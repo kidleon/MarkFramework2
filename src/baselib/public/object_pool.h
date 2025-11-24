@@ -26,8 +26,6 @@ MARKENGINE_C_API void destroy_object_pool(
 /**
  * @brief Object Pool에서 객체를 할당합니다.
  * @param pool_handle Object Pool의 핸들입니다.
- * @param file 요청을 한 소스 코드 파일 이름(__FILE__), 사용하지 않을 경우 NULL
- * @param line 요청을 한 소스 코드의 라인 번호(__LINE__), 사용하지 않을 경우 0
  * @return void* 할당된 객체의 포인터를 반환합니다. 할당에 실패할 경우 NULL을 반환합니다.
  */
 MARKENGINE_C_API void* object_pool_alloc(
