@@ -1,12 +1,12 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include <compress.h>
 #include <MemoryManager.h>
 #include <hash_table.h>
 
 
-int test_hashtable(); // ÇØ½Ã Å×ÀÌºí Å×½ºÆ® ÇÔ¼ö ¼±¾ğ
-int test_compress(); // Å×½ºÆ®¿ë ÇÔ¼ö ¼±¾ğ
-int test_memorymgr(); // ¸Ş¸ğ¸® ¸Å´ÏÀú Å×½ºÆ® ÇÔ¼ö ¼±¾ğ
+int test_hashtable(); // í•´ì‹œ í…Œì´ë¸” í…ŒìŠ¤íŠ¸ í•¨ìˆ˜ ì„ ì–¸
+int test_compress(); // í…ŒìŠ¤íŠ¸ìš© í•¨ìˆ˜ ì„ ì–¸
+int test_memorymgr(); // ë©”ëª¨ë¦¬ ë§¤ë‹ˆì € í…ŒìŠ¤íŠ¸ í•¨ìˆ˜ ì„ ì–¸
 
 
 int main()
@@ -15,14 +15,14 @@ int main()
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif // __TARGET_OS_WINDOWS
 
-	test_hashtable(); // ÇØ½Ã Å×ÀÌºí Å×½ºÆ® ÇÔ¼ö È£Ãâ
+	test_hashtable(); // í•´ì‹œ í…Œì´ë¸” í…ŒìŠ¤íŠ¸ í•¨ìˆ˜ í˜¸ì¶œ
 
-	if(!test_compress()) // Å×½ºÆ® ÇÔ¼ö È£Ãâ
+	if(!test_compress()) // í…ŒìŠ¤íŠ¸ í•¨ìˆ˜ í˜¸ì¶œ
 		printf("Compression and Decompression test passed.\n");
 	else
 		printf("Compression and Decompression test failed.\n");
 
-	if (!test_memorymgr()) // ¸Ş¸ğ¸® ¸Å´ÏÀú Å×½ºÆ® ÇÔ¼ö È£Ãâ
+	if (!test_memorymgr()) // ë©”ëª¨ë¦¬ ë§¤ë‹ˆì € í…ŒìŠ¤íŠ¸ í•¨ìˆ˜ í˜¸ì¶œ
 		printf("Memory Manager test passed.\n");
 	else
 		printf("Memory Manager test failed.\n");
@@ -31,7 +31,7 @@ int main()
 }
 
 
-// ÇØ½Ã Å×ÀÌºí Å×½ºÆ®¿ë ¿£Æ¼Æ¼ ±¸Á¶Ã¼
+// í•´ì‹œ í…Œì´ë¸” í…ŒìŠ¤íŠ¸ìš© ì—”í‹°í‹° êµ¬ì¡°ì²´
 struct hash_entity_t
 {
 	UINT32 key;
@@ -39,12 +39,12 @@ struct hash_entity_t
 	HASH_NODE node;
 };
 
-// ÇØ½Ã Å×ÀÌºí Å×½ºÆ® ÇÔ¼ö Á¤ÀÇ
+// í•´ì‹œ í…Œì´ë¸” í…ŒìŠ¤íŠ¸ í•¨ìˆ˜ ì •ì˜
 int test_hashtable()
 {
-	HASH_TABLE* hash_table = create_hash_table(128); // ¹öÅ¶ Å©±â 128·Î ÇØ½Ã Å×ÀÌºí »ı¼º
+	HASH_TABLE* hash_table = create_hash_table(128); // ë²„í‚· í¬ê¸° 128ë¡œ í•´ì‹œ í…Œì´ë¸” ìƒì„±
 	
-	// ÇØ½Ã Å×ÀÌºí Å×½ºÆ® ÄÚµå ÀÛ¼º
+	// í•´ì‹œ í…Œì´ë¸” í…ŒìŠ¤íŠ¸ ì½”ë“œ ì‘ì„±
 	hash_entity_t* entity = (hash_entity_t*)MARK_ALLOC_SYSCALL(sizeof(hash_entity_t), 16);
 	memset(entity, 0, sizeof(hash_entity_t));
 
@@ -95,25 +95,25 @@ int test_hashtable()
 	return 0;
 }
 
-// ¸Ş¸ğ¸® ¸Å´ÏÀú Å×½ºÆ® ÇÔ¼ö Á¤ÀÇ
+// ë©”ëª¨ë¦¬ ë§¤ë‹ˆì € í…ŒìŠ¤íŠ¸ í•¨ìˆ˜ ì •ì˜
 int test_memorymgr()
 {
-	mark::MemoryManager::Initialize(10 * 1024 * 1024, TRUE); // 10MB ÀÓ½Ã ¸Ş¸ğ¸® Ç® ÃÊ±âÈ­
+	mark::MemoryManager::Initialize(10 * 1024 * 1024, TRUE); // 10MB ì„ì‹œ ë©”ëª¨ë¦¬ í’€ ì´ˆê¸°í™”
 
-	// ¸Ş¸ğ¸® ÇÒ´ç Å×½ºÆ®
-	void* ptr = MARK_ALLOC_SYSCALL(256, 16); // 256¹ÙÀÌÆ® ÇÒ´ç
+	// ë©”ëª¨ë¦¬ í• ë‹¹ í…ŒìŠ¤íŠ¸
+	void* ptr = MARK_ALLOC_SYSCALL(256, 16); // 256ë°”ì´íŠ¸ í• ë‹¹
 	if (ptr == nullptr) {
 		printf("Memory allocation failed.\n");
 		return 1;
 	}
 
-	MARK_FREE_SYSCALL(ptr); // ¸Ş¸ğ¸® ÇØÁ¦
+	MARK_FREE_SYSCALL(ptr); // ë©”ëª¨ë¦¬ í•´ì œ
 
-	mark::MemoryManager::Shutdown(); // ¸Ş¸ğ¸® ¸Å´ÏÀú Á¾·á
+	mark::MemoryManager::Shutdown(); // ë©”ëª¨ë¦¬ ë§¤ë‹ˆì € ì¢…ë£Œ
 }
 
 
-// Å×½ºÆ®¿ë ¾ĞÃà ¹× ÇØÁ¦ ÇÔ¼ö
+// í…ŒìŠ¤íŠ¸ìš© ì••ì¶• ë° í•´ì œ í•¨ìˆ˜
 int test_compress()
 {
 	char source[] = "This is a test string for compression and decompression using LZ4 algorithm.";

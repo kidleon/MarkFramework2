@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "compress.h"
 #include "lz4/lz4.h"
 
