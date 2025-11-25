@@ -82,10 +82,11 @@ int insert_hash_node(
 		b_node = b_node->next;
 	}
 
+	node->key = key;
 	node->next = hash_table->buckets[index];
 	if (hash_table->buckets[index])
 		hash_table->buckets[index]->prev = node;
-
+		
 	node->prev = NULL;
 	hash_table->buckets[index] = node;
 	hash_table->node_count++;
@@ -106,6 +107,7 @@ int delete_hash_node(
 	if (hash_table->buckets[index] == NULL)
 		return -1;
 
+	/*
 	if (hash_table->buckets[index]->key == key)
 	{
 		HASH_NODE* node = hash_table->buckets[index];
@@ -116,8 +118,9 @@ int delete_hash_node(
 
 		return 0;
 	}
+	*/
 
-	HASH_NODE* node = hash_table->buckets[index]->next;
+	HASH_NODE* node = hash_table->buckets[index];
 	while (node)
 	{
 		if (node->key == key)
