@@ -107,19 +107,6 @@ int delete_hash_node(
 	if (hash_table->buckets[index] == NULL)
 		return -1;
 
-	/*
-	if (hash_table->buckets[index]->key == key)
-	{
-		HASH_NODE* node = hash_table->buckets[index];
-		hash_table->buckets[index] = node->next;
-		if (node->next)
-			node->next->prev = NULL;
-		hash_table->node_count--;
-
-		return 0;
-	}
-	*/
-
 	HASH_NODE* node = hash_table->buckets[index];
 	while (node)
 	{
