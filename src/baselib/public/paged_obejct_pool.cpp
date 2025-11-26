@@ -166,6 +166,7 @@ void* paged_object_pool_alloc(
 		new_page->next_page = opp->pages;
 		opp->pages = new_page;
 		opp->free_list = new_page->first_block;
+		opp->free_size += opp->aligned_block_size * opp->block_count_per_page;
 	}
 
 	popp_block_t* block = opp->free_list;

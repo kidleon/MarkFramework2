@@ -134,7 +134,14 @@ namespace mark
 
 	BOOL MemoryManager::Initialize(
 		MEM_SIZE temp_pool_size,
-		BOOL temp_pool_threadsafe
+		BOOL temp_pool_threadsafe,
+		void (*pfnMemoryReporter)(
+			const char* type,
+			const char* file,
+			int line,
+			const char* func,
+			size_t size
+		)
 	)
 	{
 
@@ -142,7 +149,7 @@ namespace mark
 		if (!g_pMemoryRecorder)
 		{
 			g_pMemoryRecorder = new MemoryRecorder();
-			g_pMemoryRecorder->Initialize(nullptr);
+			g_pMemoryRecorder->Initialize(pfnMemoryReporter);
 		}
 #endif // USE_PROFILE_MEMORY
 
@@ -433,5 +440,13 @@ namespace mark
 			return;
 
 		temp_pool_clear(g_hTempHeap);
+	}
+
+	void MemoryManager::ReportMemoryStats()
+	{
+		if (g_pMemoryRecorder)
+		{
+			g_pMemoryRecorder->ReportMemoryLeaks();
+		}
 	}
 }

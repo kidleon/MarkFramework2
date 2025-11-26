@@ -95,10 +95,26 @@ int test_hashtable()
 	return 0;
 }
 
+void ReportMemoryLeaks(
+	const char* type,
+	const char* file,
+	int line,
+	const char* func,
+	size_t size
+)
+{
+	printf("Memory Leak Detected: Type=%s, File=%s, Line=%d, Function=%s, Size=%zu bytes\n",
+			type, file, line, func, size);
+}
+
 // 메모리 매니저 테스트 함수 정의
 int test_memorymgr()
 {
-	mark::MemoryManager::Initialize(10 * 1024 * 1024, TRUE); // 10MB 임시 메모리 풀 초기화
+	mark::MemoryManager::Initialize(
+		10 * 1024 * 1024, 
+		TRUE,
+		ReportMemoryLeaks
+	); // 10MB 임시 메모리 풀 초기화
 
 	// 메모리 할당 테스트
 	void* ptr = MARK_ALLOC_SYSCALL(256, 16); // 256바이트 할당
@@ -107,11 +123,12 @@ int test_memorymgr()
 		return 1;
 	}
 
+	mark::MemoryManager::ReportMemoryStats(); // 메모리 사용 통계 보고
+
 	MARK_FREE_SYSCALL(ptr); // 메모리 해제
 
 	mark::MemoryManager::Shutdown(); // 메모리 매니저 종료
 }
-
 
 // 테스트용 압축 및 해제 함수
 int test_compress()

@@ -2,6 +2,7 @@
 #include "MemoryRecorder.h"
 #include "paged_object_pool.h"
 #include "hash_table.h"
+#include "fnv.h"
 
 
 namespace mark
@@ -104,11 +105,13 @@ namespace mark
 		node->line = line;
 		node->hash_node.data = (void*)node;
 
+		uint64 hash_key = fnv64(ptr, sizeof(void*)); // 해시값 계산
+
 		acquire_spin_lock(&m_SysLock);
 
 		insert_hash_node(
 			m_pMemTable_SysAlloc,
-			(int64)(uintptr_t)ptr,
+			hash_key,
 			&node->hash_node
 		);
 
@@ -119,13 +122,17 @@ namespace mark
 	{
 		if (!m_pMemTable_SysAlloc || !ptr) return;
 
+		uint64 hash_key = fnv64(ptr, sizeof(void*)); // 해시값 계산
+
 		acquire_spin_lock(&m_SysLock);
 
-		delete_hash_node(m_pMemTable_SysAlloc, (int64)(uintptr_t)ptr);
+		void* node = query_hash_node(m_pMemTable_SysAlloc, hash_key);
+		if (node)
+			delete_hash_node(m_pMemTable_SysAlloc, hash_key);
 
 		release_spin_lock(&m_SysLock);
 
-		paged_object_pool_free(m_hPool, ptr);
+		paged_object_pool_free(m_hPool, node);
 	}
 
 	void MemoryRecorder::OnAlloc_Pool(
@@ -150,11 +157,13 @@ namespace mark
 		node->line = line;
 		node->hash_node.data = (void*)node;
 
+		uint64 hash_key = fnv64(ptr, sizeof(void*)); // 해시값 계산
+
 		acquire_spin_lock(&m_PoolLock);
 
 		insert_hash_node(
 			m_pMemTable_PoolAlloc,
-			(int64)(uintptr_t)ptr,
+			hash_key,
 			&node->hash_node
 		);
 
@@ -165,9 +174,13 @@ namespace mark
 	{
 		if (!m_pMemTable_PoolAlloc || !ptr) return;
 
+		uint64 hash_key = fnv64(ptr, sizeof(void*)); // 해시값 계산
+
 		acquire_spin_lock(&m_PoolLock);
 
-		delete_hash_node(m_pMemTable_PoolAlloc, (int64)(uintptr_t)ptr);
+		void* node = query_hash_node(m_pMemTable_PoolAlloc, hash_key);
+		if (node)
+			delete_hash_node(m_pMemTable_PoolAlloc, hash_key);
 
 		release_spin_lock(&m_PoolLock);
 

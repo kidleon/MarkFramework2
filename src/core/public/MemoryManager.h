@@ -15,7 +15,14 @@ namespace mark
 		*/
 		static BOOL Initialize(
 			MEM_SIZE temp_pool_size,
-			BOOL temp_pool_threadsafe
+			BOOL temp_pool_threadsafe,
+			void (*pfnMemoryReporter)(
+				const char* type,
+				const char* file,
+				int line,
+				const char* func,
+				size_t size
+			)
 		);
 
 		/**
@@ -133,6 +140,12 @@ namespace mark
 		* @return 없음
 		*/
 		static void ResetTemp();
+
+		/**
+		* @brief 메모리 사용 통계를 보고합니다.
+		* @return 없음
+		*/
+		static void ReportMemoryStats();
 
 	};
 }
