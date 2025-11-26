@@ -4,6 +4,7 @@
 #include "temp_pool.h"
 #include "paged_object_pool.h"
 #include "MemoryRecorder.h"
+#include "MemoryStats.h"
 
 
 namespace mark
@@ -79,10 +80,15 @@ namespace mark
 		8,			// HEAP_2MB
 	};
 
-
 	static HANDLE g_hPoolHeaps[MAX_HEAP_SIZE_IDX] = { nullptr };
 	static HANDLE g_hTempHeap = nullptr;
 	static MemoryRecorder* g_pMemoryRecorder = nullptr;
+
+	static spin_lock_t g_TempHeapLock = { 0 };
+	static MEM_SIZE g_PeakAllocCount_Temp = 0; // 임시 메모리 풀 최대 할당 카운트
+	static MEM_SIZE g_PeakAllocSize_Temp = 0; // 임시 메모리 풀 최대 할당 사이즈
+	static MEM_SIZE g_UsedAllocCount_Temp = 0; // 임시 메모리 풀 현재 할당 카운트
+	static MEM_SIZE g_UsedAllocSize_Temp = 0; // 임시 메모리 풀 현재 할당 사이즈
 
 #if defined(__TARGET_COMPILER_GCC) || defined(__TARGET_COMPILER_CLANG)
 	__INLINE int get_heap_size_index(MEM_SIZE size)
@@ -431,6 +437,20 @@ namespace mark
 			return nullptr;
 
 		void* pTempHeap = temp_pool_alloc(g_hTempHeap, size);
+		if(!pTempHeap)
+			return nullptr;
+
+#if defined(USE_PROFILE_MEMORY)
+
+		acquire_spin_lock(&g_TempHeapLock);
+
+		g_UsedAllocCount_Temp++;
+		g_UsedAllocSize_Temp += size;
+
+		release_spin_lock(&g_TempHeapLock);
+
+#endif // USE_PROFILE_MEMORY
+
 		return pTempHeap;
 	}
 
@@ -439,10 +459,55 @@ namespace mark
 		if (!g_hTempHeap)
 			return;
 
+#if defined(USE_PROFILE_MEMORY)
+
+		acquire_spin_lock(&g_TempHeapLock);
+
+		g_PeakAllocCount_Temp = T_MAX(g_PeakAllocCount_Temp, g_UsedAllocCount_Temp);
+		g_PeakAllocSize_Temp = T_MAX(g_PeakAllocSize_Temp, g_UsedAllocSize_Temp);
+		g_UsedAllocCount_Temp = 0;
+		g_UsedAllocSize_Temp = 0;
+
+		release_spin_lock(&g_TempHeapLock);
+
+#endif // USE_PROFILE_MEMORY
+
 		temp_pool_clear(g_hTempHeap);
 	}
 
-	void MemoryManager::ReportMemoryStats()
+	void MemoryManager::GetMemoryStats(
+		MemoryStats* stats
+	)
+	{
+		if (!stats) return;
+
+#if defined(USE_PROFILE_MEMORY)
+		if (g_pMemoryRecorder)
+		{
+			g_pMemoryRecorder->GetAllocStats(
+				&stats->sys_alloc_count,
+				&stats->pool_alloc_count,
+				&stats->sys_alloc_size,
+				&stats->pool_alloc_size
+			);
+		}
+
+		acquire_spin_lock(&g_TempHeapLock);
+		stats->peak_temp_count = g_PeakAllocCount_Temp;
+		stats->peak_temp_size = g_PeakAllocSize_Temp;
+		release_spin_lock(&g_TempHeapLock);
+
+#else
+		stats->sys_alloc_count = 0;
+		stats->pool_alloc_count = 0;
+		stats->sys_alloc_size = 0;
+		stats->pool_alloc_size = 0;
+		stats->peak_temp_count = 0;
+		stats->peak_temp_size = 0;
+#endif // USE_PROFILE_MEMORY
+	}
+
+	void MemoryManager::ReportMemoryLeaks()
 	{
 		if (g_pMemoryRecorder)
 		{

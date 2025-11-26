@@ -123,11 +123,25 @@ int test_memorymgr()
 		return 1;
 	}
 
-	mark::MemoryManager::ReportMemoryStats(); // 메모리 사용 통계 보고
+	mark::MemoryStats memStats = {};
+	mark::MemoryManager::GetMemoryStats(&memStats); // 메모리 통계 정보 가져오기
+	
+	printf("---------------------------------------------\n");
+	printf("Memory Stats:\n");
+	printf("  Syscall Alloc Count: %llu\n", memStats.sys_alloc_count);
+	printf("  Syscall Alloc Size: %llu bytes\n", memStats.sys_alloc_size);
+	printf("  Pool Alloc Count: %llu\n", memStats.pool_alloc_count);
+	printf("  Pool Alloc Size: %llu bytes\n", memStats.pool_alloc_size);
+	printf("  Temp Peak Alloc Count: %llu bytes\n", memStats.peak_temp_count);
+	printf("  Temp Peak Alloc Size: %llu bytes\n", memStats.peak_temp_size);
+	printf("---------------------------------------------\n");
+	mark::MemoryManager::ReportMemoryLeaks(); // 메모리 사용 통계 보고
 
 	MARK_FREE_SYSCALL(ptr); // 메모리 해제
 
 	mark::MemoryManager::Shutdown(); // 메모리 매니저 종료
+
+	return 0;
 }
 
 // 테스트용 압축 및 해제 함수

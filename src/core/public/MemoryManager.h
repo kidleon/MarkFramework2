@@ -1,9 +1,13 @@
 ﻿#ifndef __MEMORY_MANAGER_H__
 #define __MEMORY_MANAGER_H__
 
+#include "MemoryStats.h"
+
 
 namespace mark
 {
+	struct MemoryStats;
+
 	class MARKENGINE_API MemoryManager
 	{
 	public:
@@ -142,10 +146,19 @@ namespace mark
 		static void ResetTemp();
 
 		/**
-		* @brief 메모리 사용 통계를 보고합니다.
+		* @brief 현재 메모리 사용 통계를 가져옵니다.
+		* @param stats 메모리 통계 정보를 받을 포인터
 		* @return 없음
 		*/
-		static void ReportMemoryStats();
+		static void GetMemoryStats(
+			MemoryStats* stats
+		);
+
+		/**
+		* @brief 메모리 누수를 보고합니다.
+		* @return 없음
+		*/
+		static void ReportMemoryLeaks();
 
 	};
 }

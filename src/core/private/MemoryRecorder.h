@@ -57,14 +57,19 @@ namespace mark
 		// 메모리 누수 보고
 		void ReportMemoryLeaks() noexcept;
 
-		// 시스템 콜 할당 카운트 조회
-		size_t GetSysAllocCount() const noexcept;
+		MEM_SIZE GetAllocCount_Syscall() noexcept; // 시스템 콜 할당 카운트 조회
+		MEM_SIZE GetAllocCount_Pool() noexcept; // 풀 할당 카운트 조회
 
-		// 풀 할당 카운트 조회
-		size_t GetPoolAllocCount() const noexcept;
+		MEM_SIZE GetAllocSize_Syscall() noexcept; // 시스템 콜 할당 사이즈 조회
+		MEM_SIZE GetAllocSize_Pool() noexcept; // 풀 할당 사이즈 조회
 
-		// 메모리 블록 풀 실제 할당 사이즈 조회
-		size_t GetMemoryBlockPoolAllocSize() const noexcept;
+		// 할당 통계 조회 (LOCK 한번에 조회한다)
+		void GetAllocStats(
+			MEM_SIZE* pSyscallCount,
+			MEM_SIZE* pPoolCount,
+			MEM_SIZE* pSyscallSize,
+			MEM_SIZE* pPoolSize
+		) noexcept;
 
 	private:
 		HANDLE m_hPool; // 메모리 블록 풀 핸들
@@ -76,6 +81,11 @@ namespace mark
 		spin_lock_t m_PoolLock; // 풀 할당 잠금
 
 		pfnReportMemoryLeak m_pfnReportMemoryLeak; // 메모리 누수 보고 함수 포인터
+
+		MEM_SIZE m_AllocCount_Syscall; // 시스템 콜 할당 카운트
+		MEM_SIZE m_AllocCount_Pool; // 풀 할당 카운트
+		MEM_SIZE m_AllocSize_Syscall; // 시스템 콜 할당 사이즈
+		MEM_SIZE m_AllocSize_Pool; // 풀 할당 사이즈
 
 	};
 }

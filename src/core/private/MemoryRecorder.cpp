@@ -27,6 +27,10 @@ namespace mark
 		, m_pMemTable_SysAlloc(nullptr)
 		, m_pMemTable_PoolAlloc(nullptr)
 		, m_pfnReportMemoryLeak(nullptr)
+		, m_AllocCount_Syscall(0)
+		, m_AllocCount_Pool(0)
+		, m_AllocSize_Syscall(0)
+		, m_AllocSize_Pool(0)
 	{
 		init_spin_lock(&m_SysLock);
 		init_spin_lock(&m_PoolLock);
@@ -115,6 +119,9 @@ namespace mark
 			&node->hash_node
 		);
 
+		m_AllocCount_Syscall++;
+		m_AllocSize_Syscall += size;
+
 		release_spin_lock(&m_SysLock);
 	}
 
@@ -126,9 +133,13 @@ namespace mark
 
 		acquire_spin_lock(&m_SysLock);
 
-		void* node = query_hash_node(m_pMemTable_SysAlloc, hash_key);
+		RECRODR_MEMORY_BLOCK* node = (RECRODR_MEMORY_BLOCK*)query_hash_node(m_pMemTable_SysAlloc, hash_key);
 		if (node)
+		{
 			delete_hash_node(m_pMemTable_SysAlloc, hash_key);
+			m_AllocCount_Syscall--;
+			m_AllocSize_Syscall -= node->size;
+		}
 
 		release_spin_lock(&m_SysLock);
 
@@ -167,6 +178,9 @@ namespace mark
 			&node->hash_node
 		);
 
+		m_AllocCount_Pool++;
+		m_AllocSize_Pool += size;
+
 		release_spin_lock(&m_PoolLock);
 	}
 
@@ -178,9 +192,14 @@ namespace mark
 
 		acquire_spin_lock(&m_PoolLock);
 
-		void* node = query_hash_node(m_pMemTable_PoolAlloc, hash_key);
+		RECRODR_MEMORY_BLOCK* node = (RECRODR_MEMORY_BLOCK*)query_hash_node(m_pMemTable_PoolAlloc, hash_key);
 		if (node)
+		{
 			delete_hash_node(m_pMemTable_PoolAlloc, hash_key);
+			m_AllocCount_Pool--;
+			m_AllocSize_Pool -= node->size;
+		}
+			
 
 		release_spin_lock(&m_PoolLock);
 
@@ -233,24 +252,80 @@ namespace mark
 		release_spin_lock(&m_PoolLock);
 	}
 
-	// 시스템 콜 할당 카운트 조회
-	size_t MemoryRecorder::GetSysAllocCount() const noexcept
+	MEM_SIZE MemoryRecorder::GetAllocCount_Syscall() noexcept
 	{
-		return (nullptr != m_pMemTable_SysAlloc) ? m_pMemTable_SysAlloc->node_count : 0;
+		MEM_SIZE result = 0;
+
+		acquire_spin_lock(&m_SysLock);
+
+		result = m_AllocCount_Syscall;
+
+		release_spin_lock(&m_SysLock);
+
+		return result;
 	}
 
-	// 풀 할당 카운트 조회
-	size_t MemoryRecorder::GetPoolAllocCount() const noexcept
+	MEM_SIZE MemoryRecorder::GetAllocCount_Pool() noexcept
 	{
-		return (nullptr != m_pMemTable_PoolAlloc) ? m_pMemTable_PoolAlloc->node_count : 0;
+		MEM_SIZE result = 0;
+
+		acquire_spin_lock(&m_PoolLock);
+
+		result = m_AllocCount_Pool;
+
+		release_spin_lock(&m_PoolLock);
+
+		return result;
 	}
 
-	size_t MemoryRecorder::GetMemoryBlockPoolAllocSize() const noexcept
+	MEM_SIZE MemoryRecorder::GetAllocSize_Syscall() noexcept
 	{
-		if (!m_hPool)
-			return 0;
+		MEM_SIZE result = 0;
 
-		return paged_object_pool_get_used_size(m_hPool);
+		acquire_spin_lock(&m_SysLock);
+
+		result = m_AllocSize_Syscall;
+
+		release_spin_lock(&m_SysLock);
+
+		return result;
 	}
+
+	MEM_SIZE MemoryRecorder::GetAllocSize_Pool() noexcept
+	{
+		MEM_SIZE result = 0;
+
+		acquire_spin_lock(&m_PoolLock);
+
+		result = m_AllocSize_Pool;
+
+		release_spin_lock(&m_PoolLock);
+
+		return result;
+	}
+
+	// 할당 통계 조회 (LOCK 한번에 조회한다)
+	void MemoryRecorder::GetAllocStats(
+		MEM_SIZE* pSyscallCount,
+		MEM_SIZE* pPoolCount,
+		MEM_SIZE* pSyscallSize,
+		MEM_SIZE* pPoolSize
+	) noexcept
+	{
+		acquire_spin_lock(&m_SysLock);
+
+		*pSyscallCount = m_AllocCount_Syscall;
+		*pSyscallSize = m_AllocSize_Syscall;
+
+		release_spin_lock(&m_SysLock);
+
+		acquire_spin_lock(&m_PoolLock);
+
+		*pPoolCount = m_AllocCount_Pool;
+		*pPoolSize = m_AllocSize_Pool;
+
+		release_spin_lock(&m_PoolLock);
+	}
+	
 }
 
