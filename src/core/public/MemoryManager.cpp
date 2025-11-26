@@ -84,11 +84,13 @@ namespace mark
 	static HANDLE g_hTempHeap = nullptr;
 	static MemoryRecorder* g_pMemoryRecorder = nullptr;
 
+#if defined(USE_PROFILE_MEMORY)
 	static spin_lock_t g_TempHeapLock = { 0 };
 	static MEM_SIZE g_PeakAllocCount_Temp = 0; // 임시 메모리 풀 최대 할당 카운트
 	static MEM_SIZE g_PeakAllocSize_Temp = 0; // 임시 메모리 풀 최대 할당 사이즈
 	static MEM_SIZE g_UsedAllocCount_Temp = 0; // 임시 메모리 풀 현재 할당 카운트
 	static MEM_SIZE g_UsedAllocSize_Temp = 0; // 임시 메모리 풀 현재 할당 사이즈
+#endif // USE_PROFILE_MEMORY
 
 #if defined(__TARGET_COMPILER_GCC) || defined(__TARGET_COMPILER_CLANG)
 	__INLINE int get_heap_size_index(MEM_SIZE size)
