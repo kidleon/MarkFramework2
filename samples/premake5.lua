@@ -7,9 +7,7 @@ do
 	objoutdir = "%{wks.location}/immediate/%{prj.name}"
 	objdir (objoutdir)
 	
-	ouput_dir = "%{wks.location}/../output"
-	targetdir (outputdir);
-	
+		
 	sdk_bin_dir = "%{wks.location}/../../engine/output/sdk/bin"
 	sdk_inc_dir = "%{wks.location}/../../engine/output/sdk/inc"
 	sdk_lib_dir = "%{wks.location}/../../engine/output/sdk/lib"
