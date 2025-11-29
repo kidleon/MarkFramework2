@@ -67,6 +67,8 @@ int insert_hash_node(
 	if (!hash_table || !node)
 		return -1;
 
+	node->key = key;
+
 	size_t index = key % hash_table->bucket_size;
 	struct HASH_NODE* b_node = hash_table->buckets[index];
 	while (b_node)
@@ -106,18 +108,7 @@ int delete_hash_node(
 	if (hash_table->buckets[index] == NULL)
 		return -1;
 
-	if (hash_table->buckets[index]->key == key)
-	{
-		struct HASH_NODE* node = hash_table->buckets[index];
-		hash_table->buckets[index] = node->next;
-		if (node->next)
-			node->next->prev = NULL;
-		hash_table->node_count--;
-
-		return 0;
-	}
-
-	struct HASH_NODE* node = hash_table->buckets[index]->next;
+	struct HASH_NODE* node = hash_table->buckets[index];
 	while (node)
 	{
 		if (node->key == key)
@@ -129,6 +120,10 @@ int delete_hash_node(
 			if (node->next)
 				node->next->prev = node->prev;
 			hash_table->node_count--;
+
+			node->prev = NULL;
+			node->next = NULL;
+
 			return 0;
 		}
 		node = node->next;
