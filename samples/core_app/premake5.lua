@@ -27,6 +27,9 @@ do
 	pchsource "src/pch.cpp"
 	debugdir "%{ouput_dir}"
 	
+	ouput_dir = "%{wks.location}/../output"
+	targetdir (ouput_dir);
+	
 	filter { "system:windows" }
 	do
 		filter {"action:vs*"}
