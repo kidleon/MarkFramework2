@@ -211,7 +211,7 @@ typedef long double LONG_DOUBLE;
 		} while(0)
 #	endif // TARGET_OS_WINDOWS  __ASSERT
 #else
-#	define __ASSERT __noop
+#	define __ASSERT(Expr, Msg) __noop
 #endif //_DEBUG
 
 #define ALIGNED_SIZE(alloc_size, alignment) (alloc_size + (alignment - (alloc_size & (alignment - 1))) & (alignment - 1))
