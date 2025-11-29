@@ -45,7 +45,7 @@ int test_hashtable()
 	HASH_TABLE* hash_table = create_hash_table(128); // 버킷 크기 128로 해시 테이블 생성
 	
 	// 해시 테이블 테스트 코드 작성
-	hash_entity_t* entity = (hash_entity_t*)MARK_ALLOC_SYSCALL(sizeof(hash_entity_t), 16);
+	hash_entity_t* entity = (hash_entity_t*)MARK_ALLOC_SYSCALL(sizeof(hash_entity_t));
 	memset(entity, 0, sizeof(hash_entity_t));
 
 	entity->key = 1;
@@ -57,7 +57,7 @@ int test_hashtable()
 
 	insert_hash_node(hash_table, entity->key, &entity->node);
 
-	hash_entity_t* entity2 = (hash_entity_t*)MARK_ALLOC_SYSCALL(sizeof(hash_entity_t), 16);
+	hash_entity_t* entity2 = (hash_entity_t*)MARK_ALLOC_SYSCALL(sizeof(hash_entity_t));
 	memset(entity2, 0, sizeof(hash_entity_t));
 
 	entity2->key = 129;
@@ -95,7 +95,7 @@ int test_hashtable()
 	return 0;
 }
 
-void ReportMemoryLeaks(
+static void ReportMemoryLeaks(
 	const char* type,
 	const char* file,
 	int line,
@@ -111,13 +111,13 @@ void ReportMemoryLeaks(
 int test_memorymgr()
 {
 	mark::MemoryManager::Initialize(
-		10 * 1024 * 1024, 
+		MEM_SIZE(10 * 1024 * 1024),
 		TRUE,
 		ReportMemoryLeaks
 	); // 10MB 임시 메모리 풀 초기화
 
 	// 메모리 할당 테스트
-	void* ptr = MARK_ALLOC_SYSCALL(256, 16); // 256바이트 할당
+	void* ptr = MARK_ALLOC_SYSCALL(256); // 256바이트 할당
 	if (ptr == nullptr) {
 		printf("Memory allocation failed.\n");
 		return 1;
@@ -149,9 +149,9 @@ int test_compress()
 {
 	char source[] = "This is a test string for compression and decompression using LZ4 algorithm.";
 	size_t source_size = sizeof(source);
-	size_t max_compressed_size = compress_size(source_size);
+	size_t max_compressed_size = compress_size_lz4(source_size);
 	char* compressed_data = new char[max_compressed_size];
-	size_t compressed_size = compress(source, source_size, compressed_data, max_compressed_size);
+	size_t compressed_size = compress_lz4(source, source_size, compressed_data, max_compressed_size);
 	if (compressed_size == 0) {
 		printf("Compression failed.\n");
 		delete[] compressed_data;
@@ -159,7 +159,7 @@ int test_compress()
 	}
 
 	char* decompressed_data = new char[source_size];
-	size_t decompressed_size = decompress(compressed_data, compressed_size, decompressed_data, source_size);
+	size_t decompressed_size = decompress_lz4(compressed_data, compressed_size, decompressed_data, source_size);
 	if (decompressed_size == 0) {
 		printf("Decompression failed.\n");
 		delete[] compressed_data;
