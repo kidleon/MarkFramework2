@@ -6,7 +6,7 @@
 #include "TDeque.h"
 #include "TStack.h"
 #include "TArray.h"
-
+#include "THashMap.h"
 
 namespace mark
 {

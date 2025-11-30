@@ -21,6 +21,8 @@ do
 		"core/private/**.h",
 		"core/private/**.inl",
 		"core/private/**.cpp",
+		"generic/**.h",
+		"generic/**.cpp",
 		"../common/*.h"
 	}
 	
@@ -29,6 +31,7 @@ do
 		"../common",
 		"core/private",
 		"core/public",
+		"generic",
 	}
 	
 	externalincludedirs {
@@ -54,6 +57,7 @@ do
 			postbuildcommands
 			{
 				"{COPY} %{prj.location}../mark3d/core/public/*.h %{incoutputdir}",
+				"{COPY} %{prj.location}../mark3d/generic/*.h %{incoutputdir}",
 				"{COPY} %{prj.location}../common/predefine.h %{incoutputdir}",
 				"{COPY} %{outputdir}/*.dll %{sdk_bin_dir}",
 				"{COPY} %{outputdir}/*.lib %{sdk_lib_dir}",

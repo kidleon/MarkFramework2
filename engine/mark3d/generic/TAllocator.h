@@ -75,6 +75,16 @@ namespace mark
 		const char* func
 	);
 
+	/**
+	* @brief 템플릿 풀 메모리 재할당 함수
+	* @param ptr 재할당할 메모리의 기존 포인터
+	* @param old_size 재할당 전 메모리 크기	
+	* @param new_size 재할당할 메모리 크기
+	* @param file 재할당 요청이 발생한 소스 파일 이름
+	* @param line 재할당 요청이 발생한 소스 파일의 라인 번호
+	* @param func 재할당 요청이 발생한 함수 이름
+	* @return 재할당된 메모리의 포인터, 실패시 nullptr
+	*/
 	MARKENGINE_C_API void* trealloc_pool(
 		void* ptr,
 		MEM_SIZE old_size,
@@ -84,6 +94,15 @@ namespace mark
 		const char* func
 	);
 
+	/**
+	* @brief 템플릿 임시 메모리 재할당 함수
+	* @param ptr 재할당할 메모리의 기존 포인터
+	* @param new_size 재할당할 메모리 크기
+	* @param file 재할당 요청이 발생한 소스 파일 이름
+	* @param line 재할당 요청이 발생한 소스 파일의 라인 번호
+	* @param func 재할당 요청이 발생한 함수 이름
+	* @return 재할당된 메모리의 포인터, 실패시 nullptr
+	*/
 	MARKENGINE_C_API void* trealloc_temp(
 		void* ptr,
 		MEM_SIZE new_size,
@@ -120,7 +139,12 @@ namespace mark
 	);
 
 
-
+	/**
+	* TAlloc_Syscall
+	* @brief 템플릿 기반의 메모리 할당기. 시스템 콜, 풀, 임시 메모리 할당을 지원합니다. 
+	* constexpr를 사용하여 컴파일 타임에 할당 유형을 결정합니다.
+	* @tparam _AllocType 할당 유형 (SYSCALL, POOL, TEMP)
+	*/
 	template<ALLOC_TYPE _AllocType>
 	struct TAlloc_Syscall
 	{
@@ -139,7 +163,7 @@ namespace mark
 				return mark::talloc(size, file, line, func);
 			}
 
-			return nullptr;
+			static_assert(false, "Unsupported Alloc Type");
 		}
 
 		static inline void* realloc(void* ptr, MEM_SIZE old_size, MEM_SIZE new_size, const char* file, int line, const char* func)
@@ -156,8 +180,8 @@ namespace mark
 			{
 				return mark::trealloc(ptr, new_size, file, line, func);
 			}
-			return nullptr;
-			
+
+			static_assert(false, "Unsupported Alloc Type");
 		}
 
 		static inline void free(void* ptr)
@@ -174,7 +198,8 @@ namespace mark
 			{
 				mark::tfree_temp(ptr);
 			}
-			
+
+			static_assert(false, "Unsupported Alloc Type");
 		}
 	};
 }

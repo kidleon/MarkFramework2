@@ -645,14 +645,14 @@ namespace mark
 		}
 
 	private:
-		void copy_other(const TList<value_type>& Other)
+		void copy_other(const TList<value_type>& other)
 		{
 			clear();
 
-			if (!Other._count)
+			if (!other._count)
 				return;
 
-			__List_Node<value_type>* pOtherNode = Other._head;
+			__List_Node<value_type>* pOtherNode = other._head;
 			__List_Node<value_type>* pMyNode = nullptr;
 			while (pOtherNode)
 			{
@@ -668,7 +668,7 @@ namespace mark
 			{
 				__List_Node<value_type>* pHead1 = nullptr;
 				__List_Node<value_type>* pHead2 = pHead;
-				size_t len = get_node_count(pHead);
+				size_t len = get_node_index(pHead);
 				for (size_t i = 0; i < len / 2; ++i)
 				{
 					pHead1 = pHead2;
@@ -689,8 +689,8 @@ namespace mark
 		{
 			__List_Node<value_type>* pNewHead;
 
-			if (pHead1 == nullptr) return pHead2;
-			else if (pHead2 == nullptr) return pHead1;
+			if (!pHead1) return pHead2;
+			else if (!pHead2) return pHead1;
 
 			//compare the value
 			if (pred(pHead1->val, pHead2->val))
@@ -707,7 +707,7 @@ namespace mark
 			return pNewHead;
 		}
 
-		inline size_t get_node_count(__List_Node<value_type>* node)
+		inline size_t get_node_index(__List_Node<value_type>* node)
 		{
 			__List_Node<value_type>* cur = node;
 			size_t i = 0;
