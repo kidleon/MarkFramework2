@@ -23,6 +23,9 @@ do
 		"core/private/**.cpp",
 		"generic/**.h",
 		"generic/**.cpp",
+		"math/**.h",
+		"math/**.inl",
+		"math/**.cpp",
 		"../common/*.h"
 	}
 	
@@ -32,6 +35,7 @@ do
 		"core/private",
 		"core/public",
 		"generic",
+		"math",
 	}
 	
 	externalincludedirs {
@@ -58,11 +62,14 @@ do
 			{
 				"{COPY} %{prj.location}../mark3d/core/public/*.h %{incoutputdir}",
 				"{COPY} %{prj.location}../mark3d/generic/*.h %{incoutputdir}",
+				"{COPY} %{prj.location}../mark3d/math/*.h %{incoutputdir}",
+				"{COPY} %{prj.location}../mark3d/math/*.inl %{incoutputdir}",
 				"{COPY} %{prj.location}../common/predefine.h %{incoutputdir}",
 				"{COPY} %{outputdir}/*.dll %{sdk_bin_dir}",
 				"{COPY} %{outputdir}/*.lib %{sdk_lib_dir}",
 				"{COPY} %{outputdir}/*.pdb %{sdk_sym_dir}",
 				"{COPY} %{incoutputdir}/*.h %{sdk_inc_dir}",
+				"{COPY} %{incoutputdir}/*.inl %{sdk_inc_dir}",
 				"{COPY} %{outputdir}/*.dll %{sample_output_dir}",
 			}
 			

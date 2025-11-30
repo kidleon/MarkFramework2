@@ -366,7 +366,6 @@ namespace mark
 			return false;
 		}
 
-
 		inline iterator begin() { return iterator(_Chain_Blocks); }
 		inline iterator end() { return iterator(nullptr); }
 		inline const_iterator cbegin() { return iterator(_Chain_Blocks); }
