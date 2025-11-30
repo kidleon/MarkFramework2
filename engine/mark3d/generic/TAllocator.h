@@ -152,36 +152,41 @@ namespace mark
 		{
 			if constexpr(ALLOC_TYPE::SYSCALL == _AllocType)
 			{
-				return mark::talloc(size, file, line, func);
+				return mark::talloc_syscall(size, file, line, func);
 			}
 			else if constexpr(ALLOC_TYPE::POOL == _AllocType)
 			{
-				return mark::talloc(size, file, line, func);
+				return mark::talloc_pool(size, file, line, func);
 			}
 			else if constexpr(ALLOC_TYPE::TEMP = _AllocType)
 			{
-				return mark::talloc(size, file, line, func);
+				return mark::talloc_temp(size, file, line, func);
 			}
-
-			static_assert(false, "Unsupported Alloc Type");
+			else
+			{
+				static_assert(false, "Unsupported Alloc Type");
+			}
+			
 		}
 
 		static inline void* realloc(void* ptr, MEM_SIZE old_size, MEM_SIZE new_size, const char* file, int line, const char* func)
 		{
 			if constexpr(ALLOC_TYPE::SYSCALL == _AllocType)
 			{
-				return mark::trealloc(ptr, old_size, new_size, file, line, func);
+				return mark::trealloc_syscall(ptr, old_size, new_size, file, line, func);
 			}
 			else if constexpr(ALLOC_TYPE::POOL == _AllocType)
 			{
-				return mark::trealloc(ptr, old_size, new_size, file, line, func);
+				return mark::trealloc_pool(ptr, old_size, new_size, file, line, func);
 			}
 			else if constexpr(ALLOC_TYPE::TEMP = _AllocType)
 			{
-				return mark::trealloc(ptr, new_size, file, line, func);
+				return mark::trealloc_temp(ptr, new_size, file, line, func);
 			}
-
-			static_assert(false, "Unsupported Alloc Type");
+			else
+			{
+				static_assert(false, "Unsupported Alloc Type");
+			}
 		}
 
 		static inline void free(void* ptr)
@@ -198,8 +203,10 @@ namespace mark
 			{
 				mark::tfree_temp(ptr);
 			}
-
-			static_assert(false, "Unsupported Alloc Type");
+			else
+			{
+				static_assert(false, "Unsupported Alloc Type");
+			}
 		}
 	};
 }

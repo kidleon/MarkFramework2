@@ -19,7 +19,7 @@ namespace mark
 	* @tparam NUM_BUCKET 버킷 수 (기본값: 32)
 	* @tparam _AllocType 메모리 할당 유형 (기본값: ALLOC_TYPE::SYSCALL)
 	*/
-	template<typename _Tk, typename _Tval, HASH_TYPE HashType = HASH_TYPE::FNV, size_t NUM_BUCKET = 32, ALLOC_TYPE _AllocType = ALLOC_TYPE::SYSCALL>
+	template<typename _Tk, typename _Tval, ALLOC_TYPE _AllocType = ALLOC_TYPE::SYSCALL, size_t NUM_BUCKET = 32, HASH_TYPE HashType = HASH_TYPE::FNV>
 	struct THashMap
 	{
 		template<typename _Tk, typename _Tval>
@@ -75,7 +75,7 @@ namespace mark
 
 		THashMap(THashMap&& other)
 		{
-			move_other(other);
+			move_other(std::move(other));
 		}
 
 		virtual ~THashMap()
@@ -105,7 +105,7 @@ namespace mark
 				DebugBreak();
 				throw std::exception("NOT FOUND ITEM");
 			}
-			return it.pNode->pair.value;
+			return it.node->pair.value;
 		}
 
 		inline bool empty() const noexcept { return _Count ? true : false; }
@@ -119,7 +119,7 @@ namespace mark
 			if (contains(key)) // If the key already exists, we do not insert it again.
 				return;
 
-			__HashMap_Node<_Tk, _Tval>* pHashNode = GENERIC_ALLOC(sizeof(__HashMap_Node<_Tk, _Tval>), _AllocType);
+			__HashMap_Node<_Tk, _Tval>* pHashNode = static_cast<__HashMap_Node<_Tk, _Tval>*>(_GENERIC_ALLOC(sizeof(__HashMap_Node<_Tk, _Tval>), _AllocType));
 
 			HASH hash = 0;
 			if constexpr (HashType == HASH_TYPE::FNV)
@@ -164,7 +164,7 @@ namespace mark
 			if (contains(key)) // If the key already exists, we do not insert it again.
 				return;
 
-			__HashMap_Node<_Tk, _Tval>* pHashNode = GENERIC_ALLOC(sizeof(__HashMap_Node<_Tk, _Tval>), _AllocType);
+			__HashMap_Node<_Tk, _Tval>* pHashNode = static_cast<__HashMap_Node<_Tk, _Tval>*>(GENERIC_ALLOC(sizeof(__HashMap_Node<_Tk, _Tval>), _AllocType));
 
 			HASH hash = 0;
 			if constexpr (HashType == HASH_TYPE::FNV)
@@ -206,7 +206,7 @@ namespace mark
 
 		inline void erase(iterator iter)
 		{
-			erase(iter.pNode->pair.key);
+			erase(iter.node->pair.key);
 		}
 
 		inline void erase(const _Tk& key)
@@ -227,52 +227,52 @@ namespace mark
 
 			uint32_t bucket_index = hash % NUM_BUCKET;
 
-			__HashMap_Node<_Tk, _Tval>* pNode = _Buckets[bucket_index];
+			__HashMap_Node<_Tk, _Tval>* node = _Buckets[bucket_index];
 
-			while (pNode)
+			while (node)
 			{
-				if (pNode->hash != hash)
+				if (node->hash != hash)
 				{
-					pNode = pNode->next;
+					node = node->next;
 					continue;
 				}
 
-				__HashMap_Node<_Tk, _Tval>* pNext = pNode->next;
-				if (!pNode->pPrev)
+				__HashMap_Node<_Tk, _Tval>* pNext = node->next;
+				if (!node->pPrev)
 				{
-					_Buckets[bucket_index] = pNode->next;
+					_Buckets[bucket_index] = node->next;
 
-					if (pNode->next)
-						pNode->next->prev = nullptr;
+					if (node->next)
+						node->next->prev = nullptr;
 				}
 				else
 				{
-					pNode->prev->next = pNode->next;
-					if (pNode->next)
-						pNode->next->prev = pNode->prev;
+					node->prev->next = node->next;
+					if (node->next)
+						node->next->prev = node->prev;
 				}
 
-				if (!pNode->chain_prev)
+				if (!node->chain_prev)
 				{
-					if (pNode->chain_next)
-						pNode->chain_next->chain_prev = nullptr;
-					_Chain_Blocks = pNode->chain_next;
+					if (node->chain_next)
+						node->chain_next->chain_prev = nullptr;
+					_Chain_Blocks = node->chain_next;
 				}
 				else
 				{
-					pNode->chain_prev->chain_next = pNode->chain_next;
-					if (pNode->chain_next)
-						pNode->chain_next->chain_prev = pNode->chain_prev;
+					node->chain_prev->chain_next = node->chain_next;
+					if (node->chain_next)
+						node->chain_next->chain_prev = node->chain_prev;
 				}
 
 				if constexpr (!std::is_trivial_v<_Tval>)
-					pNode->pair.value.~_Tval();
+					node->pair.value.~_Tval();
 
-				GENERIC_FREE(pNode, _AllocType);
+				GENERIC_FREE((void*)node, _AllocType);
 
 				_Count--;
 
-				pNode = pNext;
+				node = pNext;
 			}
 		}
 
@@ -294,12 +294,12 @@ namespace mark
 
 			uint32_t bucket_index = hash % NUM_BUCKET;
 
-			__HashMap_Node<_Tk, _Tval>* pNode = _Buckets[bucket_index];
-			while (pNode)
+			__HashMap_Node<_Tk, _Tval>* node = _Buckets[bucket_index];
+			while (node)
 			{
-				if (pNode->hash == hash)
+				if (node->hash == hash)
 					return true;
-				pNode = pNode->next;
+				node = node->next;
 			}
 
 			return false;
@@ -323,12 +323,12 @@ namespace mark
 
 			uint32_t bucket_index = hash % NUM_BUCKET;
 
-			__HashMap_Node<_Tk, _Tval>* pNode = _Buckets[bucket_index];
-			while (pNode)
+			__HashMap_Node<_Tk, _Tval>* node = _Buckets[bucket_index];
+			while (node)
 			{
-				if (pNode->hash == hash)
-					return const_iterator(pNode);
-				pNode = pNode->next;
+				if (node->hash == hash)
+					return const_iterator(node);
+				node = node->next;
 			}
 
 			return end();
@@ -352,15 +352,15 @@ namespace mark
 
 			uint32_t bucket_index = hash % NUM_BUCKET;
 
-			__HashMap_Node<_Tk, _Tval>* pNode = _Buckets[bucket_index];
-			while (pNode)
+			__HashMap_Node<_Tk, _Tval>* node = _Buckets[bucket_index];
+			while (node)
 			{
-				if (pNode->hash == hash)
+				if (node->hash == hash)
 				{
-					result = pNode->pair.value;
+					result = node->pair.value;
 					return true;
 				}
-				pNode = pNode->next;
+				node = node->next;
 			}
 
 			return false;
@@ -413,19 +413,19 @@ namespace mark
 		{
 			for (int b = 0; b < NUM_BUCKET; b++)
 			{
-				__HashMap_Node<_Tk, _Tval>* pNode = _Buckets[b];
-				while (pNode)
+				__HashMap_Node<_Tk, _Tval>* node = _Buckets[b];
+				while (node)
 				{
 					if constexpr (std::is_destructible<_Tval>::value && !std::is_pointer<_Tval>::value)
 					{
-						pNode->pair.Value.~_Tval();
+						node->pair.value.~_Tval();
 					}
 
-					__HashMap_Node<_Tk, _Tval>* pNextNode = pNode->next;
+					__HashMap_Node<_Tk, _Tval>* pNextNode = node->next;
 
-					GENERIC_FREE(pNode, _AllocType);
+					GENERIC_FREE((void*)node, _AllocType);
 
-					pNode = pNextNode;
+					node = pNextNode;
 				}
 
 				_Buckets[b] = nullptr;

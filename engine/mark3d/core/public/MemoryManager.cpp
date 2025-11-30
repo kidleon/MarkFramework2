@@ -284,8 +284,6 @@ namespace mark
 		const char* func
 	)
 	{
-		if (!ptr) return nullptr;
-
 #if defined(USE_PROFILE_MEMORY)
 		if (g_pMemoryRecorder)
 			g_pMemoryRecorder->OnFree_Syscall(ptr);
@@ -317,8 +315,6 @@ namespace mark
 		MEM_SIZE size
 	)
 	{
-		if (!ptr) return nullptr;
-
 		void* pHeap = crt_realloc(ptr, size);
 
 		if (!pHeap)

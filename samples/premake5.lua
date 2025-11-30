@@ -14,4 +14,5 @@ do
 	sdk_sym_dir = "%{wks.location}/../../engine/output/sdk/sym"
 	
 	include "core_app"
+	include "generic_app"
 end

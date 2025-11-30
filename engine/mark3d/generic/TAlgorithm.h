@@ -6,11 +6,11 @@
 
 namespace mark
 {
-	template<typename _Tx, typename Pred>
-	inline int __private_quick_sort(_Tx* data, int lo, int hi, Pred pred)
+	template<typename _Tval, typename Pred>
+	inline int __private_quick_sort(_Tval* data, int lo, int hi, Pred pred)
 	{
 		int i = lo;
-		const _Tx& pivot_value = data[hi];
+		const _Tval& pivot_value = data[hi];
 
 		for (int j = lo; j < hi; ++j)
 		{
@@ -26,8 +26,8 @@ namespace mark
 		return i;
 	}
 
-	template<typename _Tx, typename Pred>
-	inline void __private_insert_sort(_Tx* data, int lo, int hi, Pred pred)
+	template<typename _Tval, typename Pred>
+	inline void __private_insert_sort(_Tval* data, int lo, int hi, Pred pred)
 	{
 		int j;
 		for (int i = lo; i < hi + 1; ++i)
@@ -41,8 +41,8 @@ namespace mark
 		}
 	}
 
-	template<typename _Tx, typename Pred>
-	inline void __private_heap_sort_self(_Tx* data, int base, int count, Pred pred)
+	template<typename _Tval, typename Pred>
+	inline void __private_heap_sort_self(_Tval* data, int base, int count, Pred pred)
 	{
 		int largest = base;
 		int l = (base << 1) + 1; //left
@@ -70,8 +70,8 @@ namespace mark
 		}
 	}
 
-	template<typename _Tx, typename Pred>
-	inline void __private_heap_sort(_Tx* data, int lo, int hi, Pred pred)
+	template<typename _Tval, typename Pred>
+	inline void __private_heap_sort(_Tval* data, int lo, int hi, Pred pred)
 	{
 		// 힙 생성 (배열 재정렬)
 		int count = hi - lo + 1;
@@ -92,8 +92,8 @@ namespace mark
 		}
 	}
 
-	template<typename _Tx, typename Pred>
-	inline void __private_smart_sort(_Tx* data, int lo, int hi, int divlv, Pred pred)
+	template<typename _Tval, typename Pred>
+	inline void __private_smart_sort(_Tval* data, int lo, int hi, int divlv, Pred pred)
 	{
 		if (lo >= hi)
 			return;
@@ -124,15 +124,15 @@ namespace mark
 	}
 
 	// 적응형 정렬 알고리즘
-	template<typename _Tx, typename Pred>
-	inline void sort(_Tx* data, size_t count, Pred pred)
+	template<typename _Tval, typename Pred>
+	inline void sort(_Tval* data, size_t count, Pred pred)
 	{
 		__private_smart_sort(data, 0, (int)count - 1, (int)count, pred);
 	}
 
 	// 이진 탐색 알고리즘
-	template<typename _Tx, typename Comp, typename ...Args>
-	inline int binary_search(_Tx* data, size_t Count, Comp comp, Args... args)
+	template<typename _Tval, typename Comp, typename ...Args>
+	inline int binary_search(_Tval* data, size_t Count, Comp comp, Args... args)
 	{
 		int low = 0;
 		int high = (int)Count - 1;
@@ -158,8 +158,8 @@ namespace mark
 	}
 
 	// 이진 탐색 알고리즘
-	template<typename _Tx, typename Comp>
-	inline int binary_search(_Tx* data, size_t count, const _Tx& target, Comp comp)
+	template<typename _Tval, typename Comp>
+	inline int binary_search(_Tval* data, size_t count, const _Tval& target, Comp comp)
 	{
 		int low = 0;
 		int high = (int)count - 1;
@@ -185,8 +185,8 @@ namespace mark
 	}
 
 	// 이진 탐색 알고리즘
-	template<typename _Tx, typename Comp>
-	inline int binary_search_first(_Tx* data, size_t count, const _Tx& target, Comp comp)
+	template<typename _Tval, typename Comp>
+	inline int binary_search_first(_Tval* data, size_t count, const _Tval& target, Comp comp)
 	{
 		int low = 0;
 		int high = (int)count - 1;
@@ -215,8 +215,8 @@ namespace mark
 	}
 
 	// 이진 탐색 알고리즘
-	template<typename _Tx, typename Comp>
-	inline int binary_search_last(_Tx* data, size_t count, const _Tx& target, Comp comp)
+	template<typename _Tval, typename Comp>
+	inline int binary_search_last(_Tval* data, size_t count, const _Tval& target, Comp comp)
 	{
 		int low = 0;
 		int high = (int)count - 1;

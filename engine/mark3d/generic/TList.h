@@ -142,7 +142,7 @@ namespace mark
 		*/
 		void push_front(const value_type& value)
 		{
-			__List_Node<value_type>* new_node = GENERIC_ALLOC(sizeof(__List_Node<value_type>), _AllocType);
+			__List_Node<value_type>* new_node = static_cast<__List_Node<value_type>*>(GENERIC_ALLOC(sizeof(__List_Node<value_type>), _AllocType));
 
 			if (!new_node)
 			{
@@ -176,7 +176,7 @@ namespace mark
 		*/
 		void push_front(value_type&& value)
 		{
-			__List_Node<value_type>* new_node = GENERIC_ALLOC(sizeof(__List_Node<value_type>), _AllocType);
+			__List_Node<value_type>* new_node = static_cast<__List_Node<value_type>*>(GENERIC_ALLOC(sizeof(__List_Node<value_type>), _AllocType));
 
 			if (!new_node)
 			{
@@ -210,7 +210,7 @@ namespace mark
 		*/
 		void push_back(const value_type& value)
 		{
-			__List_Node<value_type>* new_node = GENERIC_ALLOC(sizeof(__List_Node<value_type>), _AllocType);
+			__List_Node<value_type>* new_node = static_cast<__List_Node<value_type>*>(GENERIC_ALLOC(sizeof(__List_Node<value_type>), _AllocType));
 
 			if (!new_node)
 			{
@@ -244,7 +244,7 @@ namespace mark
 		*/
 		void push_back(value_type&& value)
 		{
-			__List_Node<value_type>* new_node = GENERIC_ALLOC(sizeof(__List_Node<value_type>), _AllocType);
+			__List_Node<value_type>* new_node = static_cast<__List_Node<value_type>*>(GENERIC_ALLOC(sizeof(__List_Node<value_type>), _AllocType));
 
 			if (!new_node)
 			{
@@ -280,18 +280,30 @@ namespace mark
 			if (!_count || !_head) return;
 
 			__List_Node<value_type>* head = _head;
-			_head = _head->next;
 
-			if (_head)
-				_head->prev = nullptr;
+			// 노드가 1개만 있는 경우 (head == tail)
+			if (_head == _tail)
+			{
+				_head = nullptr;
+				_tail = nullptr;
+			}
+			else
+			{
+				_head = _head->next;
+				if (_head)
+					_head->prev = nullptr;
+			}
+
 			--_count;
 
+			// 값 소멸
 			if constexpr (std::is_destructible<value_type>::value && !std::is_pointer<value_type>::value)
 			{
 				destroy(&head->val);
 			}
 
-			GENERIC_FREE(head, _AllocType);
+			// 메모리 해제
+			GENERIC_FREE((void*)head, _AllocType);
 		}
 
 		/**
@@ -304,17 +316,29 @@ namespace mark
 
 			__List_Node<value_type>* tail = _tail;
 
-			_tail = _tail->prev;
-			if (_tail)
-				_tail->next = nullptr;
+			// 노드가 1개만 있는 경우 (head == tail)
+			if (_head == _tail)
+			{
+				_head = nullptr;
+				_tail = nullptr;
+			}
+			else
+			{
+				_tail = _tail->prev;
+				if (_tail)
+					_tail->next = nullptr;
+			}
+
 			--_count;
 
+			// 값 소멸
 			if constexpr (std::is_destructible<value_type>::value && !std::is_pointer<value_type>::value)
 			{
 				destroy(&tail->val);
 			}
 
-			GENERIC_FREE(tail, _AllocType);
+			// 메모리 해제
+			GENERIC_FREE((void*)tail, _AllocType);
 		}
 
 		/**
@@ -326,7 +350,7 @@ namespace mark
 		void insert(iterator position, value_type&& val)
 		{
 			__ASSERT(_count == 0, "position == begin() But Count is not zero");
-			__List_Node<value_type>* new_node = GENERIC_ALLOC(sizeof(__List_Node<value_type>), _AllocType);
+			__List_Node<value_type>* new_node = static_cast<__List_Node<value_type>*>(GENERIC_ALLOC(sizeof(__List_Node<value_type>), _AllocType));
 
 			if (!new_node)
 			{
@@ -428,7 +452,7 @@ namespace mark
 						destroy(&node->val);
 					}
 
-					GENERIC_FREE(node, _AllocType);
+					GENERIC_FREE((void*)node, _AllocType);
 					
 					node = next;
 				}
@@ -557,7 +581,7 @@ namespace mark
 					destroy(&it.node->val);
 				}
 
-				GENERIC_FREE(it.node, _AllocType);
+				GENERIC_FREE((void*)(it.node), _AllocType);
 
 				_head = nullptr;
 				_tail = nullptr;
@@ -719,9 +743,9 @@ namespace mark
 		}
 
 	protected:
-			__List_Node<value_type>* _head = nullptr;
-			__List_Node<value_type>* _tail = nullptr;
-			size_t _count = 0;
+		__List_Node<value_type>* _head = nullptr;
+		__List_Node<value_type>* _tail = nullptr;
+		size_t _count = 0;
 
 	};
 }

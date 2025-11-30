@@ -19,6 +19,8 @@ namespace mark
 	template<typename _T, ALLOC_TYPE _AllocType = ALLOC_TYPE::SYSCALL>
 	struct TArray
 	{
+		constexpr static size_t DEFAULT_HEAPARRAY_CAPACITY = 32;
+
 		template<typename _T>
 		struct __Array_Iterator
 		{
@@ -84,8 +86,7 @@ namespace mark
 
 			if (_capacity)
 			{
-				//_data = (_T*)_NodeAlloc.allocate(sizeof(_T) * _capacity);
-				_data = (_T*)GENERIC_ALLOC(sizeof(_T) * _capacity, _AllocType);
+				_data = static_cast<_T*>(GENERIC_ALLOC(sizeof(_T) * _capacity, _AllocType));
 
 				if (_count)
 					memcpy(_data, other._data, sizeof(_T) * _count);
@@ -107,7 +108,7 @@ namespace mark
 		TArray(size_t capacity)
 			: _capacity(!capacity ? DEFAULT_HEAPARRAY_CAPACITY : capacity)
 		{
-			_data = (_T*)GENERIC_ALLOC(sizeof(_T) * _capacity, _AllocType);
+			_data = static_cast<_T*>(GENERIC_ALLOC(sizeof(_T) * _capacity, _AllocType));
 		}
 
 		TArray(std::initializer_list<value_type> init_list)
@@ -145,7 +146,7 @@ namespace mark
 
 			if (_capacity)
 			{
-				_data = _NodeAlloc.allocate(sizeof(_T) * rhs._capacity);
+				_data = static_cast<_T*>(GENERIC_ALLOC(sizeof(_T) * rhs._capacity, _AllocType));
 
 				if (_count)
 					memcpy(_data, rhs._data, sizeof(_T) * rhs._count);
@@ -210,8 +211,7 @@ namespace mark
 			if (_capacity && _capacity >= reserve)
 				return;
 
-			//_data = (_T*)_NodeAlloc.realloc(_data, sizeof(_T) * _capacity, sizeof(_T) * reserve);
-			_T* new_data = (_T*)GENERIC_REALLOC(_data, sizeof(_T) * _capacity, sizeof(_T) * reserve, _AllocType);
+			_T* new_data = static_cast<_T*>(GENERIC_REALLOC(_data, sizeof(_T) * _capacity, sizeof(_T) * reserve, _AllocType));
 			if (!new_data)
 			{
 				__ASSERT(0, "Memory allocation failed in TArray::reserve");
@@ -526,7 +526,7 @@ namespace mark
 					}
 				}
 
-				GENERIC_FREE(_data, _AllocType);
+				GENERIC_FREE((void*)_data, _AllocType);
 				_data = nullptr;
 			}
 

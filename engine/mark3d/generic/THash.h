@@ -189,8 +189,8 @@ namespace mark
         }
     };
 
-    template<typename _Tx>
-    using THash = THash_FNV<_Tx>;
+    template<typename _Tval>
+    using THash = THash_FNV<_Tval>;
 
 
     //----------------------------------------------------------------------------------------
