@@ -96,7 +96,8 @@ struct mpack_chunk_t
 BOOL mpack_file_create(
 	const char* name,
 	const char* filepath,
-	const char* password
+	const char* password,
+	const char* uuid
 )
 {
 	if (exist_file(filepath))
@@ -115,8 +116,17 @@ BOOL mpack_file_create(
 	if(password && fstrlen(password) > 0)
 		header->flags |= MPACK_FILE_FLAG_PASSWORD;
 
-	if (!make_guid((char**)&header->uuid, 32))
-		goto lb_failed;
+	if (!uuid || !fstrlen(uuid))
+	{
+		// UUID 생성
+		if (!make_guid((char**)&header->uuid, 32))
+			goto lb_failed;
+	}
+	else
+	{
+		// 전달된 UUID 복사
+		fstrlcpy(header->uuid, uuid, 32);
+	}
 
 	HANDLE file = open_file(filepath, FILE_MODE_WRITE_BINARY);
 	if (!file)
