@@ -93,4 +93,8 @@ MARK_BASELIB_C_API void seek_file(
 	FILE_SEEK origin
 );
 
+MARK_BASELIB_C_API BOOL exist_file(
+	const char* filename
+);
+
 #endif // __OS_FILE_H__

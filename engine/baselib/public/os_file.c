@@ -178,3 +178,22 @@ void seek_file(
 
 	fseek(os_file->file, (long)offset, whence);
 }
+
+BOOL exist_file(
+	const char* filename
+)
+{
+	FILE* file = NULL;
+#if defined(__TARGET_COMPILER_MSC)
+	errno_t res = fopen_s(&file, filename, "rb");
+	if (res != 0 || !file)
+		return FALSE;
+#else
+	file = fopen(filename, "rb");
+	if (!file)
+		return FALSE;
+#endif // __TARGET_COMPILER_MSC
+	fclose(file);
+
+	return TRUE;
+}

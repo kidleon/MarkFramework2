@@ -22,7 +22,7 @@ static inline void* crt_malloc_align(size_t bytes, size_t align)
 {
 #if defined(__TARGET_COMPILER_MSC)
 	return _aligned_malloc(bytes, align);
-#elif defined(__TARGET_COMPILER_GCC)
+#elif defined(__TARGET_COMPILER_GCC || __TARGET_COMPILER_CLANG)
 	return aligned_alloc(align, bytes); //C11
 #endif
 }

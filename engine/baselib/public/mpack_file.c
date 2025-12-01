@@ -1,41 +1,35 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include "mpack_file.h"
-
-
+#include "crt_memory.h"
+#include "guid.h"
+#include "os_file.h"
+#include "strings.h"
 
 
 #pragma pack(push, 1)
 
 /**
-* @brief MPACK ÆÄÀÏ Çì´õ ±¸Á¶Ã¼
-* @details MPACK ÆÄÀÏÀÇ ±âº» Á¤º¸¸¦ ´ã°í ÀÖ´Â Çì´õ ±¸Á¶Ã¼ÀÔ´Ï´Ù.
+* @brief MPACK íŒŒì¼ í—¤ë” êµ¬ì¡°ì²´
+* @details MPACK íŒŒì¼ì˜ ê¸°ë³¸ ì •ë³´ë¥¼ ë‹´ê³  ìžˆëŠ” í—¤ë” êµ¬ì¡°ì²´ìž…ë‹ˆë‹¤.
 */
-struct mpack_file_hader_t
+struct mpack_header_t
 {
 	uint32_t magic; // "MPK!"
 	uint32_t version; // MPACK_FILE_VERSION(major, minor)
-	uint32_t flags; // ÆÄÀÏ ÇÃ·¡±×
-	uint32_t num_directory; // µð·ºÅä¸® ¼ö
-	uint32_t num_entity; // ¿£Æ¼Æ¼(ÆÄÀÏ) ¼ö
-	uint32_t name_offs; // mpack ÀÌ¸§ÀÇ ÀÌ¸§ Å×ÀÌºí ¿ÀÇÁ¼Â
-	uint32_t name_len; // mpack ÀÌ¸§ÀÇ ÀÌ¸§ Å×ÀÌºí ±æÀÌ
-	uint32_t hash_offs; // ÇØ½Ã Å×ÀÌºí ¿ÀÇÁ¼Â
-	uint32_t hash_len; // ÇØ½Ã Å×ÀÌºí ±æÀÌ
-	uint64_t data_offs; // µ¥ÀÌÅÍ ¿ÀÇÁ¼Â
-	uint64_t data_len; // µ¥ÀÌÅÍ ±æÀÌ
-};
-
-/**
-* @brief MPACK UUID ±¸Á¶Ã¼
-* @details MPACK ÆÄÀÏÀÇ UUID¸¦ ´ã°í ÀÖ´Â ±¸Á¶Ã¼ÀÔ´Ï´Ù. MPACKÀÚÃ¼ÀÇ °íÀ¯ ½Äº°ÀÚ ¿ªÇÒÀ» ÇÕ´Ï´Ù. ´Ù¸¸ MPACK³»ºÎÀÇ ¿£Æ¼Æ¼´Â ¿ë·®»ó uuid¸¦ °¡Áö°í ÀÖÁö ¾Ê½À´Ï´Ù.
-*/
-struct mpack_uuid_t
-{
+	uint32_t flags; // íŒŒì¼ í”Œëž˜ê·¸
 	uint8_t uuid[32];
+	uint32_t num_directory; // ë””ë ‰í† ë¦¬ ìˆ˜
+	uint32_t num_entity; // ì—”í‹°í‹°(íŒŒì¼) ìˆ˜
+	uint32_t name_offs; // mpack ì´ë¦„ì˜ ì´ë¦„ í…Œì´ë¸” ì˜¤í”„ì…‹
+	uint32_t name_len; // mpack ì´ë¦„ì˜ ì´ë¦„ í…Œì´ë¸” ê¸¸ì´
+	uint32_t hash_offs; // í•´ì‹œ í…Œì´ë¸” ì˜¤í”„ì…‹
+	uint32_t hash_len; // í•´ì‹œ í…Œì´ë¸” ê¸¸ì´
+	uint64_t data_offs; // ë°ì´í„° ì˜¤í”„ì…‹
+	uint64_t data_len; // ë°ì´í„° ê¸¸ì´
 };
 
 /**
-* @brief MPACK ¿£Æ¼Æ¼ ÇØ½Ã ±¸Á¶Ã¼
+* @brief MPACK ì—”í‹°í‹° í•´ì‹œ êµ¬ì¡°ì²´
 */
 struct mpack_hash_t
 {
@@ -65,9 +59,8 @@ struct mpack_entity_t
 	uint64_t uncomp_size;
 
 	uint32_t num_chunk;
-	uint32_t chunk_size;
 	uint64_t chunk_offs;
-	uint64_t chunk_len;
+	uint32_t chunk_size;
 };
 
 struct mpack_chunk_t
@@ -87,7 +80,8 @@ struct mpack_chunk_t
 #define MPACK_FILE_VERSION_MINOR 1 
 
 #define MPACK_FILE_FLAG_NONE 0x00000000
-#define MPACK_FILE_FLAG_WRITE_LOCKED 0x00000001 // ¾²±â Àá±Ý
+#define MPACK_FILE_FLAG_WRITE_LOCKED 0x00000001 // ì“°ê¸° ìž ê¸ˆ
+#define MPACK_FILE_FLAG_PASSWORD 0x00000002 // íŒ¨ìŠ¤ì›Œë“œ ë³´í˜¸
 
 #define MPACK_ENITIY_FLAG_NONE 0x00000000
 #define MPACK_ENITIY_FLAG_COMPRESS 0x00000001
@@ -96,6 +90,60 @@ struct mpack_chunk_t
 #define MPACK_ENITIY_FLAG_DELETED 0x80000000
 #define MPACK_ENITIY_FLAG_COMPRESS_ENCRYPT (MPACK_FILE_FLAG_COMPRESS | MPACK_FILE_FLAG_ENCRYPT)
 
-#define MPACK_ENTITY_CHUNK_SIZE 65536 // 64KB ±âº» Ã»Å© Å©±â
+#define MPACK_ENTITY_CHUNK_SIZE 65536 // 64KB ê¸°ë³¸ ì²­í¬ í¬ê¸°
 
 
+BOOL mpack_file_create(
+	const char* name,
+	const char* filepath,
+	const char* password
+)
+{
+	if (exist_file(filepath))
+		return FALSE;
+
+	struct mpack_header_t* header = (struct mpack_header_t*)crt_malloc_align(sizeof(struct mpack_header_t), 1);
+	if (!header)
+		goto lb_failed;
+
+	memset(header, 0, sizeof(struct mpack_header_t));
+
+	header->magic = MPACK_FILE_MAGIC;
+	header->version = MPACK_FILE_VERSION(MPACK_FILE_VERSION_MAJOR, MPACK_FILE_VERSION_MINOR);
+	header->flags = MPACK_FILE_FLAG_NONE;
+
+	if(password && fstrlen(password) > 0)
+		header->flags |= MPACK_FILE_FLAG_PASSWORD;
+
+	if (!make_guid((char**)&header->uuid, 32))
+		goto lb_failed;
+
+	HANDLE file = open_file(filepath, FILE_MODE_WRITE_BINARY);
+	if (!file)
+		goto lb_failed;
+
+	write_file(file, header, sizeof(struct mpack_header_t));
+
+	size_t offs = tell_file(file);
+
+	if (name && fstrlen(name) > 0)
+	{
+		header->name_offs = (uint32_t)offs;
+		header->name_len = (uint32_t)(fstrlen(name) + 1);
+		write_file(file, name, header->name_len);
+		offs += header->name_len;
+	}
+
+	seek_file(file, 0, FILE_SEEK_SET);
+	write_file(file, header, sizeof(struct mpack_header_t));
+
+	close_file(file);
+
+	return TRUE;
+
+lb_failed:
+	if (header)
+		crt_free_align(header);
+
+	return FALSE;
+}
