@@ -116,6 +116,7 @@
 #		endif //__cplusplus		
 #endif // __TARGET_OS_WINDOWS
 
+
 // NOT WINDOWS DATA TYPES
 #if defined(__TARGET_COMPILER_GCC) || defined(__TARGET_COMPILER_CLANG)
 typedef unsigned char BYTE;
