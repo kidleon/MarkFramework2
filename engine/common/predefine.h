@@ -226,15 +226,15 @@ typedef long double LONG_DOUBLE;
 #	define MEM_SIZE unsigned int
 #endif // DEFAULT_MEMORY_ALIGNMENT
 
-#define DEFAULT_MEMORY_BLOCK_ALIGNMENT 16
-
-#define CHECK_FREE(p) if(p) { free(p); p = NULL; }
+#define DEFAULT_MEMORY_BLOCK_ALIGNMENT 16 // 기본 16바이트 정렬
+#define MAX_FILE_LENGTH 260 // 최대 파일 경로 길이
 
 #if defined(__cplusplus)
 #define CHECK_DELETE(p) if(p) { delete p; p = nullptr; }
 #define CHECK_DELETE_ARRAY(arr) if(arr) { delete[] arr; arr = nullptr; }
 #define CHECK_RELEASE(p) if(p) { p->Release(); p = nullptr; }
 #define CHECK_ADDREF(p) if(p) { p->AddRef(); }
+#define CHECK_FREE(p) if(p) { free(p); p = NULL; }
 
 #include <type_traits>
 
