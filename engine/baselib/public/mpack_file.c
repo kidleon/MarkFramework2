@@ -157,3 +157,27 @@ lb_failed:
 
 	return FALSE;
 }
+
+BOOL mpack_file_check(
+	const char* filepath
+)
+{
+	if (!exist_file(filepath))
+		return FALSE;
+
+	HANDLE file = open_file(filepath, FILE_MODE_READ_BINARY);
+	if (!file)
+		return FALSE;
+
+	struct mpack_header_t header;
+	size_t read_bytes = write_file(file, &header, sizeof(struct mpack_header_t));
+	close_file(file);
+
+	if (read_bytes != sizeof(struct mpack_header_t))
+		return FALSE;
+
+	if (header.magic != MPACK_FILE_MAGIC)
+		return FALSE;
+
+	return TRUE;
+}
