@@ -2,7 +2,7 @@
 #define __I_DATA_STREAM_H__
 
 
-class IDataStream
+class IDataStream : public IUNKNOWN
 {
 public:
 	virtual size_t Read(void* buffer, size_t size) = 0;

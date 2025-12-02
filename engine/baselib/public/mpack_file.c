@@ -72,6 +72,16 @@ struct mpack_chunk_t
 
 #pragma pack(pop)
 
+struct mpack_directory
+
+
+struct mpack_t
+{
+	HANDLE file;
+	
+};
+
+
 #define MPACK_FILE_MAGIC 0x214B504D  // "MPK!"
 #define MPACK_FILE_VERSION(major, minor) (((major) << 16) | (minor))
 #define MPACK_FILE_GET_VERSION_MAJIOR(version) (((version) >> 16) & 0xFFFF)
@@ -180,4 +190,12 @@ BOOL mpack_check(
 		return FALSE;
 
 	return TRUE;
+}
+
+HANDLE mpack_open(
+	const char* filepath,
+	const char* password
+)
+{
+
 }
