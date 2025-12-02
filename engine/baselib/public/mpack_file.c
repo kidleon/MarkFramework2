@@ -93,7 +93,7 @@ struct mpack_chunk_t
 #define MPACK_ENTITY_CHUNK_SIZE 65536 // 64KB 기본 청크 크기
 
 
-BOOL mpack_file_create(
+BOOL mpack_create(
 	const char* name,
 	const char* filepath,
 	const char* password,
@@ -158,7 +158,7 @@ lb_failed:
 	return FALSE;
 }
 
-BOOL mpack_file_check(
+BOOL mpack_check(
 	const char* filepath
 )
 {
