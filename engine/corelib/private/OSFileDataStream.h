@@ -3,6 +3,7 @@
 
 #include "IDataStream.h"
 
+
 namespace mark
 {
 	class OSFileDataStream : public IDataStream

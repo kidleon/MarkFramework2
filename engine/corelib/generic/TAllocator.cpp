@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "TAllocator.h"
-#include "MemoryManager.h"
+#include "Heap.h"
 #include "TList.h"
 #include "TQueue.h"
 #include "TDeque.h"
@@ -17,7 +17,11 @@ namespace mark
 		const char* func
 	) 
 	{
-		return MemoryManager::Alloc_SysCall(size, file, line, func);
+#if defined(USE_PROFILE_MEMORY)
+		return HeapAlloc2(size, file, line, func);
+#else
+		return HeapAlloc2(size);
+#endif 
 	}
 
 	void* talloc_pool(
@@ -27,7 +31,11 @@ namespace mark
 		const char* func
 	)
 	{
-		return MemoryManager::AllocPool(size, file, line, func);
+#if defined(USE_PROFILE_MEMORY)
+		return PoolAlloc(size, file, line, func);
+#else
+		return PoolAlloc(size);
+#endif // USE_PROFILE_MEMORY
 	}
 
 	void* talloc_temp(
@@ -37,7 +45,7 @@ namespace mark
 		const char* func
 	)
 	{
-		return MemoryManager::AllocTemp(size);
+		return TempAlloc(size);
 	}
 
 	void* trealloc_syscall(
@@ -49,7 +57,11 @@ namespace mark
 		const char* func
 	)
 	{
-		return MemoryManager::Realloc_Syscall(ptr, new_size, file, line, func);
+#if defined(USE_PROFILE_MEMORY)
+		return HeapRealloc(ptr, new_size, file, line, func);
+#else
+		return HeapRealloc(ptr, new_size);
+#endif // USE_PROFILE_MEMORY
 	}
 
 	void* trealloc_pool(
@@ -61,32 +73,40 @@ namespace mark
 		const char* func
 	)
 	{
-		void* new_ptr = MemoryManager::AllocPool(new_size, file, line, func);
+#if defined(USE_PROFILE_MEMORY)
+		void* new_ptr = PoolAlloc(new_size, file, line, func);
+#else
+		void* new_ptr = PoolAlloc(new_size);
+#endif // USE_PROFILE_MEMORY
+		
 		if (!new_ptr)
 			return nullptr;
+
 		if (ptr)
 		{
 			memcpy(new_ptr, ptr, old_size);
-			MemoryManager::FreePool(ptr);
+			PoolFree(ptr);
 		}
 		return new_ptr;
 	}
 
 	void* trealloc_temp(
 		void* ptr,
-		MEM_SIZE new_size,
-		const char* file,
-		int line,
-		const char* func
+		MEM_SIZE new_size
 	)
 	{
-		void* new_ptr = MemoryManager::AllocTemp(new_size);
+#if defined(USE_PROFILE_MEMORY)
+		void* new_ptr = TempAlloc(new_size);
+#endif 
+		void* new_ptr = TempAlloc(new_size);
+
 		if (!new_ptr)
 			return nullptr;
 		if (ptr)
 		{
 			// Temp 방식은 기존 포인터를 해제하지 않음
 		}
+
 		return new_ptr;
 	}
 
@@ -94,14 +114,14 @@ namespace mark
 		void* ptr
 	)
 	{
-		MemoryManager::Free_SysCall(ptr);
+		HeapFree2(ptr);
 	}
 
 	void tfree_pool(
 		void* ptr
 	)
 	{
-		MemoryManager::FreePool(ptr);
+		PoolFree(ptr);
 	}
 
 	void tfree_temp(

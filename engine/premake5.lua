@@ -10,6 +10,7 @@ do
 	sample_output_dir = "%{wks.location}/../../samples/output"
 	
 	include "baselib"
+	include "corelib"
 	include "mark3d"
 	--include "samples/core_app"
 

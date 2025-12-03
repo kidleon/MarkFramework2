@@ -1,4 +1,4 @@
-project("mark3d")
+project("corelib")
 do
 	language "C++"
 	cppdialect "C++17"
@@ -21,6 +21,11 @@ do
 		"private/**.h",
 		"private/**.inl",
 		"private/**.cpp",
+		"generic/**.h",
+		"generic/**.cpp",
+		"math/**.h",
+		"math/**.inl",
+		"math/**.cpp",
 		"../common/*.h"
 	}
 	
@@ -45,8 +50,6 @@ do
 	pchheader "pch.h"
 	pchsource "pch.cpp"
 	
-	filter {} 
-	
 	filter { "system:windows" }
 	do
 		filter {"action:vs*"}
@@ -55,7 +58,10 @@ do
 			
 			postbuildcommands
 			{
-				"{COPY} %{prj.location}../mark3d/public/*.h %{incoutputdir}",
+				"{COPY} %{prj.location}../corelib/public/*.h %{incoutputdir}",
+				"{COPY} %{prj.location}../corelib/generic/*.h %{incoutputdir}",
+				"{COPY} %{prj.location}../corelib/math/*.h %{incoutputdir}",
+				"{COPY} %{prj.location}../corelib/math/*.inl %{incoutputdir}",
 				"{COPY} %{prj.location}../common/predefine.h %{incoutputdir}",
 				"{COPY} %{outputdir}/*.dll %{sdk_bin_dir}",
 				"{COPY} %{outputdir}/*.lib %{sdk_lib_dir}",
@@ -69,8 +75,8 @@ do
 			do
 				defines{"DEBUG", "USE_DLL", "MARKENGINE_EXPORTS", "_CRT_SECURE_NO_WARNINGS"}
 				symbols "On"
-				targetname("mark3d_d")
-				links { "baselib_d", "corelib_d" }
+				targetname("corelib_d")
+				links { "baselib_d" }
 			end
 			
 			filter "configurations:Release"
@@ -79,8 +85,8 @@ do
 				optimize "On"
 				
 				symbols "On"
-				targetname("mark3d")
-				links { "baselib", "corelib" }
+				targetname("corelib")
+				links { "baselib" }
 			end
 			
 			filter "configurations:Master"
@@ -88,8 +94,8 @@ do
 				defines{"NDEBUG", "MASTER", "USE_DLL", "MARKENGINE_EXPORTS", "_CRT_SECURE_NO_WARNINGS"}
 				optimize "On"
 				symbols "On"
-				targetname("mark3d")
-				links { "baselib", "corelib" }
+				targetname("corelib")
+				links { "baselib" }
 			end
 		end
 	end

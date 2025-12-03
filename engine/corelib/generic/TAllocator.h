@@ -160,7 +160,7 @@ namespace mark
 			}
 			else if constexpr(ALLOC_TYPE::TEMP = _AllocType)
 			{
-				return mark::talloc_temp(size, file, line, func);
+				return mark::talloc_temp(size);
 			}
 			else
 			{
@@ -181,7 +181,7 @@ namespace mark
 			}
 			else if constexpr(ALLOC_TYPE::TEMP = _AllocType)
 			{
-				return mark::trealloc_temp(ptr, new_size, file, line, func);
+				return mark::trealloc_temp(ptr, new_size);
 			}
 			else
 			{

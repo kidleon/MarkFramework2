@@ -257,13 +257,33 @@ private:\
 	classname& operator=(classname&&) = delete;\
 	volatile long m_RefCnt = 1; \
 	UINT32 PADDING_OR_RESERVED = 0; \
+	void destroy();\
 public:\
-	long AddRef() override;\
-	long Release() override;\
-	long RefCnt() override;\
-private:
+	long addref() override;\
+	long release() override;\
+	long refcnt() override;\
+private:\
 
 #endif // __cplusplus
+
+#define IMPLEMENTATION_IUNKNOWN_INTERFACE(classname)\
+long classname::addref()\
+{\
+	return interlock_increment_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL); \
+}\
+long classname::release()\
+{\
+	long refcnt = interlock_decrement_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL); \
+	if (refcnt == 0)\
+	{\
+		destroy();\
+	}\
+	return refcnt;\
+}\
+long classname::refcnt()\
+{\
+	return m_RefCnt;\
+}
 
 
 
