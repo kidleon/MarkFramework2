@@ -2,7 +2,6 @@
 #define __THREAD_POOL_H__
 
 
-
 /**
 * @brief 스레드 풀 생성
 * @param num_threads 스레드 풀에 생성할 스레드 수

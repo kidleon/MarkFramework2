@@ -42,7 +42,7 @@ struct threadpool_t
 	HANDLE task_available_event;
 	HANDLE shutdown_event;
 	HANDLE all_tasks_done_event;  // 모든 작업 완료 이벤트
-	volatile int shutdown;
+	volatile LONG shutdown;
 	volatile LONG pending_tasks;  // 대기 중인 작업 수
 	size_t num_thread;
 	struct spin_lock_t pending_lock;
