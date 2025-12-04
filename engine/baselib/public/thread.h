@@ -14,11 +14,29 @@ MARK_BASELIB_C_API HANDLE thread_create(
 
 /**
 * @brief 스레드 파괴
-* @param pool 파괴할 스레드 풀 핸들
+* @param handle 파괴할 스레드 풀 핸들
 * @return 없음
 */
 MARK_BASELIB_C_API void thread_destroy(
-	HANDLE pool
+	HANDLE handle
+);
+
+/**
+* @brief 스레드 실행 신호
+* @param handle 실행할 스레드 핸들
+* @return 없음
+*/
+MARK_BASELIB_C_API void thread_execute(
+	HANDLE handle
+);
+
+/**
+* @brief 스레드 대기
+* @param handle 대기할 스레드 핸들
+* @return 없음
+*/
+MARK_BASELIB_C_API void thread_wait(
+	HANDLE handle
 );
 
 

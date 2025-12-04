@@ -21,6 +21,7 @@ struct thread_t
 	void* arg;
 	uintptr_t handle;
 	HANDLE termiate_event;
+	HANDLE work_event;
 	HANDLE wait_event;
 	volatile BOOL terminate;
 	struct spin_lock_t lock;
@@ -32,16 +33,18 @@ unsigned __stdcall func_thread(void* arg)
 
 	for (;;)
 	{
-		acquire_spin_lock(&thread->lock);
-		BOOL term = thread->terminate;
-		release_spin_lock(&thread->lock);
+		DWORD result = WaitForSingleObject(thread->work_event, INFINITE); // 작업 또는 종료 신호 대기
 
-		if (term)
+		if (result != WAIT_OBJECT_0)
+			break;
+
+		if (thread->terminate)
 			break;
 
 		thread->thread_func(thread->arg);
 
-		Sleep(1);
+		ResetEvent(thread->work_event);
+		SetEvent(thread->wait_event);
 	}
 
 	SetEvent(thread->termiate_event);
@@ -75,6 +78,7 @@ HANDLE thread_create(
 	init_spin_lock(&thread->lock);
 
 	thread->termiate_event = CreateEvent(NULL, TRUE, FALSE, NULL);
+	thread->work_event = CreateEvent(NULL, TRUE, FALSE, NULL);
 	thread->wait_event = CreateEvent(NULL, TRUE, FALSE, NULL);
 
 	thread->handle = _beginthreadex(
@@ -98,20 +102,48 @@ void thread_destroy(
 	if (!is_valid_thread(thread))
 		return;
 
-	acquire_spin_lock(&thread->lock);
-	thread->terminate = TRUE;
-	release_spin_lock(&thread->lock);
+	interlock_store_l((LONG*)&thread->terminate, TRUE, MEMORY_ORDER_ACQ_REL);
+
+	SetEvent(thread->wait_event);
 
 	// 종료까지 무한 대기
 	WaitForSingleObject(thread->termiate_event, INFINITE);
 
 	// 핸들 닫기
 	CloseHandle(thread->wait_event);
+	CloseHandle(thread->work_event);
 	CloseHandle(thread->termiate_event);
 	CloseHandle((HANDLE)thread->handle);
 
 	crt_free(thread);
-
 }
+
+void thread_execute(
+	HANDLE handle
+)
+{
+	struct thread_t* thread = (struct thread_t*)handle;
+
+	if (!is_valid_thread(thread))
+		return;
+
+	if (thread->terminate)
+		return;
+
+	ResetEvent(thread->wait_event);
+	SetEvent(thread->work_event);
+}
+
+void thread_wait(
+	HANDLE handle
+)
+{
+	struct thread_t* thread = (struct thread_t*)handle;
+	if (!is_valid_thread(thread))
+		return;
+
+	WaitForSingleObject(thread->wait_event, INFINITE);
+}
+
 
 #endif // __TARGET_OS_WINDOWS
