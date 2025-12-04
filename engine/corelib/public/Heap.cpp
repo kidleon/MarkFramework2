@@ -275,7 +275,7 @@ void* HeapAlloc2(
 	const char* func
 )
 #else
-void* HeapAlloc2(
+void* HeapAlloc_(
 	MEM_SIZE size
 )
 #endif // USE_PROFILE_MEMORY
@@ -353,7 +353,7 @@ void HeapFreeAlign(void* ptr)
 	crt_free_align(ptr);
 }
 
-void HeapFree2(void* ptr)
+void HeapFree_(void* ptr)
 {
 #if defined(USE_PROFILE_MEMORY)
 	if (g_pMemoryRecorder)

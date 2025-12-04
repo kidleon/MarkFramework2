@@ -23,7 +23,7 @@ namespace mark
 		}
 	}
 
-	void OSFileDataStream::destroy()
+	void OSFileDataStream::OnDestroy()
 	{
 		MARK_DELETE(this, OSFileDataStream);
 	}

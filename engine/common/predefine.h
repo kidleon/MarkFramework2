@@ -240,9 +240,9 @@ typedef long double LONG_DOUBLE;
 
 struct __IUnknown
 {
-	virtual long addref() = 0;
-	virtual long release() = 0;
-	virtual long refcnt() = 0;
+	virtual long AddRef() = 0;
+	virtual long Release() = 0;
+	virtual long RefCnt() = 0;
 };
 
 typedef __IUnknown IUNKNOWN;
@@ -257,30 +257,30 @@ private:\
 	classname& operator=(classname&&) = delete;\
 	volatile long m_RefCnt = 1; \
 	UINT32 PADDING_OR_RESERVED = 0; \
-	void destroy();\
+	void OnDestroy();\
 public:\
-	long addref() override;\
-	long release() override;\
-	long refcnt() override;\
+	long AddRef() override;\
+	long Release() override;\
+	long RefCnt() override;\
 private:\
 
 #endif // __cplusplus
 
 #define IMPLEMENTATION_IUNKNOWN_INTERFACE(classname)\
-long classname::addref()\
+long classname::AddRef()\
 {\
 	return interlock_increment_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL); \
 }\
-long classname::release()\
+long classname::Release()\
 {\
 	long refcnt = interlock_decrement_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL); \
 	if (refcnt == 0)\
 	{\
-		destroy();\
+		OnDestroy();\
 	}\
 	return refcnt;\
 }\
-long classname::refcnt()\
+long classname::RefCnt()\
 {\
 	return m_RefCnt;\
 }

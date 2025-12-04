@@ -20,7 +20,7 @@ namespace mark
 #if defined(USE_PROFILE_MEMORY)
 		return HeapAlloc2(size, file, line, func);
 #else
-		return HeapAlloc2(size);
+		return HeapAlloc_(size);
 #endif 
 	}
 
@@ -114,7 +114,7 @@ namespace mark
 		void* ptr
 	)
 	{
-		HeapFree2(ptr);
+		HeapFree_(ptr);
 	}
 
 	void tfree_pool(

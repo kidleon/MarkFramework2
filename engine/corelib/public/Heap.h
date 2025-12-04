@@ -77,14 +77,14 @@ MARKENGINE_C_API void* HeapAllocAlign(
 * @return 할당된 메모리의 포인터, 실패시 nullptr
 */
 #if defined(USE_PROFILE_MEMORY)
-MARKENGINE_C_API void* HeapAlloc2(
+MARKENGINE_C_API void* HeapAlloc_(
 	MEM_SIZE size,
 	const char* file,
 	int line,
 	const char* func
 );
 #else
-MARKENGINE_C_API void* HeapAlloc2(
+MARKENGINE_C_API void* HeapAlloc_(
 	MEM_SIZE size
 );
 #endif // USE_PROFILE_MEMORY
@@ -125,7 +125,7 @@ MARKENGINE_C_API void HeapFreeAlign(void* ptr);
 * @param ptr 해제할 메모리의 포인터
 * @return 없음
 */
-MARKENGINE_C_API void HeapFree2(void* ptr);
+MARKENGINE_C_API void HeapFree_(void* ptr);
 
 /**
 * @brief 고정 크기 메모리 풀에서 메모리를 할당합니다. USE_MEMORY_PROFILE가 정의된 경우 메모리 프로파일링을 수행합니다.
@@ -170,9 +170,9 @@ MARKENGINE_C_API void TempReset();
 #	define MARK_ALLOC_ALIGN(size, alignment) HeapAllocAlign(size, alignment, __FILE__, __LINE__, __FUNCTION__)
 #	define MARK_FREE_ALIGN(ptr) HeapFreeAlign(ptr)
 
-#	define MARK_ALLOC(size) HeapAlloc2(size, __FILE__, __LINE__, __FUNCTION__)
+#	define MARK_ALLOC(size) HeapAlloc_(size, __FILE__, __LINE__, __FUNCTION__)
 #	define MARK_REALLOC(ptr, size) HeapRealloc(ptr, size, __FILE__, __LINE__, __FUNCTION__)
-#	define MARK_FREE(ptr) HeapFree2(ptr)
+#	define MARK_FREE(ptr) HeapFree_(ptr)
 
 #	define MARK_POOL_ALLOC(size) PoolAlloc(size, __FILE__, __LINE__, __FUNCTION__)
 #	define MARK_POOL_FREE(ptr) PoolFree(ptr)
@@ -187,9 +187,9 @@ MARKENGINE_C_API void TempReset();
 #	define MARK_ALLOC_ALIGN(size, alignment) HeapAllocAlign(size, alignment)
 #	define MARK_FREE_ALIGN(ptr) HeapFreeAlign(ptr)
 
-#	define MARK_ALLOC(size) HeapAlloc2(size)
+#	define MARK_ALLOC(size) HeapAlloc_(size)
 #	define MARK_REALLOC(ptr, size) HeapRealloc(ptr, size)
-#	define MARK_FREE(ptr) HeapFree2(ptr)
+#	define MARK_FREE(ptr) HeapFree_(ptr)
 
 #	define MARK_POOL_ALLOC(size) PoolAlloc(size)
 #	define MARK_POOL_FREE(ptr) PoolFree(ptr)
