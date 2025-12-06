@@ -3,10 +3,28 @@
 #include "strings.h"
 
 
+/* 컴파일러별 헤더 및 함수 정의 */
+#if defined(__TARGET_COMPILER_MSC)
+	/* Microsoft Visual C++ */
+#	include <sys/stat.h>
+#	define STAT_STRUCT struct _stat64
+#	define STAT_FUNC _stat64
+#	include <io.h>     // _access()
+#	define ACCESS _access
+#	define F_OK 0
+#elif defined(__TARGET_COMPLIER_GCC) || defined(__TARGET_COMPLIER_CLANG)
+	/* GCC 또는 Clang */
+#	include <sys/stat.h>
+#	define STAT_STRUCT struct stat
+#	define STAT_FUNC stat
+#	include <unistd.h> // access()
+#	define ACCESS access
+#endif // 컴파일러별 헤더 및 함수 정의
+
 struct OS_FILE
 {
 	FILE* file;
-	char filename[256];
+	char filename[MAX_FILE_LENGTH];
 };
 
 
@@ -183,17 +201,57 @@ BOOL exist_file(
 	const char* filename
 )
 {
-	FILE* file = NULL;
-#if defined(__TARGET_COMPILER_MSC)
-	errno_t res = fopen_s(&file, filename, "rb");
-	if (res != 0 || !file)
-		return FALSE;
-#else
-	file = fopen(filename, "rb");
-	if (!file)
-		return FALSE;
-#endif // __TARGET_COMPILER_MSC
-	fclose(file);
+	return ACCESS(filename, F_OK) == 0;
+}
 
-	return TRUE;
+size_t get_file_size(
+	const char* filename
+)
+{
+	if (!filename)
+		return 0;
+
+	STAT_STRUCT file_stat;
+
+	if (STAT_FUNC(filename, &file_stat) != 0) 
+		return 0;
+
+	return (size_t)file_stat.st_size;
+}
+
+size_t get_file_size_by_handle(
+	HANDLE file
+)
+{
+	struct OS_FILE* os_file = (struct OS_FILE*)file;
+	if (!os_file || !os_file->file)
+		return 0;
+
+	// 현재 위치 저장
+	long current_pos = ftell(os_file->file);
+	if (current_pos == -1)
+		return 0;
+	// 파일 끝으로 이동
+	if (fseek(os_file->file, 0, SEEK_END) != 0)
+		return 0;
+	// 파일 크기 가져오기
+	long file_size = ftell(os_file->file);
+
+	fseek(os_file->file, current_pos, SEEK_SET);
+
+	return (size_t)file_size;
+}
+
+BOOL delete_file(
+	const char* filename
+)
+{
+	if (!filename)
+		return FALSE;
+
+#ifdef __TARGET_COMPILER_MSC
+	return DeleteFileA(filename);
+#else
+	return (unlink(filename) == 0) ? TRUE : FALSE;
+#endif // __TARGET_COMPILER_MSC
 }

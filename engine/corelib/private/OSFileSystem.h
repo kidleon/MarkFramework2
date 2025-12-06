@@ -11,36 +11,33 @@ class OSFileSystem : public IFileSystem
 public:
 	OSFileSystem(const char* szRootPath);
 
-	virtual HANDLE OpenFile(
-		const char* szFilePath,
+	virtual IDataStream* OpenFile(
+		const char* szRelativePath,
 		BOOL ReadOnly
 	) override;
 
-	virtual void CloseFile(
-		HANDLE hFile
+#ifdef CreateFile
+#undef CreateFile
+#endif // CreateFile
+	virtual IDataStream* CreateFile(
+		const char* szRelativePath,
+		BOOL OverwriteIfExists
 	) override;
 
-	virtual size_t ReadFile(
-		HANDLE hFile,
-		void* pBuffer,
-		size_t BufferSize
+#ifdef DeleteFile
+#undef DeleteFile
+#endif // DeleteFile
+	virtual void DeleteFile(
+		const char* szRelativePath
 	) override;
 
-	virtual size_t WriteFile(
-		HANDLE hFile,
-		const void* pBuffer,
-		size_t BufferSize
-	) override;
-
-	virtual size_t SeekFile(
-		HANDLE hFile,
-		size_t Position,
-		uint32 SeekType
+	virtual size_t GetFileSize(
+		const char* szRelativePath
 	) noexcept override;
 
-	virtual size_t GetSeekPos(HANDLE Handle) noexcept override;
-
-	virtual size_t GetFileSize(HANDLE Handle) noexcept override;
+	virtual BOOL ExistFile(
+		const char* szRelativePath
+	) noexcept override;
 
 private:
 	char m_szRootPath[MAX_FILE_LENGTH];

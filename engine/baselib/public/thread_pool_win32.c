@@ -290,7 +290,7 @@ HANDLE threadpool_create(size_t num_threads)
 
 int threadpool_add_task(
     HANDLE pool,
-    void (*task_func)(void*)
+    void (*task_func)(void)
 )
 {
     struct threadpool_t* thread_pool = (struct threadpool_t*)pool;

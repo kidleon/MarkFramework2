@@ -52,6 +52,7 @@
 #	include <crtdbg.h>
 #	include <Windows.h>
 #	include <intrin.h>
+#	include <basetyps.h>
 #	if defined(USE_DLL)
 #		if defined(MARK_BASELIB_EXPORTS)
 #			ifdef __cplusplus
@@ -103,19 +104,58 @@
 #		endif //__cplusplus
 #	endif // USE_DLL
 
+#	ifndef MARK_ENCODING_ANSI
+#		define MARK_ENCODING_ANSI "CP949"
+#	endif // MARK_ENCODING_ANSI
+
+#	ifndef MARK_ENCODING_UTF8 // Little Endian용만 정의 한다.
+#		define MARK_ENCODING_UTF8 "UTF-8"
+#	endif // MARK_ENCODING_UTF8
+
+#	ifndef MARK_ENCODING_UTF16 // Little Endian용만 정의 한다.
+#		define MARK_ENCODING_UTF16 "UTF-16LE"
+#	endif // MARK_ENCODING_UTF16
+
+#	ifndef MARK_ENCODING_UTF32
+#		define MARK_ENCODING_UTF32 "UTF-32LE"
+#	endif // MARK_ENCODING_UTF32
+
+#	ifndef MARK_ENCODING_WCHAR
+#		define MARK_ENCODING_WCHAR MARK_ENCODING_UTF16
+#	endif // MARK_ENCODING_UTF32
 
 #elif defined(__TARGET_OS_LINUX)
 #   include <malloc.h>
 #   include <mm_malloc.h>
-#       ifdef __cplusplus
-#			define MARKENGINE_API extern "C"
-#			define MARKENGINE_C_API extern "C"
-#		else
-#			define MARKENGINE_API extern
-#			define MARKENGINE_C_API extern
-#		endif //__cplusplus		
-#endif // __TARGET_OS_WINDOWS
+#   ifdef __cplusplus
+#	define MARKENGINE_API extern "C"
+#		define MARKENGINE_C_API extern "C"
+#	else
+#		define MARKENGINE_API extern
+#		define MARKENGINE_C_API extern
+#	endif //__cplusplus		
 
+#	ifndef MARK_ENCODING_ANSI
+#		define MARK_ENCODING_ANSI "UTF-8"
+#	endif // MARK_ENCODING_ANSI
+
+#	ifndef MARK_ENCODING_UTF8 // Little Endian용만 정의 한다.
+#		define MARK_ENCODING_UTF8 "UTF-8"
+#	endif // MARK_ENCODING_UTF8
+
+#	ifndef MARK_ENCODING_UTF16 // Little Endian용만 정의 한다.
+#		define MARK_ENCODING_UTF16 "UTF-16LE"
+#	endif // MARK_ENCODING_UTF16
+
+#	ifndef MARK_ENCODING_UTF32
+#		define MARK_ENCODING_UTF32 "UTF-32LE"
+#	endif // MARK_ENCODING_UTF32
+
+#	ifndef MARK_ENCODING_WCHAR
+#		define MARK_ENCODING_WCHAR MARK_ENCODING_UTF32
+#	endif // MARK_ENCODING_UTF32
+
+#endif // __TARGET_OS_WINDOWS
 
 // NOT WINDOWS DATA TYPES
 #if defined(__TARGET_COMPILER_GCC) || defined(__TARGET_COMPILER_CLANG)
@@ -133,11 +173,13 @@ typedef unsigned long long ULONG64;
 #	define __INLINE inline 
 #	define __FORCEINLINE inline
 #	define __STRUCT__ struct
-#	define interface __STRUCT__
+#	define INTERFACE __STRUCT__
 
 #elif defined(__TARGET_COMPILER_MSC)
 #	define __INLINE inline 
 #	define __FORCEINLINE __forceinline 
+#	define __STRUCT__ struct
+#	define INTERFACE __STRUCT__
 #endif // defined(__TARGET_COMPILER_GCC) || defined(__TARGET_COMPILER_CLANG)
 
 typedef int8_t int8;
@@ -227,9 +269,17 @@ typedef long double LONG_DOUBLE;
 #endif // DEFAULT_MEMORY_ALIGNMENT
 
 #define DEFAULT_MEMORY_BLOCK_ALIGNMENT 16 // 기본 16바이트 정렬
-#define MAX_FILE_LENGTH 260 // 최대 파일 경로 길이
+#define MAX_FILE_LENGTH 264 // 최대 파일 경로 길이
 
 #if defined(__cplusplus)
+enum class HEAP_TYPE : unsigned
+{
+	SYSCALL = 0,
+	POOL,
+	TEMP
+};
+
+
 #define CHECK_DELETE(p) if(p) { delete p; p = nullptr; }
 #define CHECK_DELETE_ARRAY(arr) if(arr) { delete[] arr; arr = nullptr; }
 #define CHECK_RELEASE(p) if(p) { p->Release(); p = nullptr; }
@@ -259,9 +309,9 @@ private:\
 	UINT32 PADDING_OR_RESERVED = 0; \
 	void OnDestroy();\
 public:\
-	long AddRef() override;\
-	long Release() override;\
-	long RefCnt() override;\
+	virtual long AddRef() override;\
+	virtual long Release() override;\
+	virtual long RefCnt() override;\
 private:\
 
 #endif // __cplusplus

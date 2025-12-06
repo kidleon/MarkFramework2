@@ -29,12 +29,43 @@ do
 	}
 	
 	externalincludedirs {
-		"../external/inc"
+		"../external/inc",
+		"../external/iconv"
+		
 	}
 	
 	libdirs { 
 		"../external/bin"
 	}
+	
+	filter { "system:windows" }
+	do
+		filter "configurations:Debug"
+		do
+			libdirs { 
+				"../external/iconv/windows/x64/DebugStatic",
+			}
+			
+			links{ "libiconvStaticD" }
+		end
+		
+		filter "configurations:Release"
+		do
+			libdirs { 
+				"../external/iconv/windows/x64/ReleaseStatic",
+			}
+			links { "libiconvStatic" }
+		end
+			
+		filter "configurations:Master"
+		do
+			libdirs { 
+				"../external/iconv/windows/x64/ReleaseStatic",
+			}
+			links { "libiconvStatic" }
+		end
+	
+	end
 	
 	filter {} 
 	

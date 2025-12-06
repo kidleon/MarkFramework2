@@ -66,7 +66,6 @@ do
 	do
 		filter {"action:vs*"}
 		do
-			
 			filter "platforms:x64"
 				system "Windows"
 				architecture "x64"

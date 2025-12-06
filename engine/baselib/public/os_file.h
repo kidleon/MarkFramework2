@@ -93,8 +93,41 @@ MARK_BASELIB_C_API void seek_file(
 	FILE_SEEK origin
 );
 
+/**
+* @brief 파일의 존재 여부를 확인합니다.
+* @param filename 확인할 파일 이름
+* @return 파일이 존재하면 TRUE, 존재하지 않으면 FALSE
+*/
 MARK_BASELIB_C_API BOOL exist_file(
 	const char* filename
 );
+
+/**
+* @brief 파일의 크기를 가져옵니다.
+* @param filename 크기를 가져올 파일 이름
+* @return 파일 크기, 실패시 0
+*/
+MARK_BASELIB_C_API size_t get_file_size(
+	const char* filename
+);
+
+/**
+* @brief 파일의 크기를 가져옵니다.
+* @param filename 크기를 가져올 파일 이름
+* @return 파일 크기, 실패시 0
+*/
+MARK_BASELIB_C_API size_t get_file_size_by_handle(
+	HANDLE file
+);
+
+/**
+* @brief 파일을 삭제합니다.
+* @param filename 삭제할 파일 이름
+* @return 성공시 TRUE, 실패시 FALSE
+*/
+MARK_BASELIB_C_API BOOL delete_file(
+	const char* filename
+);
+
 
 #endif // __OS_FILE_H__

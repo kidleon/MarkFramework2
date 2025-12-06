@@ -50,7 +50,7 @@ MARK_BASELIB_C_API int threadpool_add_task_arg(
 */
 MARK_BASELIB_C_API int threadpool_add_task(
 	HANDLE pool,
-	void (*task_func)(void*)
+	void (*task_func)(void)
 );
 
 /**

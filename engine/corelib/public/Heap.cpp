@@ -233,7 +233,7 @@ void Heap_ReportMemoryLeaks()
 }
 
 #if defined(USE_PROFILE_MEMORY)
-void* HeapAllocAlign(
+void* SysHeapAllocAlign(
 	MEM_SIZE size,
 	size_t alignment,
 	const char* file,
@@ -241,7 +241,7 @@ void* HeapAllocAlign(
 	const char* func
 )
 #else
-void* HeapAllocAlign(
+void* SysHeapAllocAlign(
 	MEM_SIZE size,
 	size_t alignment
 )
@@ -268,14 +268,14 @@ void* HeapAllocAlign(
 }
 
 #if defined(USE_PROFILE_MEMORY)
-void* HeapAlloc2(
+void* SysHeapAlloc(
 	MEM_SIZE size,
 	const char* file,
 	int line,
 	const char* func
 )
 #else
-void* HeapAlloc_(
+void* SysHeapAlloc(
 	MEM_SIZE size
 )
 #endif // USE_PROFILE_MEMORY
@@ -301,7 +301,7 @@ void* HeapAlloc_(
 }
 
 #if defined(USE_PROFILE_MEMORY)
-void* HeapRealloc(
+void* SysHeapRealloc(
 	void* ptr,
 	MEM_SIZE size,
 	const char* file,
@@ -309,7 +309,7 @@ void* HeapRealloc(
 	const char* func
 )
 #else
-void* HeapRealloc(
+void* SysHeapRealloc(
 	void* ptr,
 	MEM_SIZE size
 )
@@ -341,7 +341,7 @@ void* HeapRealloc(
 	return pHeap;
 }
 
-void HeapFreeAlign(void* ptr)
+void SysHeapFreeAlign(void* ptr)
 {
 #if defined(USE_PROFILE_MEMORY)
 	if (g_pMemoryRecorder)
@@ -353,7 +353,7 @@ void HeapFreeAlign(void* ptr)
 	crt_free_align(ptr);
 }
 
-void HeapFree_(void* ptr)
+void SysHeapFree(void* ptr)
 {
 #if defined(USE_PROFILE_MEMORY)
 	if (g_pMemoryRecorder)
@@ -380,7 +380,7 @@ void* PoolAlloc(
 {
 	if (size > HEAP_SIZE_TABLE[MAX_HEAP_SIZE_IDX - 1])
 	{
-		void* ptr = HeapAllocAlign(
+		void* ptr = SysHeapAllocAlign(
 			ALIGNED_SIZE(size, DEFAULT_MEMORY_ALIGNMENT) + DEFAULT_MEMORY_ALIGNMENT,
 			DEFAULT_MEMORY_ALIGNMENT
 #if defined(USE_PROFILE_MEMORY)
@@ -446,7 +446,7 @@ void PoolFree(void* ptr)
 	{
 		// 시스템 콜로 할당된 메모리 해제
 		void* original_ptr = (void*)((char*)ptr - DEFAULT_MEMORY_ALIGNMENT);
-		HeapFreeAlign(original_ptr);
+		SysHeapFreeAlign(original_ptr);
 
 		return;
 	}
@@ -504,6 +504,78 @@ void TempReset()
 	temp_pool_clear(g_hTempHeap);
 }
 
-	
+
+void* HeapAlloc_Auto(
+	MEM_SIZE size,
+	HEAP_TYPE heapType,
+	const char* file,
+	int line,
+	const char* func
+)
+{
+	switch (heapType)
+	{
+		case HEAP_TYPE::SYSCALL:
+		{
+#if defined(USE_PROFILE_MEMORY)
+			return HeapAlloc(
+				size,
+				file,
+				line,
+				func
+			);
+#else
+			return SysHeapAlloc(size);
+#endif // USE_PROFILE_MEMORY
+		}
+
+		case HEAP_TYPE::POOL:
+		{
+#if defined(USE_PROFILE_MEMORY)
+			return PoolAlloc(
+				size,
+				file,
+				line,
+				func
+			);
+#else
+			return PoolAlloc(size);
+#endif // USE_PROFILE_MEMORY
+		}
+
+		case HEAP_TYPE::TEMP:
+		{
+			return TempAlloc(size);
+		}
+	}
+
+	return NULL;
+}
+
+void HeapFree_Auto(
+	void* ptr,
+	HEAP_TYPE heapType
+)
+{
+	switch (heapType)
+	{
+		case HEAP_TYPE::SYSCALL:
+		{
+			SysHeapFree(ptr);
+			break;
+		}
+		case HEAP_TYPE::POOL:
+		{
+			PoolFree(ptr);
+			break;
+		}
+		case HEAP_TYPE::TEMP:
+		{
+			// 임시 메모리는 개별 해제가 불가능합니다.
+			break;
+		}
+	}
+}
+
 
 	

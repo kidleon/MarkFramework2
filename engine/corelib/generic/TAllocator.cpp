@@ -8,6 +8,7 @@
 #include "TArray.h"
 #include "THashMap.h"
 
+
 namespace mark
 {
 	void* talloc_syscall(
@@ -20,7 +21,7 @@ namespace mark
 #if defined(USE_PROFILE_MEMORY)
 		return HeapAlloc2(size, file, line, func);
 #else
-		return HeapAlloc_(size);
+		return SysHeapAlloc(size);
 #endif 
 	}
 
@@ -60,7 +61,7 @@ namespace mark
 #if defined(USE_PROFILE_MEMORY)
 		return HeapRealloc(ptr, new_size, file, line, func);
 #else
-		return HeapRealloc(ptr, new_size);
+		return SysHeapRealloc(ptr, new_size);
 #endif // USE_PROFILE_MEMORY
 	}
 
@@ -114,7 +115,7 @@ namespace mark
 		void* ptr
 	)
 	{
-		HeapFree_(ptr);
+		SysHeapFree(ptr);
 	}
 
 	void tfree_pool(
