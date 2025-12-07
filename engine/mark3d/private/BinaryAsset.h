@@ -9,9 +9,10 @@ class BinaryAsset : public IBinaryAsset
 	DECLARATION_IUNKNOWN_INTERFACE(BinaryAsset);
 
 public:
-	BinaryAsset();
+	BinaryAsset(UINT32 ID);
 
 	// IAsset interface
+	virtual UINT32 GetID() const noexcept override;
 	virtual ASSET_TYPE GetAssetType() const noexcept override;
 	virtual LOAD_STAT GetLoadStat() const noexcept override;
 
@@ -22,6 +23,11 @@ public:
 	virtual uint64 ComputeCRC64() noexcept override;
 
 	// Private inline methods
+	__FORCEINLINE UINT32 INL_GetID() const noexcept
+	{
+		return m_ID;
+	}
+
 	__FORCEINLINE ASSET_TYPE INL_GetAssetType() const noexcept
 	{
 		return ASSET_TYPE::BINARY;
@@ -58,6 +64,7 @@ private:
 	volatile LOAD_STAT m_LoadStat;
 	uint32 m_CRC32Cache;
 	uint64 m_CRC64Cache;
+	uint32 m_ID;
 
 };
 

@@ -1,5 +1,5 @@
-﻿#ifndef __ASET_DEF_H__
-#define __ASET_DEF_H__
+﻿#ifndef __ASSET_DEF_H__
+#define __ASSET_DEF_H__
 
 
 enum class ASSET_TYPE : unsigned
@@ -23,4 +23,4 @@ enum class LOAD_STAT : unsigned
 };
 
 
-#endif // __ASET_DEF_H__
+#endif // __ASSET_DEF_H__

@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "TextAsset.h"
+#include "idgen.h"
 #include "Log.h"
 
 
@@ -15,15 +16,19 @@ TextAsset::TextAsset()
 }
 */
 
-TextAsset::TextAsset()
+TextAsset::TextAsset(UINT32 ID)
 	: m_pData(nullptr)
 	, m_Size(0)
 	, m_LoadStat(LOAD_STAT::NOT_LOADED)
+	, m_ID(ID)
 {
 }
 
 TextAsset::~TextAsset() noexcept
 {
+	idgen_release(GLOBAL_VARS::ID_GEN_HANDLE, m_ID);
+	m_ID = 0;
+
 	if (m_pData)
 	{
 		MARK_FREE(m_pData);
@@ -34,6 +39,11 @@ TextAsset::~TextAsset() noexcept
 void TextAsset::OnDestroy()
 {
 	MARK_DELETE(this, TextAsset);
+}
+
+UINT32 TextAsset::GetID() const noexcept
+{
+	return INL_GetID();
 }
 
 ASSET_TYPE TextAsset::GetAssetType() const noexcept

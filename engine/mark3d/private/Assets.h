@@ -8,6 +8,7 @@ interface IFileSystem;
 interface ITextAsset;
 interface IBinaryAsset;
 interface ITexture1D;
+interface ITexture2D;
 
 class Assets : public IAssets
 {
@@ -28,10 +29,13 @@ public:
 	virtual BOOL LoadAsync(const char* szRelativePath, IBinaryAsset** ppOut) override;
 	virtual BOOL Load(const char* szRelativePath, ITexture1D** ppOut) override;
 	virtual BOOL LoadAsync(const char* szRelativePath, ITexture1D** ppOut) override;
+	virtual BOOL Load(const char* szRelativePath, ITexture2D** ppOut) override;
+	virtual BOOL LoadAsync(const char* szRelativePath, ITexture2D** ppOut) override;
 
 private:
 	IFileSystem* m_pFileSystem;
 	HANDLE m_hThreadPool;
+	HANDLE m_hIDGen;
 	BOOL m_Initialized;
 
 };

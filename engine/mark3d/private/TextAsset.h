@@ -9,9 +9,10 @@ class TextAsset : public ITextAsset
 	DECLARATION_IUNKNOWN_INTERFACE(TextAsset);
 
 public:
-	TextAsset();
+	TextAsset(UINT32 ID);
 
 	// IAsset interface
+	virtual UINT32 GetID() const noexcept override;
 	virtual ASSET_TYPE GetAssetType() const noexcept override;
 	virtual LOAD_STAT GetLoadStat() const noexcept override;
 
@@ -28,6 +29,11 @@ public:
 	virtual BOOL ConvertWCHAR(wchar_t* pBuffer, size_t BufferSize, size_t* pResultSize) const noexcept override;
  
 	// Private inline methods
+	__FORCEINLINE UINT32 INL_GetID() const noexcept
+	{
+		return m_ID;
+	}
+
 	__FORCEINLINE ASSET_TYPE INL_GetAssetType() const noexcept
 	{
 		return ASSET_TYPE::TEXT;
@@ -62,6 +68,7 @@ private:
 	char* m_pData;
 	size_t m_Size;
 	volatile LOAD_STAT m_LoadStat;
+	UINT32 m_ID;
 
 };
 

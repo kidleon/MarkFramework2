@@ -1,19 +1,19 @@
 ﻿#include "pch.h"
+#include "BinaryAssetLoader.h"
 #include "Log.h"
 #include "IDataStream.h"
 #include "IFileSystem.h"
-#include "TextAssetLoader.h"
-#include "TextAsset.h"
+#include "BinaryAsset.h"
 #include "AsyncAssetArgument.h"
 
 
-BOOL LoadTextAssetFromFileSystem(
+BOOL LoadBinaryAssetFromFileSystem(
 	IFileSystem* pFileSystem,
 	const char* szRelativePath,
-	TextAsset* pTextAsset
+	BinaryAsset* pBinaryAsset
 )
 {
-	if(!pTextAsset)
+	if (!pBinaryAsset)
 		return FALSE;
 
 	char* pBuffer = nullptr;
@@ -30,22 +30,12 @@ BOOL LoadTextAssetFromFileSystem(
 		SYS_LOG_E("Assets::Load - Failed to open file: %s", szRelativePath);
 		goto LB_FAILED;
 	}
-		
+
 	size_t streamSize = pDataStream->GetSize();
 	pBuffer = (char*)MARK_ALLOC(streamSize + 1);
 	pDataStream->Read(pBuffer, streamSize);
-	pBuffer[streamSize] = '\0'; // Null-terminate
 
-	if (streamSize > 2 && !is_valid_utf8((unsigned char*)pBuffer, streamSize))
-	{
-		SYS_LOG_E("Assets::Load - Invalid UTF-8 encoding: %s", szRelativePath);
-		pDataStream->Release();
-
-		// 추후 이곳에서 다른 인코딩 변환 로직을 추가할 수 있음.
-		goto LB_FAILED;
-	}
-
-	pTextAsset->INL_SetData(pBuffer, streamSize);
+	pBinaryAsset->INL_SetData(pBuffer, streamSize);
 	pDataStream->Release();
 
 	return TRUE;
@@ -57,27 +47,27 @@ LB_FAILED:
 		pBuffer = nullptr;
 	}
 
-	pTextAsset->INL_SetData(NULL, 0);
+	pBinaryAsset->INL_SetData(NULL, 0);
 
 	return FALSE;
 }
 
-void AsyncLoadTextAssetFromFileSystem(void* pArg)
+void AsyncLoadBinaryAssetFromFileSystem(void* pArg)
 {
 	if (!pArg) return;
 
 	AsyncArgument* pAsyncArg = (AsyncArgument*)pArg;
 	if (!pAsyncArg->pAsset) return;
 
-	TextAsset* pTextAsset = static_cast<TextAsset*>(pAsyncArg->pAsset);
+	BinaryAsset* pBinaryAsset = static_cast<BinaryAsset*>(pAsyncArg->pAsset);
 
-	BOOL result = LoadTextAssetFromFileSystem(
+	BOOL result = LoadBinaryAssetFromFileSystem(
 		pAsyncArg->pFileSystem,
 		pAsyncArg->szRelativePath,
-		pTextAsset
+		pBinaryAsset
 	);
 
-	pTextAsset->Release(); // 비동기 작업에서 증가시킨 참조 카운트 해제
+	pBinaryAsset->Release(); // 비동기 작업에서 증가시킨 참조 카운트 해제
 
 	MARK_POOL_FREE(pAsyncArg);
 }

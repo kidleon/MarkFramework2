@@ -65,6 +65,14 @@ do
 				"{COPY} %{outputdir}/*.dll %{sample_output_dir}",
 			}
 			
+			defines { "__MARK3D_RENDERSYSTEM_D3D11__" }
+			
+			files {
+				"D3D11/**.h",
+				"D3D11/**.inl",
+				"D3D11/**.cpp"
+			}
+			
 			filter "configurations:Debug"
 			do
 				defines{"DEBUG", "USE_DLL", "MARKENGINE_EXPORTS", "_CRT_SECURE_NO_WARNINGS"}

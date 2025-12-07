@@ -2,6 +2,7 @@
 #include "BinaryAsset.h"
 #include "crc32.h"
 #include "crc64.h"
+#include "idgen.h"
 
 
 IMPLEMENTATION_IUNKNOWN_INTERFACE(BinaryAsset);
@@ -16,17 +17,21 @@ BinaryAsset::BinaryAsset()
 }
 */
 
-BinaryAsset::BinaryAsset()
+BinaryAsset::BinaryAsset(UINT32 ID)
 	: m_pData(nullptr)
 	, m_Size(0)
 	, m_LoadStat(LOAD_STAT::NOT_LOADED)
 	, m_CRC64Cache(0)
 	, m_CRC32Cache(0)
+	, m_ID(ID)
 {
 }
 
 BinaryAsset::~BinaryAsset() noexcept
 {
+	idgen_release(GLOBAL_VARS::ID_GEN_HANDLE, m_ID);
+	m_ID = 0;
+
 	if (m_pData)
 	{
 		MARK_FREE(m_pData);
@@ -37,6 +42,11 @@ BinaryAsset::~BinaryAsset() noexcept
 void BinaryAsset::OnDestroy()
 {
 	MARK_DELETE(this, BinaryAsset);
+}
+
+UINT32 BinaryAsset::GetID() const noexcept
+{
+	return INL_GetID();
 }
 
 ASSET_TYPE BinaryAsset::GetAssetType() const noexcept
