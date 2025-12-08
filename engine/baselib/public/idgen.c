@@ -4,16 +4,16 @@
 
 typedef struct idgen_t
 {
-	INT32 min_id;
-	INT32 max_id;
+	UINT32 min_id;
+	UINT32 max_id;
 	UINT32 total_count;
 	UINT32 curr_idx;
-	INT32* table;
+	UINT32* table;
 } tag_idgen;
 
 HANDLE idgen_create(
-	INT32 min_id,
-	INT32 max_id
+	UINT32 min_id,
+	UINT32 max_id
 )
 {
 	struct idgen_t* idgen = (struct idgen_t*)malloc(sizeof(struct idgen_t));
@@ -33,7 +33,7 @@ HANDLE idgen_create(
 	}
 
 	UINT32 idx = 0;
-	for (INT32 i = min_id; i < max_id + 1; ++i, ++idx)
+	for (UINT32 i = min_id; i < max_id + 1; ++i, ++idx)
 		idgen->table[idx] = i;
 
 	return (HANDLE)idgen;
@@ -51,7 +51,7 @@ void idgen_destroy(
 	free(pIDGen);
 }
 
-INT32 idgen_getid(
+UINT32 idgen_getid(
 	HANDLE idgen
 )
 {
@@ -62,7 +62,7 @@ INT32 idgen_getid(
 	if (pIDGen->total_count <= pIDGen->curr_idx)
 		return INVALID_UNIQUEID;
 
-	INT32 ID = pIDGen->table[pIDGen->curr_idx];
+	UINT32 ID = pIDGen->table[pIDGen->curr_idx];
 	pIDGen->curr_idx++;
 
 	return ID;
@@ -70,7 +70,7 @@ INT32 idgen_getid(
 
 void idgen_release(
 	HANDLE hIDGen,
-	INT32 id
+	UINT32 id
 )
 {
 	if (!hIDGen || INVALID_UNIQUEID == id) return;

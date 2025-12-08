@@ -5,6 +5,12 @@
 interface IAsset : public IUNKNOWN
 {
 	/**
+	* @brief 자산 고유 ID 반환
+	* @return 자산 고유 ID
+	*/
+	virtual uint32 GetID() const noexcept = 0;
+
+	/**
 	* @brief 자산 유형 반환
 	* @return 자산 유형
 	*/

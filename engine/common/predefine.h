@@ -314,6 +314,7 @@ public:\
 	virtual long RefCnt() override;\
 private:\
 
+
 #endif // __cplusplus
 
 #define IMPLEMENTATION_IUNKNOWN_INTERFACE(classname)\

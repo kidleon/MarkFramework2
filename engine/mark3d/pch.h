@@ -8,6 +8,9 @@
 #include "Heap.h"
 #include "AssetDef.h"
 #include "IAsset.h"
-
+#include "GlobalVars.h"
+#include "Log.h"
+#include "RenderDef.h"
+#include "IRenderSystem.h"
 
 #endif // __PCH_H__

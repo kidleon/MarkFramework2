@@ -12,8 +12,8 @@
 * @note 생성된 ID 생성기는 min_id와 max_id 사이의 ID를 순차적으로 생성합니다. 생성된 ID는 idgen_release 함수를 통해 반환할 수 있습니다.
 */
 MARK_BASELIB_C_API HANDLE idgen_create(
-	INT32 min_id,
-	INT32 max_id
+	UINT32 min_id,
+	UINT32 max_id
 );
 
 /**
@@ -32,7 +32,7 @@ MARK_BASELIB_C_API void idgen_destroy(
 * @return 생성된 ID를 반환합니다. 만약 모든 ID가 사용되었다면 INVALID_UNIQUEID를 반환합니다.
 * @note 생성된 ID는 idgen_release 함수를 통해 반환할 수 있습니다. 이 함수는 순차적으로 ID를 생성하며, 모든 ID가 사용되면 INVALID_UNIQUEID를 반환합니다.
 */
-MARK_BASELIB_C_API INT32 idgen_getid(
+MARK_BASELIB_C_API UINT32 idgen_getid(
 	HANDLE idgen
 );
 
@@ -45,7 +45,7 @@ MARK_BASELIB_C_API INT32 idgen_getid(
 */
 MARK_BASELIB_C_API void idgen_release(
 	HANDLE idgen,
-	INT32 id
+	UINT32 id
 );
 
 

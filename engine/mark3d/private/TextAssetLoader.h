@@ -1,6 +1,7 @@
 ﻿#ifndef __TEXTASSET_LOADER_H__
 #define __TEXTASSET_LOADER_H__
 
+
 class TextAsset;
 interface IFileSystem;
 
