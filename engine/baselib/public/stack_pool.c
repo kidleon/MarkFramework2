@@ -135,7 +135,7 @@ void* stackpool_alloc(
 )
 {
     if (!handle)
-        return;
+		return NULL;
 
     struct stackpool_t* pool = (struct stackpool_t*)handle;
     VALIDATE_POOL(pool);
