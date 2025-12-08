@@ -13,4 +13,12 @@
 #include "RenderDef.h"
 #include "IRenderSystem.h"
 
+#ifndef __MARK_D3D11_RENDER_SYSTEM__
+#include <d3d11.h>
+#include <d3d11_3.h>
+#include <d3dcompiler.h>
+#include <dxgiformat.h>
+
+#endif // __MARK_D3D11_RENDER_SYSTEM__
+
 #endif // __PCH_H__
