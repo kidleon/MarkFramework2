@@ -9,7 +9,8 @@ class BinaryAsset : public IBinaryAsset
 	DECLARATION_IUNKNOWN_INTERFACE(BinaryAsset);
 
 public:
-	BinaryAsset();
+	BinaryAsset() = delete;
+	BinaryAsset(HEAP_TYPE HeapType);
 
 	// IAsset interface
 	virtual ASSET_TYPE GetAssetType() const noexcept override;
@@ -18,8 +19,6 @@ public:
 	// IBinaryAsset interface
 	virtual const char* GetData() const noexcept override;
 	virtual size_t GetSize() const noexcept override;
-	virtual uint32 ComputeCRC32() noexcept override;
-	virtual uint64 ComputeCRC64() noexcept override;
 
 	// Private inline methods
 	__FORCEINLINE ASSET_TYPE INL_GetAssetType() const noexcept
@@ -56,8 +55,7 @@ private:
 	char* m_pData;
 	size_t m_Size;
 	volatile LOAD_STAT m_LoadStat;
-	uint32 m_CRC32Cache;
-	uint64 m_CRC64Cache;
+	HEAP_TYPE m_HeapType;
 
 };
 
