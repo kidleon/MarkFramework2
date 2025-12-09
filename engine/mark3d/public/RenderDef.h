@@ -24,6 +24,10 @@ enum class RENDER_API : UINT32
 */
 struct ENGINE_CREATE_DESC
 {
+#if defined(__TARGET_OS_WINDOWS)
+	HWND hWnd; // 윈도우 핸들
+#endif // __TARGET_OS_WINDOWS
+
 	UINT32 ScreenWidth; // 화면 너비
 	UINT32 ScreenHeight; // 화면 높이
 	LOG_LEVEL MinLogLevel; // 최소 로그 레벨
