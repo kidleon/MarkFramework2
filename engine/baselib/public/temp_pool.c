@@ -15,7 +15,7 @@ struct tpp_t
 	size_t padding;
 };
 
-HANDLE create_temp_pool(
+HANDLE temppool_create(
 	size_t pool_size,
 	BOOL thread_safe
 )
@@ -43,7 +43,7 @@ HANDLE create_temp_pool(
 	return (HANDLE)tpp;
 }
 
-void destroy_temp_pool(
+void temppool_destroy(
 	HANDLE pool_handle
 )
 {
@@ -54,7 +54,7 @@ void destroy_temp_pool(
 	crt_free((void*)tpp);
 }
 
-void* temp_pool_alloc(
+void* temppool_alloc(
 	HANDLE pool_handle,
 	size_t alloc_size
 )
@@ -97,7 +97,7 @@ void* temp_pool_alloc(
 	}
 }
 
-void temp_pool_clear(
+void temppool_clear(
 	HANDLE pool_handle
 )
 {

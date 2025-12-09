@@ -4,7 +4,7 @@
 
 extern "C" BOOL __stdcall D3D11CompileShader(
 	const D3D11_SHADER_COMPILE_DESC& CompileDesc,
-	ID3DBlob** ppBlob
+	D3D11_SHADER_COMPILE_RESULT& Result
 );
 
 

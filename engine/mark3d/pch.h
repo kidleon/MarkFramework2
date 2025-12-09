@@ -6,6 +6,7 @@
 #include "interlock_atomic.h"
 #include "unicode.h"
 #include "Heap.h"
+#include "NameHash.h"
 #include "AssetDef.h"
 #include "IAsset.h"
 #include "GlobalVars.h"

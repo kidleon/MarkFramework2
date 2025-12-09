@@ -7,7 +7,7 @@
 struct MemoryStats;
 
 /**
-* @brief 힙 할당기 초기화 함수
+* @brief 글로벌 힙 할당기 초기화 함수
 * @param temp_pool_size 임시 메모리 풀의 크기
 * @param temp_pool_threadsafe 임시 메모리 풀이 스레드 세이프인지 여부
 * @return 성공시 TRUE, 실패시 FALSE
@@ -23,6 +23,7 @@ MARKENGINE_C_API BOOL Heap_Init(
 		size_t size
 	)
 );
+
 
 /**
 * @brief 힙 할당기 종료 함수
@@ -61,11 +62,13 @@ MARKENGINE_C_API void* SysHeapAllocAlign(
 	int line,
 	const char* func
 );
+
 #else
 MARKENGINE_C_API void* SysHeapAllocAlign(
 	MEM_SIZE size,
 	size_t alignment
 );
+
 #endif // USE_PROFILE_MEMORY
 
 /**
@@ -87,6 +90,7 @@ MARKENGINE_C_API void* SysHeapAlloc(
 MARKENGINE_C_API void* SysHeapAlloc(
 	MEM_SIZE size
 );
+
 #endif // USE_PROFILE_MEMORY
 
 /**
@@ -111,6 +115,7 @@ MARKENGINE_C_API void* SysHeapRealloc(
 	void* ptr,
 	MEM_SIZE size
 );
+
 #endif // USE_PROFILE_MEMORY
 
 /**
@@ -165,42 +170,14 @@ MARKENGINE_C_API void* TempAlloc(MEM_SIZE size);
 */
 MARKENGINE_C_API void TempReset();
 
-/**
-* @brief 지정된 힙 유형에 따라 메모리를 할당합니다. USE_MEMORY_PROFILE가 정의된 경우 메모리 프로파일링을 수행합니다.
-* @param size 할당할 메모리 크기
-* @param heapType 할당할 힙 유형 (SYSCALL, POOL, TEMP)
-* @param file 할당 요청이 발생한 소스 파일 이름
-* @param line 할당 요청이 발생한 소스 파일의 라인 번호
-* @param func 할당 요청이 발생한 함수 이름
-* @return 할당된 메모리의 포인터, 실패시 nullptr
-*/
-MARKENGINE_C_API void* HeapAlloc_Auto(
-	MEM_SIZE size, 
-	HEAP_TYPE heapType,
-	const char* file,
-	int line,
-	const char* func
-);
-
-/**
-* @brief 지정된 힙 유형에 따라 할당된 메모리를 해제합니다.
-* @param ptr 해제할 메모리의 포인터
-* @param heapType 할당된 힙 유형 (SYSCALL, POOL, TEMP)
-* @return 없음
-*/
-MARKENGINE_C_API void HeapFree_Auto(
-	void* ptr, 
-	HEAP_TYPE heapType
-);
-
 
 #if defined(USE_PROFILE_MEMORY)
-#	define MARK_ALLOC_ALIGN(size, alignment) SysHeapAllocAlign(size, alignment, __FILE__, __LINE__, __FUNCTION__)
-#	define MARK_FREE_ALIGN(ptr) SysHeapFreeAlign(ptr)
+#	define MARK_SYS_ALLOC(size) SysHeapAlloc(size, __FILE__, __LINE__, __FUNCTION__)
+#	define MARK_SYS_FREE(ptr) SysHeapFree(ptr)
+#	define MARK_SYS_REALLOC(ptr, size) SysHeapRealloc(ptr, size, __FILE__, __LINE__, __FUNCTION__)
 
-#	define MARK_ALLOC(size) SysHeapAlloc_(size, __FILE__, __LINE__, __FUNCTION__)
-#	define MARK_REALLOC(ptr, size) SysHeapRealloc(ptr, size, __FILE__, __LINE__, __FUNCTION__)
-#	define MARK_FREE(ptr) SysHeapFree(ptr)
+#	define MARK_SYS_ALLOC_ALGIN(size, alignment) SysHeapAllocAlign(size, alignment, __FILE__, __LINE__, __FUNCTION__)
+#	define MARK_SYS_FREE_ALIGN(ptr) SysHeapFreeAlign(ptr)
 
 #	define MARK_POOL_ALLOC(size) PoolAlloc(size, __FILE__, __LINE__, __FUNCTION__)
 #	define MARK_POOL_FREE(ptr) PoolFree(ptr)
@@ -208,23 +185,17 @@ MARKENGINE_C_API void HeapFree_Auto(
 #	define MARK_TEMP_ALLOC(size) TempAlloc(size)
 #	define MARK_TEMP_RESET() TempReset()
 
-#	define MARK_NEW(type) new (MARK_POOL_ALLOC(sizeof(type))) type
-#	define MARK_NEW_ARRAY(type, count) new (MARK_POOL_ALLOC(sizeof(type) * (count))) type[count]
-#	define MARK_DELETE(ptr, type) { if(ptr) { (ptr)->~type(); MARK_POOL_FREE(ptr); ptr = nullptr; } }
-
-#	define HEAP_ALLOC_AUTO(size, heap_type) HeapAlloc_Auto(size, __FILE__, __LINE__, __FUNCTION__)
-#	define HEAP_FREE_AUTO(ptr, heap_type) HeapFree_Auto(ptr, heap_type)
-
-#	define MARK_NEW_AUTO(type, heap_type) new (HEAP_ALLOC_AUTO(sizeof(type), heap_type)) type
-#	define MARK_NEW_ARRAY_AUTO(type, count, heap_type) new (HEAP_ALLOC_AUTO(sizeof(type) * (count), heap_type)) type[count]
-#	define MARK_DELETE_AUTO(ptr, type, heap_type) { if(ptr) { (ptr)->~type(); HEAP_FREE_AUTO(ptr, heap_type); ptr = nullptr; } }
+#	define MARK_NEW(type) new (MARK_SYS_ALLOC(sizeof(type))) type
+#	define MARK_NEW_ARRAY(type, count) new (MARK_SYS_ALLOC(sizeof(type) * (count))) type[count]
+#	define MARK_DELETE(ptr, type) {type* p = ptr; if(p) { (p)->~type(); MARK_SYS_FREE(p); p = nullptr; } }
 #else
-#	define MARK_ALLOC_ALIGN(size, alignment) SysHeapAllocAlign(size, alignment)
-#	define MARK_FREE_ALIGN(ptr) SysHeapFreeAlign(ptr)
+#	define MARK_SYS_ALLOC(size) SysHeapAlloc(size)
+#	define MARK_SYS_ALLOC(size) SysHeapAlloc(size)
+#	define MARK_SYS_FREE(ptr) SysHeapFree(ptr)
+#	define MARK_SYS_REALLOC(ptr, size) SysHeapRealloc(ptr, size)
 
-#	define MARK_ALLOC(size) SysHeapAlloc(size)
-#	define MARK_REALLOC(ptr, size) SysHeapRealloc(ptr, size)
-#	define MARK_FREE(ptr) SysHeapFree(ptr)
+#	define MARK_SYS_ALLOC_ALGIN(size, alignment) SysHeapAllocAlign(size, alignment)
+#	define MARK_SYS_FREE_ALIGN(ptr) SysHeapFreeAlign(ptr)
 
 #	define MARK_POOL_ALLOC(size) PoolAlloc(size)
 #	define MARK_POOL_FREE(ptr) PoolFree(ptr)
@@ -232,16 +203,9 @@ MARKENGINE_C_API void HeapFree_Auto(
 #	define MARK_TEMP_ALLOC(size) TempAlloc(size)
 #	define MARK_TEMP_RESET() TempReset()
 
-#	define MARK_NEW(type) new (MARK_POOL_ALLOC(sizeof(type))) type
-#	define MARK_NEW_ARRAY(type, count) new (MARK_POOL_ALLOC(sizeof(type) * (count))) type[count]
-#	define MARK_DELETE(ptr, type) {type* p = ptr; if(p) { (p)->~type(); MARK_POOL_FREE(p); p = nullptr; } }
-
-#	define HEAP_ALLOC_AUTO(size, heap_type) HeapAlloc_Auto(size, heap_type, NULL, 0, NULL)
-#	define HEAP_FREE_AUTO(ptr, heap_type) HeapFree_Auto(ptr, heap_type)
-
-#	define MARK_NEW_AUTO(type, heap_type) new (HEAP_ALLOC_AUTO(sizeof(type), heap_type)) type
-#	define MARK_NEW_ARRAY_AUTO(type, count, heap_type) new (HEAP_ALLOC_AUTO(sizeof(type) * (count), heap_type)) type[count]
-#	define MARK_DELETE_AUTO(ptr, type, heap_type) {type* p = ptr; if(p) { (p)->~type(); HEAP_FREE_AUTO(p, heap_type); p = nullptr; } }
+#	define MARK_NEW(type) new (MARK_SYS_ALLOC(sizeof(type))) type
+#	define MARK_NEW_ARRAY(type, count) new (MARK_SYS_ALLOC(sizeof(type) * (count))) type[count]
+#	define MARK_DELETE(ptr, type) {type* p = ptr; if(p) { (p)->~type(); MARK_SYS_FREE(p); p = nullptr; } }
 #endif // USE_PROFILE_MEMORY
 
 #endif // __PRIVATE_HEAP_H__

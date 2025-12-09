@@ -8,7 +8,7 @@
  * @param thread_safe 멀티 스레드 환경에서 안전하게 동작하도록 설정합니다.
  * @return HANDLE 생성된 Temp Pool의 핸들을 반환합니다. 실패시 NULL을 반환합니다.
  */
-MARK_BASELIB_C_API HANDLE create_temp_pool(
+MARK_BASELIB_C_API HANDLE temppool_create(
 	size_t pool_size,
 	BOOL thread_safe
 );
@@ -17,7 +17,7 @@ MARK_BASELIB_C_API HANDLE create_temp_pool(
  * @brief Temp Pool을 파괴합니다.
  * @param pool_handle Temp Pool의 핸들입니다.
  */
-MARK_BASELIB_C_API void destroy_temp_pool(
+MARK_BASELIB_C_API void temppool_destroy(
 	HANDLE pool_handle
 );
 
@@ -26,7 +26,7 @@ MARK_BASELIB_C_API void destroy_temp_pool(
  * @param pool_handle Temp Pool의 핸들입니다.
  * @return void* 할당된 블록의 포인터를 반환합니다. 할당에 실패할 경우 NULL을 반환합니다.
  */
-MARK_BASELIB_C_API void* temp_pool_alloc(
+MARK_BASELIB_C_API void* temppool_alloc(
 	HANDLE pool_handle,
 	size_t alloc_size
 );
@@ -36,7 +36,7 @@ MARK_BASELIB_C_API void* temp_pool_alloc(
  * @brief Temp Pool을 초기화 합니다.
  * @param pool_handle Temp Pool의 핸들입니다.
  */ 
-MARK_BASELIB_C_API void temp_pool_clear(
+MARK_BASELIB_C_API void temppool_clear(
 	HANDLE pool_handle
 );
 

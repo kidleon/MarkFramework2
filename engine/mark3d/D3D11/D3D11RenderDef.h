@@ -148,10 +148,33 @@ struct D3D11_SHADER_COMPILE_DESC
     UINT32 BufferSize;
     UINT32 DefineCount;
     SHADER_TYPE ShaderType;
-    BOOL GenShaderMeta;
-    UINT32 ShaderMetaFlags;
     BOOL Debug;
 };
+
+
+enum SHADER_PARAM_TYPE
+{
+	CPARAM_UNKNOWN,
+    CPARAM_CONSTANT,
+	CPARAM_TEXTURE,
+	CPARAM_SAMPLER
+};
+
+struct D3D11_SHADER_PARAMS
+{
+    SHADER_PARAM_TYPE ParamType;
+    NameHash Name;
+	uint32 BindPoint;
+	UINT32 Size;
+};
+
+struct D3D11_SHADER_COMPILE_RESULT
+{
+    ID3DBlob* pShaderBlob;
+	D3D11_SHADER_PARAMS* pShaderParams;
+    UINT32 NumShaderParams;
+};
+
 
 
 #endif // __D3D11_RENDER_DEF_H__

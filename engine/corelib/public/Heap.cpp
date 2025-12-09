@@ -90,6 +90,14 @@ static MEM_SIZE g_UsedAllocCount_Temp = 0; // 임시 메모리 풀 현재 할당
 static MEM_SIZE g_UsedAllocSize_Temp = 0; // 임시 메모리 풀 현재 할당 사이즈
 #endif // USE_PROFILE_MEMORY
 
+
+struct Heaps
+{
+	HANDLE hTempHeap = nullptr;
+	HANDLE hPoolHeaps[MAX_HEAP_SIZE_IDX] = { nullptr };
+	MemoryRecorder* pMemoryRecorder = nullptr;
+};
+
 #if defined(__TARGET_COMPILER_GCC) || defined(__TARGET_COMPILER_CLANG)
 static int get_heap_size_index(MEM_SIZE size)
 {
@@ -160,7 +168,7 @@ BOOL Heap_Init(
 
 	if (!g_hTempHeap)
 	{
-		g_hTempHeap = create_temp_pool(
+		g_hTempHeap = temppool_create(
 			temp_pool_size,
 			temp_pool_threadsafe
 		);
@@ -170,6 +178,40 @@ BOOL Heap_Init(
 	}
 
 	return TRUE;
+}
+
+HANDLE Heap_Create(
+	MEM_SIZE temp_pool_size,
+	BOOL temp_pool_threadsafe,
+	void (*pfnMemoryReporter)(
+		const char* type,
+		const char* file,
+		int line,
+		const char* func,
+		size_t size
+	)
+)
+{
+	Heaps* pHeaps = new Heaps();
+
+#if defined(USE_PROFILE_MEMORY)
+	pHeaps->pMemoryRecorder = new MemoryRecorder();
+	if (!pHeaps->pMemoryRecorder->Initialize(pfnMemoryReporter))
+	{
+		delete pHeaps->pMemoryRecorder;
+		delete pHeaps;
+		return nullptr;
+	}
+
+	g_pMemoryRecorder = pHeaps->pMemoryRecorder;
+#endif // USE_PROFILE_MEMORY
+
+	pHeaps->hTempHeap = temppool_create(
+		temp_pool_size,
+		temp_pool_threadsafe
+	);
+	
+	return (HANDLE)pHeaps;
 }
 
 void Heap_Shutdown()
@@ -185,11 +227,43 @@ void Heap_Shutdown()
 
 	if (g_hTempHeap)
 	{
-		destroy_temp_pool(g_hTempHeap);
+		temppool_destroy(g_hTempHeap);
 		g_hTempHeap = nullptr;
 	}
 
 	CHECK_DELETE(g_pMemoryRecorder);
+}
+
+void Heap_Shutdown(HANDLE handle)
+{
+	Heaps* pHeaps = (Heaps*)handle;
+	if (!pHeaps)
+		return;
+
+	for (int i = 0; i < MAX_HEAP_SIZE_IDX; ++i)
+	{
+		if (pHeaps->hPoolHeaps[i])
+		{
+			destroy_paged_object_pool(pHeaps->hPoolHeaps[i]);
+			pHeaps->hPoolHeaps[i] = nullptr;
+		}
+	}
+	if (pHeaps->hTempHeap)
+	{
+		temppool_destroy(pHeaps->hTempHeap);
+		pHeaps->hTempHeap = nullptr;
+	}
+
+	if (pHeaps->pMemoryRecorder)
+	{
+		pHeaps->pMemoryRecorder->ReportMemoryLeaks();
+		pHeaps->pMemoryRecorder->Cleanup();
+		delete pHeaps->pMemoryRecorder;
+		pHeaps->pMemoryRecorder = nullptr;
+	}
+
+	delete pHeaps;
+
 }
 
 void Heap_GetMemoryStats(
@@ -224,6 +298,37 @@ void Heap_GetMemoryStats(
 #endif // USE_PROFILE_MEMORY
 }
 
+void Heap_GetMemoryStats(
+	HANDLE handle,
+	MemoryStats* stats
+)
+{
+	if (!stats) return;
+	Heaps* pHeaps = (Heaps*)handle;
+	if (!pHeaps)
+		return;
+
+#if defined(USE_PROFILE_MEMORY)
+	if (pHeaps->pMemoryRecorder)
+	{
+		pHeaps->pMemoryRecorder->GetAllocStats(
+			&stats->sys_alloc_count,
+			&stats->pool_alloc_count,
+			&stats->sys_alloc_size,
+			&stats->pool_alloc_size
+		);
+	}
+#else
+	stats->sys_alloc_count = 0;
+	stats->pool_alloc_count = 0;
+	stats->sys_alloc_size = 0;
+	stats->pool_alloc_size = 0;
+	stats->peak_temp_count = 0;
+	stats->peak_temp_size = 0;
+#endif // USE_PROFILE_MEMORY
+	
+}
+
 void Heap_ReportMemoryLeaks()
 {
 	if (g_pMemoryRecorder)
@@ -231,6 +336,19 @@ void Heap_ReportMemoryLeaks()
 		g_pMemoryRecorder->ReportMemoryLeaks();
 	}
 }
+
+void Heap_ReportMemoryLeaks(HANDLE handle)
+{
+	Heaps* pHeaps = (Heaps*)handle;
+	if (!pHeaps)
+		return;
+
+	if (pHeaps->pMemoryRecorder)
+	{
+		pHeaps->pMemoryRecorder->ReportMemoryLeaks();
+	}
+}
+
 
 #if defined(USE_PROFILE_MEMORY)
 void* SysHeapAllocAlign(
@@ -465,7 +583,7 @@ void* TempAlloc(MEM_SIZE size)
 	if (!g_hTempHeap)
 		return nullptr;
 
-	void* pTempHeap = temp_pool_alloc(g_hTempHeap, size);
+	void* pTempHeap = temppool_alloc(g_hTempHeap, size);
 	if (!pTempHeap)
 		return nullptr;
 
@@ -501,7 +619,7 @@ void TempReset()
 
 #endif // USE_PROFILE_MEMORY
 
-	temp_pool_clear(g_hTempHeap);
+	temppool_clear(g_hTempHeap);
 }
 
 
