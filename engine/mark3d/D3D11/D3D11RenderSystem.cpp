@@ -1,8 +1,12 @@
 ﻿#include "pch.h"
 #include "D3D11RenderSystem.h"
 
-IMPLEMENTATION_IUNKNOWN_INTERFACE(D3D11RenderSystem);
 
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "dxguid.lib")
+
+IMPLEMENTATION_IUNKNOWN_INTERFACE(D3D11RenderSystem);
 
 D3D11RenderSystem::D3D11RenderSystem()
 {

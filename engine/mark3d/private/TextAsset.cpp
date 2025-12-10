@@ -31,7 +31,7 @@ TextAsset::~TextAsset() noexcept
 
 	if (m_pData)
 	{
-		MARK_FREE(m_pData);
+		MARK_SYS_FREE(m_pData);
 		m_pData = nullptr;
 	}
 }

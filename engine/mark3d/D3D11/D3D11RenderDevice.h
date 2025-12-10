@@ -2,8 +2,11 @@
 #define __RENDER_DEVICE_D3D11_H__
 
 
-class D3D11Shader;
+class D3D11VertexShader;
+class D3D11PixelShader;
+class D3D11ComputeShader;
 class D3D11InputLayout;
+//class D3D11InputLayoutCache;
 
 class D3D11RenderDevice
 {
@@ -13,7 +16,8 @@ public:
 
 	BOOL CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOOL DebugDevice);
 	BOOL CreateBuffer(const D3D11_BUFFER_DESC* pDesc, ID3D11Buffer** ppBuffer);
-	BOOL CreateShader(const D3D11_SHADER_COMPILE_DESC& Desc, D3D11Shader** ppShader);
+	BOOL CreateVertexShader(const D3D11_SHADER_COMPILE_DESC& Desc, D3D11VertexShader** ppVertexShader);
+	BOOL CreatePixelShader(const D3D11_SHADER_COMPILE_DESC& Desc, D3D11PixelShader** ppPixelShader);
 	BOOL CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, D3D11InputLayout** ppInputLayout);
 
 private:
@@ -34,6 +38,8 @@ private:
 	ID3D11RenderTargetView* m_pRenderTargetView = nullptr;
 	ID3D11Texture2D* m_pDepthStencilTexture = nullptr;
 	ID3D11DepthStencilView* m_pDepthStencilView = nullptr;
+
+//	D3D11InputLayoutCache* m_pInputLayoutCache = nullptr;
 
 };
 

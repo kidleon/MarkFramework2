@@ -1,12 +1,12 @@
 ﻿#include "pch.h"
 #include "RenderSystemFactory.h"
-#include "D3D11/RenderSystem_D3D11.h"
+#include "D3D11/D3D11RenderSystem.h"
 
 
 BOOL __stdcall CreateRenderSystemInstance(IRenderSystem** ppOut)
 {
 #if defined(__MARK3D_RENDERSYSTEM_D3D11__)
-	RenderSystem_D3D11* pRenderSystem = new RenderSystem_D3D11();
+	D3D11RenderSystem* pRenderSystem = new D3D11RenderSystem();
 	if (!pRenderSystem)
 	{
 		SYS_LOG_E("CreateRenderSystem - Failed to create RenderSystem_D3D11 instance.");

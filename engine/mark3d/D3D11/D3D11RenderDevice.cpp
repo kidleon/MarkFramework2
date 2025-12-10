@@ -2,10 +2,14 @@
 #include "D3D11RenderDef.h"
 #include "D3D11RenderDevice.h"
 
+#include "Log.h"
 
-D3D11RenderDevice::D3D11RenderDevice()
-{
-}
+#include "D3D11ShaderCompile.h"
+#include "D3D11ShaderProp.h"
+#include "D3D11Shader.h"
+#include "D3D11InputLayout.h"
+#include "D3D11InputLayoutCache.h"
+
 
 D3D11RenderDevice::~D3D11RenderDevice() noexcept
 {
@@ -182,11 +186,22 @@ BOOL D3D11RenderDevice::CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOO
 	
 	pBackBuffer->Release();
 
+	//m_pInputLayoutCache = MARK_POOL_NEW(D3D11InputLayoutCache)();
+	//m_pInputLayoutCache->Init();
+
 	return TRUE;
 }
 
 void D3D11RenderDevice::DestroyDevice() noexcept
 {
+	/*
+	if (m_pInputLayoutCache)
+	{
+		MARK_POOL_FREE(m_pInputLayoutCache);
+		m_pInputLayoutCache = nullptr;
+	}
+	*/
+
 	CHECK_RELEASE(m_pDepthStencilView);
 	CHECK_RELEASE(m_pDepthStencilTexture);
 	CHECK_RELEASE(m_pRenderTargetView);
@@ -199,4 +214,286 @@ void D3D11RenderDevice::DestroyDevice() noexcept
 
 	CHECK_RELEASE(m_pD3D11Device1);
 	CHECK_RELEASE(m_pD3D11Device);
+}
+
+BOOL D3D11RenderDevice::CreateBuffer(const D3D11_BUFFER_DESC* pDesc, ID3D11Buffer** ppBuffer)
+{
+	if (!m_pD3D11Device || !pDesc || !ppBuffer)
+		return FALSE;
+
+	HRESULT hr = m_pD3D11Device->CreateBuffer(
+		pDesc,
+		nullptr,
+		ppBuffer
+	);
+
+	if (FAILED(hr))
+		return FALSE;
+
+	return TRUE;
+}
+
+BOOL D3D11RenderDevice::CreateVertexShader(const D3D11_SHADER_COMPILE_DESC& Desc, D3D11VertexShader** ppVertexShader)
+{
+	D3D11_SHADER_COMPILE_RESULT compileResult = {};
+
+	if (!D3D11CompileShader(Desc, compileResult))
+	{
+		(*ppVertexShader) = nullptr;
+		SYS_LOG_E("D3D11RenderDevice::CreateVertexShader: Shader compilation failed - %s", Desc.szShaderName);
+
+		return FALSE;
+	}
+
+	ID3D11VertexShader* pVertexShader = nullptr;
+	HRESULT hr = m_pD3D11Device->CreateVertexShader(
+		compileResult.pShaderBlob->GetBufferPointer(),
+		compileResult.pShaderBlob->GetBufferSize(),
+		nullptr,
+		&pVertexShader
+	);
+
+	if (FAILED(hr))
+	{
+		SYS_LOG_E("D3D11RenderDevice::CreateVertexShader: CreateVertexShader failed - %s", Desc.szShaderName);
+
+		compileResult.pShaderBlob->Release();
+
+		if (compileResult.pShaderParams)
+		{
+			MARK_POOL_FREE(compileResult.pShaderParams);
+			compileResult.pShaderParams = nullptr;
+		}
+		(*ppVertexShader) = nullptr;
+
+		return FALSE;
+	}
+
+	D3D11ShaderProp* pShaderProp = MARK_POOL_NEW(D3D11ShaderProp)(
+		compileResult.pShaderParams,
+		compileResult.NumShaderParams
+	);
+
+	D3D11_INPUTLAYOUT_DESC inputLayoutDesc = {};
+	inputLayoutDesc.NumVertexFormat = compileResult.NumVertexFormat;
+	memcpy(inputLayoutDesc.VertexFormats, compileResult.VertexFormats, sizeof(UINT32) * MAX_VERTEX_FORMAT);
+
+	D3D11InputLayout* pInputLayout = nullptr;
+	if (!CreateInputLayout(inputLayoutDesc, &pInputLayout))
+	{
+		SYS_LOG_E("D3D11RenderDevice::CreateVertexShader: CreateInputLayout failed - %s", Desc.szShaderName);
+	}
+
+	*ppVertexShader = MARK_POOL_NEW(D3D11VertexShader)(
+		pVertexShader,
+		pShaderProp,
+		pInputLayout
+	);
+
+	compileResult.pShaderBlob->Release();
+
+	return TRUE;
+}
+
+BOOL D3D11RenderDevice::CreatePixelShader(const D3D11_SHADER_COMPILE_DESC& Desc, D3D11PixelShader** ppPixelShader)
+{
+	D3D11_SHADER_COMPILE_RESULT compileResult = {};
+
+	if (!D3D11CompileShader(Desc, compileResult))
+	{
+		(*ppPixelShader) = nullptr;
+		SYS_LOG_E("D3D11RenderDevice::CreatePixelShader: Shader compilation failed - %s", Desc.szShaderName);
+
+		return FALSE;
+	}
+
+	ID3D11PixelShader* pPixelShader = nullptr;
+	HRESULT hr = m_pD3D11Device->CreatePixelShader(
+		compileResult.pShaderBlob->GetBufferPointer(),
+		compileResult.pShaderBlob->GetBufferSize(),
+		nullptr,
+		&pPixelShader
+	);
+
+	if (FAILED(hr))
+	{
+		SYS_LOG_E("D3D11RenderDevice::CreatePixelShader: CreatePixelShader failed - %s", Desc.szShaderName);
+
+		compileResult.pShaderBlob->Release();
+
+		if (compileResult.pShaderParams)
+		{
+			MARK_POOL_FREE(compileResult.pShaderParams);
+			compileResult.pShaderParams = nullptr;
+		}
+		(*ppPixelShader) = nullptr;
+
+		return FALSE;
+	}
+
+	D3D11ShaderProp* pShaderProp = MARK_POOL_NEW(D3D11ShaderProp)(
+		compileResult.pShaderParams,
+		compileResult.NumShaderParams
+	);
+
+	(*ppPixelShader) = MARK_POOL_NEW(D3D11PixelShader)(
+		pPixelShader,
+		pShaderProp
+	);
+
+	compileResult.pShaderBlob->Release();
+
+	return TRUE;
+}
+
+BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, D3D11InputLayout** ppInputLayout)
+{
+	D3D11_INPUT_ELEMENT_DESC InputElementDescs[MAX_VERTEX_FORMAT] = {};
+
+	VERTEX_FORMAT_INDEX VertexFormatIndices[MAX_VERTEX_FORMAT] = {};
+	VERTEX_FORMAT VertexFormats[MAX_VERTEX_FORMAT] = {};
+
+	UINT32 MIN_NUM_VERTEX_FORMAT = T_MIN(Desc.NumVertexFormat, MAX_VERTEX_FORMAT);
+
+	UINT32 VertexFormat = 0;
+
+	for (UINT32 i = 0; i < MIN_NUM_VERTEX_FORMAT; ++i)
+	{
+		D3D11_INPUT_ELEMENT_DESC& InputElementDesc = InputElementDescs[i];
+
+		InputElementDesc.SemanticIndex = i;
+		InputElementDesc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+		VertexFormats[i] = Desc.VertexFormats[i];
+
+		switch (Desc.VertexFormats[i])
+		{
+			case VERTEX_FORMAT::POSITION:
+			{
+				InputElementDesc.SemanticName = "POSITION";
+				InputElementDesc.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+				VertexFormatIndices[i] = VERTEX_FORMAT_INDEX::POSITION;
+				VertexFormat |= (UINT32)VERTEX_FORMAT::POSITION;
+
+			} break;
+
+			case VERTEX_FORMAT::NORMAL:
+			{
+				InputElementDesc.SemanticName = "NORMAL";
+				InputElementDesc.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+				VertexFormatIndices[i] = VERTEX_FORMAT_INDEX::NORMAL;
+				VertexFormat |= (UINT32)VERTEX_FORMAT::NORMAL;
+			} break;
+
+			case VERTEX_FORMAT::COLOR:
+			{
+				InputElementDesc.SemanticName = "COLOR";
+				InputElementDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				VertexFormatIndices[i] = VERTEX_FORMAT_INDEX::COLOR;
+				VertexFormat |= (UINT32)VERTEX_FORMAT::COLOR;
+			} break;
+
+			case VERTEX_FORMAT::TEXCOORD:
+			{
+				InputElementDesc.SemanticName = "TEXCOORD";
+				InputElementDesc.Format = DXGI_FORMAT_R32G32_FLOAT;
+				VertexFormatIndices[i] = VERTEX_FORMAT_INDEX::TEXCOORD;
+				VertexFormat |= (UINT32)VERTEX_FORMAT::TEXCOORD;
+			} break;
+
+			case VERTEX_FORMAT::BONE:
+			{
+				InputElementDesc.SemanticName = "BONE";
+				InputElementDesc.Format = DXGI_FORMAT_R32G32B32A32_UINT;
+				VertexFormatIndices[i] = VERTEX_FORMAT_INDEX::BONE;
+				VertexFormat |= (UINT32)VERTEX_FORMAT::BONE;
+			} break;
+
+			case VERTEX_FORMAT::WEIGHT:
+			{
+				InputElementDesc.SemanticName = "WEIGHT";
+				InputElementDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				VertexFormatIndices[i] = VERTEX_FORMAT_INDEX::WEIGHT;
+				VertexFormat |= (UINT32)VERTEX_FORMAT::WEIGHT;
+			} break;
+
+			case VERTEX_FORMAT::TEXCOORD1:
+			{
+				InputElementDesc.SemanticName = "TEXCOORD1";
+				InputElementDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				VertexFormatIndices[i] = VERTEX_FORMAT_INDEX::TEXCOORD1;
+				VertexFormat |= (UINT32)VERTEX_FORMAT::TEXCOORD1;
+			} break;
+
+			case VERTEX_FORMAT::TEXCOORD2:
+			{
+				InputElementDesc.SemanticName = "TEXCOORD2";
+				InputElementDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				VertexFormatIndices[i] = VERTEX_FORMAT_INDEX::TEXCOORD2;
+				VertexFormat |= (UINT32)VERTEX_FORMAT::TEXCOORD2;
+			} break;
+
+			case VERTEX_FORMAT::TEXCOORD3:
+			{
+				InputElementDesc.SemanticName = "TEXCOORD3";
+				InputElementDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				VertexFormatIndices[i] = VERTEX_FORMAT_INDEX::TEXCOORD3;
+				VertexFormat |= (UINT32)VERTEX_FORMAT::TEXCOORD3;
+			} break;
+
+			case VERTEX_FORMAT::TEXCOORD4:
+			{
+				InputElementDesc.SemanticName = "TEXCOORD4";
+				InputElementDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				VertexFormatIndices[i] = VERTEX_FORMAT_INDEX::TEXCOORD4;
+				VertexFormat |= (UINT32)VERTEX_FORMAT::TEXCOORD4;
+			} break;
+
+			case VERTEX_FORMAT::TEXCOORD5:
+			{
+				InputElementDesc.SemanticName = "TEXCOORD5";
+				InputElementDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				VertexFormatIndices[i] = VERTEX_FORMAT_INDEX::TEXCOORD5;
+				VertexFormat |= (UINT32)VERTEX_FORMAT::TEXCOORD5;
+			} break;
+
+			case VERTEX_FORMAT::TEXCOORD6:
+			{
+				InputElementDesc.SemanticName = "TEXCOORD6";
+				InputElementDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				VertexFormatIndices[i] = VERTEX_FORMAT_INDEX::TEXCOORD6;
+				VertexFormat |= (UINT32)VERTEX_FORMAT::TEXCOORD6;
+			} break;
+
+			case VERTEX_FORMAT::TEXCOORD7:
+			{
+				InputElementDesc.SemanticName = "TEXCOORD7";
+				InputElementDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				VertexFormatIndices[i] = VERTEX_FORMAT_INDEX::TEXCOORD7;
+				VertexFormat |= (UINT32)VERTEX_FORMAT::TEXCOORD7;
+			} break;
+		}
+	}
+
+	ID3D11InputLayout* pD3D11InputLayout = nullptr;
+	HRESULT hr = m_pD3D11Device->CreateInputLayout(
+		InputElementDescs,
+		MIN_NUM_VERTEX_FORMAT,
+		Desc.pShaderBlob->GetBufferPointer(),
+		Desc.pShaderBlob->GetBufferSize(),
+		&pD3D11InputLayout
+	);
+
+	if (FAILED(hr))
+		return FALSE;
+
+	D3D11InputLayout* pInputLayout = MARK_POOL_NEW(D3D11InputLayout)(
+		Desc.NumVertexFormat,
+		VertexFormats,
+		VertexFormatIndices,
+		pD3D11InputLayout
+	);
+
+	(*ppInputLayout) = pInputLayout;
+
+	return TRUE;
 }

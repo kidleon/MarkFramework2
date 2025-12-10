@@ -5,6 +5,7 @@
 #include "spin_lock.h"
 #include "interlock_atomic.h"
 #include "unicode.h"
+#include "hash_table.h"
 #include "Heap.h"
 #include "NameHash.h"
 #include "AssetDef.h"

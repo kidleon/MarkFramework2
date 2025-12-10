@@ -32,7 +32,7 @@ BOOL LoadTextAssetFromFileSystem(
 	}
 		
 	size_t streamSize = pDataStream->GetSize();
-	pBuffer = (char*)MARK_ALLOC(streamSize + 1);
+	pBuffer = (char*)MARK_SYS_ALLOC(streamSize + 1);
 	pDataStream->Read(pBuffer, streamSize);
 	pBuffer[streamSize] = '\0'; // Null-terminate
 
@@ -53,7 +53,7 @@ BOOL LoadTextAssetFromFileSystem(
 LB_FAILED:
 	if (pBuffer)
 	{
-		MARK_FREE(pBuffer);
+		MARK_SYS_FREE(pBuffer);
 		pBuffer = nullptr;
 	}
 

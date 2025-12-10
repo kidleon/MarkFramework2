@@ -32,7 +32,7 @@ BOOL LoadBinaryAssetFromFileSystem(
 	}
 
 	size_t streamSize = pDataStream->GetSize();
-	pBuffer = (char*)MARK_ALLOC(streamSize + 1);
+	pBuffer = (char*)MARK_SYS_ALLOC(streamSize + 1);
 	pDataStream->Read(pBuffer, streamSize);
 
 	pBinaryAsset->INL_SetData(pBuffer, streamSize);
@@ -43,7 +43,7 @@ BOOL LoadBinaryAssetFromFileSystem(
 LB_FAILED:
 	if (pBuffer)
 	{
-		MARK_FREE(pBuffer);
+		MARK_SYS_FREE(pBuffer);
 		pBuffer = nullptr;
 	}
 

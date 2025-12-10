@@ -62,7 +62,7 @@ private:
 	D3D11_SHADER_PARAMS* m_pShaderParams = nullptr;
 	UINT32 m_NumShaderParams = 0;
 
-}
+};
 
 
 #endif // __D3D11_SHADER_PROP_H__

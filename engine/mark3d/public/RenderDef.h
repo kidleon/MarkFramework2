@@ -294,7 +294,126 @@ struct TEXTURE2D_CREATE_DESC
 	size_t DataSize; // 초기 데이터 크기 (바이트 단위)
 };
 
+enum class FILTER_TYPE : UINT32
+{
+	MIN_MAG_MIP_POINT = 0,
+	MIN_MAG_POINT_MIP_LINEAR = 0x1,
+	MIN_POINT_MAG_LINEAR_MIP_POINT = 0x4,
+	MIN_POINT_MAG_MIP_LINEAR = 0x5,
+	MIN_LINEAR_MAG_MIP_POINT = 0x10,
+	MIN_LINEAR_MAG_POINT_MIP_LINEAR = 0x11,
+	MIN_MAG_LINEAR_MIP_POINT = 0x14,
+	MIN_MAG_MIP_LINEAR = 0x15,
+	ANISOTROPIC = 0x55,
+	COMPARISON_MIN_MAG_MIP_POINT = 0x80,
+	COMPARISON_MIN_MAG_POINT_MIP_LINEAR = 0x81,
+	COMPARISON_MIN_POINT_MAG_LINEAR_MIP_POINT = 0x84,
+	COMPARISON_MIN_POINT_MAG_MIP_LINEAR = 0x85,
+	COMPARISON_MIN_LINEAR_MAG_MIP_POINT = 0x90,
+	COMPARISON_MIN_LINEAR_MAG_POINT_MIP_LINEAR = 0x91,
+	COMPARISON_MIN_MAG_LINEAR_MIP_POINT = 0x94,
+	COMPARISON_MIN_MAG_MIP_LINEAR = 0x95,
+	COMPARISON_ANISOTROPIC = 0xd5,
+};
 
+enum class TEXTURE_ADDRESS_MODE : UINT32
+{
+	WRAP = 1,
+	MIRROR = 2,
+	CLAMP = 3,
+	BORDER = 4,
+	MIRROR_ONCE = 5,
+};
+
+enum class COMPARISON_FUNC : UINT32
+{
+	NEVER = 1,
+	LESS = 2,
+	EQUAL = 3,
+	LESS_EQUAL = 4,
+	GREATER = 5,
+	NOT_EQUAL = 6,
+	GREATER_EQUAL = 7,
+	ALWAYS = 8,
+};
+
+// 렌더 상태 구조체들
+
+/**
+* @brief 샘플러 상태 구조체
+*/
+struct RS_SAMPLER_STATE
+{
+	FILTER_TYPE Filter; // 필터 타입
+	TEXTURE_ADDRESS_MODE AddressU; // U 좌표 주소 모드
+	TEXTURE_ADDRESS_MODE AddressV; // V 좌표 주소 모드
+	TEXTURE_ADDRESS_MODE AddressW; // W 좌표 주소 모드
+	UINT32 MipLODBias; // 밉 레벨 LOD 바이어스
+	UINT32 MaxAnisotropy; // 최대 이방성 필터링 값
+	COMPARISON_FUNC ComparisonFunc; // 비교 함수
+	FLOAT BorderColor[4]; // 경계 색상
+	FLOAT MinLOD; // 최소 LOD
+	FLOAT MaxLOD; // 최대 LOD
+};
+
+/**
+* @brief 블렌드 상태 구조체
+*/
+struct RS_BLEND_STATE
+{
+	BOOL BlendEnable; // 블렌딩 활성화 여부
+	UINT32 SrcBlend; // 소스 블end 팩터
+	UINT32 DestBlend; // 대상 블렌드 팩터
+	UINT32 BlendOp; // 블렌드 연산자
+	UINT32 SrcBlendAlpha; // 소스 알파 블렌드 팩터
+	UINT32 DestBlendAlpha; // 대상 알파 블렌드 팩터
+	UINT32 BlendOpAlpha; // 알파 블렌드 연산자
+	UINT8 RenderTargetWriteMask; // 렌더 타겟 쓰기 마스크
+};
+
+/**
+* @brief 깊이-스텐실 상태 구조체
+*/
+struct RS_DEPTH_STENCIL_STATE
+{
+	BOOL DepthEnable; // 깊이 테스트 활성화 여부
+	UINT32 DepthWriteMask; // 깊이 쓰기 마스크
+	UINT32 DepthFunc; // 깊이 비교 함수
+	BOOL StencilEnable; // 스텐실 테스트 활성화 여부
+	UINT8 StencilReadMask; // 스텐실 읽기 마스크
+	UINT8 StencilWriteMask; // 스텐실 쓰기 마스크
+
+	// 앞면 스텐실 연산
+	UINT32 FrontFaceStencilFailOp; // 앞면 스텐실 실패 시 연산
+	UINT32 FrontFaceStencilDepthFailOp; // 앞면 깊이 실패 시 연산
+	UINT32 FrontFaceStencilPassOp; // 앞면 모두 통과 시 연산
+	UINT32 FrontFaceStencilFunc; // 앞면 스텐실 비교 함수
+
+	// 뒷면 스텐실 연산
+	UINT32 BackFaceStencilFailOp; // 뒷면 스텐실 실패 시 연산
+	UINT32 BackFaceStencilDepthFailOp; // 뒷면 깊이 실패 시 연산
+	UINT32 BackFaceStencilPassOp; // 뒷면 모두 통과 시 연산
+	UINT32 BackFaceStencilFunc; // 뒷면 스텐실 비교 함수
+};
+
+/**
+* @brief 래스터라이저 상태 구조체
+*/
+struct RS_RASTERIZER_STATE
+{
+	UINT32 FillMode; // 채우기 모드
+	UINT32 CullMode; // 컬링 모드
+	BOOL FrontCounterClockwise; // 앞면이 반시계 방향인지 여부
+	INT32 DepthBias; // 깊이 바이어스
+	FLOAT DepthBiasClamp; // 깊이 바이어스 클램프
+	FLOAT SlopeScaledDepthBias; // 기울기 스케일 깊이 바이어스
+	BOOL DepthClipEnable; // 깊이 클리핑 활성화 여부
+	BOOL ScissorEnable; // 가위 영역 활성화 여부
+	BOOL MultisampleEnable; // 멀티샘플링 활성화 여부
+	BOOL AntialiasedLineEnable; // 앤티앨리어싱 라인 활성화 여부
+	UINT32 ForcedSampleCount; // 강제 샘플 수
+	UINT32 ConservativeRasterizationMode; // 보수적 래스터화 모드
+};
 
 
 #endif // __RENDER_DEF_H__

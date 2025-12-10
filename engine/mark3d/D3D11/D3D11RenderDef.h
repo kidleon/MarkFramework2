@@ -130,7 +130,8 @@ static constexpr DXGI_FORMAT D3D11_IMPL_COLOR_FORMAT[(int)COLOR_FORMAT::EMAX] =
 struct D3D11_INPUTLAYOUT_DESC
 {
     UINT32 NumVertexFormat;
-    VERTEX_FORMAT VertexFormat[MAX_VERTEX_FORMAT];
+    UINT32 VertexFormat;
+    VERTEX_FORMAT VertexFormats[MAX_VERTEX_FORMAT];
     ID3DBlob* pShaderBlob;
 };
 
@@ -150,7 +151,6 @@ struct D3D11_SHADER_COMPILE_DESC
     SHADER_TYPE ShaderType;
     BOOL Debug;
 };
-
 
 enum SHADER_PARAM_TYPE
 {
@@ -173,8 +173,10 @@ struct D3D11_SHADER_COMPILE_RESULT
     ID3DBlob* pShaderBlob;
 	D3D11_SHADER_PARAMS* pShaderParams;
     UINT32 NumShaderParams;
+    UINT32 VertexFormat;
+	UINT32 VertexFormats[MAX_VERTEX_FORMAT];
+	UINT32 NumVertexFormat;
 };
 
-
-
 #endif // __D3D11_RENDER_DEF_H__
+

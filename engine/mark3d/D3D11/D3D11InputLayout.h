@@ -19,6 +19,8 @@ public:
 	__INLINE VERTEX_FORMAT_INDEX INL_GetVertexFormatIndex(UINT32 Index) const noexcept { return m_VertexFormatIndcies[Index]; }
 	__INLINE ID3D11InputLayout* INL_GetD3D11InputLayout() const noexcept { return m_pD3D11InputLayout; }
 
+	//__INLINE HASH_NODE* INL_GetHashNode() noexcept { return &m_HashNode; }
+
 private:
 	ID3D11InputLayout* m_pD3D11InputLayout;
 
@@ -26,6 +28,8 @@ private:
 	UINT32 m_PADDING = 0;
 	VERTEX_FORMAT m_VertexFormats[MAX_VERTEX_FORMAT] = {};
 	VERTEX_FORMAT_INDEX  m_VertexFormatIndcies[MAX_VERTEX_FORMAT] = {};
+
+	//HASH_NODE m_HashNode = {};
 
 };
 

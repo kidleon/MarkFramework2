@@ -188,6 +188,10 @@ MARKENGINE_C_API void TempReset();
 #	define MARK_NEW(type) new (MARK_SYS_ALLOC(sizeof(type))) type
 #	define MARK_NEW_ARRAY(type, count) new (MARK_SYS_ALLOC(sizeof(type) * (count))) type[count]
 #	define MARK_DELETE(ptr, type) {type* p = ptr; if(p) { (p)->~type(); MARK_SYS_FREE(p); p = nullptr; } }
+
+#	define MARK_POOL_NEW(type) new (MARK_POOL_ALLOC(sizeof(type))) type
+#	define MARK_POOL_NEW_ARRAY(type, count) new (MARK_POOL_ALLOC(sizeof(type) * (count))) type[count]
+#	define MARK_POOL_DELETE(ptr, type) {type* p = ptr; if(p) { (p)->~type(); MARK_POOL_FREE(p); p = nullptr; } }
 #else
 #	define MARK_SYS_ALLOC(size) SysHeapAlloc(size)
 #	define MARK_SYS_ALLOC(size) SysHeapAlloc(size)
@@ -206,6 +210,10 @@ MARKENGINE_C_API void TempReset();
 #	define MARK_NEW(type) new (MARK_SYS_ALLOC(sizeof(type))) type
 #	define MARK_NEW_ARRAY(type, count) new (MARK_SYS_ALLOC(sizeof(type) * (count))) type[count]
 #	define MARK_DELETE(ptr, type) {type* p = ptr; if(p) { (p)->~type(); MARK_SYS_FREE(p); p = nullptr; } }
+
+#	define MARK_POOL_NEW(type) new (MARK_POOL_ALLOC(sizeof(type))) type
+#	define MARK_POOL_NEW_ARRAY(type, count) new (MARK_POOL_ALLOC(sizeof(type) * (count))) type[count]
+#	define MARK_POOL_DELETE(ptr, type) {type* p = ptr; if(p) { (p)->~type(); MARK_POOL_FREE(p); p = nullptr; } }
 #endif // USE_PROFILE_MEMORY
 
 #endif // __PRIVATE_HEAP_H__

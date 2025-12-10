@@ -39,7 +39,7 @@ Assets::~Assets() noexcept
 
 void Assets::OnDestroy()
 {
-	MARK_DELETE_AUTO(this, Assets, HEAP_TYPE::SYSCALL);
+	MARK_DELETE(this, Assets);
 }
 
 BOOL Assets::Init(const char* szRootPath)

@@ -3,36 +3,45 @@
 
 
 class D3D11ShaderProp;
+class D3D11InputLayout;
 
 class D3D11VertexShader
 {
 public:
 	D3D11VertexShader(
 		ID3D11VertexShader* pVS,
-		D3D11ShaderProp* pShaderProp
+		D3D11ShaderProp* pShaderProp,
+		D3D11InputLayout* pInputLayout
 	);
 
 	~D3D11VertexShader() noexcept;
 
-	__FORCEINLINE ID3D11VertexShader* INL_GetVS() const
+	__FORCEINLINE ID3D11VertexShader* INL_GetVS() const noexcept
 	{
 		return m_pVS;
 	}
 
-	__FORCEINLINE D3D11ShaderProp* INL_GetShaderProp() const
+	__FORCEINLINE D3D11ShaderProp* INL_GetShaderProp() const noexcept
 	{
 		return m_pShaderProp;
+	}
+
+	__FORCEINLINE D3D11InputLayout* INL_GetInputLayout() const noexcept
+	{
+		return m_pInputLayout;
 	}
 
 private:
 	ID3D11VertexShader* m_pVS;
 	D3D11ShaderProp* m_pShaderProp;
+	D3D11InputLayout* m_pInputLayout;
 
 };
 
 //---------------------------------------------------------------------
 class D3D11PixelShader
 {
+public:
 	D3D11PixelShader(
 		ID3D11PixelShader* pPS,
 		D3D11ShaderProp* pShaderProp
@@ -55,7 +64,6 @@ private:
 	D3D11ShaderProp* m_pShaderProp;
 
 };
-
 
 //---------------------------------------------------------------------
 class D3D11ComputeShader

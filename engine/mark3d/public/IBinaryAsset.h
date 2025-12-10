@@ -17,6 +17,9 @@ interface IBinaryAsset : public IAsset
 	* @return 바이너리 데이터 크기 (바이트 단위)
 	*/
 	virtual size_t GetSize() const noexcept = 0;
+
+	virtual uint32 ComputeCRC32() noexcept = 0;
+	virtual uint64 ComputeCRC64() noexcept = 0;
 };
 
 

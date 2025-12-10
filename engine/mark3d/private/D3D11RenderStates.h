@@ -1,0 +1,6 @@
+﻿#ifndef __D3D11_RENDER_STATES_H__
+#define __D3D11_RENDER_STATES_H__
+
+
+
+#endif // __D3D11_RENDER_STATES_H__
