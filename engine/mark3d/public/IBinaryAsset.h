@@ -18,7 +18,16 @@ interface IBinaryAsset : public IAsset
 	*/
 	virtual size_t GetSize() const noexcept = 0;
 
+	/**
+	* @brief CRC32 계산
+	* @return CRC32 값
+	*/
 	virtual uint32 ComputeCRC32() noexcept = 0;
+
+	/**
+	* @brief CRC64 계산
+	* @return CRC64 값
+	*/
 	virtual uint64 ComputeCRC64() noexcept = 0;
 };
 

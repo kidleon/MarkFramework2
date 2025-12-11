@@ -54,7 +54,7 @@ interface ITextAsset : public IAsset
 	virtual BOOL ConvertUTF16(char16_t* pBuffer, size_t BufferSize, size_t* pResultSize) const noexcept = 0;
 
 	/**
-	* @brief WCHAR 변환
+	* @brief WCHAR 변환 (Linux/MacOS 4byte, Windows 2byte)
 	* @param pBuffer 변환된 문자열을 저장할 버퍼
 	* @param BufferSize pBuffer 버퍼 크기 (바이트 단위)
 	* @param pResultSize 변환된 문자열 크기 (문자 단위)
