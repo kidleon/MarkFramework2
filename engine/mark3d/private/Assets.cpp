@@ -21,8 +21,7 @@
 
 constexpr static UINT32 MIN_ID_COUNT = 1;
 constexpr static UINT32 MAX_ID_COUNT = 200000;
-
-IMPLEMENTATION_IUNKNOWN_INTERFACE(Assets);
+constexpr static size_t THREAD_POOL_SIZE = 4;
 
 Assets::Assets()
 	: m_pFileSystem(nullptr)

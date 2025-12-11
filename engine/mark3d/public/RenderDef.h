@@ -149,6 +149,9 @@ enum class COLOR_FORMAT : unsigned int
 	FORCE_UINT = 0xffffffff
 };
 
+/**
+* @brief 셰이더 타입 열거형
+*/
 enum class SHADER_TYPE : unsigned int
 {
 	VERTEX,
@@ -158,14 +161,20 @@ enum class SHADER_TYPE : unsigned int
 	MAX
 };
 
+/**
+* @brief 버퍼 사용 용도 열거형
+*/
 enum class BUFFER_USAGE : unsigned int
 {
-	DEFAULT = 0,
-	DYNAMIC,
+	DEFAULT = 0, 
+	DYNAMIC, 
 
 	EMAX
 };
 
+/**
+* @brief 버텍스 포맷 열거형
+*/
 enum class VERTEX_FORMAT : unsigned int
 {
 	UNKNOWN = 0x00000000,
@@ -190,6 +199,9 @@ enum class VERTEX_FORMAT : unsigned int
 	TEXCOORD8 = 0x00008000,		// FLOAT4;
 };
 
+/**
+* @brief 버텍스 포맷 인덱스 열거형
+*/
 enum class VERTEX_FORMAT_INDEX : unsigned int
 {
 	POSITION = 0,
@@ -215,6 +227,9 @@ enum class VERTEX_FORMAT_INDEX : unsigned int
 	MAX
 };
 
+/**
+* @brief 버텍스 포맷 스트라이드 열거형
+*/
 enum class VERTEX_FORMAT_STRIDE : unsigned int
 {
 	POSITION = sizeof(FLOAT) * 3,
@@ -238,8 +253,13 @@ enum class VERTEX_FORMAT_STRIDE : unsigned int
 	TEXCOORD8 = sizeof(FLOAT) * 4,
 };
 
-static constexpr UINT32 MAX_VERTEX_FORMAT = 16;
+static constexpr UINT32 MAX_VERTEX_FORMAT = 16; // 최대 버텍스 포맷 수
+static constexpr int32 MAX_RENDER_PASS = 8; // 최대 렌더 패스 수
+static constexpr int32 MAX_TEXTURE_SLOT = 16; // 최대 텍스처 슬롯 수
 
+/**
+* @brief 텍스쳐 타입
+*/
 enum class TEXTURE_TYPE : UINT32
 {
 	TEX_1D = 0, // 1D 텍스처
@@ -247,6 +267,173 @@ enum class TEXTURE_TYPE : UINT32
 	TEX_3D = 2, // 3D 텍스처
 	TEX_CUBE = 3, // 큐브 맵 텍스처
 };
+
+/**
+* @brief 필터 타입 열거형
+*/
+enum class FILTER_TYPE : UINT32
+{
+	MIN_MAG_MIP_POINT = 0,
+	MIN_MAG_POINT_MIP_LINEAR,
+	MIN_POINT_MAG_LINEAR_MIP_POINT,
+	MIN_POINT_MAG_MIP_LINEAR,
+	MIN_LINEAR_MAG_MIP_POINT,
+	MIN_LINEAR_MAG_POINT_MIP_LINEAR,
+	MIN_MAG_LINEAR_MIP_POINT,
+	MIN_MAG_MIP_LINEAR,
+	ANISOTROPIC,
+	COMPARISON_MIN_MAG_MIP_POINT,
+	COMPARISON_MIN_MAG_POINT_MIP_LINEAR,
+	COMPARISON_MIN_POINT_MAG_LINEAR_MIP_POINT,
+	COMPARISON_MIN_POINT_MAG_MIP_LINEAR,
+	COMPARISON_MIN_LINEAR_MAG_MIP_POINT,
+	COMPARISON_MIN_LINEAR_MAG_POINT_MIP_LINEAR,
+	COMPARISON_MIN_MAG_LINEAR_MIP_POINT,
+	COMPARISON_MIN_MAG_MIP_LINEAR,
+	COMPARISON_ANISOTROPIC,
+
+	EMAX
+};
+
+/**
+* @brief 텍스처 주소 모드 열거형
+*/
+enum class TEXTURE_ADDRESS_MODE : UINT32
+{
+	WRAP = 0,
+	MIRROR,
+	CLAMP,
+	BORDER,
+	MIRROR_ONCE,
+
+	EMAX
+};
+
+/**
+* @brief 비교 함수 열거형
+*/
+enum class COMPARISON_FUNC : UINT32
+{
+	NEVER = 0,
+	LESS,
+	EQUAL,
+	LESS_EQUAL,
+	GREATER,
+	NOT_EQUAL,
+	GREATER_EQUAL,
+	ALWAYS,
+
+	EMAX
+};
+
+/**
+* @brief 블렌드 팩터 열거형
+*/
+enum class BLEND_FACTOR : UINT32
+{
+	ZERO = 0,
+	ONE,
+	SRC_COLOR,
+	INV_SRC_COLOR,
+	SRC_ALPHA,
+	INV_SRC_ALPHA,
+	DEST_ALPHA,
+	INV_DEST_ALPHA,
+	DEST_COLOR,
+	INV_DEST_COLOR,
+	SRC_ALPHA_SAT,
+	BLEND_FACTOR,
+	INV_BLEND_FACTOR,
+	SRC1_COLOR,
+	INV_SRC1_COLOR,
+	SRC1_ALPHA,
+	INV_SRC1_ALPHA,
+
+	EMAX
+};
+
+/**
+* @brief 블렌드 연산자 열거형
+*/
+enum class BLEND_OP : UINT32
+{
+	ADD = 0,
+	SUBTRACT,
+	REV_SUBTRACT,
+	MIN,
+	MAX,
+
+	EMAX
+};
+
+/**
+* @brief 채우기 모드 열거형
+*/
+enum class FILL_MODE : UINT32
+{
+	SOLID = 0,
+	WIREFRAME,
+
+	EMAX
+};
+
+/**
+* @brief 컬링 모드 열거형
+*/
+enum class CULL_MODE : UINT32
+{
+	NONE = 0,
+	CW,
+	CCW,
+
+	EMAX
+};
+
+/**
+* @brief 깊이 쓰기 마스크 열거형
+*/
+enum class DEPTH_WRITE_MASK : UINT32
+{
+	ZERO = 0,
+	ALL,
+
+	EMAX
+};
+
+/**
+* @brief 깊이 비교 함수 열거형
+*/
+enum class DEPTH_FUNC : UINT32
+{
+	NEVER = 0,
+	LESS,
+	EQUAL,
+	LESS_EQUAL,
+	GREATER,
+	NOT_EQUAL,
+	GREATER_EQUAL,
+	ALWAYS,
+
+	EMAX
+};
+
+/**
+* @brief 스텐실 연산 열거형
+*/
+enum class STENCIL_OP : UINT32
+{
+	KEEP = 0,
+	ZERO,
+	REPLACE,
+	INCR_SAT,
+	DECR_SAT,
+	INVERT,
+	INCR,
+	DECR,
+
+	EMAX
+};
+
 
 /**
 * @brief 3D 엔진 생성 정보 구조체
@@ -294,48 +481,6 @@ struct TEXTURE2D_CREATE_DESC
 	size_t DataSize; // 초기 데이터 크기 (바이트 단위)
 };
 
-enum class FILTER_TYPE : UINT32
-{
-	MIN_MAG_MIP_POINT = 0,
-	MIN_MAG_POINT_MIP_LINEAR = 0x1,
-	MIN_POINT_MAG_LINEAR_MIP_POINT = 0x4,
-	MIN_POINT_MAG_MIP_LINEAR = 0x5,
-	MIN_LINEAR_MAG_MIP_POINT = 0x10,
-	MIN_LINEAR_MAG_POINT_MIP_LINEAR = 0x11,
-	MIN_MAG_LINEAR_MIP_POINT = 0x14,
-	MIN_MAG_MIP_LINEAR = 0x15,
-	ANISOTROPIC = 0x55,
-	COMPARISON_MIN_MAG_MIP_POINT = 0x80,
-	COMPARISON_MIN_MAG_POINT_MIP_LINEAR = 0x81,
-	COMPARISON_MIN_POINT_MAG_LINEAR_MIP_POINT = 0x84,
-	COMPARISON_MIN_POINT_MAG_MIP_LINEAR = 0x85,
-	COMPARISON_MIN_LINEAR_MAG_MIP_POINT = 0x90,
-	COMPARISON_MIN_LINEAR_MAG_POINT_MIP_LINEAR = 0x91,
-	COMPARISON_MIN_MAG_LINEAR_MIP_POINT = 0x94,
-	COMPARISON_MIN_MAG_MIP_LINEAR = 0x95,
-	COMPARISON_ANISOTROPIC = 0xd5,
-};
-
-enum class TEXTURE_ADDRESS_MODE : UINT32
-{
-	WRAP = 1,
-	MIRROR = 2,
-	CLAMP = 3,
-	BORDER = 4,
-	MIRROR_ONCE = 5,
-};
-
-enum class COMPARISON_FUNC : UINT32
-{
-	NEVER = 1,
-	LESS = 2,
-	EQUAL = 3,
-	LESS_EQUAL = 4,
-	GREATER = 5,
-	NOT_EQUAL = 6,
-	GREATER_EQUAL = 7,
-	ALWAYS = 8,
-};
 
 // 렌더 상태 구조체들
 
@@ -359,16 +504,22 @@ struct RS_SAMPLER_STATE
 /**
 * @brief 블렌드 상태 구조체
 */
-struct RS_BLEND_STATE
+struct RS_BLEND_TARGET
 {
 	BOOL BlendEnable; // 블렌딩 활성화 여부
-	UINT32 SrcBlend; // 소스 블end 팩터
-	UINT32 DestBlend; // 대상 블렌드 팩터
-	UINT32 BlendOp; // 블렌드 연산자
-	UINT32 SrcBlendAlpha; // 소스 알파 블렌드 팩터
-	UINT32 DestBlendAlpha; // 대상 알파 블렌드 팩터
-	UINT32 BlendOpAlpha; // 알파 블렌드 연산자
+	BLEND_FACTOR SrcBlend; // 소스 블end 팩터
+	BLEND_FACTOR DestBlend; // 대상 블렌드 팩터
+	BLEND_OP BlendOp; // 블렌드 연산자
+	BLEND_FACTOR SrcBlendAlpha; // 소스 알파 블렌드 팩터
+	BLEND_FACTOR DestBlendAlpha; // 대상 알파 블렌드 팩터
+	BLEND_OP BlendOpAlpha; // 알파 블렌드 연산자
 	UINT8 RenderTargetWriteMask; // 렌더 타겟 쓰기 마스크
+};
+
+struct RS_BLEND_STATE
+{
+	INT32 NumBlendTargets; // 블렌드 타겟 수
+	RS_BLEND_TARGET BlendTarget[8]; // 블렌드 타겟 배열 (최대 8개:D3D11 기준)
 };
 
 /**
@@ -377,23 +528,25 @@ struct RS_BLEND_STATE
 struct RS_DEPTH_STENCIL_STATE
 {
 	BOOL DepthEnable; // 깊이 테스트 활성화 여부
-	UINT32 DepthWriteMask; // 깊이 쓰기 마스크
-	UINT32 DepthFunc; // 깊이 비교 함수
+	DEPTH_WRITE_MASK DepthWriteMask; // 깊이 쓰기 마스크
+	DEPTH_FUNC DepthFunc; // 깊이 비교 함수
 	BOOL StencilEnable; // 스텐실 테스트 활성화 여부
 	UINT8 StencilReadMask; // 스텐실 읽기 마스크
 	UINT8 StencilWriteMask; // 스텐실 쓰기 마스크
 
+	UINT16 PADDING; // 패딩
+
 	// 앞면 스텐실 연산
-	UINT32 FrontFaceStencilFailOp; // 앞면 스텐실 실패 시 연산
-	UINT32 FrontFaceStencilDepthFailOp; // 앞면 깊이 실패 시 연산
-	UINT32 FrontFaceStencilPassOp; // 앞면 모두 통과 시 연산
-	UINT32 FrontFaceStencilFunc; // 앞면 스텐실 비교 함수
+	STENCIL_OP FrontFaceStencilFailOp; // 앞면 스텐실 실패 시 연산
+	STENCIL_OP FrontFaceStencilDepthFailOp; // 앞면 깊이 실패 시 연산
+	STENCIL_OP FrontFaceStencilPassOp; // 앞면 모두 통과 시 연산
+	STENCIL_OP FrontFaceStencilFunc; // 앞면 스텐실 비교 함수
 
 	// 뒷면 스텐실 연산
-	UINT32 BackFaceStencilFailOp; // 뒷면 스텐실 실패 시 연산
-	UINT32 BackFaceStencilDepthFailOp; // 뒷면 깊이 실패 시 연산
-	UINT32 BackFaceStencilPassOp; // 뒷면 모두 통과 시 연산
-	UINT32 BackFaceStencilFunc; // 뒷면 스텐실 비교 함수
+	STENCIL_OP BackFaceStencilFailOp; // 뒷면 스텐실 실패 시 연산
+	STENCIL_OP BackFaceStencilDepthFailOp; // 뒷면 깊이 실패 시 연산
+	STENCIL_OP BackFaceStencilPassOp; // 뒷면 모두 통과 시 연산
+	STENCIL_OP BackFaceStencilFunc; // 뒷면 스텐실 비교 함수
 };
 
 /**
@@ -401,8 +554,8 @@ struct RS_DEPTH_STENCIL_STATE
 */
 struct RS_RASTERIZER_STATE
 {
-	UINT32 FillMode; // 채우기 모드
-	UINT32 CullMode; // 컬링 모드
+	FILL_MODE FillMode; // 채우기 모드
+	CULL_MODE CullMode; // 컬링 모드
 	BOOL FrontCounterClockwise; // 앞면이 반시계 방향인지 여부
 	INT32 DepthBias; // 깊이 바이어스
 	FLOAT DepthBiasClamp; // 깊이 바이어스 클램프
@@ -411,9 +564,10 @@ struct RS_RASTERIZER_STATE
 	BOOL ScissorEnable; // 가위 영역 활성화 여부
 	BOOL MultisampleEnable; // 멀티샘플링 활성화 여부
 	BOOL AntialiasedLineEnable; // 앤티앨리어싱 라인 활성화 여부
-	UINT32 ForcedSampleCount; // 강제 샘플 수
-	UINT32 ConservativeRasterizationMode; // 보수적 래스터화 모드
+	//UINT32 ForcedSampleCount; // 강제 샘플 수
+	//UINT32 ConservativeRasterizationMode; // 보수적 래스터화 모드
 };
+
 
 
 #endif // __RENDER_DEF_H__

@@ -2,13 +2,15 @@
 #include "D3D11RenderDef.h"
 #include "D3D11RenderDevice.h"
 
+#include "idgen.h"
 #include "Log.h"
-
 #include "D3D11ShaderCompile.h"
-#include "D3D11ShaderProp.h"
+#include "D3D11ShaderParams.h"
 #include "D3D11Shader.h"
+#include "D3D11VertexShader.h"
 #include "D3D11InputLayout.h"
 #include "D3D11InputLayoutCache.h"
+#include "D3D11RenderResources.h"
 
 
 D3D11RenderDevice::~D3D11RenderDevice() noexcept
@@ -216,15 +218,15 @@ void D3D11RenderDevice::DestroyDevice() noexcept
 	CHECK_RELEASE(m_pD3D11Device);
 }
 
-BOOL D3D11RenderDevice::CreateBuffer(const D3D11_BUFFER_DESC* pDesc, ID3D11Buffer** ppBuffer)
+BOOL D3D11RenderDevice::CreateBuffer(const D3D11_BUFFER_DESC* pDesc, ID3D11Buffer** ppOut)
 {
-	if (!m_pD3D11Device || !pDesc || !ppBuffer)
+	if (!m_pD3D11Device || !pDesc || !ppOut)
 		return FALSE;
 
 	HRESULT hr = m_pD3D11Device->CreateBuffer(
 		pDesc,
 		nullptr,
-		ppBuffer
+		ppOut
 	);
 
 	if (FAILED(hr))
@@ -233,13 +235,13 @@ BOOL D3D11RenderDevice::CreateBuffer(const D3D11_BUFFER_DESC* pDesc, ID3D11Buffe
 	return TRUE;
 }
 
-BOOL D3D11RenderDevice::CreateVertexShader(const D3D11_SHADER_COMPILE_DESC& Desc, D3D11VertexShader** ppVertexShader)
+BOOL D3D11RenderDevice::CreateVertexShader(const D3D11_SHADER_COMPILE_DESC& Desc, D3D11VertexShader** ppOut)
 {
 	D3D11_SHADER_COMPILE_RESULT compileResult = {};
 
 	if (!D3D11CompileShader(Desc, compileResult))
 	{
-		(*ppVertexShader) = nullptr;
+		(*ppOut) = nullptr;
 		SYS_LOG_E("D3D11RenderDevice::CreateVertexShader: Shader compilation failed - %s", Desc.szShaderName);
 
 		return FALSE;
@@ -264,12 +266,12 @@ BOOL D3D11RenderDevice::CreateVertexShader(const D3D11_SHADER_COMPILE_DESC& Desc
 			MARK_POOL_FREE(compileResult.pShaderParams);
 			compileResult.pShaderParams = nullptr;
 		}
-		(*ppVertexShader) = nullptr;
+		(*ppOut) = nullptr;
 
 		return FALSE;
 	}
 
-	D3D11ShaderProp* pShaderProp = MARK_POOL_NEW(D3D11ShaderProp)(
+	D3D11ShaderParams* pShaderProp = MARK_POOL_NEW(D3D11ShaderParams)(
 		compileResult.pShaderParams,
 		compileResult.NumShaderParams
 	);
@@ -284,24 +286,27 @@ BOOL D3D11RenderDevice::CreateVertexShader(const D3D11_SHADER_COMPILE_DESC& Desc
 		SYS_LOG_E("D3D11RenderDevice::CreateVertexShader: CreateInputLayout failed - %s", Desc.szShaderName);
 	}
 
-	*ppVertexShader = MARK_POOL_NEW(D3D11VertexShader)(
-		pVertexShader,
-		pShaderProp,
-		pInputLayout
-	);
+	uint32 id = idgen_getid(GLOBAL_VARS::ID_GEN_HANDLE);
+
+	D3D11VertexShader* pVS = MARK_POOL_NEW(D3D11VertexShader)();
+	pVS->pVS = pVertexShader;
+	pVS->pShaderParams = pShaderProp;
+	pVS->pInputLayout = pInputLayout;
+
+	*ppOut = pVS;
 
 	compileResult.pShaderBlob->Release();
 
 	return TRUE;
 }
 
-BOOL D3D11RenderDevice::CreatePixelShader(const D3D11_SHADER_COMPILE_DESC& Desc, D3D11PixelShader** ppPixelShader)
+BOOL D3D11RenderDevice::CreatePixelShader(const D3D11_SHADER_COMPILE_DESC& Desc, D3D11PixelShader** ppOut)
 {
 	D3D11_SHADER_COMPILE_RESULT compileResult = {};
 
 	if (!D3D11CompileShader(Desc, compileResult))
 	{
-		(*ppPixelShader) = nullptr;
+		(*ppOut) = nullptr;
 		SYS_LOG_E("D3D11RenderDevice::CreatePixelShader: Shader compilation failed - %s", Desc.szShaderName);
 
 		return FALSE;
@@ -326,27 +331,28 @@ BOOL D3D11RenderDevice::CreatePixelShader(const D3D11_SHADER_COMPILE_DESC& Desc,
 			MARK_POOL_FREE(compileResult.pShaderParams);
 			compileResult.pShaderParams = nullptr;
 		}
-		(*ppPixelShader) = nullptr;
+		(*ppOut) = nullptr;
 
 		return FALSE;
 	}
 
-	D3D11ShaderProp* pShaderProp = MARK_POOL_NEW(D3D11ShaderProp)(
+	D3D11ShaderParams* pShaderProp = MARK_POOL_NEW(D3D11ShaderParams)(
 		compileResult.pShaderParams,
 		compileResult.NumShaderParams
 	);
 
-	(*ppPixelShader) = MARK_POOL_NEW(D3D11PixelShader)(
-		pPixelShader,
-		pShaderProp
-	);
+	D3D11PixelShader* pPS = MARK_POOL_NEW(D3D11PixelShader)();
+	pPS->pPS = pPixelShader;
+	pPS->pShaderParams = pShaderProp;
+
+	*ppOut = pPS;
 
 	compileResult.pShaderBlob->Release();
 
 	return TRUE;
 }
 
-BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, D3D11InputLayout** ppInputLayout)
+BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, D3D11InputLayout** ppOut)
 {
 	D3D11_INPUT_ELEMENT_DESC InputElementDescs[MAX_VERTEX_FORMAT] = {};
 
@@ -493,7 +499,182 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, D3
 		pD3D11InputLayout
 	);
 
-	(*ppInputLayout) = pInputLayout;
+	(*ppOut) = pInputLayout;
 
 	return TRUE;
 }
+
+BOOL D3D11RenderDevice::CreateSamplerState(const RS_SAMPLER_STATE& Desc, D3D11SamplerState** ppOut)
+{
+	uint32 Hash = fnv1_c(&Desc, sizeof(RS_SAMPLER_STATE));
+
+	// 추후 이곳에 캐싱 로직 추가 가능
+
+	D3D11_SAMPLER_DESC samplerDesc = {};
+
+	samplerDesc.Filter = D3D11_IMPL_FILTER[(int)Desc.Filter]; 
+	samplerDesc.AddressU = D3D11_IMPL_TEXTURE_ADDRESS_MODE[(int)Desc.AddressU];
+	samplerDesc.AddressV = D3D11_IMPL_TEXTURE_ADDRESS_MODE[(int)Desc.AddressV];
+	samplerDesc.AddressW = D3D11_IMPL_TEXTURE_ADDRESS_MODE[(int)Desc.AddressW];
+
+	samplerDesc.MipLODBias = (FLOAT)Desc.MipLODBias;
+	samplerDesc.MaxAnisotropy = Desc.MaxAnisotropy;
+	samplerDesc.ComparisonFunc = D3D11_IMPL_COMPARISON_FUNC[(int)Desc.ComparisonFunc];
+	samplerDesc.BorderColor[0] = Desc.BorderColor[0];
+	samplerDesc.BorderColor[1] = Desc.BorderColor[1];
+	samplerDesc.BorderColor[2] = Desc.BorderColor[2];
+	samplerDesc.BorderColor[3] = Desc.BorderColor[3];
+	samplerDesc.MinLOD = Desc.MinLOD;
+	samplerDesc.MaxLOD = Desc.MaxLOD;
+
+	ID3D11SamplerState* pD3D11SamplerState = nullptr;
+	HRESULT hr = m_pD3D11Device->CreateSamplerState(
+		&samplerDesc,
+		&pD3D11SamplerState
+	);
+
+	if (FAILED(hr))
+		return FALSE;
+
+	D3D11SamplerState* pSamplerState = MARK_POOL_NEW(D3D11SamplerState)();
+	pSamplerState->pSamplerState = pD3D11SamplerState;
+	pSamplerState->State = Desc;
+	pSamplerState->Hash = Hash;
+
+	(*ppOut) = pSamplerState;
+
+	// 이곳에 캐싱 로직 추가 가능
+
+	return TRUE;
+}
+
+BOOL D3D11RenderDevice::CreateBlendState(const RS_BLEND_STATE& Desc, D3D11BlendState** ppOut)
+{
+	uint32 Hash = fnv1_c(&Desc, sizeof(RS_BLEND_STATE));
+
+	// 추후 이곳에 캐싱 로직 추가 가능
+	D3D11_BLEND_DESC blendDesc = {};
+	for (int i = 0; i < Desc.NumBlendTargets; ++i)
+	{
+		blendDesc.AlphaToCoverageEnable = FALSE;
+		blendDesc.IndependentBlendEnable = FALSE;
+
+		D3D11_RENDER_TARGET_BLEND_DESC& rtbd = blendDesc.RenderTarget[i];
+		rtbd.BlendEnable = Desc.BlendTarget[i].BlendEnable;
+		rtbd.SrcBlend = D3D11_IMPL_BLEND_FACTOR[(int)Desc.BlendTarget[i].SrcBlend];
+		rtbd.DestBlend = D3D11_IMPL_BLEND_FACTOR[(int)Desc.BlendTarget[i].DestBlend];
+		rtbd.BlendOp = D3D11_IMPL_BLEND_OP[(int)Desc.BlendTarget[i].BlendOp];
+		rtbd.SrcBlendAlpha = D3D11_IMPL_BLEND_FACTOR[(int)Desc.BlendTarget[i].SrcBlendAlpha];
+		rtbd.DestBlendAlpha = D3D11_IMPL_BLEND_FACTOR[(int)Desc.BlendTarget[i].DestBlendAlpha];
+		rtbd.BlendOpAlpha = D3D11_IMPL_BLEND_OP[(int)Desc.BlendTarget[i].BlendOpAlpha];
+		rtbd.RenderTargetWriteMask = Desc.BlendTarget[i].RenderTargetWriteMask;
+	}
+
+	ID3D11BlendState* pD3D11BlendState = nullptr;
+	HRESULT hr = m_pD3D11Device->CreateBlendState(
+		&blendDesc,
+		&pD3D11BlendState
+	);
+
+	if (FAILED(hr))
+		return FALSE;
+
+	D3D11BlendState* pBlendState = MARK_POOL_NEW(D3D11BlendState)();
+	pBlendState->pBlendState = pD3D11BlendState;
+	pBlendState->State = Desc;
+	pBlendState->Hash = Hash;
+
+	(*ppOut) = pBlendState;
+
+	// 이곳에 캐싱 로직 추가 가능
+
+	return TRUE;
+}
+
+BOOL D3D11RenderDevice::CreateRasterizerState(const RS_RASTERIZER_STATE& Desc, D3D11RasterizerState** ppOut)
+{
+	uint32 Hash = fnv1_c(&Desc, sizeof(RS_RASTERIZER_STATE));
+
+	// 추후 이곳에 캐싱 로직 추가 가능
+	D3D11_RASTERIZER_DESC rasterizerDesc = {};
+	rasterizerDesc.FillMode = D3D11_IMPL_FILL_MODE[(int)Desc.FillMode];
+	rasterizerDesc.CullMode = D3D11_IMPL_CULL_MODE[(int)Desc.CullMode];
+	rasterizerDesc.FrontCounterClockwise = Desc.FrontCounterClockwise;
+	rasterizerDesc.DepthBias = Desc.DepthBias;
+	rasterizerDesc.DepthBiasClamp = Desc.DepthBiasClamp;
+	rasterizerDesc.SlopeScaledDepthBias = Desc.SlopeScaledDepthBias;
+	rasterizerDesc.DepthClipEnable = Desc.DepthClipEnable;
+	rasterizerDesc.ScissorEnable = Desc.ScissorEnable;
+	rasterizerDesc.MultisampleEnable = Desc.MultisampleEnable;
+	rasterizerDesc.AntialiasedLineEnable = Desc.AntialiasedLineEnable;
+	//rasterizerDesc.ForcedSampleCount = Desc.ForcedSampleCount;
+	//rasterizerDesc.ConservativeRaster = D3D11_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+
+	ID3D11RasterizerState* pD3D11RasterizerState = nullptr;
+	HRESULT hr = m_pD3D11Device->CreateRasterizerState(
+		&rasterizerDesc,
+		&pD3D11RasterizerState
+	);
+
+	if (FAILED(hr))
+		return FALSE;
+
+	D3D11RasterizerState* pRasterizerState = MARK_POOL_NEW(D3D11RasterizerState)();
+	pRasterizerState->pRasterizerState = pD3D11RasterizerState;
+	pRasterizerState->State = Desc;
+	pRasterizerState->Hash = Hash;
+
+	(*ppOut) = pRasterizerState;
+
+	// 이곳에 캐싱 로직 추가 가능
+
+	return TRUE;
+}
+
+BOOL D3D11RenderDevice::CreateDepthStencilState(const RS_DEPTH_STENCIL_STATE& Desc, D3D11DepthStencilState** ppOut)
+{
+	uint32 Hash = fnv1_c(&Desc, sizeof(RS_DEPTH_STENCIL_STATE));
+
+	// 추후 이곳에 캐싱 로직 추가 가능
+
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
+	depthStencilDesc.DepthEnable = Desc.DepthEnable;
+	depthStencilDesc.DepthWriteMask = D3D11_IMPL_DEPTH_WRITE_MASK[(int)Desc.DepthWriteMask];
+	depthStencilDesc.DepthFunc = D3D11_IMPL_COMPARISON_FUNC[(int)Desc.DepthFunc];
+	depthStencilDesc.StencilEnable = Desc.StencilEnable;
+	depthStencilDesc.StencilReadMask = Desc.StencilReadMask;
+	depthStencilDesc.StencilWriteMask = Desc.StencilWriteMask;
+
+	// 앞면 스텐실 연산
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_IMPL_STENCIL_OP[(int)Desc.FrontFaceStencilFailOp];
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_IMPL_STENCIL_OP[(int)Desc.FrontFaceStencilDepthFailOp];
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_IMPL_STENCIL_OP[(int)Desc.FrontFaceStencilPassOp];
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_IMPL_COMPARISON_FUNC[(int)Desc.FrontFaceStencilFunc];
+
+	// 뒷면 스텐실 연산
+	depthStencilDesc.BackFace.StencilFailOp = D3D11_IMPL_STENCIL_OP[(int)Desc.BackFaceStencilFailOp];
+	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_IMPL_STENCIL_OP[(int)Desc.BackFaceStencilDepthFailOp];
+	depthStencilDesc.BackFace.StencilPassOp = D3D11_IMPL_STENCIL_OP[(int)Desc.BackFaceStencilPassOp];
+	depthStencilDesc.BackFace.StencilFunc = D3D11_IMPL_COMPARISON_FUNC[(int)Desc.BackFaceStencilFunc];
+
+	ID3D11DepthStencilState* pD3D11DepthStencilState = nullptr;
+	HRESULT hr = m_pD3D11Device->CreateDepthStencilState(
+		&depthStencilDesc,
+		&pD3D11DepthStencilState
+	);
+
+	if (FAILED(hr))
+		return FALSE;
+
+	D3D11DepthStencilState* pDepthStencilState = MARK_POOL_NEW(D3D11DepthStencilState)();
+	pDepthStencilState->pDepthStencilState = pD3D11DepthStencilState;
+	pDepthStencilState->State = Desc;
+	pDepthStencilState->Hash = Hash;
+
+	(*ppOut) = pDepthStencilState;
+
+	// 이곳에 캐싱 로직 추가 가능
+
+	return TRUE;
+}
+

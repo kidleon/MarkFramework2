@@ -5,26 +5,13 @@
 #include "idgen.h"
 
 
-IMPLEMENTATION_IUNKNOWN_INTERFACE(BinaryAsset);
-
-/*
-BinaryAsset::BinaryAsset()
-	: m_pData(nullptr)
-	, m_Size(0)
-	, m_LoadStat(LOAD_STAT::NOT_LOADED)
-	, m_HeapType(HEAP_TYPE::SYSCALL)
-{
-}
-*/
-
 BinaryAsset::BinaryAsset(UINT32 ID)
 	: m_pData(nullptr)
 	, m_Size(0)
-	, m_LoadStat(LOAD_STAT::NOT_LOADED)
 	, m_CRC64Cache(0)
 	, m_CRC32Cache(0)
-	, m_ID(ID)
 {
+	INL_SetID(ID);
 }
 
 BinaryAsset::~BinaryAsset() noexcept
@@ -42,21 +29,6 @@ BinaryAsset::~BinaryAsset() noexcept
 void BinaryAsset::OnDestroy()
 {
 	MARK_DELETE(this, BinaryAsset);
-}
-
-UINT32 BinaryAsset::GetID() const noexcept
-{
-	return INL_GetID();
-}
-
-ASSET_TYPE BinaryAsset::GetAssetType() const noexcept
-{
-	return INL_GetAssetType();
-}
-
-LOAD_STAT BinaryAsset::GetLoadStat() const noexcept
-{
-	return INL_GetLoadStat();
 }
 
 const char* BinaryAsset::GetData() const noexcept

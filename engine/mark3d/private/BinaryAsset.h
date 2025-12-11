@@ -6,15 +6,9 @@
 
 class BinaryAsset : public IBinaryAsset
 {
-	DECLARATION_IUNKNOWN_INTERFACE(BinaryAsset);
-
 public:
 	BinaryAsset(UINT32 ID);
-
-	// IAsset interface
-	virtual UINT32 GetID() const noexcept override;
-	virtual ASSET_TYPE GetAssetType() const noexcept override;
-	virtual LOAD_STAT GetLoadStat() const noexcept override;
+	virtual ~BinaryAsset() noexcept;
 
 	// IBinaryAsset interface
 	virtual const char* GetData() const noexcept override;
@@ -58,13 +52,14 @@ public:
 		interlock_store_l((long*)&m_LoadStat, (long)loadStat, MEMORY_ORDER_RELAXED);
 	}
 
+protected:
+	virtual void OnDestroy() override;
+
 private:
 	char* m_pData;
 	size_t m_Size;
-	volatile LOAD_STAT m_LoadStat;
-	uint32 m_CRC32Cache;
 	uint64 m_CRC64Cache;
-	uint32 m_ID;
+	uint32 m_CRC32Cache;
 
 };
 

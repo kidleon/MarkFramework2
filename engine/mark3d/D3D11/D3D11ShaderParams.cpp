@@ -1,9 +1,8 @@
 ﻿#include "pch.h"
+#include "D3D11ShaderParams.h"
 
-#include "D3D11ShaderProp.h"
 
-
-D3D11ShaderProp::D3D11ShaderProp(
+D3D11ShaderParams::D3D11ShaderParams(
 	D3D11_SHADER_PARAMS* pShaderParams,
 	UINT32 NumShaderParams
 )
@@ -12,7 +11,7 @@ D3D11ShaderProp::D3D11ShaderProp(
 {
 }
 
-D3D11ShaderProp::~D3D11ShaderProp()
+D3D11ShaderParams::~D3D11ShaderParams()
 {
 	if (m_pShaderParams)
 	{

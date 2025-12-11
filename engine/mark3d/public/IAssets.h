@@ -7,7 +7,7 @@ interface IBinaryAsset;
 interface ITexture1D;
 interface ITexture2D;
 
-interface IAssets : public IUNKNOWN
+interface IAssets : public IUNKNOWN_IMPL
 {
 	/**
 	* @brief 텍스트 자산 로드

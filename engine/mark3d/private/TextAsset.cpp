@@ -4,24 +4,12 @@
 #include "Log.h"
 
 
-IMPLEMENTATION_IUNKNOWN_INTERFACE(TextAsset);
-
-/*
-TextAsset::TextAsset()
-	: m_pData(nullptr)
-	, m_Size(0)
-	, m_LoadStat(LOAD_STAT::NOT_LOADED)
-	, m_HeapType(HEAP_TYPE::SYSCALL)
-{
-}
-*/
-
 TextAsset::TextAsset(UINT32 ID)
 	: m_pData(nullptr)
 	, m_Size(0)
-	, m_LoadStat(LOAD_STAT::NOT_LOADED)
-	, m_ID(ID)
 {
+	m_ID = ID;
+	m_LoadStat = LOAD_STAT::NOT_LOADED;
 }
 
 TextAsset::~TextAsset() noexcept
@@ -39,21 +27,6 @@ TextAsset::~TextAsset() noexcept
 void TextAsset::OnDestroy()
 {
 	MARK_DELETE(this, TextAsset);
-}
-
-UINT32 TextAsset::GetID() const noexcept
-{
-	return INL_GetID();
-}
-
-ASSET_TYPE TextAsset::GetAssetType() const noexcept
-{
-	return INL_GetAssetType();
-}
-
-LOAD_STAT TextAsset::GetLoadStat() const noexcept
-{
-	return INL_GetLoadStat();
 }
 
 const char* TextAsset::GetData() const noexcept

@@ -314,9 +314,6 @@ public:\
 	virtual long RefCnt() override;\
 private:\
 
-
-#endif // __cplusplus
-
 #define IMPLEMENTATION_IUNKNOWN_INTERFACE(classname)\
 long classname::AddRef()\
 {\
@@ -335,6 +332,61 @@ long classname::RefCnt()\
 {\
 	return m_RefCnt;\
 }
+
+struct IUNKNOWN_IMPL : public IUNKNOWN
+{
+	IUNKNOWN_IMPL() = default;
+
+	virtual long AddRef() override
+	{
+		if (this)
+		{
+			return ++m_RefCnt;
+		}
+		return 0;
+	}
+
+	virtual long Release() override
+	{
+		if (this)
+		{
+			long NewRefCnt = --m_RefCnt;
+			if (NewRefCnt == 0)
+			{
+				OnDestroy();
+			}
+			return NewRefCnt;
+		}
+		return 0;
+	}
+
+	virtual long RefCnt() override
+	{
+		return m_RefCnt;
+	}
+
+protected:
+	virtual ~IUNKNOWN_IMPL() noexcept = default;
+	IUNKNOWN_IMPL(const IUNKNOWN_IMPL&) = delete;
+	IUNKNOWN_IMPL(IUNKNOWN_IMPL&&) = delete;
+	IUNKNOWN_IMPL& operator=(const IUNKNOWN_IMPL&) = delete;
+	IUNKNOWN_IMPL& operator=(IUNKNOWN_IMPL&&) = delete;
+	virtual void OnDestroy() = 0;
+
+private:
+	volatile long m_RefCnt = 1;
+#ifndef __TARGET_OS_WINDOWS
+	unsigned PADDING_OR_RESERVED = 0;
+#endif // __TARGET_OS_WINDOWS
+
+};
+
+
+
+#endif // __cplusplus
+
+
+
 
 
 

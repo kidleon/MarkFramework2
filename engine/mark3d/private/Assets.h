@@ -12,10 +12,6 @@ interface ITexture2D;
 
 class Assets : public IAssets
 {
-	DECLARATION_IUNKNOWN_INTERFACE(Assets);
-
-	constexpr static size_t THREAD_POOL_SIZE = 4;
-
 public:
 	Assets();
 
@@ -31,6 +27,10 @@ public:
 	virtual BOOL LoadAsync(const char* szRelativePath, ITexture1D** ppOut) override;
 	virtual BOOL Load(const char* szRelativePath, ITexture2D** ppOut) override;
 	virtual BOOL LoadAsync(const char* szRelativePath, ITexture2D** ppOut) override;
+
+protected:
+	virtual ~Assets() noexcept;
+	virtual void OnDestroy() override;
 
 private:
 	IFileSystem* m_pFileSystem;

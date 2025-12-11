@@ -4,15 +4,15 @@
 #include "D3D11RenderDef.h"
 
 
-class D3D11ShaderProp
+class D3D11ShaderParams
 {
 public:
-	D3D11ShaderProp(
+	D3D11ShaderParams(
 		D3D11_SHADER_PARAMS* pShaderParams,
 		UINT32 NumShaderParams
 	);
 
-	~D3D11ShaderProp();
+	~D3D11ShaderParams();
 
 	__FORCEINLINE BOOL INL_HasShaderParam(NameHash ParamName) const
 	{
