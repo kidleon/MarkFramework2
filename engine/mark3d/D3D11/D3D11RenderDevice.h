@@ -5,7 +5,7 @@
 struct D3D11VertexShader;
 struct D3D11PixelShader;
 struct D3D11ComputeShader;
-class D3D11InputLayout;
+struct D3D11InputLayout;
 struct D3D11SamplerState;
 struct D3D11BlendState;
 struct D3D11RasterizerState;
@@ -28,6 +28,11 @@ public:
 	BOOL CreateBlendState(const RS_BLEND_STATE& Desc, D3D11BlendState** ppOut);
 	BOOL CreateRasterizerState(const RS_RASTERIZER_STATE& Desc, D3D11RasterizerState** ppOut);
 	BOOL CreateDepthStencilState(const RS_DEPTH_STENCIL_STATE& Desc, D3D11DepthStencilState** ppOut);
+
+	__FORCEINLINE ID3D11Device* INL_GetD3D11Device() const noexcept
+	{
+		return m_pD3D11Device;
+	}
 
 private:
 	void DestroyDevice() noexcept;

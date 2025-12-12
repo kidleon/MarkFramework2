@@ -5,14 +5,12 @@
 #include "Heap.h"
 
 
-IMPLEMENTATION_IUNKNOWN_INTERFACE(OSFileDataStream);
-
 OSFileDataStream::OSFileDataStream(HANDLE hFile)
 	: m_hFile(hFile)
 {
 }
 
-OSFileDataStream::~OSFileDataStream()
+OSFileDataStream::~OSFileDataStream() noexcept
 {
 	if (m_hFile)
 	{

@@ -143,6 +143,16 @@ void linked_list_remove_node(
     linked_list->size--;
 }
 
+BOOL linked_list_empty(
+	struct LINKED_LIST* linked_list
+)
+{
+    if (!linked_list)
+        return TRUE;
+
+	return (linked_list->size == 0);
+}
+
 void linked_list_sort(
     struct LINKED_LIST* linked_list,
     int (*comp)(void*, void*)

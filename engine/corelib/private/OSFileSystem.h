@@ -6,8 +6,6 @@
 
 class OSFileSystem : public IFileSystem
 {
-	DECLARATION_IUNKNOWN_INTERFACE(OSFileSystem);
-
 public:
 	OSFileSystem(const char* szRootPath);
 
@@ -38,6 +36,11 @@ public:
 	virtual BOOL ExistFile(
 		const char* szRelativePath
 	) noexcept override;
+
+protected:
+	virtual ~OSFileSystem() noexcept;
+	virtual void OnDestroy() override;
+
 
 private:
 	char m_szRootPath[MAX_FILE_LENGTH];

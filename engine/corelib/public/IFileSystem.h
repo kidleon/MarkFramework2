@@ -1,11 +1,13 @@
 ﻿#ifndef __IFILE_SYSTEM_H__
 #define __IFILE_SYSTEM_H__
 
+#include "IUnknownImpl.h"
+
 
 struct directory_t;
 interface IDataStream;
 
-interface IFileSystem : public IUNKNOWN
+interface IFileSystem : public IUNKNOWN_IMPL
 {
 	/**
 	* @brief 파일을 엽니다.

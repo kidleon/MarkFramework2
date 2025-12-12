@@ -4,8 +4,6 @@
 #include "Log.h"
 #include "RenderSystemFactory.h"
 
-IMPLEMENTATION_IUNKNOWN_INTERFACE(Mark3D);
-
 
 Mark3D::Mark3D()
 	: m_pRenderSystem(nullptr)

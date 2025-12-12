@@ -308,7 +308,7 @@ struct D3D11_SHADER_COMPILE_RESULT
 	UINT32 NumVertexFormat;
 };
 
-
+static constexpr size_t POOL_BLOCK_TYPE_COUNT = 8;
 
 
 

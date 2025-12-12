@@ -8,8 +8,6 @@
 #include "OSFileDataStream.h"
 
 
-IMPLEMENTATION_IUNKNOWN_INTERFACE(OSFileSystem);
-
 OSFileSystem::OSFileSystem(const char* szRootPath)
 {
 	fstrlcpy(m_szRootPath, szRootPath, MAX_FILE_LENGTH - 1);

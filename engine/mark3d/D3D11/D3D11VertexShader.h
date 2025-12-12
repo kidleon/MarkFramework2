@@ -5,7 +5,7 @@
 //#include "TUnknown.h"
 
 class D3D11ShaderParams;
-class D3D11InputLayout;
+//class D3D11InputLayout;
 
 /*
 

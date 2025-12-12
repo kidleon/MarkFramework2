@@ -2,7 +2,7 @@
 #define __IMARK3D_H__
 
 
-interface IMark3D : public IUNKNOWN
+interface IMark3D : public IUNKNOWN_IMPL
 {
 	/**
 	* @brief 3D 엔진 생성

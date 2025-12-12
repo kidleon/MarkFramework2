@@ -1,9 +1,25 @@
 ﻿#include "pch.h"
 #include "D3D11RenderResources.h"
-#include "D3D11InputLayout.h"
 #include "D3D11ShaderParams.h"
 
 
+//----------------------------------------------------------------
+D3D11InputLayout::~D3D11InputLayout()
+{
+	// Release resources
+	if (pIL)
+	{
+		pIL->Release();
+		pIL = nullptr;
+	}
+}
+
+void D3D11InputLayout::OnDestroy()
+{
+	MARK_POOL_DELETE(this, D3D11InputLayout);
+}
+
+//----------------------------------------------------------------
 D3D11VertexShader::~D3D11VertexShader() noexcept
 {
 	// Release resources
@@ -21,7 +37,7 @@ D3D11VertexShader::~D3D11VertexShader() noexcept
 
 	if (pInputLayout)
 	{
-		MARK_POOL_FREE(pInputLayout);
+		pInputLayout->Release();
 		pInputLayout = nullptr;
 	}
 }
@@ -73,6 +89,22 @@ D3D11ComputeShader::~D3D11ComputeShader() noexcept
 void D3D11ComputeShader::OnDestroy()
 {
 	MARK_POOL_DELETE(this, D3D11ComputeShader);
+}
+
+//----------------------------------------------------------------
+D3D11ConstantBuffer::~D3D11ConstantBuffer() noexcept
+{
+	// Release resources
+	if (pConstantBuffer)
+	{
+		pConstantBuffer->Release();
+		pConstantBuffer = nullptr;
+	}
+}
+
+void D3D11ConstantBuffer::OnDestroy()
+{
+	MARK_POOL_DELETE(this, D3D11ConstantBuffer);
 }
 
 //----------------------------------------------------------------

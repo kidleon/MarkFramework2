@@ -5,7 +5,7 @@
 interface ITexture1D;
 interface ITexture2D;
 
-interface IRenderSystem : IUNKNOWN
+interface IRenderSystem : IUNKNOWN_IMPL
 {
 public:
 	virtual BOOL Initialize(

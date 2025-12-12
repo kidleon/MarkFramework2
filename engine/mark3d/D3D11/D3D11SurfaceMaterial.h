@@ -2,17 +2,19 @@
 #define __D3D11_SURFACE_MATERIAL_H__
 
 #include "D3D11RenderDef.h"
-#include "ISurfaceMaterial.h"
 
 
+/*
+* #include "ISurfaceMaterial.h"
+* 
 class D3D11VertexShader;
 class D3D11PixelShader;
 
 class D3D11SurfaceMaterial : public ISurfaceMaterial
 {
-	DECLARATION_IUNKNOWN_INTERFACE(D3D11SurfaceMaterial);
-
 public:
+	D3D11SurfaceMaterial() = default;
+	
 
 	virtual int32 GetNumPass() const noexcept override;
 	virtual int32 VS_GetBindIndexByName(const NameHash& Name) const override;
@@ -31,9 +33,14 @@ public:
 	virtual void PS_SetTexture2D(int32 BindIndex, ITexture2D* pTexture) override;
 
 private:
+	virtual ~D3D11SurfaceMaterial() noexcept;
+	virtual void OnDestroy() override;
+
+private:
 	RENDER_PASS m_Passes[MAX_RENDER_PASS];
 
 };
+*/
 
 
 #endif // __D3D11_SURFACE_MATERIAL_H__

@@ -6,8 +6,6 @@
 
 class OSFileDataStream : public IDataStream
 {
-	DECLARATION_IUNKNOWN_INTERFACE(OSFileDataStream);
-
 public:
 	OSFileDataStream(HANDLE hFile);
 
@@ -20,6 +18,10 @@ public:
 	virtual size_t Tell() const override;
 
 	virtual size_t GetSize() const override;
+
+protected:
+	virtual ~OSFileDataStream() noexcept;
+	virtual void OnDestroy() override;
 
 private:
 	HANDLE m_hFile;

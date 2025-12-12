@@ -1,8 +1,8 @@
 ﻿#ifndef __D3D11_INPUT_LAYOUT_H__
 #define __D3D11_INPUT_LAYOUT_H__
 
-
-class D3D11InputLayout
+/*
+class D3D11InputLayout : IUNKNOWN_HASH_IMPL
 {
 public:
 	D3D11InputLayout(
@@ -32,6 +32,6 @@ private:
 	//HASH_NODE m_HashNode = {};
 
 };
-
+*/
 
 #endif // __D3D11_INPUT_LAYOUT_H__

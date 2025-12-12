@@ -14,7 +14,7 @@ public:
 
 	~D3D11ShaderParams();
 
-	__FORCEINLINE BOOL INL_HasShaderParam(NameHash ParamName) const
+	__FORCEINLINE BOOL INL_HasShaderParam(const NameHash& ParamName) const
 	{
 		for (UINT32 i = 0; i < m_NumShaderParams; ++i)
 		{
@@ -25,7 +25,7 @@ public:
 		return FALSE;
 	}
 
-	__FORCEINLINE int32 INL_GetShaderParamIndexByName(NameHash ParamName) const
+	__FORCEINLINE int32 INL_GetShaderParamIndexByName(const NameHash& ParamName) const
 	{
 		for (UINT32 i = 0; i < m_NumShaderParams; ++i)
 		{
@@ -43,7 +43,7 @@ public:
 		return nullptr;
 	}
 
-	__FORCEINLINE const D3D11_SHADER_PARAMS* INL_GetShaderParamByName(NameHash ParamName) const
+	__FORCEINLINE const D3D11_SHADER_PARAMS* INL_GetShaderParamByName(const NameHash& ParamName) const
 	{
 		for (UINT32 i = 0; i < m_NumShaderParams; ++i)
 		{

@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "D3D11InputLayout.h"
 
-
+/*
 D3D11InputLayout::D3D11InputLayout(
 	INT32 NumVertexFormat,
 	VERTEX_FORMAT* pVertexFormats,
@@ -17,10 +17,11 @@ D3D11InputLayout::D3D11InputLayout(
 		m_VertexFormatIndcies[v] = pVertexFormatIndices[v];
 	}
 
-	//m_HashNode.data = this;
+	INL_GetHashNode()->data = this;
 }
 
 D3D11InputLayout::~D3D11InputLayout()
 {
 	CHECK_RELEASE(m_pD3D11InputLayout);
 }
+*/

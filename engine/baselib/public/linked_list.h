@@ -96,6 +96,16 @@ MARK_BASELIB_C_API void linked_list_remove_node(
 );
 
 /**
+* linked_list_empty
+* @brief linked_list가 비어있는지 확인 합니다.
+* @param linked_list 작업 linked_list 포인터
+* @return 비어있거나 linked_list포인터가 NULL일 경우 TRUE, 아니면 FALSE
+*/
+MARK_BASELIB_C_API BOOL linked_list_empty(
+	struct LINKED_LIST* linked_list
+);
+
+/**
 * linked_list_sort
 * @brief 노드를 함수 포인터(comp)를 이용하여 정렬 합니다.
 * @param linked_list 작업 linked_list 포인터

@@ -492,12 +492,11 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, D3
 	if (FAILED(hr))
 		return FALSE;
 
-	D3D11InputLayout* pInputLayout = MARK_POOL_NEW(D3D11InputLayout)(
-		Desc.NumVertexFormat,
-		VertexFormats,
-		VertexFormatIndices,
-		pD3D11InputLayout
-	);
+	D3D11InputLayout* pInputLayout = MARK_POOL_NEW(D3D11InputLayout)();
+	pInputLayout->pIL = pD3D11InputLayout;
+	pInputLayout->NumVertexFormat = Desc.NumVertexFormat;
+	memcpy(pInputLayout->VertexFormats, VertexFormats, sizeof(VERTEX_FORMAT)* MAX_VERTEX_FORMAT);
+	memcpy(pInputLayout->VertexFormatIndices, VertexFormatIndices, sizeof(VERTEX_FORMAT_INDEX)* MAX_VERTEX_FORMAT);
 
 	(*ppOut) = pInputLayout;
 

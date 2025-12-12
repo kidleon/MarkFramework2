@@ -4,13 +4,13 @@
 #include "IShaderProgram.h"
 
 
-class D3D11VertexShader;
-class D3D11PixelShader;
+struct D3D11VertexShader;
+struct D3D11PixelShader;
 
 class D3D11ShaderProgram : public IShaderProgram
 {
 public:
-	D3D11ShaderProgram(D3D11VertexShader* pVS, D3D11PixelShader* pPS) noexcept;
+	D3D11ShaderProgram(D3D11VertexShader* pVS, D3D11PixelShader* pPS);
 	virtual int32 VS_GetBindIndexByName(const NameHash& Name) const override;
 	virtual int32 PS_GetBindIndexByName(const NameHash& Name) const override;
 	virtual void VS_SetConstant(const NameHash& Name, const void* pData, uint32 DataSize) override;
@@ -30,6 +30,7 @@ private:
 	D3D11VertexShader* m_pVS;
 	D3D11PixelShader* m_pPS;
 
+	
 };
 
 

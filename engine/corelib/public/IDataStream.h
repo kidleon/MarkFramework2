@@ -1,8 +1,10 @@
 ﻿#ifndef __I_DATA_STREAM_H__
 #define __I_DATA_STREAM_H__
 
+#include "IUnknownImpl.h"
 
-interface IDataStream : public IUNKNOWN
+
+interface IDataStream : public IUNKNOWN_IMPL
 {
 public:
 	virtual size_t Read(void* pBuffer, size_t BufferSize) = 0;
