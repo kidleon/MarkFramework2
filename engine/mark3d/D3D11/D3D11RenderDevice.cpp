@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "D3D11RenderDef.h"
+
 #include "D3D11RenderDevice.h"
 
 #include "idgen.h"
@@ -7,10 +7,9 @@
 #include "D3D11ShaderCompile.h"
 #include "D3D11ShaderParams.h"
 #include "D3D11Shader.h"
-#include "D3D11VertexShader.h"
-#include "D3D11InputLayout.h"
-#include "D3D11InputLayoutCache.h"
+//#include "D3D11InputLayoutCache.h"
 #include "D3D11RenderResources.h"
+#include "D3D11GlobalVars.h"
 
 
 D3D11RenderDevice::~D3D11RenderDevice() noexcept
@@ -187,6 +186,8 @@ BOOL D3D11RenderDevice::CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOO
 	//m_pDepthStencilView->AddRef();
 	
 	pBackBuffer->Release();
+
+	D3D11GlobalVars::RENDER_DEVICE = this;
 
 	//m_pInputLayoutCache = MARK_POOL_NEW(D3D11InputLayoutCache)();
 	//m_pInputLayoutCache->Init();

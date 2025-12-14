@@ -175,6 +175,12 @@ namespace mark
 			return _data[index];
 		}
 
+		inline const _T& operator[](size_t index) const
+		{
+			__ASSERT(index < _count, "INVALID ARRAY INDEX");
+			return _data[index];
+		}
+
 		inline _T& at(size_t index)
 		{
 			__ASSERT(index < _count, "INVALID ARRAY INDEX");
@@ -220,6 +226,15 @@ namespace mark
 
 			_data = new_data;
 			_capacity = reserve;
+		}
+
+		inline void assign(const _T* array, size_t count)
+		{
+			clear();
+			if (_capacity < count)
+				reserve(count << 1);
+			memcpy(_data, array, sizeof(_T) * count);
+			_count = count;
 		}
 
 		inline void push_back(const _T& val)

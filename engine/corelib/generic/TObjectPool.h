@@ -1,41 +1,58 @@
 ﻿#ifndef __T_OBJECT_POOL_H__
 #define __T_OBJECT_POOL_H__
 
+#include "TCommon.h"
+#include "TAllocator.h"
+#include "TList.h"
 
-template <typename T>
-class TObjectPool
+
+namespace mark
 {
-public:
-	TObjectPool() = default;
-	~TObjectPool() = default;
-
-	T* Allocate()
+	template <typename T, ALLOC_TYPE _AllocType, size_t _NumGrowup = 16>
+	class TObjectPool
 	{
-		if (!m_FreeList.empty())
+	public:
+		TObjectPool() = default;
+		virtual ~TObjectPool()
 		{
-			T* obj = m_FreeList.back();
-			m_FreeList.pop_back();
+			clear();
+		}
+
+		__INLINE T* alloc()
+		{
+			if (m_FreeList.empty())
+			{
+				for (size_t i = 0; i < _NumGrowup; ++i)
+				{
+					T* obj = GENERIC_ALLOC(sizeof(T), _AllocType);
+					m_FreeList.push_front(newObj);
+					m_AllocList.push_back(newObj);
+				}
+			}
+
+			T* obj = m_FreeList.front();
+			m_FreeList.pop_front();
 			return obj;
 		}
-		return new T();
-	}
-	void Deallocate(T* obj)
-	{
-		m_FreeList.push_back(obj);
-	}
 
-	void Clear()
-	{
-		for (T* obj : m_FreeList)
+		__INLINE void release(T* obj)
 		{
-			delete obj;
+			m_FreeList.push_front(obj);
 		}
-		m_FreeList.clear();
-	}
 
-private:
-	TArray<T*> m_FreeList;
+		void clear()
+		{
+			for (T* obj : m_AllocList)
+				GENERIC_FREE(obj, _AllocType);
+			m_AllocList.clear();
+			m_FreeList.clear();
+		}
 
-};
+	private:
+		TList<T*, _AllocType> m_FreeList;
+		TList<T*, _AllocType> m_AllocList;
+
+	};
+}
 
 #endif // __T_OBJECT_POOL_H__

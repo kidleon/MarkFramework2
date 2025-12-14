@@ -15,7 +15,8 @@ public:
 	{
 		if (this)
 		{
-			return ++m_RefCnt;
+			interlock_increment_l(&m_RefCnt, MEMORY_ORDER_RELAXED);
+			return m_RefCnt;
 		}
 		return 0;
 	}
@@ -24,7 +25,7 @@ public:
 	{
 		if (this)
 		{
-			long NewRefCnt = --m_RefCnt;
+			long NewRefCnt = interlock_decrement_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL);
 			if (NewRefCnt == 0)
 			{
 				OnDestroy();

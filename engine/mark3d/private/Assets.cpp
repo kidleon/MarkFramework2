@@ -13,6 +13,7 @@
 #include "BinaryAsset.h"
 #include "ITexture1D.h"
 #include "ITexture2D.h"
+#include "Mesh.h"
 
 #include "TextAssetLoader.h"
 #include "BinaryAssetLoader.h"
@@ -197,4 +198,22 @@ BOOL Assets::LoadAsync(const char* szRelativePath, ITexture2D** ppOut)
 	return TRUE;
 }
 
+BOOL Assets::CreateMesh(UINT32 VertexFormat, size_t MaxVertexCount, size_t MaxIndexCount, IMesh** ppOut)
+{
+	if (!ppOut) return FALSE;
 
+	Mesh* pMesh = MARK_POOL_NEW(Mesh)(VertexFormat, MaxVertexCount, MaxIndexCount);
+	*ppOut = pMesh;
+
+	return TRUE;
+}
+
+BOOL Assets::CreateMesh(const NameHash& Name, UINT32 VertexFormat, size_t MaxVertexCount, size_t MaxIndexCount, IMesh** ppOut)
+{
+	if (!ppOut) return FALSE;
+
+	Mesh* pMesh = MARK_POOL_NEW(Mesh)(VertexFormat, MaxVertexCount, MaxIndexCount);
+	*ppOut = pMesh;
+
+	return TRUE;
+}

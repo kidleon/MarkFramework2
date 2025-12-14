@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <uchar.h> 
 #include <wchar.h>
+#include <float.h>
 
 
 // TARGET OS PREDEFINES
@@ -206,6 +207,10 @@ typedef long double LONG_DOUBLE;
 #ifndef BOOL
 #	define BOOL UINT32
 #endif // BOOL
+
+#ifndef BOOL8
+#	define BOOL8 UINT8
+#endif // BOOL8
 
 #ifndef S_OK
 #	define S_OK ((HRESULT)0L)

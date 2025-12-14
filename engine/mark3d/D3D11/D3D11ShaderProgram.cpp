@@ -1,18 +1,9 @@
 ﻿#include "pch.h"
 #include "D3D11ShaderProgram.h"
+#include "D3D11ShaderParams.h"
 #include "D3D11RenderResources.h"
-
-
-D3D11ShaderProgram::D3D11ShaderProgram(
-	D3D11VertexShader* pVS,
-	D3D11PixelShader* pPS
-)
-	: m_pVS(pVS)
-	, m_pPS(pPS)
-{
-	m_pVS->AddRef();
-	m_pPS->AddRef();
-}
+#include "D3D11GlobalVars.h"
+#include "D3D11RenderDevice.h"
 
 
 D3D11ShaderProgram::~D3D11ShaderProgram() noexcept
@@ -35,52 +26,52 @@ void D3D11ShaderProgram::OnDestroy()
 	MARK_POOL_DELETE(this, D3D11ShaderProgram);
 }
 
-int32 D3D11ShaderProgram::VS_GetBindIndexByName(const NameHash& Name) const
+int32 D3D11ShaderProgram::GetBindIndexByName(const NameHash& Name) const
 {
-	return 0;
+	if (m_pVS)
+	{
+		const D3D11_SHADER_PARAMS* pParams = m_pVS->pShaderParams->INL_GetShaderParamByName(Name);
+		if (!pParams) return -1;
+		return pParams->BindPoint;
+	}
+
+	if (m_pPS)
+	{
+		const D3D11_SHADER_PARAMS* pParams = m_pPS->pShaderParams->INL_GetShaderParamByName(Name);
+		if (!pParams) return -1;
+		return pParams->BindPoint;
+	}
+
+	return -1;
 }
 
-int32 D3D11ShaderProgram::PS_GetBindIndexByName(const NameHash& Name) const
+void D3D11ShaderProgram::SetConstant(const NameHash& Name, const void* pData, uint32 DataSize)
 {
-	return 0;
+	ID3D11Device* pD3D11Device = D3D11GlobalVars::RENDER_DEVICE->INL_GetD3D11Device();
 }
 
-void D3D11ShaderProgram::VS_SetConstant(const NameHash& Name, const void* pData, uint32 DataSize)
+void D3D11ShaderProgram::SetConstant(int32 BindIndex, const void* pData, uint32 DataSize)
 {
-
+	ID3D11Device* pD3D11Device = D3D11GlobalVars::RENDER_DEVICE->INL_GetD3D11Device();
 }
 
-void D3D11ShaderProgram::VS_SetConstant(int32 BindIndex, const void* pData, uint32 DataSize)
-{
 
+void D3D11ShaderProgram::SetTexture1D(const NameHash& Name, ITexture1D* pTexture)
+{
+	ID3D11Device* pD3D11Device = D3D11GlobalVars::RENDER_DEVICE->INL_GetD3D11Device();
 }
 
-void D3D11ShaderProgram::PS_SetConstant(const NameHash& Name, const void* pData, uint32 DataSize)
+void D3D11ShaderProgram::SetTexture1D(int32 BindIndex, ITexture1D* pTexture)
 {
-
+	ID3D11Device* pD3D11Device = D3D11GlobalVars::RENDER_DEVICE->INL_GetD3D11Device();
 }
 
-void D3D11ShaderProgram::PS_SetConstant(int32 BindIndex, const void* pData, uint32 DataSize)
+void D3D11ShaderProgram::SetTexture2D(const NameHash& Name, ITexture2D* pTexture)
 {
-
+	ID3D11Device* pD3D11Device = D3D11GlobalVars::RENDER_DEVICE->INL_GetD3D11Device();
 }
 
-void D3D11ShaderProgram::PS_SetTexture1D(const NameHash& Name, ITexture1D* pTexture)
+void D3D11ShaderProgram::SetTexture2D(int32 BindIndex, ITexture2D* pTexture)
 {
-
-}
-
-void D3D11ShaderProgram::PS_SetTexture1D(int32 BindIndex, ITexture1D* pTexture)
-{
-
-}
-
-void D3D11ShaderProgram::PS_SetTexture2D(const NameHash& Name, ITexture2D* pTexture)
-{
-
-}
-
-void D3D11ShaderProgram::PS_SetTexture2D(int32 BindIndex, ITexture2D* pTexture)
-{
-
+	ID3D11Device* pD3D11Device = D3D11GlobalVars::RENDER_DEVICE->INL_GetD3D11Device();
 }
