@@ -1,7 +1,8 @@
-#ifndef __D3D11_CONSTANT_BUFFER_POOL_H__
+﻿#ifndef __D3D11_CONSTANT_BUFFER_POOL_H__
 #define __D3D11_CONSTANT_BUFFER_POOL_H__
 
 
+/*
 class D3D11RenderDevice;
 struct D3D11ConstantBuffer;
 
@@ -26,5 +27,6 @@ private:
 	LINKED_LIST m_UsedList[POOL_BLOCK_TYPE_COUNT] = {};
 
 };
+*/
 
 #endif // __D3D11_CONSTANT_BUFFER_POOL_H__

@@ -1,10 +1,11 @@
-#include "pch.h"
+ï»¿#include "pch.h"
 #include "D3D11RenderDef.h"
 #include "D3D11ConstantBufferPool.h"
 #include "D3D11RenderResources.h"
 #include "D3D11RenderDevice.h"
 
 
+/*
 static constexpr size_t POOL_BLOCK_SIZE[POOL_BLOCK_TYPE_COUNT] =
 {
 	64,     // 64 bytes
@@ -116,7 +117,7 @@ D3D11ConstantBuffer* D3D11ConstantBufferPool::Allocate(size_t AllocSize)
 		
 	if (linked_list_empty(&m_FreeList[TypeIndex]))
 	{
-		// Ç®¿¡ ¿©À¯°¡ ¾øÀ¸¸é »õ·Î »ý¼º
+		// í’€ì— ì—¬ìœ ê°€ ì—†ìœ¼ë©´ ìƒˆë¡œ ìƒì„±
 		if (!CreateD3D11ConstantBuffer(
 			m_pRenderDevice->INL_GetD3D11Device(),
 			&m_FreeList[TypeIndex],
@@ -129,11 +130,11 @@ D3D11ConstantBuffer* D3D11ConstantBufferPool::Allocate(size_t AllocSize)
 		}
 	}
 
-	// ÇÁ¸® ¸®½ºÆ®¿¡¼­ ÇÏ³ª ²¨³»±â
+	// í”„ë¦¬ ë¦¬ìŠ¤íŠ¸ì—ì„œ í•˜ë‚˜ êº¼ë‚´ê¸°
 	LINK_NODE* pNode = linked_list_pop_front(&m_FreeList[TypeIndex]);
 	D3D11ConstantBuffer* pConstantBuffer = (D3D11ConstantBuffer*)pNode->data;
 
-	// À¯Áî ¸®½ºÆ®¿¡ Ãß°¡
+	// ìœ ì¦ˆ ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€
 	linked_list_push_back(&m_UsedList[TypeIndex], pConstantBuffer->INL_GetLinkNode());
 
 	return pConstantBuffer;
@@ -151,10 +152,10 @@ void D3D11ConstantBufferPool::Release(D3D11ConstantBuffer* pConstantBuffer)
 		return;
 	}
 
-	// À¯Áî ¸®½ºÆ®¿¡¼­ Á¦°Å
+	// ìœ ì¦ˆ ë¦¬ìŠ¤íŠ¸ì—ì„œ ì œê±°
 	linked_list_remove_node(&m_UsedList[TypeIndex], pConstantBuffer->INL_GetLinkNode());
 
-	// ÇÁ¸® ¸®½ºÆ®¿¡ Ãß°¡
+	// í”„ë¦¬ ë¦¬ìŠ¤íŠ¸ì— ì¶”ê°€
 	linked_list_push_front(&m_FreeList[TypeIndex], pConstantBuffer->INL_GetLinkNode());
 }
 
@@ -191,4 +192,4 @@ BOOL D3D11ConstantBufferPool::CreateD3D11ConstantBuffer(ID3D11Device* pDevice, L
 
 	return TRUE;
 }
-
+*/

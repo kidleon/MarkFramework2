@@ -17,6 +17,7 @@ protected:
 
 };
 
+/*
 //----------------------------------------------------------------
 struct D3D11VertexShader : public IUNKNOWN_HASH_IMPL
 {
@@ -69,7 +70,7 @@ protected:
 struct D3D11SamplerState : public IUNKNOWN_HASH_IMPL
 {
 	ID3D11SamplerState* pSamplerState = nullptr;
-	RS_SAMPLER_STATE State = {};
+	///RS_SAMPLER_STA State = {};
 	UINT32 Hash = 0;
 
 protected:
@@ -116,7 +117,7 @@ protected:
 	virtual void OnDestroy() override;
 
 };
-
+*/
 
 #endif // __D3D11_SHADER_H__
 

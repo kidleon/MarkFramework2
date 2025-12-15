@@ -216,7 +216,17 @@ struct RS_BLEND_STATE
 	BOOL AlphaToCoverageEnable; // 알파 투 커버리지 활성화 여부 
 	BOOL IndependentBlendEnable; // 독립적 블렌드 활성화 여부 (MRT용..)
 	UINT32 PADDING;
-	RS_BLEND_TARGET BlendTarget[8]; // 블렌드 타겟 배열 (최대 8개:D3D11 기준)
+	RS_BLEND_TARGET BlendTarget[MAX_BLEND_TARGET]; // 블렌드 타겟 배열 (최대 8개:D3D11 기준)
+	FLOAT4 BlendFactor[MAX_BLEND_TARGET]; // 블렌드 팩터 배열
+	constexpr RS_BLEND_STATE()
+		: NumBlendTargets(1)
+		, AlphaToCoverageEnable(FALSE)
+		, IndependentBlendEnable(FALSE)
+		, PADDING(0)
+		, BlendTarget{}
+		, BlendFactor{}
+	{
+	}
 };
 
 /**
@@ -569,6 +579,24 @@ struct TEXTURE_STATE
 		ITexture1D* pTexture1D; // 1D 텍스처 포인터
 		ITexture2D* pTexture2D; // 2D 텍스처 포인터
 	};
+
+};
+
+
+interface IConstantBuffer;
+
+struct CONSTANT_STATE
+{
+	NameHash Name; // 상수 버퍼 이름 해시
+	INT32 BindIndex; // 바인드 인덱스
+	IConstantBuffer* pCB; // 상수 버퍼 포인터
+
+	constexpr CONSTANT_STATE()
+		: Name()
+		, BindIndex(-1)
+		, pCB(nullptr)
+	{
+	}
 };
 
 

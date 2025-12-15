@@ -229,13 +229,12 @@ typedef long double LONG_DOUBLE;
 #endif // TRUE
 
 #ifndef TMIN
-#	define T_MIN(a, b) (a < b) ? a : b
+#   define T_MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif //TMIN
 
 #ifndef TMAX
-#	define T_MAX(a, b) (a > b) ? a : b
+#   define T_MAX(a, b) (((a) > (b)) ? (a) : (b))
 #endif //TMAX
-
 
 
 #if defined(_DEBUG)

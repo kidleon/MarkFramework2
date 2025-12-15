@@ -8,6 +8,7 @@
 
 D3D11ShaderProgram::~D3D11ShaderProgram() noexcept
 {
+	/*
 	if (m_pVS)
 	{
 		m_pVS->Release();
@@ -19,6 +20,7 @@ D3D11ShaderProgram::~D3D11ShaderProgram() noexcept
 		m_pPS->Release();
 		m_pPS = nullptr;
 	}
+	*/
 }
 
 void D3D11ShaderProgram::OnDestroy()
@@ -28,6 +30,7 @@ void D3D11ShaderProgram::OnDestroy()
 
 int32 D3D11ShaderProgram::GetBindIndexByName(const NameHash& Name) const
 {
+	/*
 	if (m_pVS)
 	{
 		const D3D11_SHADER_PARAMS* pParams = m_pVS->pShaderParams->INL_GetShaderParamByName(Name);
@@ -41,10 +44,12 @@ int32 D3D11ShaderProgram::GetBindIndexByName(const NameHash& Name) const
 		if (!pParams) return -1;
 		return pParams->BindPoint;
 	}
+	*/
 
 	return -1;
 }
 
+/*
 void D3D11ShaderProgram::SetConstant(const NameHash& Name, const void* pData, uint32 DataSize)
 {
 	ID3D11Device* pD3D11Device = D3D11GlobalVars::RENDER_DEVICE->INL_GetD3D11Device();
@@ -75,3 +80,5 @@ void D3D11ShaderProgram::SetTexture2D(int32 BindIndex, ITexture2D* pTexture)
 {
 	ID3D11Device* pD3D11Device = D3D11GlobalVars::RENDER_DEVICE->INL_GetD3D11Device();
 }
+
+*/

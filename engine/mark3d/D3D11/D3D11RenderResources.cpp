@@ -19,6 +19,7 @@ void D3D11InputLayout::OnDestroy()
 	MARK_POOL_DELETE(this, D3D11InputLayout);
 }
 
+/*
 //----------------------------------------------------------------
 D3D11VertexShader::~D3D11VertexShader() noexcept
 {
@@ -170,3 +171,4 @@ void D3D11DepthStencilState::OnDestroy()
 {
 	MARK_POOL_DELETE(this, D3D11DepthStencilState);
 }
+*/

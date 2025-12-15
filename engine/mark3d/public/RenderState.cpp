@@ -170,6 +170,8 @@ static constexpr RS_BLEND_TARGET CreateAlphaBlendAddAlpha()
 	target.SrcBlendAlpha = BLEND_FACTOR::ONE;
 	target.DestBlendAlpha = BLEND_FACTOR::ONE;
 	target.BlendOpAlpha = BLEND_OP::ADD;
+
+	return target;
 }
 
 RS_BLEND_TARGET RS_BLEND_TARGET::NO_BLEND = CreateOpaque();
@@ -305,10 +307,10 @@ static constexpr RS_DEPTH_STENCIL_STATE CreateStencilTwoSided()
 static constexpr RS_DEPTH_STENCIL_STATE CreateStencilMask()
 {
 	RS_DEPTH_STENCIL_STATE state;
-	state.DepthEnable = true;
-	state.DepthWriteEnable = false;
+	state.DepthEnable = TRUE;
+	state.DepthWriteEnable = FALSE;
 	state.DepthFunc = DEPTH_FUNC::LESS;
-	state.StencilEnable = true;
+	state.StencilEnable = TRUE;
 	state.StencilReadMask = 0xFF;
 	state.StencilWriteMask = 0xFF;
 
@@ -327,6 +329,8 @@ static constexpr RS_DEPTH_STENCIL_STATE CreateStencilMask()
 		STENCIL_OP::KEEP,
 		STENCIL_FUNC::ALWAYS
 	);
+
+	return state;
 }
 
 RS_DEPTH_STENCIL_STATE RS_DEPTH_STENCIL_STATE::DEFAULT = CreateDefault();

@@ -268,18 +268,23 @@ enum class VERTEX_FORMAT_STRIDE : unsigned int
 
 static constexpr UINT32 MAX_VERTEX_FORMAT = 16; // 최대 버텍스 포맷 수
 static constexpr int32 MAX_RENDER_PASS = 4; // 서피스 메테리얼의 최대 렌더 패스 수 (추가 패스는 별도의 메테리얼로 구현)
+static constexpr int32 MAX_BLEND_TARGET = 8; // 최대 블렌드 타겟 수 (MRT 지원)
+
 static constexpr int32 MAX_TEXTURE_SLOT = 16; // 최대 텍스처 슬롯 수
 static constexpr int32 MAX_SAMPLER_SLOT = 8; // 최대 샘플러 슬롯 수
+static constexpr int32 MAX_CONSTANT_SLOT = 8; // 최대 상수 버퍼 슬롯 수
+static constexpr int32 MAX_ANISOTROPY_LEVEL = 16; // 최대 이방성 필터링 레벨
 
 /**
 * @brief 텍스쳐 타입
 */
 enum class TEXTURE_TYPE : UINT32
 {
-	TEX_1D = 0, // 1D 텍스처
-	TEX_2D = 1, // 2D 텍스처
-	TEX_3D = 2, // 3D 텍스처
-	TEX_CUBE = 3, // 큐브 맵 텍스처
+	TEX_UNKNOWN = 0,
+	TEX_1D, // 1D 텍스처
+	TEX_2D, // 2D 텍스처
+	TEX_3D, // 3D 텍스처
+	TEX_CUBE, // 큐브 맵 텍스처
 };
 
 /**

@@ -16,6 +16,7 @@ public:
 
 	virtual int32 GetBindIndexByName(const NameHash& Name) const override;
 
+	/*
 	virtual void SetConstant(const NameHash& Name, const void* pData, uint32 DataSize) override;
 	virtual void SetConstant(int32 BindIndex, const void* pData, uint32 DataSize) override;
 
@@ -24,7 +25,7 @@ public:
 
 	virtual void SetTexture2D(const NameHash& Name, ITexture2D* pTexture) override;
 	virtual void SetTexture2D(int32 BindIndex, ITexture2D* pTexture) override;
-
+	
 	__FORCEINLINE void INL_SetShader(D3D11VertexShader* pVS) noexcept
 	{
 		if (m_pVS)
@@ -76,12 +77,13 @@ public:
 		m_pPS = pPS;
 		interlock_store_l((long*)&m_LoadStat, (long)LOAD_STAT::LOADED, MEMORY_ORDER_RELAXED);
 	}
-
+	*/
 protected:
 	virtual ~D3D11ShaderProgram() noexcept;
 	virtual void OnDestroy() override;
 
 private:
+	/*
 	SHADER_TYPE m_ShaderType = SHADER_TYPE::UNKNOWN;
 
 	union
@@ -90,7 +92,7 @@ private:
 		D3D11PixelShader* m_pPS;
 	};
 
-	
+	*/
 };
 
 

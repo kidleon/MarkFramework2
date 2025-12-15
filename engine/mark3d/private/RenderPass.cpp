@@ -3,6 +3,7 @@
 #include "IShaderProgram.h"
 #include "ITexture1D.h"
 #include "ITexture2D.h"
+#include "IConstantBuffer.h"
 
 
 RENDER_PASS::~RENDER_PASS() noexcept
@@ -27,6 +28,4 @@ RENDER_PASS::~RENDER_PASS() noexcept
 			TextureState[i].pTexture1D = nullptr;
 		}
 	}
-
-
 }

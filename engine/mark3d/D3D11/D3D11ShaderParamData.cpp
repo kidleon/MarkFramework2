@@ -14,5 +14,5 @@ void D3D11ShaderParamData::Reset()
 
 void D3D11ShaderParamData::Build(D3D11VertexShader* pVS, D3D11PixelShader* pPS)
 {
-	pVS->pShaderParams->INL_GetShaderParamByIndex()
+	//pVS->pShaderParams->INL_GetShaderParamByIndex()
 }

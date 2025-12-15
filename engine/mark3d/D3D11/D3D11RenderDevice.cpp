@@ -12,6 +12,10 @@
 #include "D3D11GlobalVars.h"
 
 
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "d3dcompiler.lib")
+#pragma comment(lib, "dxguid.lib")
+
 D3D11RenderDevice::~D3D11RenderDevice() noexcept
 {
 	DestroyDevice();
@@ -235,7 +239,7 @@ BOOL D3D11RenderDevice::CreateBuffer(const D3D11_BUFFER_DESC* pDesc, ID3D11Buffe
 
 	return TRUE;
 }
-
+/*
 BOOL D3D11RenderDevice::CreateVertexShader(const D3D11_SHADER_COMPILE_DESC& Desc, D3D11VertexShader** ppOut)
 {
 	D3D11_SHADER_COMPILE_RESULT compileResult = {};
@@ -503,7 +507,8 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, D3
 
 	return TRUE;
 }
-
+*/
+/*
 BOOL D3D11RenderDevice::CreateSamplerState(const RS_SAMPLER_STATE& Desc, D3D11SamplerState** ppOut)
 {
 	uint32 Hash = fnv1_c(&Desc, sizeof(RS_SAMPLER_STATE));
@@ -677,4 +682,4 @@ BOOL D3D11RenderDevice::CreateDepthStencilState(const RS_DEPTH_STENCIL_STATE& De
 
 	return TRUE;
 }
-
+*/

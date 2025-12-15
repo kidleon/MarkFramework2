@@ -22,8 +22,7 @@ public:
 	IShaderProgram* GetVertexShader() noexcept override;
 	IShaderProgram* GetPixelShader() noexcept override;
 
-	void SetGlobalConstantBuffer(const NameHash& Name, IConstantBuffer* pCBuffer) override;
-	void SetConstantBuffer(const NameHash& Name, IConstantBuffer* pCBuffer) override;
+	void SetConstantBuffer(int32 SlotIndex, const NameHash& Name, IConstantBuffer* pCBuffer) override;
 
 	void SetSamplerState(int32 SamplerIndex, const RS_SAMPLER_STATE& SamplerState) override;
 	void SetFilter(int32 SamplerIndex, SAMPLER_FILTER MinFilter, SAMPLER_FILTER MagFilter, SAMPLER_FILTER MipFilter) override;
@@ -45,18 +44,29 @@ public:
 	void SetTexture2D(int32 TextureSlot, const NameHash& Name, ITexture2D* pTexture) override;
 
 	void SetBlendState(const RS_BLEND_STATE& BlendState) override;
-	void SetBlendState(BOOL Enable, BLEND_FACTOR SrcFactor, BLEND_FACTOR DstFactor, BLEND_OP BlendOp) override;
-	void SetBlendFactor(FLOAT R, FLOAT G, FLOAT B, FLOAT A) override;
-	void SetBlendFactor(const FLOAT4 Factor) override;
+	void SetBlendStateOption(BOOL AlphaToCoverageEnable, BOOL IndependentBlendEnable) override;
+
+	void SetBlendTarget(int32 BlendTargetIndex, const RS_BLEND_TARGET& BlendTarget) override;
+	void EnableBlendTarget(int32 BlendTargetIndex, BOOL Enable) override;
+
+	void SetBlendTargetFactorOp(int32 BlendTargetIndex, BLEND_FACTOR SrcFactor, BLEND_FACTOR DstFactor, BLEND_OP BlendOp) override;
+	void SetBlendTargetFactor(int32 BlendTargetIndex, BLEND_FACTOR SrcFactor, BLEND_FACTOR DstFactor) override;
+	void SetBlendTargetOp(int32 BlendTargetIndex, BLEND_OP BlendOp) override;
+
+	void SetBlendTargetAlphaFactorOp(int32 BlendTargetIndex, BLEND_FACTOR SrcAlphaFactor, BLEND_FACTOR DstAlphaFactor, BLEND_OP AlphaBlendOp) override;
+	void SetBlendTargetAlphaFactor(int32 BlendTargetIndex, BLEND_FACTOR SrcAlphaFactor, BLEND_FACTOR DstAlphaFactor) override;
+	void SetBlendTargetOpAlpha(int32 BlendTargetIndex, BLEND_OP AlphaBlendOp) override;
+	void SetBlendTargetFactorValue(int32 BlendTargetIndex, FLOAT R, FLOAT G, FLOAT B, FLOAT A) override;
+	void SetBlendTargetFactorValue(int32 BlendTargetIndex, const FLOAT4& Factor) override;
 
 	void SetDepthStencilState(const RS_DEPTH_STENCIL_STATE& DepthStencilState) override;
 	void EnableDepth(BOOL Enable) override;
 	void EnableZWrite(BOOL Enable) override;
-	void SetDepthState(BOOL Enable, DEPTH_WRITE_MASK WriteMask, COMPARISON_FUNC Func) override;
-	void SetDepthBias(int32 DepthBias) override;
-	void SetStencilState(BOOL Enable, uint8 ReadMask, uint8 WriteMask, COMPARISON_FUNC Func) override;
+	void SetDepthState(BOOL ZEnable, BOOL ZWriteEnable, DEPTH_FUNC DepthFunc) override;
+	void SetStencilState(BOOL Enable, uint8 ReadMask, uint8 WriteMask) override;
 
 	void SetRasterizerState(const RS_RASTERIZER_STATE& RasterizerState) override;
+	void SetFillMode(FILL_MODE Mode) override;
 	void SetCullMode(CULL_MODE Mode) override;
 	void SetWireframeMode(BOOL Enable) override;
 	void SetFrontCounterClockwise(BOOL Enable) override;
@@ -74,8 +84,7 @@ public:
 	IShaderProgram* GetVertexShader(int32 Pass) noexcept override;
 	IShaderProgram* GetPixelShader(int32 Pass) noexcept override;
 
-	void SetGlobalConstantBuffer(int32 Pass, const NameHash& Name, IConstantBuffer* pCBuffer) override;
-	void SetConstantBuffer(int32 Pass, const NameHash& Name, IConstantBuffer* pCBuffer) override;
+	void SetConstantBuffer(int32 Pass, int32 SlotIndex, const NameHash& Name, IConstantBuffer* pCBuffer) override;
 
 	void SetSamplerState(int32 Pass, int32 SamplerIndex, const RS_SAMPLER_STATE& SamplerState) override;
 	void SetFilter(int32 Pass, int32 SamplerIndex, SAMPLER_FILTER MinFilter, SAMPLER_FILTER MagFilter, SAMPLER_FILTER MipFilter) override;
@@ -97,18 +106,29 @@ public:
 	void SetTexture2D(int32 Pass, int32 TextureSlot, const NameHash& Name, ITexture2D* pTexture) override;
 
 	void SetBlendState(int32 Pass, const RS_BLEND_STATE& BlendState) override;
-	void SetBlendState(int32 Pass, BOOL Enable, BLEND_FACTOR SrcFactor, BLEND_FACTOR DstFactor, BLEND_OP BlendOp) override;
-	void SetBlendFactor(int32 Pass, FLOAT R, FLOAT G, FLOAT B, FLOAT A) = 0;
-	void SetBlendFactor(int32 Pass, const FLOAT4 Factor) = 0;
+	void SetBlendStateOption(int32 Pass, BOOL AlphaToCoverageEnable, BOOL IndependentBlendEnable) override;
+
+	void SetBlendTarget(int32 Pass, int32 BlendTargetIndex, const RS_BLEND_TARGET& BlendTarget) override;
+	void EnableBlendTarget(int32 Pass, int32 BlendTargetIndex, BOOL Enable) override;
+
+	void SetBlendTargetFactorOp(int32 Pass, int32 BlendTargetIndex, BLEND_FACTOR SrcFactor, BLEND_FACTOR DstFactor, BLEND_OP BlendOp) override;
+	void SetBlendTargetFactor(int32 Pass, int32 BlendTargetIndex, BLEND_FACTOR SrcFactor, BLEND_FACTOR DstFactor) override;
+	void SetBlendTargetOp(int32 Pass, int32 BlendTargetIndex, BLEND_OP BlendOp) override;
+
+	void SetBlendTargetAlphaFactorOp(int32 Pass, int32 BlendTargetIndex, BLEND_FACTOR SrcAlphaFactor, BLEND_FACTOR DstAlphaFactor, BLEND_OP AlphaBlendOp) override;
+	void SetBlendTargetAlphaFactor(int32 Pass, int32 BlendTargetIndex, BLEND_FACTOR SrcAlphaFactor, BLEND_FACTOR DstAlphaFactor) override;
+	void SetBlendTargetOpAlpha(int32 Pass, int32 BlendTargetIndex, BLEND_OP AlphaBlendOp) override;
+	void SetBlendTargetFactorValue(int32 Pass, int32 BlendTargetIndex, FLOAT R, FLOAT G, FLOAT B, FLOAT A) override;
+	void SetBlendTargetFactorValue(int32 Pass, int32 BlendTargetIndex, const FLOAT4& Factor) override;
 
 	void SetDepthStencilState(int32 Pass, const RS_DEPTH_STENCIL_STATE& DepthStencilState) override;
 	void EnableDepth(int32 Pass, BOOL Enable) override;
 	void EnableZWrite(int32 Pass, BOOL Enable) override;
-	void SetDepthState(int32 Pass, BOOL Enable, DEPTH_WRITE_MASK WriteMask, COMPARISON_FUNC Func) override;
-	void SetDepthBias(int32 Pass, int32 DepthBias) override;
-	void SetStencilState(int32 Pass, BOOL Enable, uint8 ReadMask, uint8 WriteMask, COMPARISON_FUNC Func) override;
+	void SetDepthState(int32 Pass, BOOL ZEnable, BOOL ZWriteEnable, DEPTH_FUNC DepthFunc) override;
+	void SetStencilState(int32 Pass, BOOL Enable, uint8 ReadMask, uint8 WriteMask) override;
 
 	void SetRasterizerState(int32 Pass, const RS_RASTERIZER_STATE& RasterizerState) override;
+	void SetFillMode(int32 Pass, FILL_MODE Mode) override;
 	void SetCullMode(int32 Pass, CULL_MODE Mode) override;
 	void SetWireframeMode(int32 Pass, BOOL Enable) override;
 	void SetFrontCounterClockwise(int32 Pass, BOOL Enable) override;
