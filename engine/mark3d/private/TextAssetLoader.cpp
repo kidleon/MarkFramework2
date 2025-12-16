@@ -4,7 +4,7 @@
 #include "IFileSystem.h"
 #include "TextAssetLoader.h"
 #include "TextAsset.h"
-#include "AsyncAssetArgument.h"
+#include "AsyncAssetOp.h"
 
 
 BOOL LoadTextAssetFromFileSystem(
@@ -66,18 +66,18 @@ void AsyncLoadTextAssetFromFileSystem(void* pArg)
 {
 	if (!pArg) return;
 
-	AsyncArgument* pAsyncArg = (AsyncArgument*)pArg;
-	if (!pAsyncArg->pAsset) return;
+	AsyncAssetOp* pAsyncOp = (AsyncAssetOp*)pArg;
+	if (!pAsyncOp->pAsset) return;
 
-	TextAsset* pTextAsset = static_cast<TextAsset*>(pAsyncArg->pAsset);
+	TextAsset* pTextAsset = static_cast<TextAsset*>(pAsyncOp->pAsset);
 
 	BOOL result = LoadTextAssetFromFileSystem(
-		pAsyncArg->pFileSystem,
-		pAsyncArg->szRelativePath,
+		pAsyncOp->pFileSystem,
+		pAsyncOp->szRelativePath,
 		pTextAsset
 	);
 
 	pTextAsset->Release(); // 비동기 작업에서 증가시킨 참조 카운트 해제
 
-	MARK_POOL_FREE(pAsyncArg);
+	MARK_POOL_FREE(pAsyncOp);
 }

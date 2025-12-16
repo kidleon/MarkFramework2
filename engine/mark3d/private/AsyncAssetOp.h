@@ -5,7 +5,7 @@
 interface IFileSystem;
 interface IAsset;
 
-struct AsyncArgument
+struct AsyncAssetOp
 {
 	char szRelativePath[264];
 	IFileSystem* pFileSystem;

@@ -17,7 +17,7 @@
 
 #include "TextAssetLoader.h"
 #include "BinaryAssetLoader.h"
-#include "AsyncAssetArgument.h"
+#include "AsyncAssetOp.h"
 
 
 constexpr static UINT32 MIN_ID_COUNT = 1;
@@ -113,7 +113,7 @@ BOOL Assets::LoadAsync(const char* szRelativePath, ITextAsset** ppOut)
 	TextAsset* pTextAsset = MARK_NEW(TextAsset)(idgen_getid(m_hIDGen));
 	(*ppOut) = pTextAsset;
 
-	AsyncArgument* pArg = (AsyncArgument*)MARK_POOL_ALLOC(sizeof(AsyncArgument));
+	AsyncAssetOp* pArg = (AsyncAssetOp*)MARK_POOL_ALLOC(sizeof(AsyncAssetOp));
 	fstrlcpy(pArg->szRelativePath, szRelativePath, sizeof(pArg->szRelativePath));
 
 	pArg->pFileSystem = m_pFileSystem;
@@ -161,7 +161,7 @@ BOOL Assets::LoadAsync(const char* szRelativePath, IBinaryAsset** ppOut)
 	BinaryAsset* pBinaryAsset = MARK_NEW(BinaryAsset)(idgen_getid(m_hIDGen));
 	(*ppOut) = pBinaryAsset;
 
-	AsyncArgument* pArg = (AsyncArgument*)MARK_POOL_ALLOC(sizeof(AsyncArgument));
+	AsyncAssetOp* pArg = (AsyncAssetOp*)MARK_POOL_ALLOC(sizeof(AsyncAssetOp));
 	fstrlcpy(pArg->szRelativePath, szRelativePath, sizeof(pArg->szRelativePath));
 
 	pArg->pFileSystem = m_pFileSystem;

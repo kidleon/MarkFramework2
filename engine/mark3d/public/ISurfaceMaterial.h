@@ -9,7 +9,7 @@
 interface IShaderProgram;
 interface IConstantBuffer;
 
-class ISurfaceMaterial : public IASSET_IMPL<ASSET_TYPE::SURFACE_MATERIAL>
+interface ISurfaceMaterial : public IASSET_IMPL<ASSET_TYPE::SURFACE_MATERIAL>
 {
 public:
 	virtual int32 AddPass(const char* szPassName) noexcept = 0;

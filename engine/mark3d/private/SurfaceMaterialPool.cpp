@@ -3,15 +3,8 @@
 #include "SurfaceMaterial.h"
 
 
-SurfaceMaterialPool::~SurfaceMaterialPool()
-{
-	while (!linked_list_empty(&m_FreeList))
-	{
-		LINK_NODE* pNode = linked_list_pop_front(&m_FreeList);
-		SurfaceMaterial* pMaterial = static_cast<SurfaceMaterial*>(pNode->data);
-		pMaterial->Release();
-	}
-}
+LINKED_LIST SurfaceMaterialPool::m_FreeList = {};
+size_t SurfaceMaterialPool::m_Capacity = 0;
 
 void SurfaceMaterialPool::Init(size_t InitialCapacity)
 {
@@ -20,6 +13,16 @@ void SurfaceMaterialPool::Init(size_t InitialCapacity)
 	init_linked_list(&m_FreeList);
 
 	AllocBlock();
+}
+
+void SurfaceMaterialPool::Shutdown()
+{
+	while (!linked_list_empty(&m_FreeList))
+	{
+		LINK_NODE* pNode = linked_list_pop_front(&m_FreeList);
+		SurfaceMaterial* pMaterial = static_cast<SurfaceMaterial*>(pNode->data);
+		pMaterial->Release();
+	}
 }
 
 SurfaceMaterial* SurfaceMaterialPool::Alloc()
@@ -55,7 +58,7 @@ void SurfaceMaterialPool::AllocBlock()
 {
 	for (size_t i = 0; i < m_Capacity; ++i)
 	{
-		SurfaceMaterial* pMaterial = MARK_NEW(SurfaceMaterial);
+		SurfaceMaterial* pMaterial = MARK_POOL_NEW(SurfaceMaterial);
 
 		LINK_NODE* pNode = pMaterial->INL_GetLinkNode();
 		pNode->data = (void*)pMaterial;

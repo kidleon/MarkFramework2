@@ -6,6 +6,7 @@
 #include "IConstantBuffer.h"
 
 #include "ConstantBuffer.h"
+#include "SurfaceMaterialPool.h"
 
 
 SurfaceMaterial::~SurfaceMaterial() noexcept
@@ -15,7 +16,7 @@ SurfaceMaterial::~SurfaceMaterial() noexcept
 
 void SurfaceMaterial::OnDestroy()
 {
-	MARK_DELETE(this, SurfaceMaterial);
+	MARK_POOL_DELETE(this, SurfaceMaterial);
 }
 
 int32 SurfaceMaterial::AddPass(const char* szPassName) noexcept

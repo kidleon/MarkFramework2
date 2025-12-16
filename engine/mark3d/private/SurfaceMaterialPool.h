@@ -7,20 +7,18 @@ class SurfaceMaterial;
 class SurfaceMaterialPool
 {
 public:
-	SurfaceMaterialPool() = default;
-	~SurfaceMaterialPool();
+	static void Init(size_t InitialCapacity = 32);
+	static void Shutdown();
 
-	void Init(size_t InitialCapacity = 32);
-
-	SurfaceMaterial* Alloc();
-	void Release(SurfaceMaterial* pMaterial);
+	static SurfaceMaterial* Alloc();
+	static void Release(SurfaceMaterial* pMaterial);
 
 private:
-	void AllocBlock();
+	static void AllocBlock();
 
 private:
-	LINKED_LIST m_FreeList = {};
-	size_t m_Capacity = 0;
+	static LINKED_LIST m_FreeList;
+	static size_t m_Capacity;
 
 };
 

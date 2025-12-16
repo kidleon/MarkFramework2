@@ -3,9 +3,17 @@
 #include "SurfaceMaterialPool.h"
 
 
+RenderSystem::RenderSystem()
+{
+	if (!m_pInstance)
+		m_pInstance = this;
+}
+
 RenderSystem::~RenderSystem() noexcept
 {
-
+	if (m_pInstance == this)
+		m_pInstance = nullptr;
+	SurfaceMaterialPool::Shutdown();
 }
 
 void RenderSystem::OnDestroy()
@@ -20,13 +28,7 @@ BOOL RenderSystem::Initialize(
 	BOOL Fullscreen
 )
 {
-	m_pSurfaceMaterialPool = new SurfaceMaterialPool();
-	if (!m_pSurfaceMaterialPool)
-	{
-		delete m_pSurfaceMaterialPool;
-		return FALSE;
-	}
-	m_pSurfaceMaterialPool->Init(128);
+	SurfaceMaterialPool::Init(128);
 
 	return TRUE;
 }
@@ -34,6 +36,15 @@ BOOL RenderSystem::Initialize(
 void RenderSystem::Shutdown()
 {
 
+}
+
+BOOL RenderSystem::CreateMaterial(ISurfaceMaterial** ppMaterial)
+{
+	return FALSE;
+}
+
+void RenderSystem::ReleaseMaterial(ISurfaceMaterial* pMaterial)
+{
 }
 
 BOOL RenderSystem::CreateTexture1D(const TEXTURE1D_CREATE_DESC* pDesc, ITexture1D** ppTexture)

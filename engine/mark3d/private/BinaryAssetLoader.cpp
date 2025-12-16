@@ -4,7 +4,7 @@
 #include "IDataStream.h"
 #include "IFileSystem.h"
 #include "BinaryAsset.h"
-#include "AsyncAssetArgument.h"
+#include "AsyncAssetOp.h"
 
 
 BOOL LoadBinaryAssetFromFileSystem(
@@ -56,18 +56,18 @@ void AsyncLoadBinaryAssetFromFileSystem(void* pArg)
 {
 	if (!pArg) return;
 
-	AsyncArgument* pAsyncArg = (AsyncArgument*)pArg;
-	if (!pAsyncArg->pAsset) return;
+	AsyncAssetOp* pAsyncOp = (AsyncAssetOp*)pArg;
+	if (!pAsyncOp->pAsset) return;
 
-	BinaryAsset* pBinaryAsset = static_cast<BinaryAsset*>(pAsyncArg->pAsset);
+	BinaryAsset* pBinaryAsset = static_cast<BinaryAsset*>(pAsyncOp->pAsset);
 
 	BOOL result = LoadBinaryAssetFromFileSystem(
-		pAsyncArg->pFileSystem,
-		pAsyncArg->szRelativePath,
+		pAsyncOp->pFileSystem,
+		pAsyncOp->szRelativePath,
 		pBinaryAsset
 	);
 
 	pBinaryAsset->Release(); // 비동기 작업에서 증가시킨 참조 카운트 해제
 
-	MARK_POOL_FREE(pAsyncArg);
+	MARK_POOL_FREE(pAsyncOp);
 }

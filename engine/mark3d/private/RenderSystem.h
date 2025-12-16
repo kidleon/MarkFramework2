@@ -8,8 +8,10 @@ class SurfaceMaterialPool;
 
 class RenderSystem : public IRenderSystem
 {
+	static RenderSystem* m_pInstance = nullptr;
+
 public:
-	RenderSystem() = default;
+	RenderSystem();
 
 	BOOL Initialize(
 		HWND hWnd,
@@ -20,15 +22,15 @@ public:
 
 	void Shutdown() override;
 
+	BOOL CreateMaterial(ISurfaceMaterial** ppMaterial) override;
+	void ReleaseMaterial(ISurfaceMaterial* pMaterial) override;
+
 	BOOL CreateTexture1D(const TEXTURE1D_CREATE_DESC* pDesc, ITexture1D** ppTexture) override;
 	BOOL CreateTexture2D(const TEXTURE2D_CREATE_DESC* pDesc, ITexture2D** ppTexture) override;
 
 protected:
 	virtual ~RenderSystem() noexcept;
 	virtual void OnDestroy() override;
-
-private:
-	SurfaceMaterialPool* m_pSurfaceMaterialPool = nullptr;
 
 };
 
