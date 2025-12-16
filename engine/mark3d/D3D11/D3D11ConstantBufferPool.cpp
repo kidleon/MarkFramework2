@@ -1,11 +1,10 @@
 ﻿#include "pch.h"
 #include "D3D11RenderDef.h"
 #include "D3D11ConstantBufferPool.h"
-#include "D3D11RenderResources.h"
+#include "D3D11ConstantBuffer.h"
 #include "D3D11RenderDevice.h"
 
 
-/*
 static constexpr size_t POOL_BLOCK_SIZE[POOL_BLOCK_TYPE_COUNT] =
 {
 	64,     // 64 bytes
@@ -15,7 +14,10 @@ static constexpr size_t POOL_BLOCK_SIZE[POOL_BLOCK_TYPE_COUNT] =
 	1024,   // 1 KB
 	2048,   // 2 KB
 	4096,   // 4 KB
-	8192    // 8 KB
+	8192,   // 8 KB
+	16384,	// 16 KB
+	32768,	// 32 KB
+	65536,	// 64 KB
 };
 
 
@@ -29,6 +31,9 @@ static constexpr size_t POOL_BLOCK_COUNT[POOL_BLOCK_TYPE_COUNT] =
 	16,
 	16,
 	16,
+	8,
+	8,
+	8
 };
 
 __FORCEINLINE size_t GetPoolBlockTypeIndex(size_t SizeInBytes)
@@ -41,12 +46,17 @@ __FORCEINLINE size_t GetPoolBlockTypeIndex(size_t SizeInBytes)
 	return SIZE_MAX;
 }
 
+D3D11ConstantBufferPool::D3D11ConstantBufferPool(D3D11RenderDevice* pRenderDevice)
+	: m_pRenderDevice(pRenderDevice)
+{
+}
+
 D3D11ConstantBufferPool::~D3D11ConstantBufferPool() noexcept
 {
 	Shutdown();
 }
 
-BOOL D3D11ConstantBufferPool::Init(D3D11RenderDevice* pRenderDevice)
+BOOL D3D11ConstantBufferPool::Init()
 {
 	for (int i = 0; i < POOL_BLOCK_TYPE_COUNT; ++i)
 		init_linked_list(&m_FreeList[i]);
@@ -56,10 +66,12 @@ BOOL D3D11ConstantBufferPool::Init(D3D11RenderDevice* pRenderDevice)
 
 	D3D11_BUFFER_DESC Desc = {};
 
+	ID3D11Device* pD3D11Device = m_pRenderDevice->INL_GetD3D11Device();
+
 	for (int i = 0; i < POOL_BLOCK_TYPE_COUNT; ++i)
 	{
 		if (!CreateD3D11ConstantBuffer(
-			pRenderDevice->INL_GetD3D11Device(), 
+			pD3D11Device,
 			&m_FreeList[i], 
 			POOL_BLOCK_SIZE[i], 
 			POOL_BLOCK_COUNT[i]
@@ -69,8 +81,6 @@ BOOL D3D11ConstantBufferPool::Init(D3D11RenderDevice* pRenderDevice)
 			return FALSE;
 		}
 	}
-
-	m_pRenderDevice = pRenderDevice;
 
 	return TRUE;
 }
@@ -87,8 +97,7 @@ void D3D11ConstantBufferPool::Shutdown() noexcept
 			D3D11ConstantBuffer* pConstantBuffer = (D3D11ConstantBuffer*)pNode->data;
 			if (pConstantBuffer)
 			{
-				CHECK_RELEASE(pConstantBuffer->pConstantBuffer);
-				MARK_POOL_FREE(pConstantBuffer);
+				MARK_POOL_DELETE(pConstantBuffer, D3D11ConstantBuffer);
 			}
 		}
 
@@ -99,11 +108,12 @@ void D3D11ConstantBufferPool::Shutdown() noexcept
 			D3D11ConstantBuffer* pConstantBuffer = (D3D11ConstantBuffer*)pNode->data;
 			if (pConstantBuffer)
 			{
-				CHECK_RELEASE(pConstantBuffer->pConstantBuffer);
-				MARK_POOL_FREE(pConstantBuffer);
+				MARK_POOL_DELETE(pConstantBuffer, D3D11ConstantBuffer);
 			}
 		}
 	}
+
+	m_pRenderDevice = nullptr;
 }
 
 D3D11ConstantBuffer* D3D11ConstantBufferPool::Allocate(size_t AllocSize)
@@ -119,7 +129,6 @@ D3D11ConstantBuffer* D3D11ConstantBufferPool::Allocate(size_t AllocSize)
 	{
 		// 풀에 여유가 없으면 새로 생성
 		if (!CreateD3D11ConstantBuffer(
-			m_pRenderDevice->INL_GetD3D11Device(),
 			&m_FreeList[TypeIndex],
 			POOL_BLOCK_SIZE[TypeIndex],
 			POOL_BLOCK_COUNT[TypeIndex]
@@ -159,7 +168,7 @@ void D3D11ConstantBufferPool::Release(D3D11ConstantBuffer* pConstantBuffer)
 	linked_list_push_front(&m_FreeList[TypeIndex], pConstantBuffer->INL_GetLinkNode());
 }
 
-BOOL D3D11ConstantBufferPool::CreateD3D11ConstantBuffer(ID3D11Device* pDevice, LINKED_LIST* pStoreList, size_t SizeInBytes, size_t Count)
+BOOL D3D11ConstantBufferPool::CreateD3D11ConstantBuffer(LINKED_LIST* pStoreList, size_t SizeInBytes, size_t Count)
 {
 	D3D11_BUFFER_DESC Desc = {};
 
@@ -173,23 +182,13 @@ BOOL D3D11ConstantBufferPool::CreateD3D11ConstantBuffer(ID3D11Device* pDevice, L
 	for (size_t i = 0; i < Count; ++i)
 	{
 		ID3D11Buffer* pD3D11Buffer = nullptr;
-		HRESULT hr = pDevice->CreateBuffer(
-			&Desc,
-			nullptr,
-			&pD3D11Buffer
-		);
 
-		if (FAILED(hr))
-			return FALSE;
+		if (!m_pRenderDevice->CreateBuffer(&Desc, &pD3D11Buffer))
+			continue;
 
-		D3D11ConstantBuffer* pConstantBuffer = MARK_POOL_NEW(D3D11ConstantBuffer)();
-		pConstantBuffer->pConstantBuffer = pD3D11Buffer;
-		pConstantBuffer->SizeInBytes = Desc.ByteWidth;
-		pConstantBuffer->INL_GetLinkNode()->data = (void*)pConstantBuffer;
-
+		D3D11ConstantBuffer* pConstantBuffer = MARK_POOL_NEW(D3D11ConstantBuffer)(SizeInBytes, pD3D11Buffer);
 		linked_list_push_back(pStoreList, pConstantBuffer->INL_GetLinkNode());
 	}
 
 	return TRUE;
 }
-*/

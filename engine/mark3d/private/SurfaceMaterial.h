@@ -5,11 +5,13 @@
 #include "RenderPass.h"
 
 
+struct SURFACE_MATERIAL_BLOCK;
+
 class SurfaceMaterial : public ISurfaceMaterial
 {
-	friend class SurfaceMaterialPool; // 오직 SurfaceMaterialPool 만이 SurfaceMaterial 인스턴스를 생성/해제할 수 있음
-
 public:
+	SurfaceMaterial(SURFACE_MATERIAL_BLOCK* pMaterialBlock) noexcept;
+
 	int32 AddPass(const char* szPassName) noexcept override;
 	int32 GetNumPass() const noexcept override;
 
@@ -138,27 +140,16 @@ public:
 	void SetDepthBiasEnable(int32 Pass, BOOL Enable) override;
 	void SetDepthBiasParams(int32 Pass, int32 DepthBias, float DepthBiasClamp, float SlopeScaledDepthBias) override;
 
-	void Reset();
-
-	__FORCEINLINE LINK_NODE* INL_GetLinkNode() noexcept
-	{
-		return &m_LinkNode;
-	}
-
 protected:
-	SurfaceMaterial() = default;
+	SurfaceMaterial() = delete;
 	~SurfaceMaterial() noexcept;
 	virtual void OnDestroy() override;
 
 private:
-	RENDER_PASS m_RenderPass[MAX_RENDER_PASS];
-	size_t m_NumRenderPass = 0;
+	SURFACE_MATERIAL_BLOCK* m_pMaterialBlock;
 
-	int32 m_CurrentPass = -1;
+	int32 m_CurrentPass;
 	int32 PADDING = 0;
-
-	LINK_NODE m_LinkNode = {};
-
 };
 
 

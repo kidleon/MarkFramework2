@@ -23,19 +23,6 @@ struct RENDER_PASS
 	RS_BLEND_STATE BlendState; // 블렌드 상태
 	RS_DEPTH_STENCIL_STATE DepthStencilState; // 깊이-스텐실 상태
 	RS_RASTERIZER_STATE RasterizerState; // 래스터라이저 상태
-
-	RENDER_PASS()
-		: Pass(-1)
-		, pVertexShader(nullptr)
-		, pPixelShader(nullptr)
-		, NumTextureState(0)
-		, BlendState()
-		, DepthStencilState()
-		, RasterizerState()
-	{
-	}
-
-	~RENDER_PASS() noexcept;
 };
 
 
