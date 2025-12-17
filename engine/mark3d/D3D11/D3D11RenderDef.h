@@ -4,6 +4,7 @@
 #include "RenderDef.h"
 
 
+/*
 // DEPTH_WRITE_MASK와 D3D11_DEPTH_WRITE_MASK 매핑 테이블
 static constexpr D3D11_DEPTH_WRITE_MASK D3D11_IMPL_DEPTH_WRITE_MASK[(int)DEPTH_WRITE_MASK::EMAX] =
 {
@@ -259,6 +260,7 @@ static constexpr DXGI_FORMAT D3D11_IMPL_COLOR_FORMAT[(int)COLOR_FORMAT::EMAX] =
     DXGI_FORMAT_SAMPLER_FEEDBACK_MIN_MIP_OPAQUE,
     DXGI_FORMAT_SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE,
 };
+*/
 
 // 입력 레이아웃 생성 구조체
 struct D3D11_INPUTLAYOUT_DESC
@@ -284,7 +286,7 @@ struct D3D11_SHADER_COMPILE_DESC
 };
 
 // 셰이더 파라미터 타입
-enum SHADER_PARAM_TYPE
+enum D3D11_SHADER_PARAM_TYPE
 {
 	CPARAM_UNKNOWN,
     CPARAM_CONSTANT,
@@ -295,10 +297,15 @@ enum SHADER_PARAM_TYPE
 // 셰이더 파라미터 정보 구조체
 struct D3D11_SHADER_PARAMS
 {
-    SHADER_PARAM_TYPE ParamType;
+    D3D11_SHADER_PARAM_TYPE ParamType;
     NameHash Name;
 	uint32 BindPoint;
-	UINT32 Size;
+
+    union
+    {
+        UINT32 Size;
+        UINT32 Count;
+    };
 };
 
 // 셰이더 컴파일 결과 구조체
@@ -307,7 +314,7 @@ struct D3D11_SHADER_COMPILE_RESULT
     ID3DBlob* pShaderBlob;
 	D3D11_SHADER_PARAMS* pShaderParams;
     UINT32 NumShaderParams;
-    UINT32 VertexFormat;
+    UINT32 m_VertexFormat;
 	UINT32 VertexFormats[MAX_VERTEX_FORMAT];
 	UINT32 NumVertexFormat;
 };

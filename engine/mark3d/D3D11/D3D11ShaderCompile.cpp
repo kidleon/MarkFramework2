@@ -214,7 +214,7 @@ BOOL __stdcall D3D11ShaderReflect(
 		}
 	}
 
-	pCompileResult->VertexFormat = VertexFormat;
+	pCompileResult->m_VertexFormat = VertexFormat;
 	memcpy(pCompileResult->VertexFormats, VertexFormats, sizeof(VERTEX_FORMAT)* MAX_VERTEX_FORMAT);
 	pCompileResult->NumVertexFormat = NumVertexFormat;
 
@@ -260,7 +260,7 @@ BOOL __stdcall D3D11ShaderReflect(
 			continue;
 		}
 
-		SHADER_PARAM_TYPE paramType;
+		D3D11_SHADER_PARAM_TYPE paramType;
 		switch (bindDesc.Type)
 		{
 		case D3D_SIT_TEXTURE:

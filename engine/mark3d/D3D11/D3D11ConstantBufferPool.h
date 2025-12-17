@@ -3,6 +3,7 @@
 
 
 class D3D11ConstantBuffer;
+class D3D11RenderDevice;
 
 class D3D11ConstantBufferPool
 {

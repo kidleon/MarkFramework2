@@ -124,6 +124,11 @@ public:
 private:
 	uint32 m_Hash = 0;
 
+
+#if defined(_DEBUG) || defined(_DEBUG_)
+	char m_szDebugName[124] = {};
+#endif // _DEBUG || DEBUG
+
 };
 
 #endif // __NAME_HASH_H__

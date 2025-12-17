@@ -8,7 +8,7 @@ class Mesh : public IMesh
 {
 public:
 	Mesh() = default;
-	Mesh(uint32 VertexFormat, size_t TotalVertexCount, size_t TotalIndexCount);
+	Mesh(uint32 m_VertexFormat, size_t TotalVertexCount, size_t TotalIndexCount);
 
 	virtual int32 AddPrimitive(PRIMITIVE_TYPE PrimitiveType, size_t MaxVertex, size_t MaxIndex) noexcept override;
 	virtual int32 GetNumPrimitives() const noexcept override;
@@ -131,7 +131,7 @@ protected:
 	virtual void OnDestroy() override;
 	void Clear() noexcept;
 	void AllocBuffer(
-		uint32 VertexFormat, 
+		uint32 m_VertexFormat, 
 		size_t TotalVertexCount, 
 		size_t TotalIndexCount
 	) noexcept;

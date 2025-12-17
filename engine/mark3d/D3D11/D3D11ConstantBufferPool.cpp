@@ -71,7 +71,6 @@ BOOL D3D11ConstantBufferPool::Init()
 	for (int i = 0; i < POOL_BLOCK_TYPE_COUNT; ++i)
 	{
 		if (!CreateD3D11ConstantBuffer(
-			pD3D11Device,
 			&m_FreeList[i], 
 			POOL_BLOCK_SIZE[i], 
 			POOL_BLOCK_COUNT[i]
@@ -154,7 +153,7 @@ void D3D11ConstantBufferPool::Release(D3D11ConstantBuffer* pConstantBuffer)
 	if (!pConstantBuffer)
 		return;
 
-	size_t TypeIndex = GetPoolBlockTypeIndex(pConstantBuffer->SizeInBytes);
+	size_t TypeIndex = GetPoolBlockTypeIndex(pConstantBuffer->INL_GetBufferSize());
 	if (SIZE_MAX == TypeIndex)
 	{
 		SYS_LOG_E("D3D11ConstantBufferPool::Release: Invalid constant buffer size %u", pConstantBuffer->SizeInBytes);

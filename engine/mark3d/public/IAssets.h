@@ -82,7 +82,7 @@ interface IAssets : public IUNKNOWN_IMPL
 	* @return 생성 성공 시 TRUE, 실패 시 FALSE
 	*/
 	virtual BOOL CreateMesh(
-		UINT32 VertexFormat,
+		UINT32 m_VertexFormat,
 		size_t MaxVertexCount, 
 		size_t MaxIndexCount, 
 		IMesh** ppOut
@@ -98,7 +98,7 @@ interface IAssets : public IUNKNOWN_IMPL
 	*/
 	virtual BOOL CreateMesh(
 		const NameHash& Name,
-		UINT32 VertexFormat,
+		UINT32 m_VertexFormat,
 		size_t MaxVertexCount,
 		size_t MaxIndexCount,
 		IMesh** ppOut

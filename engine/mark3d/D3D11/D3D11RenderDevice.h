@@ -5,12 +5,16 @@
 struct D3D11VertexShader;
 struct D3D11PixelShader;
 struct D3D11ComputeShader;
-struct D3D11InputLayout;
 struct D3D11SamplerState;
 struct D3D11BlendState;
 struct D3D11RasterizerState;
 struct D3D11DepthStencilState;
-//class D3D11InputLayoutCache;
+
+class D3D11InputLayoutCache;
+class D3D11InputLayout;
+class D3D11ConstantBufferPool;
+class D3D11ConstantBuffer;
+
 
 class D3D11RenderDevice
 {
@@ -20,6 +24,16 @@ public:
 
 	BOOL CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOOL DebugDevice);
 	BOOL CreateBuffer(const D3D11_BUFFER_DESC* pDesc, ID3D11Buffer** ppBuffer);
+
+	BOOL CreateConstantBuffer(size_t BufferSize, D3D11ConstantBuffer** ppCB);
+	void ReleaseConstantBuffer(D3D11ConstantBuffer** ppCB);
+
+	BOOL CreateInputLayout(
+		const D3D11_INPUTLAYOUT_DESC* pDesc,
+		UINT NumElements, 
+		D3D11InputLayout** ppIL
+	);
+
 	/*
 	BOOL CreateVertexShader(const D3D11_SHADER_COMPILE_DESC& Desc, D3D11VertexShader** ppOut);
 	BOOL CreatePixelShader(const D3D11_SHADER_COMPILE_DESC& Desc, D3D11PixelShader** ppOut);
@@ -56,8 +70,8 @@ private:
 	ID3D11Texture2D* m_pDepthStencilTexture = nullptr;
 	ID3D11DepthStencilView* m_pDepthStencilView = nullptr;
 
-//	D3D11InputLayoutCache* m_pInputLayoutCache = nullptr;
-
+	D3D11InputLayoutCache* m_pInputLayoutCache = nullptr;
+	D3D11ConstantBufferPool* m_pConstantBufferPool = nullptr;
 };
 
 

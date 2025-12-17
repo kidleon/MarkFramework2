@@ -1,10 +1,8 @@
 ﻿#include "pch.h"
 #include "D3D11InputLayoutCache.h"
-#include "hash_table.h"
-//#include "D3D11InputLayout.h"
+#include "D3D11InputLayout.h"
 
 
-/*
 D3D11InputLayoutCache::D3D11InputLayoutCache()
 	: m_pCacheTable(nullptr)
 {
@@ -45,4 +43,3 @@ D3D11InputLayout* D3D11InputLayoutCache::GetInputLayout(UINT32 VertexFormat)
 
 	return nullptr;
 }
-*/

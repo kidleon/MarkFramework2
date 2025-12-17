@@ -3,13 +3,13 @@
 
 class D3D11ShaderParams;
 
+/*
 //----------------------------------------------------------------
 struct D3D11InputLayout : public IUNKNOWN_HASH_IMPL
 {
 	ID3D11InputLayout* pIL = nullptr;
 	UINT32 NumVertexFormat = 0;
-	VERTEX_FORMAT VertexFormats[MAX_VERTEX_FORMAT] = {};
-	VERTEX_FORMAT_INDEX VertexFormatIndices[MAX_VERTEX_FORMAT] = {};
+	
 
 protected:
 	virtual ~D3D11InputLayout() noexcept;
@@ -17,7 +17,7 @@ protected:
 
 };
 
-/*
+
 //----------------------------------------------------------------
 struct D3D11VertexShader : public IUNKNOWN_HASH_IMPL
 {
