@@ -3,8 +3,8 @@
 
 
 extern "C" BOOL __stdcall D3D11CompileShader(
-	const D3D11_SHADER_COMPILE_DESC& CompileDesc,
-	D3D11_SHADER_COMPILE_RESULT& Result
+	const D3D11_SHADER_COMPILE_DESC* pCompileDesc,
+	D3D11_SHADER_COMPILE_RESULT* pResult
 );
 
 

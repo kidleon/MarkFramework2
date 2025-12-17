@@ -1,4 +1,4 @@
-#ifndef __D3D11_SHADER_H__
+﻿#ifndef __D3D11_SHADER_H__
 #define __D3D11_SHADER_H__
 
 
@@ -27,6 +27,47 @@ public:
 
 	~D3D11Shader() noexcept;
 
+	__FORCEINLINE const NameHash& INL_GetShaderName() const noexcept
+	{
+		return m_ShaderName;
+	}
+
+	__FORCEINLINE SHADER_TYPE INL_GetShaderType() const noexcept
+	{
+		return m_ShaderType;
+	}
+
+	__FORCEINLINE D3D11ShaderParamTable* INL_GetParamTable() const noexcept
+	{
+		return m_pParamTable;
+	}
+
+	__FORCEINLINE ID3D11VertexShader* INL_GetVertexShader() const noexcept
+	{
+		if (m_ShaderType == SHADER_TYPE::VERTEX)
+			return m_pVS;
+		return nullptr;
+	}
+
+	__FORCEINLINE ID3D11PixelShader* INL_GetPixelShader() const noexcept
+	{
+		if (m_ShaderType == SHADER_TYPE::PIXEL)
+			return m_pPS;
+		return nullptr;
+	}
+
+	__FORCEINLINE ID3D11ComputeShader* INL_GetComputeShader() const noexcept
+	{
+		if (m_ShaderType == SHADER_TYPE::COMPUTE)
+			return m_pCS;
+		return nullptr;
+	}
+
+	__FORCEINLINE HASH_NODE* INL_GetHashNode() noexcept
+	{
+		return &m_HashNode;
+	}
+
 private:
 	D3D11Shader() = delete;
 
@@ -41,6 +82,8 @@ private:
 		ID3D11PixelShader* m_pPS;
 		ID3D11ComputeShader* m_pCS;
 	};
+
+	HASH_NODE m_HashNode;
 };
 
 

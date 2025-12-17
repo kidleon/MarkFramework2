@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "D3D11Shader.h"
 
 
@@ -11,9 +11,13 @@ D3D11Shader::D3D11Shader(
 	, m_ShaderType(SHADER_TYPE::VERTEX)
 	, m_pParamTable(pParamTable)
 	, m_pVS(pVS)
+	, m_HashNode{}
 {
 	if (m_pVS)
 		m_pVS->AddRef();
+
+	m_HashNode.key = ShaderName.value();
+	m_HashNode.data = this;
 }
 
 D3D11Shader::D3D11Shader(
@@ -25,9 +29,13 @@ D3D11Shader::D3D11Shader(
 	, m_ShaderType(SHADER_TYPE::PIXEL)
 	, m_pParamTable(pParamTable)
 	, m_pPS(pPS)
+	, m_HashNode{}
 {
 	if (m_pPS)
 		m_pPS->AddRef();
+
+	m_HashNode.key = ShaderName.value();
+	m_HashNode.data = this;
 }
 
 D3D11Shader::D3D11Shader(
@@ -39,9 +47,13 @@ D3D11Shader::D3D11Shader(
 	, m_ShaderType(SHADER_TYPE::COMPUTE)
 	, m_pParamTable(pParamTable)
 	, m_pCS(pCS)
+	, m_HashNode{}
 {
 	if (m_pCS)
 		m_pCS->AddRef();
+
+	m_HashNode.key = ShaderName.value();
+	m_HashNode.data = this;
 }
 
 D3D11Shader::~D3D11Shader() noexcept

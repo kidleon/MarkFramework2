@@ -12,13 +12,13 @@ BOOL __stdcall D3D11ShaderReflect(
 );
 
 BOOL __stdcall D3D11CompileShader(
-	const D3D11_SHADER_COMPILE_DESC& CompileDesc,
-	D3D11_SHADER_COMPILE_RESULT& Result
+	const D3D11_SHADER_COMPILE_DESC* pCompileDesc,
+	D3D11_SHADER_COMPILE_RESULT* pResult
 )
 {
 	UINT32 ShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
 
-	if (CompileDesc.Debug)
+	if (pCompileDesc->Debug)
 	{
 		ShaderFlags |= D3DCOMPILE_DEBUG;
 		ShaderFlags |= D3DCOMPILE_SKIP_OPTIMIZATION;
@@ -29,25 +29,25 @@ BOOL __stdcall D3D11CompileShader(
 
 	D3D_SHADER_MACRO D3D11_SHADER_MACROS[32 + 1] = {};
 
-	if (CompileDesc.DefineCount)
+	if (pCompileDesc->DefineCount)
 	{
-		DWORD MaxDefines = T_MIN(32u, CompileDesc.DefineCount);
+		DWORD MaxDefines = T_MIN(32u, pCompileDesc->DefineCount);
 
 		for (DWORD i = 0; i < MaxDefines; ++i)
 		{
-			D3D11_SHADER_MACROS[i].Name = CompileDesc.szShaderDefines[i];
-			D3D11_SHADER_MACROS[i].Definition = CompileDesc.szShaderDefines[i];
+			D3D11_SHADER_MACROS[i].Name = pCompileDesc->szShaderDefines[i];
+			D3D11_SHADER_MACROS[i].Definition = pCompileDesc->szShaderDefines[i];
 		}
 	}
 
 	HRESULT hr = D3DCompile(
-		CompileDesc.pBuffer,
-		CompileDesc.BufferSize,
+		pCompileDesc->pBuffer,
+		pCompileDesc->BufferSize,
 		nullptr,
-		(CompileDesc.DefineCount == 0) ? nullptr : D3D11_SHADER_MACROS,
+		(pCompileDesc->DefineCount == 0) ? nullptr : D3D11_SHADER_MACROS,
 		D3D_COMPILE_STANDARD_FILE_INCLUDE,
-		CompileDesc.szEntryPoint,
-		CompileDesc.szShaderModel,
+		pCompileDesc->szEntryPoint,
+		pCompileDesc->szShaderModel,
 		ShaderFlags,
 		0,
 		&pResultBlob,
@@ -74,7 +74,7 @@ BOOL __stdcall D3D11CompileShader(
 	UINT32 numShaderParams = 0;
 	BOOL reflectResult = D3D11ShaderReflect(
 		pResultBlob,
-		&Result
+		pResult
 	);
 
 	if (!reflectResult)
@@ -84,9 +84,9 @@ BOOL __stdcall D3D11CompileShader(
 		return FALSE;
 	}
 
-	Result.pShaderBlob = pResultBlob;
-	Result.pShaderParams = pShaderParams;
-	Result.NumShaderParams = numShaderParams;
+	pResult->pShaderBlob = pResultBlob;
+	pResult->pShaderParams = pShaderParams;
+	pResult->NumShaderParams = numShaderParams;
 
 	return TRUE;
 }

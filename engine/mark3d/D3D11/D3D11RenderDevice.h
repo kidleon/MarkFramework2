@@ -14,7 +14,8 @@ class D3D11InputLayoutCache;
 class D3D11InputLayout;
 class D3D11ConstantBufferPool;
 class D3D11ConstantBuffer;
-
+class D3D11ShaderCache;
+class D3D11Shader;
 
 class D3D11RenderDevice
 {
@@ -28,6 +29,11 @@ public:
 	BOOL CreateConstantBuffer(size_t BufferSize, D3D11ConstantBuffer** ppCB);
 	void ReleaseConstantBuffer(D3D11ConstantBuffer** ppCB);
 
+	BOOL CreateShader(
+		const D3D11_SHADER_COMPILE_DESC* pDesc,
+		D3D11Shader** ppShader
+	);
+
 	BOOL CreateInputLayout(
 		const D3D11_INPUTLAYOUT_DESC* pDesc,
 		UINT NumElements, 
@@ -35,11 +41,6 @@ public:
 	);
 
 	/*
-	BOOL CreateVertexShader(const D3D11_SHADER_COMPILE_DESC& Desc, D3D11VertexShader** ppOut);
-	BOOL CreatePixelShader(const D3D11_SHADER_COMPILE_DESC& Desc, D3D11PixelShader** ppOut);
-	BOOL CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, D3D11InputLayout** ppOut);
-
-	
 	BOOL CreateSamplerState(const RS_SAMPLER_STATE& Desc, D3D11SamplerState** ppOut);
 	BOOL CreateBlendState(const RS_BLEND_STATE& Desc, D3D11BlendState** ppOut);
 	BOOL CreateRasterizerState(const RS_RASTERIZER_STATE& Desc, D3D11RasterizerState** ppOut);
@@ -72,6 +73,7 @@ private:
 
 	D3D11InputLayoutCache* m_pInputLayoutCache = nullptr;
 	D3D11ConstantBufferPool* m_pConstantBufferPool = nullptr;
+	D3D11ShaderCache* m_pShaderCache = nullptr;
 };
 
 

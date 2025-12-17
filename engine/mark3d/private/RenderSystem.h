@@ -4,8 +4,6 @@
 #include "IRenderSystem.h"
 
 
-class SurfaceMaterialPool;
-
 class RenderSystem : public IRenderSystem
 {
 	static RenderSystem* m_pInstance;

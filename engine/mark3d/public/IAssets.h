@@ -103,6 +103,8 @@ interface IAssets : public IUNKNOWN_IMPL
 		size_t MaxIndexCount,
 		IMesh** ppOut
 	) = 0;
+
+	virtual BOOL CreateSurfaceMaterial(ISurfaceMaterial** ppOut) = 0;
 };
 
 

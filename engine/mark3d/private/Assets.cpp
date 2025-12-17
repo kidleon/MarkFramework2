@@ -19,6 +19,10 @@
 #include "BinaryAssetLoader.h"
 #include "AsyncAssetOp.h"
 
+#include "SurfaceMaterialBlockPool.h"
+#include "SurfaceMaterialBlock.h"
+#include "SurfaceMaterial.h"
+
 
 constexpr static UINT32 MIN_ID_COUNT = 1;
 constexpr static UINT32 MAX_ID_COUNT = 200000;
@@ -214,6 +218,23 @@ BOOL Assets::CreateMesh(const NameHash& Name, UINT32 m_VertexFormat, size_t MaxV
 
 	Mesh* pMesh = MARK_POOL_NEW(Mesh)(m_VertexFormat, MaxVertexCount, MaxIndexCount);
 	*ppOut = pMesh;
+
+	return TRUE;
+}
+
+BOOL Assets::CreateSurfaceMaterial(ISurfaceMaterial** ppOut)
+{
+	if (!ppOut || !(*ppOut)) return FALSE;
+
+	SURFACE_MATERIAL_BLOCK* pBlock = SurfaceMaterialBlockPool::Alloc();
+	if (!pBlock)
+	{
+		if (ppOut) *ppOut = nullptr;
+		return FALSE;
+	}
+
+	SurfaceMaterial* pMaterial = MARK_POOL_NEW(SurfaceMaterial)(pBlock);
+	*ppOut = pMaterial;
 
 	return TRUE;
 }

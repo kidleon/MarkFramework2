@@ -44,6 +44,9 @@ public:
 		IMesh** ppOut
 	) override;
 
+	virtual BOOL CreateSurfaceMaterial(ISurfaceMaterial** ppOut) override;
+
+
 protected:
 	virtual ~Assets() noexcept;
 	virtual void OnDestroy() override;

@@ -3,13 +3,14 @@
 #include "idgen.h"
 #include "Log.h"
 #include "D3D11ShaderCompile.h"
-#include "D3D11ShaderParams.h"
 #include "D3D11Shader.h"
+#include "D3D11ShaderParamTable.h"
 #include "D3D11InputLayoutCache.h"
 #include "D3D11InputLayout.h"
 #include "D3D11ConstantBufferPool.h"
 #include "D3D11ConstantBuffer.h"
 #include "D3D11RenderResources.h"
+#include "D3D11ShaderCache.h"
 
 
 #pragma comment(lib, "d3d11.lib")
@@ -201,6 +202,8 @@ BOOL D3D11RenderDevice::CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOO
 		return FALSE;
 	}
 
+	m_pShaderCache = MARK_NEW(D3D11ShaderCache)();
+
 	return TRUE;
 }
 
@@ -210,6 +213,18 @@ void D3D11RenderDevice::DestroyDevice() noexcept
 	{
 		MARK_DELETE(m_pInputLayoutCache, D3D11InputLayoutCache);
 		m_pInputLayoutCache = nullptr;
+	}
+
+	if (m_pConstantBufferPool)
+	{
+		MARK_DELETE(m_pConstantBufferPool, D3D11ConstantBufferPool);
+		m_pConstantBufferPool = nullptr;
+	}
+
+	if (m_pShaderCache)
+	{
+		MARK_DELETE(m_pShaderCache, D3D11ShaderCache);
+		m_pShaderCache = nullptr;
 	}
 
 	CHECK_RELEASE(m_pDepthStencilView);
@@ -264,6 +279,109 @@ void D3D11RenderDevice::ReleaseConstantBuffer(D3D11ConstantBuffer** ppCB)
 
 	m_pConstantBufferPool->Release(*ppCB);
 	*ppCB = nullptr;
+}
+
+BOOL D3D11RenderDevice::CreateShader(
+	const D3D11_SHADER_COMPILE_DESC* pDesc,
+	D3D11Shader** ppShader
+)
+{
+	if (!pDesc || !ppShader)
+		return FALSE;
+
+	NameHash nameHash(pDesc->szShaderName);
+
+	// FIND CACHE
+	D3D11Shader* pShader = m_pShaderCache->Get(nameHash);
+	if (pShader)
+	{
+		*ppShader = pShader;
+		return TRUE;
+	}
+
+	D3D11_SHADER_COMPILE_RESULT CompileResult = {};
+
+	if (!D3D11CompileShader(pDesc, &CompileResult))
+	{
+		SYS_LOG_E("D3D11RenderDevice::CreateShader: Shader compilation failed for %s", pDesc->szShaderName);
+		return FALSE;
+	}
+
+	D3D11ShaderParamTable* pParamTable = MARK_POOL_NEW(D3D11ShaderParamTable);
+	pParamTable->Build(CompileResult.pShaderParams, CompileResult.NumShaderParams);
+
+	if (pDesc->ShaderType == SHADER_TYPE::VERTEX)
+	{
+		// 입력 레이아웃 생성
+		D3D11_INPUTLAYOUT_DESC ILDesc = {};
+		ILDesc.NumVertexFormat = CompileResult.NumVertexFormat;
+		ILDesc.VertexFormat = CompileResult.m_VertexFormat;
+		for (UINT32 i = 0; i < CompileResult.NumVertexFormat; ++i)
+		{
+			ILDesc.VertexFormats[i] = (VERTEX_FORMAT)CompileResult.VertexFormats[i];
+		}
+
+		ILDesc.pShaderBlob = CompileResult.pShaderBlob;
+
+		D3D11InputLayout* pInputLayout = nullptr;
+		if (!CreateInputLayout(&ILDesc, CompileResult.NumVertexFormat, &pInputLayout))
+		{
+			SYS_LOG_E("D3D11RenderDevice::CreateShader: Failed to create input layout for shader %s", pDesc->szShaderName);
+			return FALSE;
+		}
+
+		ID3D11VertexShader* pVS = nullptr;
+		m_pD3D11Device->CreateVertexShader(
+			CompileResult.pShaderBlob->GetBufferPointer(),
+			CompileResult.pShaderBlob->GetBufferSize(),
+			nullptr,
+			&pVS
+		);
+
+		pShader = MARK_POOL_NEW(D3D11Shader)(
+			nameHash,
+			pParamTable,
+			pVS);
+
+		m_pShaderCache->Add(nameHash, pShader);
+	}
+	else if(pDesc->ShaderType == SHADER_TYPE::PIXEL)
+	{
+		ID3D11PixelShader* pPS = nullptr;
+		m_pD3D11Device->CreatePixelShader(
+			CompileResult.pShaderBlob->GetBufferPointer(),
+			CompileResult.pShaderBlob->GetBufferSize(),
+			nullptr,
+			&pPS
+		);
+		pShader = MARK_POOL_NEW(D3D11Shader)(
+			nameHash,
+			pParamTable,
+			pPS);
+		m_pShaderCache->Add(nameHash, pShader);
+	}
+	else if (pDesc->ShaderType == SHADER_TYPE::COMPUTE)
+	{
+		ID3D11ComputeShader* pCS = nullptr;
+		m_pD3D11Device->CreateComputeShader(
+			CompileResult.pShaderBlob->GetBufferPointer(),
+			CompileResult.pShaderBlob->GetBufferSize(),
+			nullptr,
+			&pCS
+		);
+		pShader = MARK_POOL_NEW(D3D11Shader)(
+			nameHash,
+			pParamTable,
+			pCS);
+		m_pShaderCache->Add(nameHash, pShader);
+	}
+	else
+	{
+		SYS_LOG_E("D3D11RenderDevice::CreateShader: Unsupported shader type for shader %s", pDesc->szShaderName);
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 BOOL D3D11RenderDevice::CreateInputLayout(

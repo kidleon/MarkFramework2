@@ -1,6 +1,5 @@
 ﻿#include "pch.h"
 #include "D3D11ShaderProgram.h"
-#include "D3D11ShaderParams.h"
 #include "D3D11RenderResources.h"
 #include "D3D11RenderDevice.h"
 
