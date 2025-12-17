@@ -1,10 +1,10 @@
 ﻿#ifndef __ITEXTURE1D_H__
 #define __ITEXTURE1D_H__
 
-#include "IAsset.h"
+#include "IAssetImpl.h"
 
 
-interface ITexture1D : public IAsset
+interface ITexture1D : public IASSET_IMPL<ASSET_TYPE::TEXTURE1D>
 {
 	/**
 	* @brief 텍스처 너비 반환
@@ -17,6 +17,7 @@ interface ITexture1D : public IAsset
 	* @return MIP 레벨 수
 	*/
 	virtual uint32 GetMipLevels() const noexcept = 0;
+
 };
 
 #endif // __ITEXTURE1D_H__
