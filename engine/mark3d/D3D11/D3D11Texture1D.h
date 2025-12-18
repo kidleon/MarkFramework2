@@ -4,7 +4,7 @@
 #include "Texture1D.h"
 
 
-class D3D11Texture1D
+class D3D11Texture1D : public Texture1D
 {
 public:
 	explicit D3D11Texture1D(
@@ -17,11 +17,11 @@ public:
 
 	virtual ~D3D11Texture1D() noexcept;
 
-	__FORCEINLINE uint32 GetWidth() const { return m_Width; }
-	__FORCEINLINE uint32 GetMipLevels() const { return m_MipLevels; }
-	__FORCEINLINE DXGI_FORMAT GetFormat() const { return m_Format; }
-	__FORCEINLINE ID3D11Texture1D* GetD3D11Texture1D() const { return m_pD3D11Texture; }
-	__FORCEINLINE ID3D11ShaderResourceView* GetD3D11SRV() const { return m_pD3D11SRV; }
+	__FORCEINLINE uint32 INL_GetWidth() const { return m_Width; }
+	__FORCEINLINE uint32 INL_GetMipLevels() const { return m_MipLevels; }
+	__FORCEINLINE DXGI_FORMAT INL_GetFormat() const { return m_Format; }
+	__FORCEINLINE ID3D11Texture1D* INL_GetD3D11Texture1D() const { return m_pD3D11Texture; }
+	__FORCEINLINE ID3D11ShaderResourceView* INL_GetD3D11SRV() const { return m_pD3D11SRV; }
 
 private:
 	D3D11Texture1D() = delete;

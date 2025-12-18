@@ -4,17 +4,25 @@
 #include "ITexture1D.h"
 
 
-class Texture1D : public ITexture1D
+interface ITexture1DProxy;
+
+class Texture1D final : public ITexture1D
 {
 public:
 	Texture1D(UINT32 ID);
 	virtual ~Texture1D() noexcept;
 
 
+	uint32 GetWidth() const noexcept final;
+
+	uint32 GetMipLevels() const noexcept final;
+
+	COLOR_FORMAT GetFormat() const noexcept final;
+
+	void SetTexture1DProxy(ITexture1DProxy* pTexture1DProxy) noexcept;
+
 private:
-#if defined(__MARK3D_RENDERSYSTEM_D3D11__)
-	D3D11Texture1D* m_pImpl_D3D11;
-#endif // defined(__MARK3D_RENDERSYSTEM_D3D11__)
+	ITexture1DProxy* m_pTexture1DProxy;
 
 };
 

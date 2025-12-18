@@ -1,4 +1,4 @@
-#ifndef __D3D11_TEXTURE2D_H__
+﻿#ifndef __D3D11_TEXTURE2D_H__
 #define __D3D11_TEXTURE2D_H__
 
 class D3D11Texture2D
@@ -15,12 +15,12 @@ public:
 
 	virtual ~D3D11Texture2D() noexcept;
 
-	__FORCEINLINE uint32 GetWidth() const { return m_Width; }
-	__FORCEINLINE uint32 GetHeight() const { return m_Height; }
-	__FORCEINLINE uint32 GetMipLevels() const { return m_MipLevels; }
-	__FORCEINLINE DXGI_FORMAT GetFormat() const { return m_Format; }
-	__FORCEINLINE ID3D11Texture2D* GetD3D11Texture2D() const { return m_pD3D11Texture; }
-	__FORCEINLINE ID3D11ShaderResourceView* GetD3D11SRV() const { return m_pD3D11SRV; }
+	__FORCEINLINE uint32 INL_GetWidth() const { return m_Width; }
+	__FORCEINLINE uint32 INL_GetHeight() const { return m_Height; }
+	__FORCEINLINE uint32 INL_GetMipLevels() const { return m_MipLevels; }
+	__FORCEINLINE DXGI_FORMAT INL_GetFormat() const { return m_Format; }
+	__FORCEINLINE ID3D11Texture2D* INL_GetD3D11Texture2D() const { return m_pD3D11Texture; }
+	__FORCEINLINE ID3D11ShaderResourceView* INL_GetD3D11SRV() const { return m_pD3D11SRV; }
 
 private:
 	D3D11Texture2D() = delete;
