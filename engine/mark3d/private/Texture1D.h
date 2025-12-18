@@ -10,21 +10,11 @@ public:
 	Texture1D(UINT32 ID);
 	virtual ~Texture1D() noexcept;
 
-	// Private inline methods
-	__FORCEINLINE UINT32 INL_GetID() const noexcept
-	{
-		return m_ID;
-	}
 
-	__FORCEINLINE ASSET_TYPE INL_GetAssetType() const noexcept
-	{
-		return ASSET_TYPE::TEXT;
-	}
-
-	__FORCEINLINE LOAD_STAT INL_GetLoadStat() const noexcept
-	{
-		return m_LoadStat;
-	}
+private:
+#if defined(__MARK3D_RENDERSYSTEM_D3D11__)
+	D3D11Texture1D* m_pImpl_D3D11;
+#endif // defined(__MARK3D_RENDERSYSTEM_D3D11__)
 
 };
 

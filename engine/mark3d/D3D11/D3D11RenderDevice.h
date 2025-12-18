@@ -36,8 +36,12 @@ public:
 
 	BOOL CreateInputLayout(
 		const D3D11_INPUTLAYOUT_DESC* pDesc,
-		UINT NumElements, 
+		UINT NumElements,
 		D3D11InputLayout** ppIL
+	);
+
+	BOOL CreateTexture1D(
+		const D3D11_TEXTURE1D_DESC* pDesc,
 	);
 
 	/*

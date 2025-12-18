@@ -319,6 +319,17 @@ struct D3D11_SHADER_COMPILE_RESULT
 	UINT32 NumVertexFormat;
 };
 
+struct D3D11_TEXTURE1D_CREATE_DESC
+{
+	UINT32 Width;
+	UINT32 MipLevels;
+	COLOR_FORMAT Format;
+	UINT32 BindFlags;
+	UINT32 CPUAccessFlags;
+	UINT32 MiscFlags;
+	TEXTURE_USAGE Usage;
+};
+
 static constexpr size_t POOL_BLOCK_TYPE_COUNT = 11;
 
 

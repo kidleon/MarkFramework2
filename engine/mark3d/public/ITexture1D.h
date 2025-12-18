@@ -18,6 +18,12 @@ interface ITexture1D : public IASSET_IMPL<ASSET_TYPE::TEXTURE1D>
 	*/
 	virtual uint32 GetMipLevels() const noexcept = 0;
 
+	/**
+	* @brief 텍스처 컬러 포맷 반환
+	* @return 텍스처 컬러 포맷
+	*/
+	virtual COLOR_FORMAT GetFormat() const noexcept = 0;
+
 };
 
 #endif // __ITEXTURE1D_H__

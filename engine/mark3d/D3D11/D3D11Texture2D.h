@@ -1,42 +1,38 @@
-﻿#ifndef __D3D11_TEXTURE1D_H__
-#define __D3D11_TEXTURE1D_H__
+#ifndef __D3D11_TEXTURE2D_H__
+#define __D3D11_TEXTURE2D_H__
 
-#include "Texture1D.h"
-
-
-class D3D11Texture1D
+class D3D11Texture2D
 {
 public:
-	explicit D3D11Texture1D(
+	explicit D3D11Texture2D(
 		uint32 Width,
+		uint32 Height,
 		uint32 MipLevels,
 		DXGI_FORMAT Format,
-		ID3D11Texture1D* pTexture, 
+		ID3D11Texture2D* pTexture,
 		ID3D11ShaderResourceView* pSRV
 	);
 
-	virtual ~D3D11Texture1D() noexcept;
+	virtual ~D3D11Texture2D() noexcept;
 
 	__FORCEINLINE uint32 GetWidth() const { return m_Width; }
+	__FORCEINLINE uint32 GetHeight() const { return m_Height; }
 	__FORCEINLINE uint32 GetMipLevels() const { return m_MipLevels; }
 	__FORCEINLINE DXGI_FORMAT GetFormat() const { return m_Format; }
-	__FORCEINLINE ID3D11Texture1D* GetD3D11Texture1D() const { return m_pD3D11Texture; }
+	__FORCEINLINE ID3D11Texture2D* GetD3D11Texture2D() const { return m_pD3D11Texture; }
 	__FORCEINLINE ID3D11ShaderResourceView* GetD3D11SRV() const { return m_pD3D11SRV; }
 
 private:
-	D3D11Texture1D() = delete;
+	D3D11Texture2D() = delete;
 
 private:
 	uint32 m_Width;
+	uint32 m_Height;
 	uint32 m_MipLevels;
 	DXGI_FORMAT m_Format;
 
-	uint32 PADDING;
-
-	ID3D11Texture1D* m_pD3D11Texture;
+	ID3D11Texture2D* m_pD3D11Texture;
 	ID3D11ShaderResourceView* m_pD3D11SRV;
-
 };
 
-
-#endif // __D3D11_TEXTURE1D_H__
+#endif // __D3D11_TEXTURE2D_H__
