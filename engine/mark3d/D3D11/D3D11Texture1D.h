@@ -1,40 +1,46 @@
 ﻿#ifndef __D3D11_TEXTURE1D_H__
 #define __D3D11_TEXTURE1D_H__
 
-#include "Texture1D.h"
+#include "ITexture1D.h"
 
 
-class D3D11Texture1D : public Texture1D
+struct D3D11Texture1DImpl;
+
+class D3D11Texture1D final : public ITexture1D
 {
 public:
-	explicit D3D11Texture1D(
-		uint32 Width,
-		uint32 MipLevels,
-		DXGI_FORMAT Format,
-		ID3D11Texture1D* pTexture, 
-		ID3D11ShaderResourceView* pSRV
-	);
+	uint32 GetWidth() const noexcept final;
+	uint32 GetMipLevels() const noexcept final;
+	COLOR_FORMAT GetFormat() const noexcept final;
 
-	virtual ~D3D11Texture1D() noexcept;
+	void SetData(
+		uint32 Width, 
+		uint32 MipLevels, 
+		COLOR_FORMAT Format, 
+		ID3D11Texture1D* pTexture1D, 
+		ID3D11ShaderResourceView* pSRV
+	) noexcept;
 
 	__FORCEINLINE uint32 INL_GetWidth() const { return m_Width; }
 	__FORCEINLINE uint32 INL_GetMipLevels() const { return m_MipLevels; }
-	__FORCEINLINE DXGI_FORMAT INL_GetFormat() const { return m_Format; }
+	__FORCEINLINE COLOR_FORMAT INL_GetFormat() const { return m_Format; }
 	__FORCEINLINE ID3D11Texture1D* INL_GetD3D11Texture1D() const { return m_pD3D11Texture; }
 	__FORCEINLINE ID3D11ShaderResourceView* INL_GetD3D11SRV() const { return m_pD3D11SRV; }
 
 private:
 	D3D11Texture1D() = delete;
+	virtual ~D3D11Texture1D() noexcept;
+	void OnDestroy() noexcept override;
 
 private:
-	uint32 m_Width;
-	uint32 m_MipLevels;
-	DXGI_FORMAT m_Format;
+	uint32 m_Width = 0;
+	uint32 m_MipLevels = 0;
+	COLOR_FORMAT m_Format = COLOR_FORMAT::UNKNOWN;
 
-	uint32 PADDING;
+	uint32 PADDING = 0;
 
-	ID3D11Texture1D* m_pD3D11Texture;
-	ID3D11ShaderResourceView* m_pD3D11SRV;
+	ID3D11Texture1D* m_pD3D11Texture = nullptr;
+	ID3D11ShaderResourceView* m_pD3D11SRV = nullptr;
 
 };
 

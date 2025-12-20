@@ -35,6 +35,7 @@ do
 	
 	externalincludedirs {
 		"../external/inc",
+		"../external/stb",
 		"%{prj.location}/../output/sdk/inc"
 	}
 	
@@ -70,7 +71,9 @@ do
 			files {
 				"D3D11/**.h",
 				"D3D11/**.inl",
-				"D3D11/**.cpp"
+				"D3D11/**.cpp",
+				"**.cpp",
+				"**.def"
 			}
 			
 			filter "configurations:Debug"

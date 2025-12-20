@@ -23,6 +23,12 @@
 #include "SurfaceMaterialBlock.h"
 #include "SurfaceMaterial.h"
 
+#if defined(__MARK3D_RENDERSYSTEM_D3D11__)
+#include "D3D11/D3D11TextureLoader.h"
+#include "D3D11/D3D11Texture1D.h"
+#include "D3D11/D3D11Texture2D.h"
+#endif // __MARK3D_RENDERSYSTEM_D3D11__
+
 
 constexpr static UINT32 MIN_ID_COUNT = 1;
 constexpr static UINT32 MAX_ID_COUNT = 200000;
@@ -184,6 +190,66 @@ BOOL Assets::LoadAsync(const char* szRelativePath, IBinaryAsset** ppOut)
 
 BOOL Assets::Load(const char* szRelativePath, ITexture1D** ppOut)
 {
+	if (!szRelativePath || !ppOut) return FALSE;
+
+#if defined(__MARK3D_RENDERSYSTEM_D3D11__)
+	/*
+	IDataStream* pDataStream = m_pFileSystem->OpenFile(szRelativePath, TRUE);
+	if (!pDataStream)
+	{
+		SYS_LOG_E("Assets::Load: Failed to open texture1D file: %s", szRelativePath);
+		return FALSE;
+	}
+
+	size_t DataSize = pDataStream->GetSize();
+	void* pData = MARK_TEMP_ALLOC(DataSize);
+	if (!pData)
+	{
+		pDataStream->Release();
+		SYS_LOG_E("Assets::Load: Failed to allocate memory for texture1D data: %s", szRelativePath);
+		return FALSE;
+	}
+
+	if (!pDataStream->Read(pData, DataSize))
+	{
+		SYS_LOG_E("Assets::Load: Failed to read texture1D data from file: %s", szRelativePath);
+
+		MARK_TEMP_RESET();
+		pDataStream->Release();
+		
+		return FALSE;
+	}
+
+	D3D11Texture1D* pD3D11Texture1D = nullptr;
+	if (!LoadD3D11Texture1DFromMemory(
+		GLOBAL_VARS::D3D11_RENDER_DEVICE,
+		szRelativePath,
+		pData,
+		DataSize,
+		&pD3D11Texture1D
+	))
+	{
+		SYS_LOG_E("Assets::Load: Failed to load D3D11 texture1D from memory: %s", szRelativePath);
+
+		MARK_TEMP_RESET();
+		pDataStream->Release();
+
+		return FALSE;
+	}
+
+	pDataStream->Release();
+	pDataStream = nullptr;
+
+	D3D11Texture1DProxy* pTexture1DProxy = MARK_POOL_NEW(D3D11Texture1DProxy)(pD3D11Texture1D);
+
+	Texture2D* pTexture1D = MARK_POOL_NEW(Texture2D)(idgen_getid(m_hIDGen));
+	pTexture1D->SetTexture1DProxy(pTexture1DProxy);
+	
+	(*ppOut) = pTexture1D;
+	*/
+
+#endif // __MARK3D_RENDERSYSTEM_D3D11__
+
 	return TRUE;
 }
 

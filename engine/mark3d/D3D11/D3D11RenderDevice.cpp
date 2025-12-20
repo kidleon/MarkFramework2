@@ -9,13 +9,12 @@
 #include "D3D11InputLayout.h"
 #include "D3D11ConstantBufferPool.h"
 #include "D3D11ConstantBuffer.h"
-#include "D3D11RenderResources.h"
 #include "D3D11ShaderCache.h"
+#include "D3D11Texture1D.h"
+#include "D3D11Texture2D.h"
+#include "D3D11RenderTarget.h"
+#include "D3D11Global.h"
 
-
-#pragma comment(lib, "d3d11.lib")
-#pragma comment(lib, "d3dcompiler.lib")
-#pragma comment(lib, "dxguid.lib")
 
 D3D11RenderDevice::~D3D11RenderDevice() noexcept
 {
@@ -185,10 +184,24 @@ BOOL D3D11RenderDevice::CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOO
 	if (FAILED(hr))
 		return FALSE;
 
-	//pBackBuffer->AddRef();
-	//m_pRenderTargetView->AddRef();
-	//m_pDepthStencilTexture->AddRef();
-	//m_pDepthStencilView->AddRef();
+	pBackBuffer->AddRef();
+	m_pRenderTargetView->AddRef();
+	m_pDepthStencilTexture->AddRef();
+	m_pDepthStencilView->AddRef();
+
+	m_pBackBuffer_RT = MARK_POOL_NEW(D3D11RenderTarget)(
+		Width,
+		Height,
+		COLOR_FORMAT::R8G8B8A8_UNORM,
+		Width,
+		Height,
+		COLOR_FORMAT::D24_UNORM_S8_UINT,
+		pBackBuffer,
+		m_pRenderTargetView,
+		m_pDepthStencilTexture,
+		m_pDepthStencilView
+	);
+
 	
 	pBackBuffer->Release();
 
@@ -203,6 +216,8 @@ BOOL D3D11RenderDevice::CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOO
 	}
 
 	m_pShaderCache = MARK_NEW(D3D11ShaderCache)();
+
+	D3D11Global::s_pRenderDevice = this;
 
 	return TRUE;
 }
@@ -226,6 +241,8 @@ void D3D11RenderDevice::DestroyDevice() noexcept
 		MARK_DELETE(m_pShaderCache, D3D11ShaderCache);
 		m_pShaderCache = nullptr;
 	}
+
+	CHECK_RELEASE(m_pBackBuffer_RT);
 
 	CHECK_RELEASE(m_pDepthStencilView);
 	CHECK_RELEASE(m_pDepthStencilTexture);
@@ -281,7 +298,7 @@ void D3D11RenderDevice::ReleaseConstantBuffer(D3D11ConstantBuffer** ppCB)
 	*ppCB = nullptr;
 }
 
-BOOL D3D11RenderDevice::CreateShader(
+BOOL D3D11RenderDevice::GetOrCreateShader(
 	const D3D11_SHADER_COMPILE_DESC* pDesc,
 	D3D11Shader** ppShader
 )
@@ -324,7 +341,7 @@ BOOL D3D11RenderDevice::CreateShader(
 		ILDesc.pShaderBlob = CompileResult.pShaderBlob;
 
 		D3D11InputLayout* pInputLayout = nullptr;
-		if (!CreateInputLayout(&ILDesc, CompileResult.NumVertexFormat, &pInputLayout))
+		if (!GetOrCreateInputLayout(&ILDesc, CompileResult.NumVertexFormat, &pInputLayout))
 		{
 			SYS_LOG_E("D3D11RenderDevice::CreateShader: Failed to create input layout for shader %s", pDesc->szShaderName);
 			return FALSE;
@@ -384,7 +401,7 @@ BOOL D3D11RenderDevice::CreateShader(
 	return TRUE;
 }
 
-BOOL D3D11RenderDevice::CreateInputLayout(
+BOOL D3D11RenderDevice::GetOrCreateInputLayout(
 	const D3D11_INPUTLAYOUT_DESC* pDesc,
 	UINT NumElements,
 	D3D11InputLayout** ppIL
@@ -552,6 +569,191 @@ BOOL D3D11RenderDevice::CreateInputLayout(
 	return TRUE;
 }
 
+BOOL D3D11RenderDevice::FillTexture1D(
+	const D3D11_TEXTURE1D_CREATE_DESC* pDesc,
+	D3D11Texture1D* pTexture1D
+)
+{
+	D3D11_TEXTURE1D_DESC desc = {};
+
+	if (pDesc->Usage == RESOURCE_USAGE::STATIC)
+	{
+		desc.Usage = (pDesc->InitialSize > 0) ? D3D11_USAGE_IMMUTABLE : D3D11_USAGE_DEFAULT;
+		desc.CPUAccessFlags = 0;
+	}
+	else if (pDesc->Usage == RESOURCE_USAGE::DYNAMIC)
+	{
+		desc.Usage = D3D11_USAGE_DYNAMIC;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	}
+	else if (pDesc->Usage == RESOURCE_USAGE::RW_BUFFER)
+	{
+		desc.Usage = D3D11_USAGE_STAGING;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
+	}
+	else
+	{
+		SYS_LOG_E("D3D11RenderDevice::CreateTexture1D: Unsupported RESOURCE_USAGE value");
+		return FALSE;
+	}
+
+	desc.Width = pDesc->Width;
+	desc.MipLevels = pDesc->MipLevels;
+	desc.ArraySize = 1;
+	desc.Format = (DXGI_FORMAT)pDesc->Format;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	desc.MiscFlags = (pDesc->MipLevels != 1) ? D3D11_RESOURCE_MISC_GENERATE_MIPS : 0;
+
+	ID3D11Texture1D* pD3D11Tex1D = nullptr;
+
+	D3D11_SUBRESOURCE_DATA data = {};
+	data.pSysMem = pDesc->pInitialData;
+	data.SysMemPitch = desc.Width * (UINT32)GetPixelFormatSize(pDesc->Format);
+
+	D3D11_SUBRESOURCE_DATA* pData = desc.Usage == D3D11_USAGE_IMMUTABLE ? &data : nullptr;
+
+	HRESULT hr = m_pD3D11Device->CreateTexture1D(
+		&desc,
+		pData,
+		&pD3D11Tex1D
+	);
+
+	if (FAILED(hr))
+		return FALSE;
+
+	// Shader Resource View 
+	D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+	SRVDesc.Format = (DXGI_FORMAT)pDesc->Format;;
+	SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1D;
+	SRVDesc.Texture1D.MostDetailedMip = 0;
+	SRVDesc.Texture1D.MipLevels = pDesc->MipLevels;
+
+	ID3D11ShaderResourceView* pSRV = nullptr;
+	hr = m_pD3D11Device->CreateShaderResourceView(
+		pD3D11Tex1D,
+		&SRVDesc,
+		&pSRV
+	);
+
+	if (FAILED(hr))
+	{
+		pTexture1D->Release();
+		return FALSE;
+	}
+
+	pTexture1D->SetData(
+		desc.Width,
+		desc.MipLevels,
+		pDesc->Format,
+		pD3D11Tex1D,
+		pSRV
+	);
+
+	return TRUE;
+}
+
+BOOL D3D11RenderDevice::FillTexture2D(
+	const D3D11_TEXTURE2D_CREATE_DESC* pDesc,
+	D3D11Texture2D* pTexture2D
+)
+{
+	D3D11_TEXTURE2D_DESC desc = {};
+
+	if (pDesc->Usage == RESOURCE_USAGE::STATIC)
+	{
+		desc.Usage = D3D11_USAGE_DEFAULT; 
+		desc.CPUAccessFlags = 0;
+	}
+	else if(pDesc->Usage == RESOURCE_USAGE::FIXED)
+	{
+		if (!pDesc->pInitialData)
+			SYS_LOG_W("D3D11RenderDevice::CreateTexture2D: FIXED usage requires initial data");
+		
+		desc.Usage = (!pDesc->pInitialData) ? D3D11_USAGE_DEFAULT : D3D11_USAGE_IMMUTABLE;
+		desc.CPUAccessFlags = 0;
+	}
+	else if (pDesc->Usage == RESOURCE_USAGE::DYNAMIC)
+	{
+		desc.Usage = D3D11_USAGE_DYNAMIC;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	}
+	else if (pDesc->Usage == RESOURCE_USAGE::RW_BUFFER)
+	{
+		desc.Usage = D3D11_USAGE_STAGING;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ | D3D11_CPU_ACCESS_WRITE;
+	}
+	else
+	{
+		SYS_LOG_E("D3D11RenderDevice::CreateTexture2D: Unsupported RESOURCE_USAGE value");
+		return FALSE;
+	}
+
+	desc.Width = pDesc->Width;
+	desc.Height = pDesc->Height;
+	desc.MipLevels = pDesc->MipLevels;
+	desc.ArraySize = 1;
+	desc.Format = (DXGI_FORMAT)pDesc->Format;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	desc.MiscFlags = (pDesc->MipLevels != 1) ? D3D11_RESOURCE_MISC_GENERATE_MIPS : 0;
+
+	ID3D11Texture2D* pD3D11Tex2D = nullptr;
+
+	D3D11_SUBRESOURCE_DATA data = {};
+	data.pSysMem = pDesc->pInitialData;
+	data.SysMemPitch = desc.Width * (UINT32)GetPixelFormatSize(pDesc->Format);
+
+	D3D11_SUBRESOURCE_DATA* pData = (desc.Usage == D3D11_USAGE_IMMUTABLE) ? &data : nullptr;
+
+	HRESULT hr = m_pD3D11Device->CreateTexture2D(
+		&desc,
+		pData,
+		&pD3D11Tex2D
+	);
+
+	if (FAILED(hr))
+	{
+		return FALSE;
+	}
+
+	// Shader Resource View 
+	D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+	SRVDesc.Format = (DXGI_FORMAT)pDesc->Format;;
+	SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	SRVDesc.Texture1D.MostDetailedMip = 0;
+	SRVDesc.Texture1D.MipLevels = pDesc->MipLevels;
+
+	ID3D11ShaderResourceView* pSRV = nullptr;
+	hr = m_pD3D11Device->CreateShaderResourceView(
+		pD3D11Tex2D,
+		&SRVDesc,
+		&pSRV
+	);
+
+	if (FAILED(hr))
+	{
+		pD3D11Tex2D->Release();
+		return FALSE;
+	}
+
+	pTexture2D->SetData(
+		desc.Width,
+		desc.Height,
+		desc.MipLevels,
+		pDesc->Format,
+		pD3D11Tex2D,
+		pSRV
+	);
+
+	return TRUE;
+}
+
+BOOL D3D11RenderDevice::CreateRenderTarget(
+	const D3D11_RENDERTARGET_CREATE_DESC* pDesc,
+	D3D11RenderTarget** ppRT
+)
+{
+	return TRUE;
+}
 
 /*
 BOOL D3D11RenderDevice::CreateVertexShader(const D3D11_SHADER_COMPILE_DESC& Desc, D3D11VertexShader** ppOut)

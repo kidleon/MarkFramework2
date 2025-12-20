@@ -11,7 +11,7 @@ BOOL __stdcall D3D11ShaderReflect(
 	D3D11_SHADER_COMPILE_RESULT* pCompileResult
 );
 
-BOOL __stdcall D3D11CompileShader(
+BOOL D3D11CompileShader(
 	const D3D11_SHADER_COMPILE_DESC* pCompileDesc,
 	D3D11_SHADER_COMPILE_RESULT* pResult
 )

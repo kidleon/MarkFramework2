@@ -3,6 +3,7 @@
 
 #include "IAsset.h"
 #include "AssetDef.h"
+#include "idgen.h"
 
 
 template<ASSET_TYPE AssetType>
@@ -10,8 +11,7 @@ struct IASSET_IMPL : public IAsset
 {
 public:
 	IASSET_IMPL() = default;
-
-	virtual long AddRef() override
+	virtual long AddRef() final
 	{
 		if (this)
 		{
@@ -21,7 +21,7 @@ public:
 		return 0;
 	}
 
-	virtual long Release() override
+	virtual long Release() final
 	{
 		if (this)
 		{
@@ -35,28 +35,32 @@ public:
 		return 0;
 	}
 
-	virtual long RefCnt() override
+	virtual long RefCnt() final
 	{
 		return m_RefCnt;
 	}
 
-	virtual uint32 GetID() const noexcept override
+	virtual uint32 GetID() const noexcept final
 	{
 		return m_ID;
 	}
 
-	virtual ASSET_TYPE GetAssetType() const noexcept override
+	virtual ASSET_TYPE GetAssetType() const noexcept final
 	{
 		return AssetType;
 	}
 
-	virtual LOAD_STAT GetLoadStat() const noexcept override
+	virtual LOAD_STAT GetLoadStat() const noexcept final
 	{
 		return m_LoadStat;
 	}
 
 protected:
-	virtual ~IASSET_IMPL() noexcept = default;
+	virtual ~IASSET_IMPL() noexcept
+	{
+		idgen_release(GLOBAL_VARS::ID_GEN_HANDLE, m_ID);
+	}
+
 	IASSET_IMPL(const IASSET_IMPL&) = delete;
 	IASSET_IMPL(IASSET_IMPL&&) = delete;
 	IASSET_IMPL& operator=(const IASSET_IMPL&) = delete;

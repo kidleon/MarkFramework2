@@ -87,67 +87,100 @@ enum class COLOR_FORMAT : unsigned int
 	R8_SINT,
 	A8_UNORM,
 	R1_UNORM,
-	R9G9B9E5_SHAREDEXP,
-	R8G8_B8G8_UNORM,
-	G8R8_G8B8_UNORM,
-	BC1_TYPELESS,
-	BC1_UNORM,
-	BC1_UNORM_SRGB,
-	BC2_TYPELESS,
-	BC2_UNORM,
-	BC2_UNORM_SRGB,
-	BC3_TYPELESS,
-	BC3_UNORM,
-	BC3_UNORM_SRGB,
-	BC4_TYPELESS,
-	BC4_UNORM,
-	BC4_SNORM,
-	BC5_TYPELESS,
-	BC5_UNORM,
-	BC5_SNORM,
-	B5G6R5_UNORM,
-	B5G5R5A1_UNORM,
-	B8G8R8A8_UNORM,
-	B8G8R8X8_UNORM,
-	R10G10B10_XR_BIAS_A2_UNORM,
-	B8G8R8A8_TYPELESS,
-	B8G8R8A8_UNORM_SRGB,
-	B8G8R8X8_TYPELESS,
-	B8G8R8X8_UNORM_SRGB,
-	BC6H_TYPELESS,
-	BC6H_UF16,
-	BC6H_SF16,
-	BC7_TYPELESS,
-	BC7_UNORM,
-	BC7_UNORM_SRGB,
-	AYUV,
-	Y410,
-	Y416,
-	NV12,
-	P010,
-	P016,
-	OPAQUE_420,
-	YUY2,
-	Y210,
-	Y216,
-	NV11,
-	AI44,
-	IA44,
-	P8,
-	A8P8,
-	B4G4R4A4_UNORM,
 
-	P208,
-	V208,
-	V408,
-
-	SAMPLER_FEEDBACK_MIN_MIP_OPAQUE,
-	SAMPLER_FEEDBACK_MIP_REGION_USED_OPAQUE,
-
+	
 	EMAX,
 
 	FORCE_UINT = 0xffffffff
 };
+
+// 각 COLOR_FORMAT에 대한 바이트 크기 (픽셀당)
+constexpr static size_t FORMAT_SIZE[] = {
+	0,   // UNKNOWN
+	16,  // R32G32B32A32_TYPELESS
+	16,  // R32G32B32A32_FLOAT
+	16,  // R32G32B32A32_UINT
+	16,  // R32G32B32A32_SINT
+	12,  // R32G32B32_TYPELESS
+	12,  // R32G32B32_FLOAT
+	12,  // R32G32B32_UINT
+	12,  // R32G32B32_SINT
+	8,   // R16G16B16A16_TYPELESS
+	8,   // R16G16B16A16_FLOAT
+	8,   // R16G16B16A16_UNORM
+	8,   // R16G16B16A16_UINT
+	8,   // R16G16B16A16_SNORM
+	8,   // R16G16B16A16_SINT
+	8,   // R32G32_TYPELESS
+	8,   // R32G32_FLOAT
+	8,   // R32G32_UINT
+	8,   // R32G32_SINT
+	8,   // R32G8X24_TYPELESS
+	8,   // D32_FLOAT_S8X24_UINT
+	8,   // R32_FLOAT_X8X24_TYPELESS
+	8,   // X32_TYPELESS_G8X24_UINT
+	4,   // R10G10B10A2_TYPELESS
+	4,   // R10G10B10A2_UNORM
+	4,   // R10G10B10A2_UINT
+	4,   // R11G11B10_FLOAT
+	4,   // R8G8B8A8_TYPELESS
+	4,   // R8G8B8A8_UNORM
+	4,   // R8G8B8A8_UNORM_SRGB
+	4,   // R8G8B8A8_UINT
+	4,   // R8G8B8A8_SNORM
+	4,   // R8G8B8A8_SINT
+	4,   // R16G16_TYPELESS
+	4,   // R16G16_FLOAT
+	4,   // R16G16_UNORM
+	4,   // R16G16_UINT
+	4,   // R16G16_SNORM
+	4,   // R16G16_SINT
+	4,   // R32_TYPELESS
+	4,   // D32_FLOAT
+	4,   // R32_FLOAT
+	4,   // R32_UINT
+	4,   // R32_SINT
+	4,   // R24G8_TYPELESS
+	4,   // D24_UNORM_S8_UINT
+	4,   // R24_UNORM_X8_TYPELESS
+	4,   // X24_TYPELESS_G8_UINT
+	2,   // R8G8_TYPELESS
+	2,   // R8G8_UNORM
+	2,   // R8G8_UINT
+	2,   // R8G8_SNORM
+	2,   // R8G8_SINT
+	2,   // R16_TYPELESS
+	2,   // R16_FLOAT
+	2,   // D16_UNORM
+	2,   // R16_UNORM
+	2,   // R16_UINT
+	2,   // R16_SNORM
+	2,   // R16_SINT
+	1,   // R8_TYPELESS
+	1,   // R8_UNORM
+	1,   // R8_UINT
+	1,   // R8_SNORM
+	1,   // R8_SINT
+	1,   // A8_UNORM
+	0,   // R1_UNORM (비트 단위, 8픽셀당 1바이트)
+};
+
+inline size_t GetPixelFormatSize(COLOR_FORMAT format) 
+{
+	size_t index = static_cast<size_t>(format);
+	if (index < sizeof(FORMAT_SIZE) / sizeof(FORMAT_SIZE[0])) {
+		return FORMAT_SIZE[index];
+	}
+	return 0;
+}
+
+// 텍스처 전체 크기 계산
+inline size_t CalculateTextureSize(COLOR_FORMAT format, size_t width, size_t height) 
+{
+	size_t pixelSize = GetPixelFormatSize(format);
+	if (pixelSize == 0) return 0;  // UNKNOWN이나 특수 포맷
+	return width * height * pixelSize;
+}
 
 enum class PRIMITIVE_TYPE : unsigned int
 {
@@ -470,6 +503,18 @@ enum class STENCIL_OP : UINT8
 	INCR_WRAP,
 	DECR_WRAP,
 
+	EMAX
+};
+
+/**
+* @brief 리소스 사용 용도 열거형
+*/
+enum class RESOURCE_USAGE : UINT32
+{
+	STATIC = 0,
+	FIXED = 1,
+	DYNAMIC = 2,
+	RW_BUFFER = 3,
 	EMAX
 };
 

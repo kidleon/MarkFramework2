@@ -1,10 +1,10 @@
 ﻿#ifndef __ITEXTURE2D_H__
 #define __ITEXTURE2D_H__
 
-#include "IAsset.h"
+#include "IAssetImpl.h"
 
 
-interface ITexture2D : public IAsset
+interface ITexture2D : public IASSET_IMPL<ASSET_TYPE::TEXTURE2D>
 {
 	/**
 	* @brief 텍스처 너비 반환
@@ -23,6 +23,12 @@ interface ITexture2D : public IAsset
 	* @return MIP 레벨 수
 	*/
 	virtual uint32 GetMipLevels() const noexcept = 0;
+
+	/**
+	* @brief 텍스처 컬러 포맷 반환
+	* @return 텍스처 컬러 포맷
+	*/
+	virtual COLOR_FORMAT GetFormat() const noexcept = 0;
 
 };
 

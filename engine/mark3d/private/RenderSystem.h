@@ -4,7 +4,7 @@
 #include "IRenderSystem.h"
 
 
-class RenderSystem : public IRenderSystem
+class RenderSystem final : public IRenderSystem
 {
 	static RenderSystem* m_pInstance;
 
@@ -15,16 +15,16 @@ public:
 		HWND hWnd,
 		uint32 ScreenWidth,
 		uint32 ScreenHeight,
+		int32 MinLogLevel,
 		BOOL Fullscreen
-	) override;
+	) final;
 
-	void Shutdown() override;
+	void Shutdown() final;
 
 protected:
 	virtual ~RenderSystem() noexcept;
-	virtual void OnDestroy() override;
+	virtual void OnDestroy() final;
 
 };
-
 
 #endif // __RENDER_SYSTEM_H__

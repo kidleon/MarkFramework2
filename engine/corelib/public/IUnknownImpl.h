@@ -1,4 +1,4 @@
-#ifndef __I_UNKNOWN_IMPL_H__
+﻿#ifndef __I_UNKNOWN_IMPL_H__
 #define __I_UNKNOWN_IMPL_H__
 
 #include "hash_table.h"
@@ -9,7 +9,7 @@ struct IUNKNOWN_IMPL : public IUNKNOWN
 {
 	IUNKNOWN_IMPL() = default;
 
-	virtual long AddRef() override
+	virtual long AddRef() final
 	{
 		if (this)
 		{
@@ -18,7 +18,7 @@ struct IUNKNOWN_IMPL : public IUNKNOWN
 		return 0;
 	}
 
-	virtual long Release() override
+	virtual long Release() final
 	{
 		if (this)
 		{
@@ -32,7 +32,7 @@ struct IUNKNOWN_IMPL : public IUNKNOWN
 		return 0;
 	}
 
-	virtual long RefCnt() override
+	virtual long RefCnt() final
 	{
 		return m_RefCnt;
 	}
@@ -58,7 +58,7 @@ struct IUNKNOWN_HASH_IMPL : public IUNKNOWN
 {
 	IUNKNOWN_HASH_IMPL() = default;
 
-	virtual long AddRef() override
+	virtual long AddRef() final
 	{
 		if (this)
 		{
@@ -67,7 +67,7 @@ struct IUNKNOWN_HASH_IMPL : public IUNKNOWN
 		return 0;
 	}
 
-	virtual long Release() override
+	virtual long Release() final
 	{
 		if (this)
 		{
@@ -81,7 +81,7 @@ struct IUNKNOWN_HASH_IMPL : public IUNKNOWN
 		return 0;
 	}
 
-	virtual long RefCnt() override
+	virtual long RefCnt() final
 	{
 		return m_RefCnt;
 	}
@@ -111,7 +111,7 @@ struct IUNKNOWN_LIST_IMPL : public IUNKNOWN
 {
 	IUNKNOWN_LIST_IMPL() = default;
 
-	virtual long AddRef() override
+	virtual long AddRef() final
 	{
 		if (this)
 		{
@@ -120,7 +120,7 @@ struct IUNKNOWN_LIST_IMPL : public IUNKNOWN
 		return 0;
 	}
 
-	virtual long Release() override
+	virtual long Release() final
 	{
 		if (this)
 		{
@@ -134,7 +134,7 @@ struct IUNKNOWN_LIST_IMPL : public IUNKNOWN
 		return 0;
 	}
 
-	virtual long RefCnt() override
+	virtual long RefCnt() final
 	{
 		return m_RefCnt;
 	}
