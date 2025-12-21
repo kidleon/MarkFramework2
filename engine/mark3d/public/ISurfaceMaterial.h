@@ -1,7 +1,7 @@
 ﻿#ifndef __I_SURFAE_MATERIAL_H__
 #define __I_SURFAE_MATERIAL_H__
 
-#include "IAssetImpl.h"
+#include "IAsset.h"
 #include "RenderDef.h"
 #include "RenderState.h"
 
@@ -9,7 +9,7 @@
 interface IShaderProgram;
 interface IConstantBuffer;
 
-interface ISurfaceMaterial : public IASSET_IMPL<ASSET_TYPE::SURFACE_MATERIAL>
+interface ISurfaceMaterial : public IAsset
 {
 public:
 	virtual int32 AddPass(const char* szPassName) noexcept = 0;

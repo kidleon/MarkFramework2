@@ -28,6 +28,17 @@ public:
 		ID3D11DepthStencilView* pD3D11DSV
 	) noexcept;
 
+	// IUNKNOWN interface
+	virtual long AddRef() final;
+	virtual long Release() final;
+	virtual long RefCnt() final;
+
+	// IAsset interface
+	virtual UINT32 GetID() const noexcept final;
+	virtual ASSET_TYPE GetAssetType() const noexcept final;
+	virtual LOAD_STAT GetLoadStat() const noexcept final;
+
+	// IRenderTarget interface
 	virtual UINT32 GetColorWidth() const noexcept final;
 	virtual UINT32 GetColorHeight() const noexcept final;
 	virtual COLOR_FORMAT GetColorFormat() const noexcept final;
@@ -53,9 +64,16 @@ public:
 
 private:
 	virtual ~D3D11RenderTarget() noexcept;
-	virtual void OnDestroy() noexcept override;
 
 private:
+	volatile long m_RefCnt = 1;
+#if defined(__TARGET_OS_WINDOWS)
+	unsigned PADDING_OR_RESERVED = 0;
+#endif // defined(__TARGET_OS_WINDOWS)
+
+	UINT32 m_ID = 0;
+	LOAD_STAT m_LoadStat = LOAD_STAT::NOT_LOADED;
+
 	UINT32 m_ColorWidth = 0;
 	UINT32 m_ColorHeight = 0;
 	COLOR_FORMAT m_ColorFormat = COLOR_FORMAT::UNKNOWN;

@@ -10,6 +10,16 @@ public:
 	Mesh() = default;
 	Mesh(uint32 m_VertexFormat, size_t TotalVertexCount, size_t TotalIndexCount);
 
+	// IUNKNOWN interface
+	virtual long AddRef() final;
+	virtual long Release() final;
+	virtual long RefCnt() final;
+
+	// IAsset interface
+	virtual UINT32 GetID() const noexcept final;
+	virtual ASSET_TYPE GetAssetType() const noexcept final;
+	virtual LOAD_STAT GetLoadStat() const noexcept final;
+
 	virtual int32 AddPrimitive(PRIMITIVE_TYPE PrimitiveType, size_t MaxVertex, size_t MaxIndex) noexcept override;
 	virtual int32 GetNumPrimitives() const noexcept override;
 
@@ -128,7 +138,6 @@ public:
 
 protected:
 	virtual ~Mesh() noexcept;
-	virtual void OnDestroy() override;
 	void Clear() noexcept;
 	void AllocBuffer(
 		uint32 m_VertexFormat, 
@@ -137,6 +146,15 @@ protected:
 	) noexcept;
 
 private:
+	volatile long m_RefCnt = 1;
+#if defined(__TARGET_OS_WINDOWS)
+	unsigned PADDING_OR_RESERVED = 0;
+#endif // defined(__TARGET_OS_WINDOWS)
+
+	UINT32 m_ID;
+	LOAD_STAT m_LoadStat;
+
+
 	struct PRIMITIVE
 	{
 		PRIMITIVE_TYPE PrimitiveType;

@@ -25,9 +25,40 @@ D3D11SurfaceMaterial::~D3D11SurfaceMaterial() noexcept
 	}
 }
 
-void D3D11SurfaceMaterial::OnDestroy()
+long D3D11SurfaceMaterial::AddRef()
 {
-	MARK_POOL_DELETE(this, D3D11SurfaceMaterial);
+	interlock_increment_l(&m_RefCnt, MEMORY_ORDER_RELAXED);
+	return m_RefCnt;
+}
+
+long D3D11SurfaceMaterial::Release()
+{
+	long NewRefCnt = interlock_decrement_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL);
+	if (NewRefCnt == 0)
+	{
+		MARK_POOL_DELETE(this, D3D11SurfaceMaterial);
+	}
+	return NewRefCnt;
+}
+
+long D3D11SurfaceMaterial::RefCnt()
+{
+	return m_RefCnt;
+}
+
+UINT32 D3D11SurfaceMaterial::GetID() const noexcept
+{
+	return m_ID;
+}
+
+ASSET_TYPE D3D11SurfaceMaterial::GetAssetType() const noexcept
+{
+	return ASSET_TYPE::SURFACE_MATERIAL;
+}
+
+LOAD_STAT D3D11SurfaceMaterial::GetLoadStat() const noexcept
+{
+	return LOAD_STAT::LOADED;
 }
 
 int32 D3D11SurfaceMaterial::AddPass(const char* szPassName) noexcept

@@ -12,6 +12,17 @@ class D3D11ConstantBufferImpl final : public IConstantBuffer
 public:
 	D3D11ConstantBufferImpl() = default;
 
+	// IUNKNOWN interface
+	virtual long AddRef() final;
+	virtual long Release() final;
+	virtual long RefCnt() final;
+
+	// IAsset interface
+	virtual UINT32 GetID() const noexcept final;
+	virtual ASSET_TYPE GetAssetType() const noexcept final;
+	virtual LOAD_STAT GetLoadStat() const noexcept final;
+
+	// IConstantBuffer interface
 	virtual void UpdateData(const void* pData, size_t DataSize) final;
 
 	virtual void UpdateDataRef(const void* pData, size_t DataSize) final;
@@ -51,9 +62,16 @@ public:
 
 protected:
 	virtual ~D3D11ConstantBufferImpl() noexcept;
-	virtual void OnDestroy() final;
 
 private:
+	volatile long m_RefCnt = 1;
+#if defined(__TARGET_OS_WINDOWS)
+	unsigned PADDING_OR_RESERVED = 0;
+#endif // defined(__TARGET_OS_WINDOWS)
+
+	UINT32 m_ID = 0;
+	LOAD_STAT m_LoadStat = LOAD_STAT::NOT_LOADED;
+
 	D3D11_CONSTANT_BUFFER_BLOCK* m_pCBufferBlock = nullptr;
 
 	void* m_pDataRefPtr = nullptr;

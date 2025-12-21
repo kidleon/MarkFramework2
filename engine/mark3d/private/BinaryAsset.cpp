@@ -3,6 +3,7 @@
 #include "crc32.h"
 #include "crc64.h"
 #include "idgen.h"
+#include "Assets.h"
 
 
 BinaryAsset::BinaryAsset(UINT32 ID)
@@ -10,13 +11,14 @@ BinaryAsset::BinaryAsset(UINT32 ID)
 	, m_Size(0)
 	, m_CRC64Cache(0)
 	, m_CRC32Cache(0)
+	, m_ID(ID)
+	, m_LoadStat(LOAD_STAT::NOT_LOADED)
 {
-	INL_SetID(ID);
 }
 
 BinaryAsset::~BinaryAsset() noexcept
 {
-	idgen_release(GLOBAL_VARS::ID_GEN_HANDLE, m_ID);
+	idgen_release(Assets::ID_GEN_HANDLE, m_ID);
 	m_ID = 0;
 
 	if (m_pData)
@@ -26,9 +28,40 @@ BinaryAsset::~BinaryAsset() noexcept
 	}
 }
 
-void BinaryAsset::OnDestroy()
+long BinaryAsset::AddRef()
 {
-	MARK_DELETE(this, BinaryAsset);
+	interlock_increment_l(&m_RefCnt, MEMORY_ORDER_RELAXED);
+	return m_RefCnt;
+}
+
+long BinaryAsset::Release()
+{
+	long NewRefCnt = interlock_decrement_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL);
+	if (NewRefCnt == 0)
+	{
+		MARK_DELETE(this, BinaryAsset);
+	}
+	return NewRefCnt;
+}
+
+long BinaryAsset::RefCnt()
+{
+	return m_RefCnt;
+}
+
+UINT32 BinaryAsset::GetID() const noexcept
+{
+	return m_ID;
+}
+
+ASSET_TYPE BinaryAsset::GetAssetType() const noexcept
+{
+	return ASSET_TYPE::BINARY;
+}
+
+LOAD_STAT BinaryAsset::GetLoadStat() const noexcept
+{
+	return m_LoadStat;
 }
 
 const char* BinaryAsset::GetData() const noexcept

@@ -1,10 +1,10 @@
 ﻿#ifndef __I_SHADER_PROGRAM_H__
 #define __I_SHADER_PROGRAM_H__
 
-#include "IAssetImpl.h"
+#include "IAsset.h"
 
 
-interface IShaderProgram : IASSET_IMPL<ASSET_TYPE::SHADER_PROGRAM>
+interface IShaderProgram : IAsset
 {
 public:
 	virtual int32 GetBindIndexByName(const NameHash& Name) const = 0;

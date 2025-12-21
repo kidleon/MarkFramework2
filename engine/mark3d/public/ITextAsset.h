@@ -1,13 +1,13 @@
 ﻿#ifndef __ITEXTASSET_H__
 #define __ITEXTASSET_H__
 
-#include "IAssetImpl.h"
+#include "IAsset.h"
 
 
 /**
 * @brief 텍스트 자산 인터페이스, 문자열 데이터를 다루기 위한 기능 제공, UTF-8 인코딩 사용
 */
-interface ITextAsset : public IASSET_IMPL<ASSET_TYPE::TEXT>
+interface ITextAsset : public IAsset
 {
 	/**
 	* @brief 문자열 데이터 포인터 반환 (ITextAsset는 UTF-8 인코딩을 사용함)

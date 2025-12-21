@@ -14,7 +14,19 @@ class D3D11ShaderProgram : public IShaderProgram
 public:
 	D3D11ShaderProgram() = default;
 
+	// IUNKNOWN interface
+	virtual long AddRef() final;
+	virtual long Release() final;
+	virtual long RefCnt() final;
+
+	// IAsset interface
+	virtual UINT32 GetID() const noexcept final;
+	virtual ASSET_TYPE GetAssetType() const noexcept final;
+	virtual LOAD_STAT GetLoadStat() const noexcept final;
+
+	// IShaderProgram interface
 	virtual int32 GetBindIndexByName(const NameHash& Name) const override;
+
 
 	/*
 	virtual void SetConstant(const NameHash& Name, const void* pData, uint32 DataSize) override;
@@ -80,9 +92,16 @@ public:
 	*/
 protected:
 	virtual ~D3D11ShaderProgram() noexcept;
-	virtual void OnDestroy() override;
 
 private:
+	volatile long m_RefCnt = 1;
+#if defined(__TARGET_OS_WINDOWS)
+	unsigned PADDING_OR_RESERVED = 0;
+#endif // defined(__TARGET_OS_WINDOWS)
+
+	UINT32 m_ID = 0;
+	LOAD_STAT m_LoadStat = LOAD_STAT::NOT_LOADED;
+
 	/*
 	SHADER_TYPE m_ShaderType = SHADER_TYPE::UNKNOWN;
 

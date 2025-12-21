@@ -4,9 +4,20 @@
 #include "ITexture2D.h"
 
 
-class D3D11Texture2D : public ITexture2D
+class D3D11Texture2D final : public ITexture2D
 {
 public:
+	// IUNKNOWN interface
+	virtual long AddRef() final;
+	virtual long Release() final;
+	virtual long RefCnt() final;
+
+	// IAsset interface
+	virtual UINT32 GetID() const noexcept final;
+	virtual ASSET_TYPE GetAssetType() const noexcept final;
+	virtual LOAD_STAT GetLoadStat() const noexcept final;
+
+	// ITexture2D interface
 	uint32 GetWidth() const noexcept final;
 	uint32 GetHeight() const noexcept final;
 	uint32 GetMipLevels() const noexcept final;
@@ -31,9 +42,16 @@ public:
 private:
 	D3D11Texture2D() = delete;
 	virtual ~D3D11Texture2D() noexcept;
-	virtual void OnDestroy() noexcept final;
 
 private:
+	volatile long m_RefCnt = 1;
+#if defined(__TARGET_OS_WINDOWS)
+	unsigned PADDING_OR_RESERVED = 0;
+#endif // defined(__TARGET_OS_WINDOWS)
+
+	UINT32 m_ID = 0;
+	LOAD_STAT m_LoadStat = LOAD_STAT::NOT_LOADED;
+
 	uint32 m_Width = 0;
 	uint32 m_Height = 0;
 	uint32 m_MipLevels = 0;

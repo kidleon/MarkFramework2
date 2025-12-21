@@ -11,6 +11,11 @@ class RenderSystem final : public IRenderSystem
 public:
 	RenderSystem();
 
+	// IUNKNOWN interface
+	long AddRef() final;
+	long Release() final;
+	long RefCnt() final;
+
 	BOOL Initialize(
 		HWND hWnd,
 		uint32 ScreenWidth,
@@ -23,7 +28,12 @@ public:
 
 protected:
 	virtual ~RenderSystem() noexcept;
-	virtual void OnDestroy() final;
+	
+private:
+	volatile long m_RefCnt = 1;
+#if defined(__TARGET_OS_WINDOWS)
+	unsigned PADDING_OR_RESERVED = 0;
+#endif // defined(__TARGET_OS_WINDOWS)
 
 };
 

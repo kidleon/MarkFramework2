@@ -1,10 +1,10 @@
 ﻿#ifndef __I_RENDER_CAMERA_H__
 #define __I_RENDER_CAMERA_H__
 
-#include "IAssetImpl.h"
+#include "IAsset.h"
 
 
-interface IRenderCamera : public IASSET_IMPL<ASSET_TYPE::RENDER_CAMERA>
+interface IRenderCamera : public IAsset
 {
 	virtual void SetClearTarget(UINT32 ClearBuffers,
 								const FLOAT4 & ClearColor,

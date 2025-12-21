@@ -12,7 +12,6 @@ public:
 
 	~D3D11ConstantBuffer() noexcept;
 
-
 	__FORCEINLINE size_t INL_GetBufferSize() const noexcept
 	{
 		return m_BufferSize;

@@ -2,6 +2,7 @@
 #include "TextAsset.h"
 #include "idgen.h"
 #include "Log.h"
+#include "Assets.h"
 
 
 TextAsset::TextAsset(UINT32 ID)
@@ -14,7 +15,7 @@ TextAsset::TextAsset(UINT32 ID)
 
 TextAsset::~TextAsset() noexcept
 {
-	idgen_release(GLOBAL_VARS::ID_GEN_HANDLE, m_ID);
+	idgen_release(Assets::ID_GEN_HANDLE, m_ID);
 	m_ID = 0;
 
 	if (m_pData)
@@ -24,9 +25,40 @@ TextAsset::~TextAsset() noexcept
 	}
 }
 
-void TextAsset::OnDestroy()
+long TextAsset::AddRef()
 {
-	MARK_DELETE(this, TextAsset);
+	interlock_increment_l(&m_RefCnt, MEMORY_ORDER_RELAXED);
+	return m_RefCnt;
+}
+
+long TextAsset::Release()
+{
+	long NewRefCnt = interlock_decrement_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL);
+	if (NewRefCnt == 0)
+	{
+		MARK_DELETE(this, TextAsset);
+	}
+	return NewRefCnt;
+}
+
+long TextAsset::RefCnt()
+{
+	return m_RefCnt;
+}
+
+UINT32 TextAsset::GetID() const noexcept
+{
+	return m_ID;
+}
+
+ASSET_TYPE TextAsset::GetAssetType() const noexcept
+{
+	return ASSET_TYPE::TEXT;
+}
+
+LOAD_STAT TextAsset::GetLoadStat() const noexcept
+{
+	return m_LoadStat;
 }
 
 const char* TextAsset::GetData() const noexcept

@@ -57,9 +57,40 @@ D3D11RenderTarget::~D3D11RenderTarget()
 	CHECK_RELEASE(m_pD3D11ColorTexture);
 }
 
-void D3D11RenderTarget::OnDestroy() noexcept
+long D3D11RenderTarget::AddRef()
 {
-	MARK_POOL_DELETE(this, D3D11RenderTarget);
+	interlock_increment_l(&m_RefCnt, MEMORY_ORDER_RELAXED);
+	return m_RefCnt;
+}
+
+long D3D11RenderTarget::Release()
+{
+	long NewRefCnt = interlock_decrement_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL);
+	if (NewRefCnt == 0)
+	{
+		MARK_POOL_DELETE(this, D3D11RenderTarget);
+	}
+	return NewRefCnt;
+}
+
+long D3D11RenderTarget::RefCnt()
+{
+	return m_RefCnt;
+}
+
+UINT32 D3D11RenderTarget::GetID() const noexcept
+{
+	return m_ID;
+}
+
+ASSET_TYPE D3D11RenderTarget::GetAssetType() const noexcept
+{
+	return ASSET_TYPE::RENDER_TARGET;
+}
+
+LOAD_STAT D3D11RenderTarget::GetLoadStat() const noexcept
+{
+	return m_LoadStat;
 }
 
 UINT32 D3D11RenderTarget::GetColorWidth() const noexcept

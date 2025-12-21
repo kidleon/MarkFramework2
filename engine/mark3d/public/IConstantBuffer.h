@@ -2,7 +2,7 @@
 #define __I_CONSTANT_BUFFER_H__
 
 
-interface IConstantBuffer : public IUNKNOWN_IMPL
+interface IConstantBuffer : public IAsset
 {
 	/**
 	* @brief 데이터 복사 후 업데이트. UpdateData 함수는 데이터를 복사하므로, 호출 후 pData의 메모리는 해제해도 됩니다.

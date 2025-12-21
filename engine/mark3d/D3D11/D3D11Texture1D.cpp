@@ -17,9 +17,40 @@ D3D11Texture1D::~D3D11Texture1D() noexcept
 	}
 }
 
-void D3D11Texture1D::OnDestroy() noexcept
+long D3D11Texture1D::AddRef()
 {
-	MARK_POOL_DELETE(this, D3D11Texture1D);
+	interlock_increment_l(&m_RefCnt, MEMORY_ORDER_RELAXED);
+	return m_RefCnt;
+}
+
+long D3D11Texture1D::Release()
+{
+	long NewRefCnt = interlock_decrement_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL);
+	if (NewRefCnt == 0)
+	{
+		MARK_POOL_DELETE(this, D3D11Texture1D);
+	}
+	return NewRefCnt;
+}
+
+long D3D11Texture1D::RefCnt()
+{
+	return m_RefCnt;
+}
+
+UINT32 D3D11Texture1D::GetID() const noexcept
+{
+	return m_ID;
+}
+
+ASSET_TYPE D3D11Texture1D::GetAssetType() const noexcept
+{
+	return ASSET_TYPE::TEXTURE2D;
+}
+
+LOAD_STAT D3D11Texture1D::GetLoadStat() const noexcept
+{
+	return m_LoadStat;
 }
 
 uint32 D3D11Texture1D::GetWidth() const noexcept

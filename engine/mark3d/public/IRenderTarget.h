@@ -1,10 +1,10 @@
 ﻿#ifndef __I_RENDER_TARGET_H__
 #define __I_RENDER_TARGET_H__
 
-#include "IAssetImpl.h"
+#include "IAsset.h"
 
 
-interface IRenderTarget : public IASSET_IMPL<ASSET_TYPE::RENDER_TARGET>
+interface IRenderTarget : public IAsset
 {
 public:
 	virtual UINT32 GetColorWidth() const noexcept = 0;

@@ -29,9 +29,25 @@ RenderSystem::~RenderSystem() noexcept
 	Shutdown();
 }
 
-void RenderSystem::OnDestroy()
+long RenderSystem::AddRef()
 {
-	delete this;
+	interlock_increment_l(&m_RefCnt, MEMORY_ORDER_RELAXED);
+	return m_RefCnt;
+}
+
+long RenderSystem::Release()
+{
+	long NewRefCnt = interlock_decrement_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL);
+	if (NewRefCnt == 0)
+	{
+		delete this;
+	}
+	return NewRefCnt;
+}
+
+long RenderSystem::RefCnt()
+{
+	return m_RefCnt;
 }
 
 BOOL RenderSystem::Initialize(

@@ -1,10 +1,10 @@
 ﻿#ifndef __ITEXTURE1D_H__
 #define __ITEXTURE1D_H__
 
-#include "IAssetImpl.h"
+#include "IAsset.h"
 
 
-interface ITexture1D : public IASSET_IMPL<ASSET_TYPE::TEXTURE1D>
+interface ITexture1D : public IAsset
 {
 	/**
 	* @brief 텍스처 너비 반환

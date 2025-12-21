@@ -12,6 +12,17 @@ class D3D11SurfaceMaterial final : public ISurfaceMaterial
 public:
 	D3D11SurfaceMaterial(D3D11_SURFACE_MATERIAL_BLOCK* pMaterialBlock) noexcept;
 
+	// IUNKNOWN interface
+	virtual long AddRef() final;
+	virtual long Release() final;
+	virtual long RefCnt() final;
+
+	// IAsset interface
+	virtual UINT32 GetID() const noexcept final;
+	virtual ASSET_TYPE GetAssetType() const noexcept final;
+	virtual LOAD_STAT GetLoadStat() const noexcept final;
+
+	// ISurfaceMaterial interface
 	int32 AddPass(const char* szPassName) noexcept final;
 	int32 GetNumPass() const noexcept final;
 
@@ -143,9 +154,16 @@ public:
 protected:
 	D3D11SurfaceMaterial() = delete;
 	~D3D11SurfaceMaterial() noexcept;
-	virtual void OnDestroy() final;
 
 private:
+	volatile long m_RefCnt = 1;
+#if defined(__TARGET_OS_WINDOWS)
+	unsigned PADDING_OR_RESERVED = 0;
+#endif // defined(__TARGET_OS_WINDOWS)
+
+	UINT32 m_ID = 0;
+	LOAD_STAT m_LoadStat = LOAD_STAT::NOT_LOADED;
+
 	D3D11_SURFACE_MATERIAL_BLOCK* m_pMaterialBlock;
 
 	int32 m_CurrentPass;

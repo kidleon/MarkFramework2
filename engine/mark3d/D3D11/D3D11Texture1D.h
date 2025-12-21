@@ -9,6 +9,17 @@ struct D3D11Texture1DImpl;
 class D3D11Texture1D final : public ITexture1D
 {
 public:
+	// IUNKNOWN interface
+	virtual long AddRef() final;
+	virtual long Release() final;
+	virtual long RefCnt() final;
+
+	// IAsset interface
+	virtual UINT32 GetID() const noexcept final;
+	virtual ASSET_TYPE GetAssetType() const noexcept final;
+	virtual LOAD_STAT GetLoadStat() const noexcept final;
+
+	// ITexture1D interface
 	uint32 GetWidth() const noexcept final;
 	uint32 GetMipLevels() const noexcept final;
 	COLOR_FORMAT GetFormat() const noexcept final;
@@ -30,9 +41,16 @@ public:
 private:
 	D3D11Texture1D() = delete;
 	virtual ~D3D11Texture1D() noexcept;
-	void OnDestroy() noexcept final;
 
 private:
+	volatile long m_RefCnt = 1;
+#if defined(__TARGET_OS_WINDOWS)
+	unsigned PADDING_OR_RESERVED = 0;
+#endif // defined(__TARGET_OS_WINDOWS)
+
+	UINT32 m_ID = 0;
+	LOAD_STAT m_LoadStat = LOAD_STAT::NOT_LOADED;
+
 	uint32 m_Width = 0;
 	uint32 m_MipLevels = 0;
 	COLOR_FORMAT m_Format = COLOR_FORMAT::UNKNOWN;

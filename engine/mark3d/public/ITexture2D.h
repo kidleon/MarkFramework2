@@ -1,10 +1,10 @@
 ﻿#ifndef __ITEXTURE2D_H__
 #define __ITEXTURE2D_H__
 
-#include "IAssetImpl.h"
+#include "IAsset.h"
 
 
-interface ITexture2D : public IASSET_IMPL<ASSET_TYPE::TEXTURE2D>
+interface ITexture2D : public IAsset
 {
 	/**
 	* @brief 텍스처 너비 반환

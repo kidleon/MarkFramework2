@@ -10,6 +10,16 @@ public:
 	BinaryAsset(UINT32 ID);
 	virtual ~BinaryAsset() noexcept;
 
+	// IUNKNOWN interface
+	virtual long AddRef() final;
+	virtual long Release() final;
+	virtual long RefCnt() final;
+
+	// IAsset interface
+	virtual UINT32 GetID() const noexcept final;
+	virtual ASSET_TYPE GetAssetType() const noexcept final;
+	virtual LOAD_STAT GetLoadStat() const noexcept final;
+
 	// IBinaryAsset interface
 	virtual const char* GetData() const noexcept override;
 	virtual size_t GetSize() const noexcept override;
@@ -52,10 +62,15 @@ public:
 		interlock_store_l((long*)&m_LoadStat, (long)loadStat, MEMORY_ORDER_RELAXED);
 	}
 
-protected:
-	virtual void OnDestroy() override;
-
 private:
+	volatile long m_RefCnt = 1;
+#if defined(__TARGET_OS_WINDOWS)
+	unsigned PADDING_OR_RESERVED = 0;
+#endif // defined(__TARGET_OS_WINDOWS)
+
+	UINT32 m_ID;
+	LOAD_STAT m_LoadStat;
+
 	char* m_pData;
 	size_t m_Size;
 	uint64 m_CRC64Cache;

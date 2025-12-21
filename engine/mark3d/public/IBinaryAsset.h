@@ -1,10 +1,10 @@
 ﻿#ifndef __IBINARYASSET_H__
 #define __IBINARYASSET_H__
 
-#include "IAssetImpl.h"
+#include "IAsset.h"
 
 
-interface IBinaryAsset : public IASSET_IMPL<ASSET_TYPE::BINARY>
+interface IBinaryAsset : public IAsset
 {
 	/**
 	* @brief 바이너리 데이터 포인터 반환

@@ -18,9 +18,40 @@ Mesh::~Mesh() noexcept
 {
 }
 
-void Mesh::OnDestroy()
+long Mesh::AddRef()
 {
-	MARK_POOL_DELETE(this, Mesh);
+	interlock_increment_l(&m_RefCnt, MEMORY_ORDER_RELAXED);
+	return m_RefCnt;
+}
+
+long Mesh::Release()
+{
+	long NewRefCnt = interlock_decrement_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL);
+	if (NewRefCnt == 0)
+	{
+		MARK_POOL_DELETE(this, Mesh);
+	}
+	return NewRefCnt;
+}
+
+long Mesh::RefCnt()
+{
+	return m_RefCnt;
+}
+
+UINT32 Mesh::GetID() const noexcept
+{
+	return m_ID;
+}
+
+ASSET_TYPE Mesh::GetAssetType() const noexcept
+{
+	return ASSET_TYPE::MESH;
+}
+
+LOAD_STAT Mesh::GetLoadStat() const noexcept
+{
+	return m_LoadStat;
 }
 
 void Mesh::Clear() noexcept

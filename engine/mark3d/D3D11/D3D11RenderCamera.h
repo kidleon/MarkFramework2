@@ -52,6 +52,17 @@ public:
 		CAMERA_MODE CameraMode
 	);
 
+	// IUNKNOWN interface
+	virtual long AddRef() final;
+	virtual long Release() final;
+	virtual long RefCnt() final;
+
+	// IAsset interface
+	virtual UINT32 GetID() const noexcept final;
+	virtual ASSET_TYPE GetAssetType() const noexcept final;
+	virtual LOAD_STAT GetLoadStat() const noexcept final;
+
+	// IRenderCamera interface
 	void SetClearTarget(
 		UINT32 ClearBuffers,
 		const FLOAT4& ClearColor,
@@ -101,10 +112,17 @@ public:
 	__INLINE D3D11RenderTarget* INL_GetRenderTarget() const noexcept { return m_pRenderTarget; }
 
 protected:
-	virtual ~D3D11RenderCamera();
-	virtual void OnDestroy() noexcept final;
+	virtual ~D3D11RenderCamera() noexcept;
 
 private:
+	volatile long m_RefCnt = 1;
+#if defined(__TARGET_OS_WINDOWS)
+	unsigned PADDING_OR_RESERVED = 0;
+#endif // defined(__TARGET_OS_WINDOWS)
+
+	UINT32 m_ID = 0;
+	LOAD_STAT m_LoadStat = LOAD_STAT::NOT_LOADED;
+
 	CLEAR_TARGET_DESC m_ClearTarget;
 	PERSPECTIVE_DESC m_Perspective;
 	ORTHO_DESC m_Ortho;

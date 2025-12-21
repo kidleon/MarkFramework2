@@ -4,7 +4,7 @@
 
 using namespace mark;
 
-interface IMesh : public IASSET_IMPL<ASSET_TYPE::MESH>
+interface IMesh : public IAsset
 {
 	/**
 	* @brief 프리미티브 추가

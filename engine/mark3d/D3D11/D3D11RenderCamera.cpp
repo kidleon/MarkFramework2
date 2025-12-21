@@ -19,14 +19,45 @@ D3D11RenderCamera::D3D11RenderCamera(
 {
 }
 
-D3D11RenderCamera::~D3D11RenderCamera()
+D3D11RenderCamera::~D3D11RenderCamera() noexcept
 {
 	CHECK_RELEASE(m_pRenderTarget);
 }
 
-void D3D11RenderCamera::OnDestroy() noexcept
+long D3D11RenderCamera::AddRef()
 {
-	MARK_POOL_DELETE(this, D3D11RenderCamera);
+	interlock_increment_l(&m_RefCnt, MEMORY_ORDER_RELAXED);
+	return m_RefCnt;
+}
+
+long D3D11RenderCamera::Release()
+{
+	long NewRefCnt = interlock_decrement_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL);
+	if (NewRefCnt == 0)
+	{
+		MARK_POOL_DELETE(this, D3D11RenderCamera);
+	}
+	return NewRefCnt;
+}
+
+long D3D11RenderCamera::RefCnt()
+{
+	return m_RefCnt;
+}
+
+UINT32 D3D11RenderCamera::GetID() const noexcept
+{
+	return m_ID;
+}
+
+ASSET_TYPE D3D11RenderCamera::GetAssetType() const noexcept
+{
+	return ASSET_TYPE::RENDER_CAMERA;
+}
+
+LOAD_STAT D3D11RenderCamera::GetLoadStat() const noexcept
+{
+	return m_LoadStat;
 }
 
 void D3D11RenderCamera::SetClearTarget(

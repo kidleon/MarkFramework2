@@ -10,16 +10,26 @@ public:
 	TextAsset(UINT32 ID);
 	virtual ~TextAsset() noexcept;
 
+	// IUNKNOWN interface
+	virtual long AddRef() final;
+	virtual long Release() final;
+	virtual long RefCnt() final;
+
+	// IAsset interface
+	virtual UINT32 GetID() const noexcept final;
+	virtual ASSET_TYPE GetAssetType() const noexcept final;
+	virtual LOAD_STAT GetLoadStat() const noexcept final;
+
 	// ITextAsset interface
-	virtual const char* GetData() const noexcept override;
-	virtual size_t GetSize() const noexcept override;
+	virtual const char* GetData() const noexcept final;
+	virtual size_t GetSize() const noexcept final;
 
-	virtual BOOL IsUTF8() const noexcept override;
-	virtual ENCODING_TYPE GetEncodingType() const noexcept override;
+	virtual BOOL IsUTF8() const noexcept final;
+	virtual ENCODING_TYPE GetEncodingType() const noexcept final;
 
-	virtual BOOL ConvertUTF32(char32_t* pBuffer, size_t BufferSize, size_t* pResultSize) const noexcept override;
-	virtual BOOL ConvertUTF16(char16_t* pBuffer, size_t BufferSize, size_t* pResultSize) const noexcept override;
-	virtual BOOL ConvertWCHAR(wchar_t* pBuffer, size_t BufferSize, size_t* pResultSize) const noexcept override;
+	virtual BOOL ConvertUTF32(char32_t* pBuffer, size_t BufferSize, size_t* pResultSize) const noexcept final;
+	virtual BOOL ConvertUTF16(char16_t* pBuffer, size_t BufferSize, size_t* pResultSize) const noexcept final;
+	virtual BOOL ConvertWCHAR(wchar_t* pBuffer, size_t BufferSize, size_t* pResultSize) const noexcept final;
  
 	// Private inline methods
 	__FORCEINLINE UINT32 INL_GetID() const noexcept
@@ -57,10 +67,15 @@ public:
 		interlock_store_l((long*)&m_LoadStat, (long)loadStat, MEMORY_ORDER_RELAXED);
 	}
 
-protected:
-	void OnDestroy();
-
 private:
+	volatile long m_RefCnt = 1;
+#if defined(__TARGET_OS_WINDOWS)
+	unsigned PADDING_OR_RESERVED = 0;
+#endif // defined(__TARGET_OS_WINDOWS)
+
+	UINT32 m_ID;
+	LOAD_STAT m_LoadStat;
+
 	char* m_pData;
 	size_t m_Size;
 

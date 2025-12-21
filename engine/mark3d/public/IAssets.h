@@ -7,8 +7,9 @@ interface IBinaryAsset;
 interface ITexture1D;
 interface ITexture2D;
 interface IMesh;
+interface ISurfaceMaterial;
 
-interface IAssets : public IUNKNOWN_IMPL
+interface IAssets : public IUNKNOWN
 {
 	/**
 	* @brief 텍스트 자산 로드

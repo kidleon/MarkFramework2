@@ -20,9 +20,40 @@ D3D11ShaderProgram::~D3D11ShaderProgram() noexcept
 	*/
 }
 
-void D3D11ShaderProgram::OnDestroy()
+long D3D11ShaderProgram::AddRef()
 {
-	MARK_POOL_DELETE(this, D3D11ShaderProgram);
+	interlock_increment_l(&m_RefCnt, MEMORY_ORDER_RELAXED);
+	return m_RefCnt;
+}
+
+long D3D11ShaderProgram::Release()
+{
+	long NewRefCnt = interlock_decrement_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL);
+	if (NewRefCnt == 0)
+	{
+		MARK_POOL_DELETE(this, D3D11ShaderProgram);
+	}
+	return NewRefCnt;
+}
+
+long D3D11ShaderProgram::RefCnt()
+{
+	return m_RefCnt;
+}
+
+UINT32 D3D11ShaderProgram::GetID() const noexcept
+{
+	return m_ID;
+}
+
+ASSET_TYPE D3D11ShaderProgram::GetAssetType() const noexcept
+{
+	return ASSET_TYPE::SHADER_PROGRAM;
+}
+
+LOAD_STAT D3D11ShaderProgram::GetLoadStat() const noexcept
+{
+	return m_LoadStat;
 }
 
 int32 D3D11ShaderProgram::GetBindIndexByName(const NameHash& Name) const

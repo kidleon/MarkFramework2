@@ -13,7 +13,6 @@
 #include "IUnknownImpl.h"
 #include "IAssetImpl.h"
 #include "IAsset.h"
-#include "GlobalVars.h"
 #include "Log.h"
 #include "RenderDef.h"
 #include "IRenderSystem.h"

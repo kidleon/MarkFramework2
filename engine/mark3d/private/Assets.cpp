@@ -33,6 +33,8 @@ constexpr static UINT32 MIN_ID_COUNT = 1;
 constexpr static UINT32 MAX_ID_COUNT = 200000;
 constexpr static size_t THREAD_POOL_SIZE = 4;
 
+HANDLE Assets::ID_GEN_HANDLE = nullptr;
+
 Assets::Assets()
 	: m_pFileSystem(nullptr)
 	, m_hThreadPool(nullptr)
@@ -46,9 +48,25 @@ Assets::~Assets() noexcept
 	Shutdown();
 }
 
-void Assets::OnDestroy()
+long Assets::AddRef()
 {
-	MARK_DELETE(this, Assets);
+	interlock_increment_l(&m_RefCnt, MEMORY_ORDER_RELAXED);
+	return m_RefCnt;
+}
+
+long Assets::Release()
+{
+	long NewRefCnt = interlock_decrement_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL);
+	if (NewRefCnt == 0)
+	{
+		MARK_DELETE(this, Assets);
+	}
+	return NewRefCnt;
+}
+
+long Assets::RefCnt()
+{
+	return m_RefCnt;
 }
 
 BOOL Assets::Init(const char* szRootPath)
@@ -58,7 +76,7 @@ BOOL Assets::Init(const char* szRootPath)
 	CreateOSFileSystem(szRootPath, &m_pFileSystem);
 	m_hThreadPool = threadpool_create(THREAD_POOL_SIZE);
 	m_hIDGen = idgen_create(MIN_ID_COUNT, MAX_ID_COUNT);
-	GLOBAL_VARS::ID_GEN_HANDLE = m_hIDGen;
+	Assets::ID_GEN_HANDLE = m_hIDGen;
 
 	m_Initialized = TRUE;
 
@@ -79,7 +97,7 @@ void Assets::Shutdown()
 	{
 		idgen_destroy(m_hIDGen);
 		m_hIDGen = nullptr;
-		GLOBAL_VARS::ID_GEN_HANDLE = nullptr;
+		Assets::ID_GEN_HANDLE = nullptr;
 	}
 
 	if (m_pFileSystem)
