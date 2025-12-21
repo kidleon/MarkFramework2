@@ -345,7 +345,6 @@ enum class SAMPLER_FILTER : UINT8
 	EMAX
 };
 
-
 /**
 * @brief 텍스처 주소 모드 열거형
 */
@@ -548,7 +547,7 @@ enum class CAMERA_MODE : unsigned int
 * @note Height : 화면 높이
 * @note Fullscreen : 전체 화면 모드 여부
 */
-struct ENGINE_CREATE_DESC
+struct MARKENGINE_API ENGINE_CREATE_DESC
 {
 #if defined(__TARGET_OS_WINDOWS)
 	HWND hWnd; // 윈도우 핸들
@@ -563,7 +562,7 @@ struct ENGINE_CREATE_DESC
 /**
 * @brief 1D 텍스처 생성 정보 구조체
 */
-struct TEXTURE1D_CREATE_DESC
+struct MARKENGINE_API TEXTURE1D_CREATE_DESC
 {
 	TEXTURE_TYPE Type; // 텍스처 타입
 	UINT32 Width; // 텍스처 너비
@@ -576,7 +575,7 @@ struct TEXTURE1D_CREATE_DESC
 /**
 * @brief 2D 텍스처 생성 정보 구조체
 */
-struct TEXTURE2D_CREATE_DESC
+struct MARKENGINE_API TEXTURE2D_CREATE_DESC
 {
 	TEXTURE_TYPE Type; // 텍스처 타입
 	UINT32 Width; // 텍스처 너비
@@ -588,7 +587,6 @@ struct TEXTURE2D_CREATE_DESC
 };
 
 
-// 렌더 상태 구조체들
 
 
 

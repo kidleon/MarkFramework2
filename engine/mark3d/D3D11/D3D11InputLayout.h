@@ -1,4 +1,4 @@
-#ifndef __D3D11_INPUT_LAYOUT_H__
+﻿#ifndef __D3D11_INPUT_LAYOUT_H__
 #define __D3D11_INPUT_LAYOUT_H__
 
 
@@ -30,6 +30,7 @@ public:
 private:
 	ID3D11InputLayout* m_pD3D11InputLayout;
 	uint32 m_VertexFormat;
+	uint32 PADDING = 0;
 	HASH_NODE m_HashNode;
 
 };

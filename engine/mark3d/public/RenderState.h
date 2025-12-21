@@ -7,7 +7,7 @@
 /**
 * @brief 샘플러 상태 구조체
 */
-struct RS_SAMPLER_STATE
+struct MARKENGINE_API RS_SAMPLER_STATE
 {
 	static RS_SAMPLER_STATE LINEAR_WRAP; // 기본 선형 필터링 (일반)
 	static RS_SAMPLER_STATE POINT_WRAP; // 포인트 필터링 (픽셀 그래픽)
@@ -93,7 +93,7 @@ struct RS_SAMPLER_STATE
 /**
 * @brief 블렌드 타겟 구조체
 */
-struct RS_BLEND_TARGET
+struct MARKENGINE_API RS_BLEND_TARGET
 {
 	static RS_BLEND_TARGET NO_BLEND; // 블렌드 비활성화
 	static RS_BLEND_TARGET ALPHA_BLEND; // 알파 블렌드 (전통적인 알파효과, Result = SrcAlpha * Src + (1 - SrcAlpha) * Dst)
@@ -210,7 +210,7 @@ struct RS_BLEND_TARGET
 /**
 * @brief 블렌드 상태 구조체
 */
-struct RS_BLEND_STATE
+struct MARKENGINE_API RS_BLEND_STATE
 {
 	INT32 NumBlendTargets; // 블렌드 타겟 수
 	BOOL AlphaToCoverageEnable; // 알파 투 커버리지 활성화 여부 
@@ -232,7 +232,7 @@ struct RS_BLEND_STATE
 /**
 * @brief 스텐실 연산 설명 구조체
 */
-struct RS_STENCIL_OP
+struct MARKENGINE_API RS_STENCIL_OP
 {
 	STENCIL_OP StencilFailOp; // 스텐실 테스트 실패 시
 	STENCIL_OP StencilDepthFailOp; // 스텐실 통과, 깊이 실패 시
@@ -279,7 +279,7 @@ struct RS_STENCIL_OP
 /**
 * @brief 깊이-스텐실 상태 구조체
 */
-struct RS_DEPTH_STENCIL_STATE
+struct MARKENGINE_API RS_DEPTH_STENCIL_STATE
 {
 	static RS_DEPTH_STENCIL_STATE DEFAULT; // 기본 깊이-스텐실 상태
 	static RS_DEPTH_STENCIL_STATE DEPTH_READ_ONLY; // 깊이 읽기 전용 (투명 오브젝트용)
@@ -378,7 +378,7 @@ struct RS_DEPTH_STENCIL_STATE
 /**
 * @brief 래스터라이저 상태 구조체
 */
-struct RS_RASTERIZER_STATE
+struct MARKENGINE_API RS_RASTERIZER_STATE
 {
 	static RS_RASTERIZER_STATE DEFAULT; // 기본 래스터라이저 상태
 	static RS_RASTERIZER_STATE WIREFRAME; // 와이어프레임 모드
@@ -566,7 +566,7 @@ struct RS_RASTERIZER_STATE
 /**
 * @brief 텍스처 상태 구조체
 */
-struct TEXTURE_STATE
+struct MARKENGINE_API TEXTURE_STATE
 {
 	NameHash Name; // 텍스처 이름 해시
 	INT32 BindIndex; // 바인드 인덱스
@@ -585,7 +585,7 @@ struct TEXTURE_STATE
 
 interface IConstantBuffer;
 
-struct CONSTANT_STATE
+struct MARKENGINE_API CONSTANT_STATE
 {
 	NameHash Name; // 상수 버퍼 이름 해시
 	INT32 BindIndex; // 바인드 인덱스
