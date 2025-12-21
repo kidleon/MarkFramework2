@@ -1,8 +1,5 @@
 ﻿#include "pch.h"
 #include "RenderSystem.h"
-#include "SurfaceMaterialBlockPool.h"
-#include "ConstantBufferBlockPool.h"
-#include "SurfaceMaterial.h"
 
 
 RenderSystem* RenderSystem::m_pInstance = nullptr;
@@ -59,9 +56,6 @@ BOOL RenderSystem::Initialize(
 
 	SYS_LOG_I("Log system initialized: MinLogLevel=%u", pDesc->MinLogLevel);
 
-	SurfaceMaterialBlockPool::Init();
-	ConstantBufferBlockPool::Init();
-
 #if defined(__MARK3D_RENDERSYSTEM_D3D11__)
 	SYS_LOG_I("Render System: Direct3D 11");
 #elif defined(__MARK3D_RENDERSYSTEM_D3D12__)
@@ -83,6 +77,4 @@ BOOL RenderSystem::Initialize(
 
 void RenderSystem::Shutdown()
 {
-	SurfaceMaterialBlockPool::Shutdown();
-	ConstantBufferBlockPool::Shutdown();
 }

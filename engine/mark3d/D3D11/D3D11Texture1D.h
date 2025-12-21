@@ -30,7 +30,7 @@ public:
 private:
 	D3D11Texture1D() = delete;
 	virtual ~D3D11Texture1D() noexcept;
-	void OnDestroy() noexcept override;
+	void OnDestroy() noexcept final;
 
 private:
 	uint32 m_Width = 0;

@@ -14,6 +14,7 @@
 #include "D3D11Texture2D.h"
 #include "D3D11RenderTarget.h"
 #include "D3D11Global.h"
+#include "D3D11RenderStateCache.h"
 
 
 D3D11RenderDevice::~D3D11RenderDevice() noexcept
@@ -216,6 +217,10 @@ BOOL D3D11RenderDevice::CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOO
 	}
 
 	m_pShaderCache = MARK_NEW(D3D11ShaderCache)();
+	m_pShaderCache->Init();
+
+	m_pRenderStateCache = MARK_NEW(D3D11RenderStateCache)();
+	m_pRenderStateCache->Init();
 
 	D3D11Global::s_pRenderDevice = this;
 
@@ -224,6 +229,12 @@ BOOL D3D11RenderDevice::CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOO
 
 void D3D11RenderDevice::DestroyDevice() noexcept
 {
+	if (m_pRenderStateCache)
+	{
+		MARK_DELETE(m_pRenderStateCache, D3D11RenderStateCache);
+		m_pRenderStateCache = nullptr;
+	}
+
 	if (m_pInputLayoutCache)
 	{
 		MARK_DELETE(m_pInputLayoutCache, D3D11InputLayoutCache);
@@ -750,6 +761,74 @@ BOOL D3D11RenderDevice::FillTexture2D(
 BOOL D3D11RenderDevice::CreateRenderTarget(
 	const D3D11_RENDERTARGET_CREATE_DESC* pDesc,
 	D3D11RenderTarget** ppRT
+)
+{
+	return TRUE;
+}
+
+BOOL D3D11RenderDevice::GetOrCreateSamplerState(
+	uint64 Hash,
+	const RS_SAMPLER_STATE& Desc,
+	D3D11SamplerState** ppOut
+)
+{
+	return TRUE;
+}
+
+BOOL D3D11RenderDevice::GetOrCreateSamplerState(
+	const TRenderState<RS_SAMPLER_STATE>& TDesc,
+	D3D11SamplerState** ppOut
+)
+{
+	return TRUE;
+}
+
+BOOL D3D11RenderDevice::GetOrCreateBlendState(
+	uint64 Hash,
+	const RS_BLEND_STATE& Desc,
+	D3D11BlendState** ppOut
+)
+{
+	return TRUE;
+}
+
+BOOL D3D11RenderDevice::GetOrCreateBlendState(
+	const TRenderState<RS_BLEND_STATE>& TDesc,
+	D3D11BlendState** ppOut
+)
+{
+	return TRUE;
+}
+
+BOOL D3D11RenderDevice::GetOrCreateRasterizerState(
+	uint64 Hash,
+	const RS_RASTERIZER_STATE& Desc,
+	D3D11RasterizerState** ppOut
+)
+{
+	return TRUE;
+}
+
+BOOL D3D11RenderDevice::GetOrCreateRasterizerState(
+	const TRenderState<RS_RASTERIZER_STATE>& TDesc,
+	D3D11RasterizerState** ppOut
+)
+{
+	return TRUE;
+}
+
+BOOL D3D11RenderDevice::GetOrCreateDepthStencilState(
+	uint64 Hash,
+	const RS_DEPTH_STENCIL_STATE& Desc,
+	D3D11DepthStencilState** ppOut
+)
+{
+	return TRUE;
+}
+
+BOOL D3D11RenderDevice::GetOrCreateDepthStencilState(
+	const TRenderState<RS_DEPTH_STENCIL_STATE>& TDesc,
+	D3D11DepthStencilState** ppOut
 )
 {
 	return TRUE;

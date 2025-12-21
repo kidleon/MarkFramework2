@@ -1,20 +1,20 @@
-﻿#ifndef __CONSTANT_BUFFER_H__
-#define __CONSTANT_BUFFER_H__
+﻿#ifndef __D3D11_CONSTANT_BUFFER_H__
+#define __D3D11_CONSTANT_BUFFER_H__
 
 #include "IConstantBuffer.h"
-#include "ConstantBufferBlock.h"
+#include "D3D11ConstantBufferBlock.h"
 
 
-struct CONSTANT_BUFFER_BLOCK;
+struct D3D11_CONSTANT_BUFFER_BLOCK;
 
-class ConstantBuffer : public IConstantBuffer
+class D3D11ConstantBufferImpl final : public IConstantBuffer
 {
 public:
-	ConstantBuffer() = default;
+	D3D11ConstantBufferImpl() = default;
 
-	virtual void UpdateData(const void* pData, size_t DataSize) override;
+	virtual void UpdateData(const void* pData, size_t DataSize) final;
 
-	virtual void UpdateDataRef(const void* pData, size_t DataSize) override;
+	virtual void UpdateDataRef(const void* pData, size_t DataSize) final;
 
 	__FORCEINLINE BOOL INL_IsDataRef() const noexcept
 	{
@@ -50,11 +50,11 @@ public:
 	}
 
 protected:
-	virtual ~ConstantBuffer() noexcept;
-	virtual void OnDestroy() override;
+	virtual ~D3D11ConstantBufferImpl() noexcept;
+	virtual void OnDestroy() final;
 
 private:
-	CONSTANT_BUFFER_BLOCK* m_pCBufferBlock = nullptr;
+	D3D11_CONSTANT_BUFFER_BLOCK* m_pCBufferBlock = nullptr;
 
 	void* m_pDataRefPtr = nullptr;
 	size_t m_DataRefSize = 0;
@@ -62,4 +62,4 @@ private:
 };
 
 
-#endif // __CONSTANT_BUFFER_H__
+#endif // __D3D11_CONSTANT_BUFFER_H__

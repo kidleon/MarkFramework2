@@ -1,10 +1,10 @@
 ﻿#include "pch.h"
-#include "ConstantBufferBlockPool.h"
-#include "ConstantBufferBlock.h"
+#include "D3D11ConstantBufferBlockPool.h"
+#include "D3D11ConstantBufferBlock.h"
 #include "crt_memory.h"
 
 
-LINKED_LIST ConstantBufferBlockPool::m_CBufferBlockPool[(size_t)CBUFFER_INDEX::EMAX] = {};
+LINKED_LIST D3D11ConstantBufferBlockPool::m_CBufferBlockPool[(size_t)CBUFFER_INDEX::EMAX] = {};
 
 
 static constexpr size_t CBUFFER_CAPA_SIZE[] =
@@ -48,7 +48,7 @@ static int32 GetSizeIndexBySize(size_t size)
 	return -1;
 }
 
-void ConstantBufferBlockPool::Init()
+void D3D11ConstantBufferBlockPool::Init()
 {
 	for(int i = 0; i < (size_t)CBUFFER_INDEX::EMAX; ++i)
 	{
@@ -58,7 +58,7 @@ void ConstantBufferBlockPool::Init()
 
 }
 
-CONSTANT_BUFFER_BLOCK* ConstantBufferBlockPool::Alloc(size_t BufferSize)
+D3D11_CONSTANT_BUFFER_BLOCK* D3D11ConstantBufferBlockPool::Alloc(size_t BufferSize)
 {
 	const int32 SizeIndex = GetSizeIndexBySize(BufferSize);
 	if (-1 == SizeIndex)
@@ -71,12 +71,12 @@ CONSTANT_BUFFER_BLOCK* ConstantBufferBlockPool::Alloc(size_t BufferSize)
 		AllocPool((CBUFFER_INDEX)SizeIndex);
 
 	LINK_NODE* pNode = linked_list_pop_front(&m_CBufferBlockPool[SizeIndex]);
-	CONSTANT_BUFFER_BLOCK* pBlock = (CONSTANT_BUFFER_BLOCK*)pNode->data;
+	D3D11_CONSTANT_BUFFER_BLOCK* pBlock = (D3D11_CONSTANT_BUFFER_BLOCK*)pNode->data;
 	
 	return pBlock;
 }
 
-void ConstantBufferBlockPool::Release(CONSTANT_BUFFER_BLOCK* pCBBlock)
+void D3D11ConstantBufferBlockPool::Release(D3D11_CONSTANT_BUFFER_BLOCK* pCBBlock)
 {
 	if (!pCBBlock)
 		return;
@@ -94,7 +94,7 @@ void ConstantBufferBlockPool::Release(CONSTANT_BUFFER_BLOCK* pCBBlock)
 	linked_list_push_front(pLinkedList, &pCBBlock->LinkNode);
 }
 
-void ConstantBufferBlockPool::Shutdown()
+void D3D11ConstantBufferBlockPool::Shutdown()
 {
 	for (int i = 0; i < (size_t)CBUFFER_INDEX::EMAX; ++i)
 	{
@@ -102,7 +102,7 @@ void ConstantBufferBlockPool::Shutdown()
 		while (!linked_list_empty(pLinkedList))
 		{
 			LINK_NODE* pNode = linked_list_pop_front(pLinkedList);
-			CONSTANT_BUFFER_BLOCK* pCBBlock = (CONSTANT_BUFFER_BLOCK*)pNode->data;
+			D3D11_CONSTANT_BUFFER_BLOCK* pCBBlock = (D3D11_CONSTANT_BUFFER_BLOCK*)pNode->data;
 			if (pCBBlock)
 			{
 				if (pCBBlock->pData)
@@ -111,13 +111,13 @@ void ConstantBufferBlockPool::Shutdown()
 					pCBBlock->pData = nullptr;
 				}
 
-				MARK_DELETE(pCBBlock, CONSTANT_BUFFER_BLOCK);
+				MARK_DELETE(pCBBlock, D3D11_CONSTANT_BUFFER_BLOCK);
 			}
 		}
 	}
 }
 
-void ConstantBufferBlockPool::AllocPool(CBUFFER_INDEX Index)
+void D3D11ConstantBufferBlockPool::AllocPool(CBUFFER_INDEX Index)
 {
 	const size_t AllocCount = CBUFFER_ALLOC_COUNT[(int)Index];
 	const size_t AllocSize = CBUFFER_CAPA_SIZE[(int)Index];
@@ -126,7 +126,7 @@ void ConstantBufferBlockPool::AllocPool(CBUFFER_INDEX Index)
 
 	for(size_t i = 0; i < AllocCount; ++i)
 	{
-		CONSTANT_BUFFER_BLOCK* pCBBlock = MARK_NEW(CONSTANT_BUFFER_BLOCK);
+		D3D11_CONSTANT_BUFFER_BLOCK* pCBBlock = MARK_NEW(D3D11_CONSTANT_BUFFER_BLOCK);
 		pCBBlock->BufferSize = AllocSize;
 		pCBBlock->BufferSizeIndex = (size_t)Index;
 		pCBBlock->pData = crt_malloc_align(AllocSize, 16);

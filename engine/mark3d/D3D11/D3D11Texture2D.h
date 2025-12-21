@@ -31,7 +31,7 @@ public:
 private:
 	D3D11Texture2D() = delete;
 	virtual ~D3D11Texture2D() noexcept;
-	virtual void OnDestroy() noexcept override;
+	virtual void OnDestroy() noexcept final;
 
 private:
 	uint32 m_Width = 0;

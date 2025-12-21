@@ -12,6 +12,21 @@ D3D11InputLayoutCache::~D3D11InputLayoutCache() noexcept
 {
 	if (m_pCacheTable)
 	{
+		for (int b = 0; b < m_pCacheTable->bucket_size; ++b)
+		{
+			HASH_NODE* pNode = m_pCacheTable->buckets[b];
+
+			while (pNode)
+			{
+				HASH_NODE* pNext = pNode->next;
+
+				D3D11InputLayout* pIL = (D3D11InputLayout*)pNode->data;
+				MARK_POOL_DELETE(pIL, D3D11InputLayout);
+
+				pNode = pNext;
+			}
+		}
+
 		delete_hash_table(m_pCacheTable);
 		m_pCacheTable = nullptr;
 	}

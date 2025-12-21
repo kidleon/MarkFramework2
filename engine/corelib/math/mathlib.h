@@ -110,6 +110,43 @@ struct MATRIX4
 	};
 };
 
+typedef FLOAT4 COLOR4;
+typedef FLOAT4 QUATERNION;
+
+constexpr FLOAT M_2PI = 6.283185307f;
+constexpr FLOAT M_1DIVPI = 0.318309886f;
+constexpr FLOAT M_1DIV2PI = 0.159154943f;
+constexpr FLOAT M_PIDIV2 = 1.570796327f;
+constexpr FLOAT M_PIDIV4 = 0.785398163f;
+
+constexpr FLOAT4 COLOR_WHITE = { 1.0f, 1.0f, 1.0f, 1.0f };
+constexpr FLOAT4 COLOR_BLACK = { 1.0f, 1.0f, 1.0f, 1.0f };
+constexpr FLOAT4 COLOR_RED = { 1.0f, 0.0f, 0.0f, 1.0f };
+constexpr FLOAT4 COLOR_GREEN = { 0.0f, 1.0f, 0.0f, 1.0f };
+constexpr FLOAT4 COLOR_BLUE = { 0.0f, 0.0f, 1.0f, 1.0f };
+
+constexpr FLOAT2 FLOAT2_ZERO = { 0.0f, 0.0f };
+constexpr FLOAT3 FLOAT3_ZERO = { 0.0f, 0.0f, 0.0f };
+constexpr FLOAT4 FLOAT4_ZERO = { 0.0f, 0.0f, 0.0f, 0.0f };
+constexpr FLOAT2 FLOAT2_ONE = { 1.0f, 1.0f };
+constexpr FLOAT3 FLOAT3_ONE = { 1.0f, 1.0f, 1.0f };
+constexpr FLOAT4 FLOAT4_ONE = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+constexpr FLOAT2 FLOAT2_UNIT_X = { 1.0f, 0.0f };
+constexpr FLOAT2 FLOAT2_UNIT_Y = { 0.0f, 1.0f };
+constexpr FLOAT3 FLOAT3_UNIT_X = { 1.0f, 0.0f, 0.0f };
+constexpr FLOAT3 FLOAT3_UNIT_Y = { 0.0f, 1.0f, 0.0f };
+constexpr FLOAT3 FLOAT3_UNIT_Z = { 0.0f, 0.0f, 1.0f };
+constexpr FLOAT4 FLOAT4_UNIT_X = { 1.0f, 0.0f, 0.0f, 0.0f };
+constexpr FLOAT4 FLOAT4_UNIT_Y = { 0.0f, 1.0f, 0.0f, 0.0f };
+constexpr FLOAT4 FLOAT4_UNIT_Z = { 0.0f, 0.0f, 1.0f, 0.0f };
+constexpr FLOAT4 FLOAT4_UNIT_W = { 0.0f, 0.0f, 0.0f, 1.0f };
+constexpr QUATERNION QUAT_IDENT = { 0.0f, 0.0f, 0.0f, 1.0f };
+constexpr MATRIX4 MATRIX4_IDENT = { 1.0f, 0.0f, 0.0f, 0.0f,
+									0.0f, 1.0f, 0.0f, 0.0f,
+									0.0f, 0.0f, 1.0f, 0.0f,
+									0.0f, 0.0f, 0.0f, 1.0f };
+
 inline INT2 int2_zero();
 inline void int2_zero(INT2* v);
 inline INT2 int2_set(int x, int y);

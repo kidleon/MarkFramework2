@@ -218,6 +218,19 @@ enum class BUFFER_USAGE : unsigned int
 	EMAX
 };
 
+
+/**
+* @brief 버퍼 클리어 옵션 열거형
+*/
+enum class CLEAR_BUFFER : unsigned int
+{
+	COLOR = 0x00000001u,
+	DEPTH = 0x00000002u,
+	STENCIL = 0x00000004u,
+	ALL = COLOR | DEPTH | STENCIL
+};
+
+
 /**
 * @brief 버텍스 포맷 열거형
 */
@@ -516,6 +529,15 @@ enum class RESOURCE_USAGE : UINT32
 	DYNAMIC = 2,
 	RW_BUFFER = 3,
 	EMAX
+};
+
+/**
+* @brief 카메라 모드
+*/
+enum class CAMERA_MODE : unsigned int
+{
+	PERSPECTIVE = 0,
+	ORTHO,
 };
 
 

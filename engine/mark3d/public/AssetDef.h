@@ -17,6 +17,7 @@ enum class ASSET_TYPE : unsigned
 	TEXTURE3D,
 	MESH,
 	RENDER_TARGET,
+	RENDER_CAMERA,
 	AUDIO,
 };
 

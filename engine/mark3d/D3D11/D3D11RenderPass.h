@@ -1,19 +1,20 @@
-﻿#ifndef __RENDER_PASS_H__
-#define __RENDER_PASS_H__
+﻿#ifndef __D3D11_RENDER_PASS_H__
+#define __D3D11_RENDER_PASS_H__
 
 #include "RenderState.h"
 
-interface IShaderProgram;
+
+class D3D11ShaderProgram;
 
 /**
 * @brief 렌더 패스 구조체
 */
-struct RENDER_PASS
+struct D3D11_RENDER_PASS
 {
 	int32 Pass; // 패스 인덱스
 	NameHash Name; // 패스 이름
-	IShaderProgram* pVertexShader; // 버텍스 셰이더
-	IShaderProgram* pPixelShader; // 픽셀 셰이더
+	D3D11ShaderProgram* pVertexShader; // 버텍스 셰이더
+	D3D11ShaderProgram* pPixelShader; // 픽셀 셰이더
 
 	CONSTANT_STATE ConstantState[MAX_CONSTANT_SLOT]; // 상수 버퍼 상태
 
@@ -26,4 +27,4 @@ struct RENDER_PASS
 };
 
 
-#endif // __RENDER_PASS_H__
+#endif // __D3D11_RENDER_PASS_H__

@@ -1,12 +1,12 @@
 ﻿#include "pch.h"
-#include "SurfaceMaterialBlock.h"
-#include "IShaderProgram.h"
-#include "ITexture1D.h"
-#include "ITexture2D.h"
-#include "IConstantBuffer.h"
+#include "D3D11SurfaceMaterialBlock.h"
+#include "D3D11ShaderProgram.h"
+#include "D3D11Texture1D.h"
+#include "D3D11Texture2D.h"
+#include "D3D11ConstantBufferImpl.h"
 
 
-void SURFACE_MATERIAL_BLOCK::Reset()
+void D3D11_SURFACE_MATERIAL_BLOCK::Reset()
 {
 	NumRenderPass = 0;
 
@@ -15,7 +15,7 @@ void SURFACE_MATERIAL_BLOCK::Reset()
 
 	for (int32 p = 0; p < MAX_RENDER_PASS; ++p)
 	{
-		RENDER_PASS* pRenderPass = &RenderPasses[p];
+		D3D11_RENDER_PASS* pRenderPass = &RenderPasses[p];
 
 		pRenderPass->Name = 0;
 		pRenderPass->Pass = -1;

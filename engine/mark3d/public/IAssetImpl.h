@@ -13,26 +13,18 @@ public:
 	IASSET_IMPL() = default;
 	virtual long AddRef() final
 	{
-		if (this)
-		{
-			interlock_increment_l(&m_RefCnt, MEMORY_ORDER_RELAXED);
-			return m_RefCnt;
-		}
-		return 0;
+		interlock_increment_l(&m_RefCnt, MEMORY_ORDER_RELAXED);
+		return m_RefCnt;
 	}
 
 	virtual long Release() final
 	{
-		if (this)
+		long NewRefCnt = interlock_decrement_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL);
+		if (NewRefCnt == 0)
 		{
-			long NewRefCnt = interlock_decrement_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL);
-			if (NewRefCnt == 0)
-			{
-				OnDestroy();
-			}
-			return NewRefCnt;
+			OnDestroy();
 		}
-		return 0;
+		return NewRefCnt;
 	}
 
 	virtual long RefCnt() final

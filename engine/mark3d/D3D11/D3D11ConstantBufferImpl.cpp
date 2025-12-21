@@ -1,15 +1,15 @@
 ﻿#include "pch.h"
-#include "ConstantBuffer.h"
-#include "ConstantBufferBlock.h"
-#include "ConstantBufferBlockPool.h"
+#include "D3D11ConstantBufferImpl.h"
+#include "D3D11ConstantBufferBlock.h"
+#include "D3D11ConstantBufferBlockPool.h"
 #include "Log.h"
 
 
-ConstantBuffer::~ConstantBuffer() noexcept
+D3D11ConstantBufferImpl::~D3D11ConstantBufferImpl() noexcept
 {
 	if (m_pCBufferBlock)
 	{
-		ConstantBufferBlockPool::Release(m_pCBufferBlock);
+		D3D11ConstantBufferBlockPool::Release(m_pCBufferBlock);
 		m_pCBufferBlock = nullptr;
 	}
 
@@ -17,12 +17,12 @@ ConstantBuffer::~ConstantBuffer() noexcept
 	m_DataRefSize = 0;
 }
 
-void ConstantBuffer::OnDestroy()
+void D3D11ConstantBufferImpl::OnDestroy()
 {
-	MARK_POOL_DELETE(this, ConstantBuffer);
+	MARK_POOL_DELETE(this, D3D11ConstantBufferImpl);
 }
 
-void ConstantBuffer::UpdateData(const void* pData, size_t DataSize)
+void D3D11ConstantBufferImpl::UpdateData(const void* pData, size_t DataSize)
 {
 	if (!pData || (DataSize == 0))
 		return;
@@ -42,11 +42,11 @@ void ConstantBuffer::UpdateData(const void* pData, size_t DataSize)
 			return;
 		}
 
-		ConstantBufferBlockPool::Release(m_pCBufferBlock);
+		D3D11ConstantBufferBlockPool::Release(m_pCBufferBlock);
 		m_pCBufferBlock = nullptr;
 	}
 
-	m_pCBufferBlock = ConstantBufferBlockPool::Alloc(DataSize);
+	m_pCBufferBlock = D3D11ConstantBufferBlockPool::Alloc(DataSize);
 	if (!m_pCBufferBlock)
 	{
 		SYS_LOG_E("ConstantBuffer::UpdateData - Failed to allocate constant buffer block of size %zu.", DataSize);
@@ -56,7 +56,7 @@ void ConstantBuffer::UpdateData(const void* pData, size_t DataSize)
 	memcpy(m_pCBufferBlock->pData, pData, DataSize);
 }
 
-void ConstantBuffer::UpdateDataRef(const void* pData, size_t DataSize)
+void D3D11ConstantBufferImpl::UpdateDataRef(const void* pData, size_t DataSize)
 {
 	if (!pData || (DataSize == 0))
 		return;
@@ -64,7 +64,7 @@ void ConstantBuffer::UpdateDataRef(const void* pData, size_t DataSize)
 	// 참조 모드로 전환
 	if (m_pCBufferBlock)
 	{
-		ConstantBufferBlockPool::Release(m_pCBufferBlock);
+		D3D11ConstantBufferBlockPool::Release(m_pCBufferBlock);
 		m_pCBufferBlock = nullptr;
 	}
 

@@ -1,10 +1,10 @@
-﻿#ifndef __CONSTANT_BUFFER_POOL_H__
-#define __CONSTANT_BUFFER_POOL_H__
+﻿#ifndef __D3D11_CONSTANT_BUFFER_POOL_H__
+#define __D3D11_CONSTANT_BUFFER_POOL_H__
 
 
-struct CONSTANT_BUFFER_BLOCK;
+struct D3D11_CONSTANT_BUFFER_BLOCK;
 
-class ConstantBufferBlockPool
+class D3D11ConstantBufferBlockPool
 {
 	enum class CBUFFER_INDEX : size_t
 	{
@@ -27,8 +27,8 @@ public:
 	static void Init();
 	static void Shutdown();
 
-	static CONSTANT_BUFFER_BLOCK* Alloc(size_t BufferSize);
-	static void Release(CONSTANT_BUFFER_BLOCK* pCBBlock);
+	static D3D11_CONSTANT_BUFFER_BLOCK* Alloc(size_t BufferSize);
+	static void Release(D3D11_CONSTANT_BUFFER_BLOCK* pCBBlock);
 
 private:
 	static void AllocPool(CBUFFER_INDEX Index);
@@ -39,4 +39,4 @@ private:
 };
 
 
-#endif // __CONSTANT_BUFFER_POOL_H__
+#endif // __D3D11_CONSTANT_BUFFER_POOL_H__

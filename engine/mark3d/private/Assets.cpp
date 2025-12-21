@@ -19,14 +19,13 @@
 #include "BinaryAssetLoader.h"
 #include "AsyncAssetOp.h"
 
-#include "SurfaceMaterialBlockPool.h"
-#include "SurfaceMaterialBlock.h"
-#include "SurfaceMaterial.h"
-
 #if defined(__MARK3D_RENDERSYSTEM_D3D11__)
 #include "D3D11/D3D11TextureLoader.h"
 #include "D3D11/D3D11Texture1D.h"
 #include "D3D11/D3D11Texture2D.h"
+#include "D3D11/D3D11SurfaceMaterialBlockPool.h"
+#include "D3D11/D3D11SurfaceMaterialBlock.h"
+#include "D3D11/D3D11SurfaceMaterial.h"
 #endif // __MARK3D_RENDERSYSTEM_D3D11__
 
 
@@ -292,14 +291,14 @@ BOOL Assets::CreateSurfaceMaterial(ISurfaceMaterial** ppOut)
 {
 	if (!ppOut || !(*ppOut)) return FALSE;
 
-	SURFACE_MATERIAL_BLOCK* pBlock = SurfaceMaterialBlockPool::Alloc();
+	D3D11_SURFACE_MATERIAL_BLOCK* pBlock = D3D11SurfaceMaterialBlockPool::Alloc();
 	if (!pBlock)
 	{
 		if (ppOut) *ppOut = nullptr;
 		return FALSE;
 	}
 
-	SurfaceMaterial* pMaterial = MARK_POOL_NEW(SurfaceMaterial)(pBlock);
+	D3D11SurfaceMaterial* pMaterial = MARK_POOL_NEW(D3D11SurfaceMaterial)(pBlock);
 	*ppOut = pMaterial;
 
 	return TRUE;
