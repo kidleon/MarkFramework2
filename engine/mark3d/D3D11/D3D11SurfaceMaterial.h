@@ -75,7 +75,7 @@ public:
 	void SetDepthStencilState(const RS_DEPTH_STENCIL_STATE& DepthStencilState) final;
 	void EnableDepth(BOOL Enable) final;
 	void EnableZWrite(BOOL Enable) final;
-	void SetDepthState(BOOL ZEnable, BOOL ZWriteEnable, DEPTH_FUNC DepthFunc) final;
+	void SetDepthState(BOOL ZEnable, BOOL ZWriteEnable, COMPARISON_FUNC DepthFunc) final;
 	void SetStencilState(BOOL Enable, uint8 ReadMask, uint8 WriteMask) final;
 
 	void SetRasterizerState(const RS_RASTERIZER_STATE& RasterizerState) final;
@@ -137,7 +137,7 @@ public:
 	void SetDepthStencilState(int32 Pass, const RS_DEPTH_STENCIL_STATE& DepthStencilState) final;
 	void EnableDepth(int32 Pass, BOOL Enable) final;
 	void EnableZWrite(int32 Pass, BOOL Enable) final;
-	void SetDepthState(int32 Pass, BOOL ZEnable, BOOL ZWriteEnable, DEPTH_FUNC DepthFunc) final;
+	void SetDepthState(int32 Pass, BOOL ZEnable, BOOL ZWriteEnable, COMPARISON_FUNC DepthFunc) final;
 	void SetStencilState(int32 Pass, BOOL Enable, uint8 ReadMask, uint8 WriteMask) final;
 
 	void SetRasterizerState(int32 Pass, const RS_RASTERIZER_STATE& RasterizerState) final;

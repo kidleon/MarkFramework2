@@ -14,6 +14,7 @@
 #include "D3D11Texture2D.h"
 #include "D3D11RenderTarget.h"
 #include "D3D11Global.h"
+#include "D3D11RenderState.h"
 #include "D3D11RenderStateCache.h"
 
 
@@ -772,6 +773,58 @@ BOOL D3D11RenderDevice::GetOrCreateSamplerState(
 	D3D11SamplerState** ppOut
 )
 {
+	D3D11SamplerState* pSamplerState = nullptr;
+	if (0 < Hash && m_pRenderStateCache->TryGet(Hash, &pSamplerState))
+	{
+		*ppOut = pSamplerState;
+		return TRUE;
+	}
+
+	D3D11_SAMPLER_DESC SamplerDesc = {};
+
+	SamplerDesc.Filter = __D3D11ConvSamplerFilter(
+		Desc.MinFilter, 
+		Desc.MagFilter, 
+		Desc.MipFilter, 
+		Desc.MaxAnisotropy
+	);
+
+	__D3D11ConvBorderColor(
+		Desc.BorderColor, 
+		&Desc.CustomBorderColor, 
+		SamplerDesc.BorderColor
+	);
+
+	SamplerDesc.MaxAnisotropy = Desc.MaxAnisotropy;
+	SamplerDesc.MipLODBias = Desc.MipLODBias;
+
+	SamplerDesc.AddressU = D3D11_IMPL_TEXTURE_ADDRESS_MODE[(int32)Desc.AddressU];
+	SamplerDesc.AddressV = D3D11_IMPL_TEXTURE_ADDRESS_MODE[(int32)Desc.AddressV];
+	SamplerDesc.AddressW = D3D11_IMPL_TEXTURE_ADDRESS_MODE[(int32)Desc.AddressW];
+	SamplerDesc.ComparisonFunc = D3D11_IMPL_COMPARISON_FUNC[(int32)Desc.ComparisonFunc];
+
+	SamplerDesc.MinLOD = Desc.MinLOD;
+	SamplerDesc.MaxLOD = Desc.MaxLOD;
+
+	ID3D11SamplerState* pD3D11SamplerState = nullptr;
+	HRESULT hr = m_pD3D11Device->CreateSamplerState(
+		&SamplerDesc,
+		&pD3D11SamplerState
+	);
+
+	if (FAILED(hr))
+	{
+		SYS_LOG_E("D3D11RenderDevice::GetOrCreateSamplerState: CreateSamplerState failed");
+		(*ppOut) = nullptr;
+		return FALSE;
+	}
+
+	pSamplerState = MARK_POOL_NEW(D3D11SamplerState)();
+	pSamplerState->pD3D11SamplerState = pD3D11SamplerState;
+
+	Hash = fnv64_c(&Desc, sizeof(RS_SAMPLER_STATE));
+	m_pRenderStateCache->Add(Hash, pSamplerState);
+
 	return TRUE;
 }
 
@@ -780,7 +833,7 @@ BOOL D3D11RenderDevice::GetOrCreateSamplerState(
 	D3D11SamplerState** ppOut
 )
 {
-	return TRUE;
+	return GetOrCreateSamplerState(TDesc.GetStateHash(), TDesc.GetState(), ppOut);
 }
 
 BOOL D3D11RenderDevice::GetOrCreateBlendState(

@@ -220,14 +220,14 @@ static constexpr RS_DEPTH_STENCIL_STATE CreateDepthDisabled()
 static constexpr RS_DEPTH_STENCIL_STATE CreateDepthEqual()
 {
 	RS_DEPTH_STENCIL_STATE state;
-	state.DepthFunc = DEPTH_FUNC::EQUAL;
+	state.DepthFunc = COMPARISON_FUNC::EQUAL;
 	return state;
 }
 
 static constexpr RS_DEPTH_STENCIL_STATE CreateDepthReverseZ()
 {
 	RS_DEPTH_STENCIL_STATE state;
-	state.DepthFunc = DEPTH_FUNC::GREATER_EQUAL;
+	state.DepthFunc = COMPARISON_FUNC::GREATER_EQUAL;
 	return state;
 }
 
@@ -309,7 +309,7 @@ static constexpr RS_DEPTH_STENCIL_STATE CreateStencilMask()
 	RS_DEPTH_STENCIL_STATE state;
 	state.DepthEnable = TRUE;
 	state.DepthWriteEnable = FALSE;
-	state.DepthFunc = DEPTH_FUNC::LESS;
+	state.DepthFunc = COMPARISON_FUNC::LESS;
 	state.StencilEnable = TRUE;
 	state.StencilReadMask = 0xFF;
 	state.StencilWriteMask = 0xFF;

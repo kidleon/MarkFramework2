@@ -537,7 +537,7 @@ void D3D11SurfaceMaterial::EnableZWrite(BOOL Enable)
 	EnableZWrite(m_CurrentPass, Enable);
 }
 
-void D3D11SurfaceMaterial::SetDepthState(BOOL ZEnable, BOOL ZWriteEnable, DEPTH_FUNC DepthFunc)
+void D3D11SurfaceMaterial::SetDepthState(BOOL ZEnable, BOOL ZWriteEnable, COMPARISON_FUNC DepthFunc)
 {
 	if (-1 == m_CurrentPass)
 	{
@@ -1427,7 +1427,7 @@ void D3D11SurfaceMaterial::EnableZWrite(int32 Pass, BOOL Enable)
 	pRenderPass->DepthStencilState.DepthWriteEnable = Enable;
 }
 
-void D3D11SurfaceMaterial::SetDepthState(int32 Pass, BOOL ZEnable, BOOL ZWriteEnable, DEPTH_FUNC DepthFunc)
+void D3D11SurfaceMaterial::SetDepthState(int32 Pass, BOOL ZEnable, BOOL ZWriteEnable, COMPARISON_FUNC DepthFunc)
 {
 	if (0 > Pass || Pass >= (int32)m_pMaterialBlock->NumRenderPass)
 	{

@@ -7,9 +7,13 @@
 struct D3D11BlendState : public IUNKNOWN_HASH_IMPL
 {
 	ID3D11BlendState* pD3D11BlendState = nullptr;
-
+	HASH_NODE HashNode;
 	D3D11BlendState() noexcept;
 	~D3D11BlendState() noexcept;
+
+protected:
+	void OnDestroy() final;
+
 };
 
 struct D3D11SamplerState : public IUNKNOWN_HASH_IMPL
@@ -18,6 +22,10 @@ struct D3D11SamplerState : public IUNKNOWN_HASH_IMPL
 
 	D3D11SamplerState() noexcept;
 	~D3D11SamplerState() noexcept;
+
+protected:
+	void OnDestroy() final;
+
 };
 
 struct D3D11DepthStencilState : public IUNKNOWN_HASH_IMPL
@@ -26,6 +34,10 @@ struct D3D11DepthStencilState : public IUNKNOWN_HASH_IMPL
 
 	D3D11DepthStencilState() noexcept;
 	~D3D11DepthStencilState() noexcept;
+
+protected:
+	void OnDestroy() final;
+
 };
 
 struct D3D11RasterizerState : public IUNKNOWN_HASH_IMPL
@@ -34,6 +46,10 @@ struct D3D11RasterizerState : public IUNKNOWN_HASH_IMPL
 
 	D3D11RasterizerState() noexcept;
 	~D3D11RasterizerState() noexcept;
+
+protected:
+	void OnDestroy() final;
+
 };
 
 

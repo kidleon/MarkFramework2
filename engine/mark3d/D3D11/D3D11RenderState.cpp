@@ -17,6 +17,11 @@ D3D11BlendState::~D3D11BlendState() noexcept
 	}
 }
 
+void D3D11BlendState::OnDestroy() 
+{
+	MARK_POOL_DELETE(this, D3D11BlendState);
+}
+
 
 D3D11SamplerState::D3D11SamplerState() noexcept
 {
@@ -31,6 +36,11 @@ D3D11SamplerState::~D3D11SamplerState() noexcept
 		pD3D11SamplerState->Release();
 		pD3D11SamplerState = nullptr;
 	}
+}
+
+void D3D11SamplerState::OnDestroy() 
+{
+	MARK_POOL_DELETE(this, D3D11SamplerState);
 }
 
 
@@ -49,6 +59,11 @@ D3D11DepthStencilState::~D3D11DepthStencilState() noexcept
 	}
 }
 
+void D3D11DepthStencilState::OnDestroy() 
+{
+	MARK_POOL_DELETE(this, D3D11DepthStencilState);
+}
+
 
 D3D11RasterizerState::D3D11RasterizerState() noexcept
 {
@@ -63,4 +78,9 @@ D3D11RasterizerState::~D3D11RasterizerState() noexcept
 		pD3D11RasterizerState->Release();
 		pD3D11RasterizerState = nullptr;
 	}
+}
+
+void D3D11RasterizerState::OnDestroy() 
+{
+	MARK_POOL_DELETE(this, D3D11RasterizerState);
 }

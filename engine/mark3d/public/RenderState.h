@@ -24,8 +24,10 @@ struct MARKENGINE_API RS_SAMPLER_STATE
 	TEXTURE_ADDRESS_MODE AddressV; // V 축 주소 모드
 	TEXTURE_ADDRESS_MODE AddressW; // W 축 주소 모드
 	BORDER_COLOR BorderColor; // Border 색상
+	FLOAT4 CustomBorderColor; // 사용자 정의 Border 색상 (BorderColor가 CUSTOM일 때 사용)
 
 	COMPARISON_FUNC ComparisonFunc; // NEVER = 비활성화
+	UINT8 PADDINGs[3];
 
 	float MipLODBias;	// 기본값: 0.0f
 	float MinLOD;       // 기본값: 0.0f
@@ -41,6 +43,8 @@ struct MARKENGINE_API RS_SAMPLER_STATE
 		, AddressW(TEXTURE_ADDRESS_MODE::WRAP)
 		, BorderColor(BORDER_COLOR::OPAQUE_BLACK)
 		, ComparisonFunc(COMPARISON_FUNC::NEVER)
+		, CustomBorderColor({ 0.0f, 0.0f, 0.0f, 0.0f })
+		, PADDINGs{ 0, 0, 0 }
 		, MipLODBias(0.0f)
 		, MinLOD(0.0f)
 		, MaxLOD(3.402823466e+38F) // FLT_MAX
@@ -298,7 +302,7 @@ struct MARKENGINE_API RS_DEPTH_STENCIL_STATE
 	// 깊이 테스트 설정
 	BOOL8 DepthEnable;
 	BOOL8 DepthWriteEnable;
-	DEPTH_FUNC DepthFunc;
+	COMPARISON_FUNC DepthFunc;
 
 	// 스텐실 설정
 	BOOL8 StencilEnable;
@@ -314,7 +318,7 @@ struct MARKENGINE_API RS_DEPTH_STENCIL_STATE
 	constexpr RS_DEPTH_STENCIL_STATE()
 		: DepthEnable(TRUE)
 		, DepthWriteEnable(TRUE)
-		, DepthFunc(DEPTH_FUNC::LESS)
+		, DepthFunc(COMPARISON_FUNC::LESS)
 		, StencilEnable(FALSE)
 		, StencilReadMask(0xFF)
 		, StencilWriteMask(0xFF)
@@ -327,13 +331,13 @@ struct MARKENGINE_API RS_DEPTH_STENCIL_STATE
 	// 깊이 테스트가 실질적으로 비활성화 상태인지
 	__FORCEINLINE BOOL IsDisabledDepthTest() const
 	{
-		return !DepthEnable || DepthFunc == DEPTH_FUNC::ALWAYS;
+		return !DepthEnable || DepthFunc == COMPARISON_FUNC::ALWAYS;
 	}
 
 	// 깊이 쓰기 전용 모드
 	__FORCEINLINE BOOL IsDepthWriteOnly() const
 	{
-		return DepthWriteEnable && (!DepthEnable || DepthFunc == DEPTH_FUNC::ALWAYS);
+		return DepthWriteEnable && (!DepthEnable || DepthFunc == COMPARISON_FUNC::ALWAYS);
 	}
 
 	// Read-only 깊이 버퍼

@@ -369,22 +369,6 @@ enum class BORDER_COLOR : UINT8
 	EMAX
 };
 
-/**
-* @brief 비교 함수 열거형
-*/
-enum class COMPARISON_FUNC : UINT32
-{
-	NEVER = 0,
-	LESS,
-	EQUAL,
-	LESS_EQUAL,
-	GREATER,
-	NOT_EQUAL,
-	GREATER_EQUAL,
-	ALWAYS,
-
-	EMAX
-};
 
 /**
 * @brief 블렌드 팩터 열거형
@@ -485,7 +469,7 @@ enum class DEPTH_WRITE_MASK : UINT8
 /**
 * @brief 깊이 비교 함수 열거형
 */
-enum class DEPTH_FUNC : UINT8
+enum class COMPARISON_FUNC : UINT8
 {
 	NEVER = 0,
 	LESS,
@@ -499,7 +483,7 @@ enum class DEPTH_FUNC : UINT8
 	EMAX
 };
 
-typedef DEPTH_FUNC STENCIL_FUNC;
+typedef COMPARISON_FUNC STENCIL_FUNC;
 
 /**
 * @brief 스텐실 연산 열거형

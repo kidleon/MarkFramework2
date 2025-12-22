@@ -147,6 +147,8 @@ BOOL D3D11RenderStateCache::TryGet(uint64 Hash, D3D11BlendState** ppOut)
 		return FALSE;
 	}
 
+	pState->AddRef();
+
 	*ppOut = pState;
 
 	return TRUE;
@@ -163,6 +165,8 @@ BOOL D3D11RenderStateCache::TryGet(uint64 Hash, D3D11SamplerState** ppOut)
 		*ppOut = nullptr;
 		return FALSE;
 	}
+
+	pState->AddRef();
 
 	*ppOut = pState;
 
@@ -181,6 +185,8 @@ BOOL D3D11RenderStateCache::TryGet(uint64 Hash, D3D11DepthStencilState** ppOut)
 		return FALSE;
 	}
 
+	pState->AddRef();
+
 	*ppOut = pState;
 
 	return TRUE;
@@ -197,6 +203,8 @@ BOOL D3D11RenderStateCache::TryGet(uint64 Hash, D3D11RasterizerState** ppOut)
 		*ppOut = nullptr;
 		return FALSE;
 	}
+
+	pState->AddRef();
 
 	*ppOut = pState;
 

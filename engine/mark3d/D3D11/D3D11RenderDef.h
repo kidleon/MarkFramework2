@@ -4,16 +4,18 @@
 #include "RenderDef.h"
 
 
-/*
-// DEPTH_WRITE_MASK와 D3D11_DEPTH_WRITE_MASK 매핑 테이블
-static constexpr D3D11_DEPTH_WRITE_MASK D3D11_IMPL_DEPTH_WRITE_MASK[(int)DEPTH_WRITE_MASK::EMAX] =
+// TEXTURE_ADDRESS_MODE와 D3D11_TEXTURE_ADDRESS_MODE 매핑 테이블
+static constexpr D3D11_TEXTURE_ADDRESS_MODE D3D11_IMPL_TEXTURE_ADDRESS_MODE[(int)TEXTURE_ADDRESS_MODE::EMAX] =
 {
-    D3D11_DEPTH_WRITE_MASK_ZERO,
-    D3D11_DEPTH_WRITE_MASK_ALL
+    D3D11_TEXTURE_ADDRESS_WRAP,
+    D3D11_TEXTURE_ADDRESS_MIRROR,
+    D3D11_TEXTURE_ADDRESS_CLAMP,
+    D3D11_TEXTURE_ADDRESS_BORDER,
+    D3D11_TEXTURE_ADDRESS_MIRROR_ONCE
 };
 
 // DEPTH_FUNC와 D3D11_COMPARISON_FUNC 매핑 테이블
-static constexpr D3D11_COMPARISON_FUNC D3D11_IMPL_DEPTH_FUNC[(int)DEPTH_FUNC::EMAX] =
+static constexpr D3D11_COMPARISON_FUNC D3D11_IMPL_COMPARISON_FUNC[(int)COMPARISON_FUNC::EMAX] =
 {
     D3D11_COMPARISON_NEVER,
     D3D11_COMPARISON_LESS,
@@ -24,6 +26,163 @@ static constexpr D3D11_COMPARISON_FUNC D3D11_IMPL_DEPTH_FUNC[(int)DEPTH_FUNC::EM
     D3D11_COMPARISON_GREATER_EQUAL,
     D3D11_COMPARISON_ALWAYS
 };
+
+__FORCEINLINE D3D11_FILTER __D3D11ConvSamplerFilter(
+    SAMPLER_FILTER MinFilter,
+    SAMPLER_FILTER MagFilter,
+    SAMPLER_FILTER MipFilter,
+    uint8_t MaxAnisotropy
+)
+{
+    // Anisotropic 필터링이 활성화된 경우
+    if (MaxAnisotropy > 1)
+    {
+        return D3D11_FILTER_ANISOTROPIC;
+    }
+
+    // NONE 처리 - 기본값을 LINEAR로 설정
+    if (MinFilter == SAMPLER_FILTER::NONE)
+        MinFilter = SAMPLER_FILTER::LINEAR;
+    if (MagFilter == SAMPLER_FILTER::NONE)
+        MagFilter = SAMPLER_FILTER::LINEAR;
+    if (MipFilter == SAMPLER_FILTER::NONE)
+        MipFilter = SAMPLER_FILTER::LINEAR;
+
+    // 모든 조합을 명시적으로 처리
+    // NEAREST = POINT, LINEAR = LINEAR
+
+    // Min=NEAREST, Mag=NEAREST, Mip=NEAREST
+    if (MinFilter == SAMPLER_FILTER::NEAREST &&
+        MagFilter == SAMPLER_FILTER::NEAREST &&
+        MipFilter == SAMPLER_FILTER::NEAREST)
+    {
+        return D3D11_FILTER_MIN_MAG_MIP_POINT;
+    }
+
+    // Min=NEAREST, Mag=NEAREST, Mip=LINEAR
+    if (MinFilter == SAMPLER_FILTER::NEAREST &&
+        MagFilter == SAMPLER_FILTER::NEAREST &&
+        MipFilter == SAMPLER_FILTER::LINEAR)
+    {
+        return D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+    }
+
+    // Min=NEAREST, Mag=LINEAR, Mip=NEAREST
+    if (MinFilter == SAMPLER_FILTER::NEAREST &&
+        MagFilter == SAMPLER_FILTER::LINEAR &&
+        MipFilter == SAMPLER_FILTER::NEAREST)
+    {
+        return D3D11_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
+    }
+
+    // Min=NEAREST, Mag=LINEAR, Mip=LINEAR
+    if (MinFilter == SAMPLER_FILTER::NEAREST &&
+        MagFilter == SAMPLER_FILTER::LINEAR &&
+        MipFilter == SAMPLER_FILTER::LINEAR)
+    {
+        return D3D11_FILTER_MIN_POINT_MAG_MIP_LINEAR;
+    }
+
+    // Min=LINEAR, Mag=NEAREST, Mip=NEAREST
+    if (MinFilter == SAMPLER_FILTER::LINEAR &&
+        MagFilter == SAMPLER_FILTER::NEAREST &&
+        MipFilter == SAMPLER_FILTER::NEAREST)
+    {
+        return D3D11_FILTER_MIN_LINEAR_MAG_MIP_POINT;
+    }
+
+    // Min=LINEAR, Mag=NEAREST, Mip=LINEAR
+    if (MinFilter == SAMPLER_FILTER::LINEAR &&
+        MagFilter == SAMPLER_FILTER::NEAREST &&
+        MipFilter == SAMPLER_FILTER::LINEAR)
+    {
+        return D3D11_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+    }
+
+    // Min=LINEAR, Mag=LINEAR, Mip=NEAREST
+    if (MinFilter == SAMPLER_FILTER::LINEAR &&
+        MagFilter == SAMPLER_FILTER::LINEAR &&
+        MipFilter == SAMPLER_FILTER::NEAREST)
+    {
+        return D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+    }
+
+    // Min=LINEAR, Mag=LINEAR, Mip=LINEAR
+    if (MinFilter == SAMPLER_FILTER::LINEAR &&
+        MagFilter == SAMPLER_FILTER::LINEAR &&
+        MipFilter == SAMPLER_FILTER::LINEAR)
+    {
+        return D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+    }
+
+    // 기본값 (도달하면 안 됨)
+    assert(false && "Invalid filter combination");
+    return D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+}
+
+// Border Color를 FLOAT[4] 배열로 변환
+__FORCEINLINE void __D3D11ConvBorderColor(BORDER_COLOR BorderColor, const FLOAT4* pCustomBorderColor, FLOAT* pOut)
+{
+    assert(pOut != nullptr && "pOut cannot be null");
+
+    if (BorderColor == BORDER_COLOR::TRANSPARENT_BLACK)
+    {
+        pOut[0] = 0.0f;  // R
+        pOut[1] = 0.0f;  // G
+        pOut[2] = 0.0f;  // B
+        pOut[3] = 0.0f;  // A
+    }
+    else if (BorderColor == BORDER_COLOR::OPAQUE_BLACK)
+    {
+        pOut[0] = 0.0f;  // R
+        pOut[1] = 0.0f;  // G
+        pOut[2] = 0.0f;  // B
+        pOut[3] = 1.0f;  // A
+    }
+    else if (BorderColor == BORDER_COLOR::OPAQUE_WHITE)
+    {
+        pOut[0] = 1.0f;  // R
+        pOut[1] = 1.0f;  // G
+        pOut[2] = 1.0f;  // B
+        pOut[3] = 1.0f;  // A
+    }
+    else if (BorderColor == BORDER_COLOR::CUSTOM)
+    {
+        // CUSTOM의 경우 호출자가 직접 설정해야 함
+        // 기본값으로 Transparent Black 설정
+        if (pCustomBorderColor)
+        {
+			pOut[0] = pCustomBorderColor->x;
+            pOut[1] = pCustomBorderColor->y;
+            pOut[2] = pCustomBorderColor->z;
+			pOut[3] = pCustomBorderColor->w;
+        }
+        else
+        {
+            pOut[0] = 0.0f;
+            pOut[1] = 0.0f;
+            pOut[2] = 0.0f;
+            pOut[3] = 0.0f;
+        }
+    }
+    else
+    {
+        pOut[0] = 0.0f;
+        pOut[1] = 0.0f;
+        pOut[2] = 0.0f;
+        pOut[3] = 0.0f;
+    }
+}
+
+/*
+// DEPTH_WRITE_MASK와 D3D11_DEPTH_WRITE_MASK 매핑 테이블
+static constexpr D3D11_DEPTH_WRITE_MASK D3D11_IMPL_DEPTH_WRITE_MASK[(int)DEPTH_WRITE_MASK::EMAX] =
+{
+    D3D11_DEPTH_WRITE_MASK_ZERO,
+    D3D11_DEPTH_WRITE_MASK_ALL
+};
+
+
 
 // STENCIL_OP와 D3D11_STENCIL_OP 매핑 테이블
 static constexpr D3D11_STENCIL_OP D3D11_IMPL_STENCIL_OP[(int)STENCIL_OP::EMAX] =
@@ -125,15 +284,7 @@ static constexpr D3D11_FILTER D3D11_IMPL_FILTER[(int)18] =
     D3D11_FILTER_COMPARISON_ANISOTROPIC
 };
 
-// TEXTURE_ADDRESS_MODE와 D3D11_TEXTURE_ADDRESS_MODE 매핑 테이블
-static constexpr D3D11_TEXTURE_ADDRESS_MODE D3D11_IMPL_TEXTURE_ADDRESS_MODE[(int)TEXTURE_ADDRESS_MODE::EMAX] =
-{
-    D3D11_TEXTURE_ADDRESS_WRAP,
-    D3D11_TEXTURE_ADDRESS_MIRROR,
-    D3D11_TEXTURE_ADDRESS_CLAMP,
-    D3D11_TEXTURE_ADDRESS_BORDER,
-    D3D11_TEXTURE_ADDRESS_MIRROR_ONCE
-};
+//
 */
 
 // COLOR_FORMAT와 DXGI_FORMAT 매핑 테이블
