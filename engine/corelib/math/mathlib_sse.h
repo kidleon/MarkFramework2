@@ -7,9 +7,9 @@
 #include <immintrin.h>  // SSE/SSE2/SSE3/SSE4 명령어 집합 포함
 #include "mathlib.h"
 
+// SIMD 최적화를 위한 호출 규약 설정
 #define SIMD_CALL __vectorcall
 
-// SIMD 최적화를 위한 호출 규약 설정
 static constexpr __m128 XMM_GLOBAL_ZERO = { 0.0f, 0.0f, 0.0f, 0.0f };
 static constexpr __m128 XMM_GLOBAL_ONE = { 1.0f, 1.0f, 1.0f, 1.0f };
 

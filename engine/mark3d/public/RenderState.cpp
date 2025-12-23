@@ -156,7 +156,7 @@ static constexpr RS_BLEND_TARGET CreateColorOnly()
 {
 	RS_BLEND_TARGET target;
 	target.BlendEnable = FALSE;
-	target.RenderTargetWriteMask = COLOR_WRITE_MASK::RGB;
+	target.RenderTargetWriteMask = COLOR_WRITE_MASK::RED | COLOR_WRITE_MASK::GREEN | COLOR_WRITE_MASK::BLUE;
 	return target;
 }
 

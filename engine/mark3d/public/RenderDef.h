@@ -421,9 +421,10 @@ enum COLOR_WRITE_MASK : UINT8
 	GREEN = 0x02,
 	BLUE = 0x04,
 	ALPHA = 0x08,
-	RGB = RED | GREEN | BLUE,
 	ALL = RED | GREEN | BLUE | ALPHA,
 };
+
+constexpr uint8 MAX_COLOR_WRITE_MASK = 6;
 
 /**
 * @brief 채우기 모드 열거형

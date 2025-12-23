@@ -128,7 +128,7 @@ struct MARKENGINE_API RS_BLEND_TARGET
 			BLEND_FACTOR SrcBlendAlpha;
 			BLEND_FACTOR DestBlendAlpha;
 			BLEND_OP BlendOpAlpha;
-			uint8_t RenderTargetWriteMask; // 쓰기 마스크
+			UINT8 RenderTargetWriteMask; // 쓰기 마스크
 		};
 
 		uint64 data; // 전체 데이터를 하나의 64비트 정수로 접근

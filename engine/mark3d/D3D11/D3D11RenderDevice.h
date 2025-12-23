@@ -63,17 +63,21 @@ public:
 		D3D11RenderTarget** ppRT
 	);
 
-	BOOL GetOrCreateSamplerState(uint64 Hash, const RS_SAMPLER_STATE& Desc, D3D11SamplerState** ppOut);
+	BOOL GetOrCreateSamplerState(const RS_SAMPLER_STATE& Desc, D3D11SamplerState** ppOut);
 	BOOL GetOrCreateSamplerState(const TRenderState<RS_SAMPLER_STATE>& TDesc, D3D11SamplerState** ppOut);
+	BOOL GetOrCreateSamplerState(uint64 Hash, const RS_SAMPLER_STATE& Desc, D3D11SamplerState** ppOut);
 
-	BOOL GetOrCreateBlendState(uint64 Hash, const RS_BLEND_STATE& Desc, D3D11BlendState** ppOut);
+	BOOL GetOrCreateBlendState(const RS_BLEND_STATE& Desc, D3D11BlendState** ppOut);
 	BOOL GetOrCreateBlendState(const TRenderState<RS_BLEND_STATE>& TDesc, D3D11BlendState** ppOut);
+	BOOL GetOrCreateBlendState(uint64 Hash, const RS_BLEND_STATE& Desc, D3D11BlendState** ppOut);
 
-	BOOL GetOrCreateRasterizerState(uint64 Hash, const RS_RASTERIZER_STATE& Desc, D3D11RasterizerState** ppOut);
+	BOOL GetOrCreateRasterizerState(const RS_RASTERIZER_STATE& Desc, D3D11RasterizerState** ppOut);
 	BOOL GetOrCreateRasterizerState(const TRenderState<RS_RASTERIZER_STATE>& TDesc, D3D11RasterizerState** ppOut);
+	BOOL GetOrCreateRasterizerState(uint64 Hash, const RS_RASTERIZER_STATE& Desc, D3D11RasterizerState** ppOut);
 
-	BOOL GetOrCreateDepthStencilState(uint64 Hash, const RS_DEPTH_STENCIL_STATE& Desc, D3D11DepthStencilState** ppOut);
+	BOOL GetOrCreateDepthStencilState(const RS_DEPTH_STENCIL_STATE& Desc, D3D11DepthStencilState** ppOut);
 	BOOL GetOrCreateDepthStencilState(const TRenderState<RS_DEPTH_STENCIL_STATE>& TDesc, D3D11DepthStencilState** ppOut);
+	BOOL GetOrCreateDepthStencilState(uint64 Hash, const RS_DEPTH_STENCIL_STATE& Desc, D3D11DepthStencilState** ppOut);
 
 	__FORCEINLINE ID3D11Device* INL_GetD3D11Device() const noexcept { return m_pD3D11Device; }
 	__FORCEINLINE ID3D11DeviceContext* INL_GetD3D11Context() const noexcept { return m_pImmediateContext; }

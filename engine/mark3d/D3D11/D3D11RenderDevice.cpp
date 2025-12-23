@@ -764,7 +764,27 @@ BOOL D3D11RenderDevice::CreateRenderTarget(
 	D3D11RenderTarget** ppRT
 )
 {
+	D3D11_RENDER_TARGET_VIEW_DESC RTVDesc = {};
+
+
 	return TRUE;
+}
+
+BOOL D3D11RenderDevice::GetOrCreateSamplerState(
+	const RS_SAMPLER_STATE& Desc,
+	D3D11SamplerState** ppOut
+)
+{
+	uint64 Hash = fnv64_c(&Desc, sizeof(RS_SAMPLER_STATE));
+	return GetOrCreateSamplerState(Hash, Desc, ppOut);
+}
+
+BOOL D3D11RenderDevice::GetOrCreateSamplerState(
+	const TRenderState<RS_SAMPLER_STATE>& TDesc,
+	D3D11SamplerState** ppOut
+)
+{
+	return GetOrCreateSamplerState(TDesc.GetStateHash(), TDesc.GetState(), ppOut);
 }
 
 BOOL D3D11RenderDevice::GetOrCreateSamplerState(
@@ -821,19 +841,25 @@ BOOL D3D11RenderDevice::GetOrCreateSamplerState(
 
 	pSamplerState = MARK_POOL_NEW(D3D11SamplerState)();
 	pSamplerState->pD3D11SamplerState = pD3D11SamplerState;
+	pSamplerState->Hash = fnv64_c(&Desc, sizeof(RS_SAMPLER_STATE));
 
-	Hash = fnv64_c(&Desc, sizeof(RS_SAMPLER_STATE));
-	m_pRenderStateCache->Add(Hash, pSamplerState);
+	m_pRenderStateCache->Add(pSamplerState->Hash, pSamplerState);
 
 	return TRUE;
 }
 
-BOOL D3D11RenderDevice::GetOrCreateSamplerState(
-	const TRenderState<RS_SAMPLER_STATE>& TDesc,
-	D3D11SamplerState** ppOut
+BOOL D3D11RenderDevice::GetOrCreateBlendState(const RS_BLEND_STATE& Desc, D3D11BlendState** ppOut)
+{
+	uint64 Hash = fnv64_c(&Desc, sizeof(RS_BLEND_STATE));
+	return GetOrCreateBlendState(Hash, Desc, ppOut);
+}
+
+BOOL D3D11RenderDevice::GetOrCreateBlendState(
+	const TRenderState<RS_BLEND_STATE>& TDesc,
+	D3D11BlendState** ppOut
 )
 {
-	return GetOrCreateSamplerState(TDesc.GetStateHash(), TDesc.GetState(), ppOut);
+	return GetOrCreateBlendState(TDesc.GetStateHash(), TDesc.GetState(), ppOut);
 }
 
 BOOL D3D11RenderDevice::GetOrCreateBlendState(
@@ -842,15 +868,70 @@ BOOL D3D11RenderDevice::GetOrCreateBlendState(
 	D3D11BlendState** ppOut
 )
 {
+	D3D11BlendState* pBlendState = nullptr;
+	if (0 < Hash && m_pRenderStateCache->TryGet(Hash, &pBlendState))
+	{
+		*ppOut = pBlendState;
+		return TRUE;
+	}
+
+	D3D11_BLEND_DESC BlendDesc = {};
+	BlendDesc.AlphaToCoverageEnable = Desc.AlphaToCoverageEnable;
+	BlendDesc.IndependentBlendEnable = Desc.IndependentBlendEnable;
+
+	int32 NumBlendTargets = T_MIN(Desc.NumBlendTargets, D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT);
+
+	for (int i = 0; i < NumBlendTargets; ++i)
+	{
+		BlendDesc.RenderTarget[i].BlendEnable = Desc.BlendTarget[i].BlendEnable;
+		BlendDesc.RenderTarget[i].SrcBlend = D3D11_IMPL_BLEND_FACTOR[(int32)Desc.BlendTarget[i].SrcBlend];
+		BlendDesc.RenderTarget[i].DestBlend = D3D11_IMPL_BLEND_FACTOR[(int32)Desc.BlendTarget[i].DestBlend];
+		BlendDesc.RenderTarget[i].BlendOp = D3D11_IMPL_BLEND_OP[(int32)Desc.BlendTarget[i].BlendOp];
+		BlendDesc.RenderTarget[i].SrcBlendAlpha = D3D11_IMPL_BLEND_FACTOR[(int32)Desc.BlendTarget[i].SrcBlendAlpha];
+		BlendDesc.RenderTarget[i].DestBlendAlpha = D3D11_IMPL_BLEND_FACTOR[(int32)Desc.BlendTarget[i].DestBlendAlpha];
+		BlendDesc.RenderTarget[i].BlendOpAlpha = D3D11_IMPL_BLEND_OP[(int32)Desc.BlendTarget[i].BlendOpAlpha];
+		BlendDesc.RenderTarget[i].RenderTargetWriteMask = D3D11_IMPL_COLOR_WRITE_MASK[(int32)Desc.BlendTarget[i].RenderTargetWriteMask];
+	}
+
+	ID3D11BlendState* pD3D11BlendState = nullptr;
+	HRESULT hr = m_pD3D11Device->CreateBlendState(
+		&BlendDesc,
+		&pD3D11BlendState
+	);
+
+	if (FAILED(hr))
+	{
+		SYS_LOG_E("D3D11RenderDevice::GetOrCreateBlendState: CreateBlendState failed");
+		(*ppOut) = nullptr;
+		return FALSE;
+	}
+
+	pBlendState = MARK_POOL_NEW(D3D11BlendState)();
+	pBlendState->pD3D11BlendState = pD3D11BlendState;
+	pBlendState->Hash = fnv64_c(&Desc, sizeof(RS_BLEND_STATE));
+
+	m_pRenderStateCache->Add(pBlendState->Hash, pBlendState);
+
+	*ppOut = pBlendState;
+
 	return TRUE;
 }
 
-BOOL D3D11RenderDevice::GetOrCreateBlendState(
-	const TRenderState<RS_BLEND_STATE>& TDesc,
-	D3D11BlendState** ppOut
+BOOL D3D11RenderDevice::GetOrCreateRasterizerState(
+	const RS_RASTERIZER_STATE& Desc,
+	D3D11RasterizerState** ppOut
 )
 {
-	return TRUE;
+	uint64 Hash = fnv64_c(&Desc, sizeof(RS_RASTERIZER_STATE));
+	return GetOrCreateRasterizerState(Hash, Desc, ppOut);
+}
+
+BOOL D3D11RenderDevice::GetOrCreateRasterizerState(
+	const TRenderState<RS_RASTERIZER_STATE>& TDesc,
+	D3D11RasterizerState** ppOut
+)
+{
+	return GetOrCreateRasterizerState(TDesc.GetStateHash(), TDesc.GetState(), ppOut);
 }
 
 BOOL D3D11RenderDevice::GetOrCreateRasterizerState(
@@ -859,15 +940,63 @@ BOOL D3D11RenderDevice::GetOrCreateRasterizerState(
 	D3D11RasterizerState** ppOut
 )
 {
+	D3D11RasterizerState* pRasterizerState = nullptr;
+	if (0 < Hash && m_pRenderStateCache->TryGet(Hash, &pRasterizerState))
+	{
+		*ppOut = pRasterizerState;
+		return TRUE;
+	}
+
+	D3D11_RASTERIZER_DESC RasterizerDesc = {};
+	RasterizerDesc.FillMode = D3D11_IMPL_FILL_MODE[(int32)Desc.FillMode];
+	RasterizerDesc.CullMode = D3D11_IMPL_CULL_MODE[(int32)Desc.CullMode];
+	RasterizerDesc.FrontCounterClockwise = Desc.IsAntialiasedLineEnabled();
+	RasterizerDesc.DepthBias = Desc.DepthBias;
+	RasterizerDesc.DepthBiasClamp = Desc.DepthBiasClamp;
+	RasterizerDesc.SlopeScaledDepthBias = Desc.SlopeScaledDepthBias;
+	RasterizerDesc.DepthClipEnable = Desc.IsDepthClipEnabled();
+	RasterizerDesc.MultisampleEnable = Desc.IsMultisampleEnabled();
+	RasterizerDesc.AntialiasedLineEnable = Desc.IsAntialiasedLineEnabled();
+
+	ID3D11RasterizerState* pD3D11RasterizerState = nullptr;
+	HRESULT hr = m_pD3D11Device->CreateRasterizerState(
+		&RasterizerDesc,
+		&pD3D11RasterizerState
+	);
+
+	if (FAILED(hr))
+	{
+		SYS_LOG_E("D3D11RenderDevice::GetOrCreateRasterizerState: CreateRasterizerState failed");
+		(*ppOut) = nullptr;
+		return FALSE;
+	}
+
+	pRasterizerState = MARK_POOL_NEW(D3D11RasterizerState)();
+	pRasterizerState->pD3D11RasterizerState = pD3D11RasterizerState;
+	pRasterizerState->Hash = fnv64_c(&Desc, sizeof(RS_RASTERIZER_STATE));
+
+	m_pRenderStateCache->Add(pRasterizerState->Hash, pRasterizerState);
+
+	*ppOut = pRasterizerState;
+
 	return TRUE;
 }
 
-BOOL D3D11RenderDevice::GetOrCreateRasterizerState(
-	const TRenderState<RS_RASTERIZER_STATE>& TDesc,
-	D3D11RasterizerState** ppOut
+BOOL D3D11RenderDevice::GetOrCreateDepthStencilState(
+	const RS_DEPTH_STENCIL_STATE& Desc,
+	D3D11DepthStencilState** ppOut
 )
 {
-	return TRUE;
+	uint64 Hash = fnv64_c(&Desc, sizeof(RS_DEPTH_STENCIL_STATE));
+	return GetOrCreateDepthStencilState(Hash, Desc, ppOut);
+}
+
+BOOL D3D11RenderDevice::GetOrCreateDepthStencilState(
+	const TRenderState<RS_DEPTH_STENCIL_STATE>& TDesc,
+	D3D11DepthStencilState** ppOut
+)
+{
+	return GetOrCreateDepthStencilState(TDesc.GetStateHash(), TDesc.GetState(), ppOut);
 }
 
 BOOL D3D11RenderDevice::GetOrCreateDepthStencilState(
@@ -876,16 +1005,55 @@ BOOL D3D11RenderDevice::GetOrCreateDepthStencilState(
 	D3D11DepthStencilState** ppOut
 )
 {
+	D3D11DepthStencilState* pDepthStencilState = nullptr;
+	if (0 < Hash && m_pRenderStateCache->TryGet(Hash, &pDepthStencilState))
+	{
+		*ppOut = pDepthStencilState;
+		return TRUE;
+	}
+
+	D3D11_DEPTH_STENCIL_DESC DepthStencilDesc = {};
+	DepthStencilDesc.DepthEnable = Desc.DepthEnable;
+	DepthStencilDesc.DepthWriteMask = Desc.DepthWriteEnable ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
+	DepthStencilDesc.DepthFunc = D3D11_IMPL_COMPARISON_FUNC[(int32)Desc.DepthFunc];
+	DepthStencilDesc.StencilEnable = Desc.StencilEnable;
+	DepthStencilDesc.StencilReadMask = Desc.StencilReadMask;
+	DepthStencilDesc.StencilWriteMask = Desc.StencilWriteMask;
+	DepthStencilDesc.FrontFace.StencilFailOp = D3D11_IMPL_STENCIL_OP[(int32)Desc.FrontFace.StencilFailOp];
+	DepthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_IMPL_STENCIL_OP[(int32)Desc.FrontFace.StencilDepthFailOp];
+	DepthStencilDesc.FrontFace.StencilPassOp = D3D11_IMPL_STENCIL_OP[(int32)Desc.FrontFace.StencilPassOp];
+	DepthStencilDesc.FrontFace.StencilFunc = D3D11_IMPL_COMPARISON_FUNC[(int32)Desc.FrontFace.StencilFunc];
+	DepthStencilDesc.BackFace.StencilFailOp = D3D11_IMPL_STENCIL_OP[(int32)Desc.BackFace.StencilFailOp];
+	DepthStencilDesc.BackFace.StencilDepthFailOp = D3D11_IMPL_STENCIL_OP[(int32)Desc.BackFace.StencilDepthFailOp];
+	DepthStencilDesc.BackFace.StencilPassOp = D3D11_IMPL_STENCIL_OP[(int32)Desc.BackFace.StencilPassOp];
+	DepthStencilDesc.BackFace.StencilFunc = D3D11_IMPL_COMPARISON_FUNC[(int32)Desc.BackFace.StencilFunc];
+
+	ID3D11DepthStencilState* pD3D11DepthStencilState = nullptr;
+	HRESULT hr = m_pD3D11Device->CreateDepthStencilState(
+		&DepthStencilDesc,
+		&pD3D11DepthStencilState
+	);
+
+	if (FAILED(hr))
+	{
+		SYS_LOG_E("D3D11RenderDevice::GetOrCreateDepthStencilState: CreateDepthStencilState failed");
+		(*ppOut) = nullptr;
+		return FALSE;
+	}
+
+	pDepthStencilState = MARK_POOL_NEW(D3D11DepthStencilState)();
+
+	pDepthStencilState->pD3D11DepthStencilState = pD3D11DepthStencilState;
+	pDepthStencilState->Hash = fnv64_c(&Desc, sizeof(RS_DEPTH_STENCIL_STATE));
+
+	m_pRenderStateCache->Add(pDepthStencilState->Hash, pDepthStencilState);
+
+	*ppOut = pDepthStencilState;
+
 	return TRUE;
 }
 
-BOOL D3D11RenderDevice::GetOrCreateDepthStencilState(
-	const TRenderState<RS_DEPTH_STENCIL_STATE>& TDesc,
-	D3D11DepthStencilState** ppOut
-)
-{
-	return TRUE;
-}
+
 
 /*
 BOOL D3D11RenderDevice::CreateVertexShader(const D3D11_SHADER_COMPILE_DESC& Desc, D3D11VertexShader** ppOut)
