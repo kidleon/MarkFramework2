@@ -6,12 +6,12 @@
 #include "Log.h"
 
 
-Mesh::Mesh(uint32 m_VertexFormat, size_t TotalVertexCount, size_t TotalIndexCount)
+Mesh::Mesh(uint32 m_BufferFormat, size_t TotalVertexCount, size_t TotalIndexCount)
 	: m_TotalVertexCount(TotalVertexCount)
 	, m_TotalIndexCount(TotalIndexCount)
 {
 	m_Primitives.reserve(8);
-	AllocBuffer(m_VertexFormat, TotalVertexCount, TotalIndexCount);
+	AllocBuffer(m_BufferFormat, TotalVertexCount, TotalIndexCount);
 }
 
 Mesh::~Mesh() noexcept
@@ -112,7 +112,7 @@ void Mesh::Clear() noexcept
 }
 
 void Mesh::AllocBuffer(
-	uint32 m_VertexFormat,
+	uint32 m_BufferFormat,
 	size_t TotalVertexCount,
 	size_t TotalIndexCount
 ) noexcept
@@ -123,25 +123,25 @@ void Mesh::AllocBuffer(
 
 	if (0 < m_TotalVertexCount)
 	{
-		if (m_VertexFormat & (uint32)VERTEX_FORMAT::POSITION)
+		if (m_BufferFormat & (uint32)VERTEX_FORMAT::POSITION)
 			m_pPositions = (FLOAT3*)MARK_POOL_ALLOC(sizeof(FLOAT3) * TotalVertexCount);
 
-		if (m_VertexFormat & (uint32)VERTEX_FORMAT::NORMAL)
+		if (m_BufferFormat & (uint32)VERTEX_FORMAT::NORMAL)
 			m_pNormals = (FLOAT3*)MARK_POOL_ALLOC(sizeof(FLOAT3) * TotalVertexCount);
 
-		if (m_VertexFormat & (uint32)VERTEX_FORMAT::COLOR)
+		if (m_BufferFormat & (uint32)VERTEX_FORMAT::COLOR)
 			m_pColors = (COLOR_VAULE*)MARK_POOL_ALLOC(sizeof(COLOR_VAULE) * TotalVertexCount);
 
-		if (m_VertexFormat & (uint32)VERTEX_FORMAT::TEXCOORD)
+		if (m_BufferFormat & (uint32)VERTEX_FORMAT::TEXCOORD)
 			m_pTexCoords = (FLOAT2*)MARK_POOL_ALLOC(sizeof(FLOAT2) * TotalVertexCount);
 
-		if (m_VertexFormat & (uint32)VERTEX_FORMAT::TEXCOORD1)
+		if (m_BufferFormat & (uint32)VERTEX_FORMAT::TEXCOORD1)
 			m_pTexCoords1 = (FLOAT4*)MARK_POOL_ALLOC(sizeof(FLOAT4) * TotalVertexCount);
 
-		if (m_VertexFormat & (uint32)VERTEX_FORMAT::TANGENT)
+		if (m_BufferFormat & (uint32)VERTEX_FORMAT::TANGENT)
 			m_pTangents = (FLOAT3*)MARK_POOL_ALLOC(sizeof(FLOAT3) * TotalVertexCount);
 
-		if (m_VertexFormat & (uint32)VERTEX_FORMAT::BINORMAL)
+		if (m_BufferFormat & (uint32)VERTEX_FORMAT::BINORMAL)
 			m_pBinormals = (FLOAT3*)MARK_POOL_ALLOC(sizeof(FLOAT3) * TotalVertexCount);
 	}
 	

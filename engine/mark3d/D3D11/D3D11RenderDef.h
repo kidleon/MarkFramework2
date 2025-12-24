@@ -104,6 +104,18 @@ enum class D3D11_BUFFER_TYPE
 	CONSTANT_BUFFER
 };
 
+enum class D3D11_BUFFER_STRATEGY
+{
+	// 독립, 버퍼풀, 트랜지언트 버퍼
+	INDEPENDENT,
+    POOL,
+	TRANSIENT
+};
+
+#define MAKE_BUFFER_POOL_ID(Format, Index) (((uint32_t)(Format) << 24) | ((uint32_t)(Index) & 0x00FFFFFF))
+#define GET_BUFFER_POOL_FORMAT(PoolID) ((D3D11_BUFFER_TYPE)(((PoolID) >> 24) & 0xFF))
+#define GET_BUFFER_POOL_INDEX(PoolID) ((uint32_t)((PoolID) & 0x00FFFFFF))
+
 __FORCEINLINE D3D11_FILTER __D3D11ConvSamplerFilter(
     SAMPLER_FILTER MinFilter,
     SAMPLER_FILTER MagFilter,
@@ -447,7 +459,7 @@ struct D3D11_SHADER_COMPILE_RESULT
     ID3DBlob* pShaderBlob;
 	D3D11_SHADER_PARAMS* pShaderParams;
     UINT32 NumShaderParams;
-    UINT32 m_VertexFormat;
+    UINT32 m_BufferFormat;
 	UINT32 VertexFormats[MAX_VERTEX_FORMAT];
 	UINT32 NumVertexFormat;
 };

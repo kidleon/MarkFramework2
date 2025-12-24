@@ -5,6 +5,23 @@
 class D3D11Buffer
 {
 public:
+	// 독립 버퍼용 생성자
+	D3D11Buffer(
+		D3D11_BUFFER_TYPE BufferType,
+		size_t BufferSize,
+		ID3D11Buffer* pBuffer
+	) noexcept;
+
+	// 버퍼 풀용 생성자.
+	D3D11Buffer(
+		D3D11_BUFFER_TYPE BufferType,
+		size_t BufferSize,
+		uint32 Format,
+		uint32 PoolIndex,
+		ID3D11Buffer* pBuffer
+	) noexcept;
+
+	// TRANSIENT 버퍼용 생성자
 	D3D11Buffer(
 		D3D11_BUFFER_TYPE BufferType,
 		size_t BufferSize,
@@ -20,9 +37,11 @@ public:
 
 private:
 	D3D11_BUFFER_TYPE m_BufferType;
-	uint32 _PADDING = 0;
+	D3D11_BUFFER_STRATEGY m_BufferStrategy;
 	size_t m_BufferSize;
 	size_t m_Offset;
+	uint32 m_BufferFormat;
+	uint32 m_PoolIndex;
 	void* m_pCPUAddress;
 	ID3D11Buffer* m_pD3D11Buffer;
 

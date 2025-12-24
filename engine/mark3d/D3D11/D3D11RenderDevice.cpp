@@ -344,7 +344,7 @@ BOOL D3D11RenderDevice::GetOrCreateShader(
 		// 입력 레이아웃 생성
 		D3D11_INPUTLAYOUT_DESC ILDesc = {};
 		ILDesc.NumVertexFormat = CompileResult.NumVertexFormat;
-		ILDesc.VertexFormat = CompileResult.m_VertexFormat;
+		ILDesc.VertexFormat = CompileResult.m_BufferFormat;
 		for (UINT32 i = 0; i < CompileResult.NumVertexFormat; ++i)
 		{
 			ILDesc.VertexFormats[i] = (VERTEX_FORMAT)CompileResult.VertexFormats[i];

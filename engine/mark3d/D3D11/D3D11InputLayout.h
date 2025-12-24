@@ -19,7 +19,7 @@ public:
 
 	__FORCEINLINE uint32 INL_GetVertexFormat() const noexcept
 	{
-		return m_VertexFormat;
+		return m_BufferFormat;
 	}
 
 	__FORCEINLINE HASH_NODE* INL_GetHashNode() noexcept
@@ -29,7 +29,7 @@ public:
 
 private:
 	ID3D11InputLayout* m_pD3D11InputLayout;
-	uint32 m_VertexFormat;
+	uint32 m_BufferFormat;
 	uint32 PADDING = 0;
 	HASH_NODE m_HashNode;
 

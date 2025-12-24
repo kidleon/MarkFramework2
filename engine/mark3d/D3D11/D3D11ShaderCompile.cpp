@@ -214,7 +214,7 @@ BOOL __stdcall D3D11ShaderReflect(
 		}
 	}
 
-	pCompileResult->m_VertexFormat = VertexFormat;
+	pCompileResult->m_BufferFormat = VertexFormat;
 	memcpy(pCompileResult->VertexFormats, VertexFormats, sizeof(VERTEX_FORMAT)* MAX_VERTEX_FORMAT);
 	pCompileResult->NumVertexFormat = NumVertexFormat;
 

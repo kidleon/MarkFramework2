@@ -6,7 +6,7 @@ D3D11InputLayout::D3D11InputLayout(
 	uint32 VertexFormat,
 	ID3D11InputLayout* pInputLayout
 )
-	: m_VertexFormat(VertexFormat)
+	: m_BufferFormat(VertexFormat)
 	, m_pD3D11InputLayout(pInputLayout)
 	, m_HashNode{}
 {
