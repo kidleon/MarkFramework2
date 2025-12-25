@@ -5,6 +5,7 @@
 interface ITexture1D;
 interface ITexture2D;
 interface ISurfaceMaterial;
+interface IRenderCamera;
 
 interface IRenderSystem : public IUNKNOWN
 {
@@ -18,6 +19,11 @@ public:
 	) = 0;
 
 	virtual void Shutdown() = 0;
+
+	virtual BOOL CreateRenderCamera(
+		const RENDERCAMERA_CREATE_DESC& Desc, 
+		IRenderCamera** ppOut
+	) = 0;
 
 };
 

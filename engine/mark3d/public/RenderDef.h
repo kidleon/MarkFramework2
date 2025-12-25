@@ -1,6 +1,7 @@
 ﻿#ifndef __RENDER_DEF_H__
 #define __RENDER_DEF_H__
 
+#include "mathlib.h"
 
 /**
 * @brief 렌더링 API 열거형
@@ -572,7 +573,23 @@ struct MARKENGINE_API TEXTURE2D_CREATE_DESC
 };
 
 
+struct MARKENGINE_API RENDERCAMERA_CREATE_DESC
+{
+	CAMERA_MODE CameraMode; // 카메라 모드
+	FLOAT FOVY; // 시야각 (라디안 단위, 원근 카메라에만 해당)
+	FLOAT AspectRatio; // 종횡비 (원근 카메라에만 해당)
+	FLOAT NearZ; // 근평면 거리
+	FLOAT FarZ; // 원평면 거리
+	FLOAT OrthoWidth; // 직교 카메라의 너비 (직교 카메라에만 해당)
+	FLOAT OrthoHeight; // 직교 카메라의 높이 (직교 카메라에만 해당)
 
+	FLOAT4 ClearColor; // 클리어 색상
+	UINT32 ClearFlags; // 클리어 플래그 (CLEAR_BUFFER 열거형의 비트 플래그 조합)
+	FLOAT Depth; // 깊이 값 (렌더링 순서에 사용)
+	UINT8 Sencil; // 스텐실 값
+	UINT8 CameraOrder; // 카메라 렌더링 순서
+	UINT8 PADDING[2];
+};
 
 
 #endif // __RENDER_DEF_H__

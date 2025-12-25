@@ -367,10 +367,20 @@ BOOL D3D11RenderDevice::GetOrCreateShader(
 			&pVS
 		);
 
+		interlock_increment_l((LONG*)&m_VertexShaderIndex, MEMORY_ORDER_RELAXED);
+		if (m_VertexShaderIndex > MAX_SHADER_INDEX)
+		{
+			SYS_LOG_E("D3D11RenderDevice::CreateShader: Exceeded maximum number of vertex shaders");
+			CHECK_RELEASE(pVS);
+			return FALSE;
+		}
+
 		pShader = MARK_POOL_NEW(D3D11Shader)(
+			m_VertexShaderIndex,
 			nameHash,
 			pParamTable,
-			pVS);
+			pVS
+		);
 
 		m_pShaderCache->Add(nameHash, pShader);
 	}
@@ -383,10 +393,22 @@ BOOL D3D11RenderDevice::GetOrCreateShader(
 			nullptr,
 			&pPS
 		);
+
+		interlock_increment_l((LONG*)&m_PixelShaderIndex, MEMORY_ORDER_RELAXED);
+		if (m_PixelShaderIndex > MAX_SHADER_INDEX)
+		{
+			SYS_LOG_E("D3D11RenderDevice::CreateShader: Exceeded maximum number of pixel shaders");
+			CHECK_RELEASE(pPS);
+			return FALSE;
+		}
+
 		pShader = MARK_POOL_NEW(D3D11Shader)(
+			m_PixelShaderIndex,
 			nameHash,
 			pParamTable,
-			pPS);
+			pPS
+		);
+
 		m_pShaderCache->Add(nameHash, pShader);
 	}
 	else if (pDesc->ShaderType == SHADER_TYPE::COMPUTE)
@@ -398,7 +420,17 @@ BOOL D3D11RenderDevice::GetOrCreateShader(
 			nullptr,
 			&pCS
 		);
+
+		interlock_increment_l((LONG*)&m_ComputeShaderIndex, MEMORY_ORDER_RELAXED);
+		if (m_ComputeShaderIndex > MAX_SHADER_INDEX)
+		{
+			SYS_LOG_E("D3D11RenderDevice::CreateShader: Exceeded maximum number of compute shaders");
+			CHECK_RELEASE(pCS);
+			return FALSE;
+		}
+
 		pShader = MARK_POOL_NEW(D3D11Shader)(
+			m_ComputeShaderIndex, 
 			nameHash,
 			pParamTable,
 			pCS);
@@ -840,9 +872,18 @@ BOOL D3D11RenderDevice::GetOrCreateSamplerState(
 		return FALSE;
 	}
 
+	interlock_increment_l((LONG*)&m_SamplerStateIndex, MEMORY_ORDER_RELAXED);
+	if (m_SamplerStateIndex > MAX_STATE_INDEX)
+	{
+		SYS_LOG_E("D3D11RenderDevice::GetOrCreateSamplerState: Exceeded maximum number of sampler states");
+		CHECK_RELEASE(pD3D11SamplerState);
+		return FALSE;
+	}
+
 	pSamplerState = MARK_POOL_NEW(D3D11SamplerState)();
 	pSamplerState->pD3D11SamplerState = pD3D11SamplerState;
 	pSamplerState->Hash = fnv64_c(&Desc, sizeof(RS_SAMPLER_STATE));
+	pSamplerState->StateIndex = m_SamplerStateIndex;
 
 	m_pRenderStateCache->Add(pSamplerState->Hash, pSamplerState);
 
@@ -907,9 +948,18 @@ BOOL D3D11RenderDevice::GetOrCreateBlendState(
 		return FALSE;
 	}
 
+	interlock_increment_l((LONG*)&m_BlendStateIndex, MEMORY_ORDER_RELAXED);
+	if (m_BlendStateIndex > MAX_STATE_INDEX)
+	{
+		SYS_LOG_E("D3D11RenderDevice::GetOrCreateBlendState: Exceeded maximum number of blend states");
+		CHECK_RELEASE(pD3D11BlendState);
+		return FALSE;
+	}
+
 	pBlendState = MARK_POOL_NEW(D3D11BlendState)();
 	pBlendState->pD3D11BlendState = pD3D11BlendState;
 	pBlendState->Hash = fnv64_c(&Desc, sizeof(RS_BLEND_STATE));
+	pBlendState->StateIndex = m_BlendStateIndex;
 
 	m_pRenderStateCache->Add(pBlendState->Hash, pBlendState);
 
@@ -972,9 +1022,18 @@ BOOL D3D11RenderDevice::GetOrCreateRasterizerState(
 		return FALSE;
 	}
 
+	interlock_increment_l((LONG*)&m_RasterizerStateIndex, MEMORY_ORDER_RELAXED);
+	if (m_RasterizerStateIndex > MAX_STATE_INDEX)
+	{
+		SYS_LOG_E("D3D11RenderDevice::GetOrCreateRasterizerState: Exceeded maximum number of rasterizer states");
+		CHECK_RELEASE(pD3D11RasterizerState);
+		return FALSE;
+	}
+
 	pRasterizerState = MARK_POOL_NEW(D3D11RasterizerState)();
 	pRasterizerState->pD3D11RasterizerState = pD3D11RasterizerState;
 	pRasterizerState->Hash = fnv64_c(&Desc, sizeof(RS_RASTERIZER_STATE));
+	pRasterizerState->StateIndex = m_RasterizerStateIndex;
 
 	m_pRenderStateCache->Add(pRasterizerState->Hash, pRasterizerState);
 
@@ -1042,10 +1101,19 @@ BOOL D3D11RenderDevice::GetOrCreateDepthStencilState(
 		return FALSE;
 	}
 
+	interlock_increment_l((LONG*)&m_DepthStencilStateIndex, MEMORY_ORDER_RELAXED);
+	if (m_DepthStencilStateIndex > MAX_STATE_INDEX)
+	{
+		SYS_LOG_E("D3D11RenderDevice::GetOrCreateDepthStencilState: Exceeded maximum number of depth stencil states");
+		CHECK_RELEASE(pD3D11DepthStencilState);
+		return FALSE;
+	}
+
 	pDepthStencilState = MARK_POOL_NEW(D3D11DepthStencilState)();
 
 	pDepthStencilState->pD3D11DepthStencilState = pD3D11DepthStencilState;
 	pDepthStencilState->Hash = fnv64_c(&Desc, sizeof(RS_DEPTH_STENCIL_STATE));
+	pDepthStencilState->StateIndex = m_DepthStencilStateIndex;
 
 	m_pRenderStateCache->Add(pDepthStencilState->Hash, pDepthStencilState);
 

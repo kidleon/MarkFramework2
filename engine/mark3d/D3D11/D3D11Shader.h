@@ -8,18 +8,21 @@ class D3D11Shader
 {
 public:
 	D3D11Shader(
+		UINT16 ShaderIndex,
 		const NameHash& ShaderName,
 		D3D11ShaderParamTable* pParamTable,
 		ID3D11VertexShader* pVS
 	);
 
 	D3D11Shader(
+		UINT16 ShaderIndex,
 		const NameHash& ShaderName,
 		D3D11ShaderParamTable* pParamTable,
 		ID3D11PixelShader* pPS
 	);
 
 	D3D11Shader(
+		UINT16 ShaderIndex,
 		const NameHash& ShaderName,
 		D3D11ShaderParamTable* pParamTable,
 		ID3D11ComputeShader* pCS
@@ -72,6 +75,7 @@ private:
 	D3D11Shader() = delete;
 
 private:
+	UINT16 m_ShaderIndex;
 	NameHash m_ShaderName;
 	SHADER_TYPE m_ShaderType;
 	D3D11ShaderParamTable* m_pParamTable;

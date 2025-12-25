@@ -500,7 +500,8 @@ struct D3D11_RENDERTARGET_CREATE_DESC
 };
 
 static constexpr size_t POOL_BLOCK_TYPE_COUNT = 11;
-
+static constexpr size_t MAX_SHADER_INDEX = 65535;
+static constexpr size_t MAX_STATE_INDEX = 255;
 
 
 #endif // __D3D11_RENDER_DEF_H__

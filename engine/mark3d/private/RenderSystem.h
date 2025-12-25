@@ -4,7 +4,7 @@
 #include "IRenderSystem.h"
 
 
-class RenderSystem final : public IRenderSystem
+class RenderSystem : public IRenderSystem
 {
 	static RenderSystem* m_pInstance;
 
@@ -15,16 +15,6 @@ public:
 	long AddRef() final;
 	long Release() final;
 	long RefCnt() final;
-
-	BOOL Initialize(
-		HWND hWnd,
-		uint32 ScreenWidth,
-		uint32 ScreenHeight,
-		int32 MinLogLevel,
-		BOOL Fullscreen
-	) final;
-
-	void Shutdown() final;
 
 protected:
 	virtual ~RenderSystem() noexcept;

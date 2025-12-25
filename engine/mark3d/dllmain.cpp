@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "RenderSystem.h"
+#include "D3D11/D3D11RenderSystem.h"
 
 
 #ifdef __TARGET_OS_WINDOWS
@@ -50,7 +50,7 @@ BOOL __stdcall CreateMark3D(
         return FALSE;
 
 
-    RenderSystem* pRenderSystem = new RenderSystem();
+    D3D11RenderSystem* pRenderSystem = new D3D11RenderSystem();
     if (!pRenderSystem->Initialize(
         hWnd,
         ScreenWidth,

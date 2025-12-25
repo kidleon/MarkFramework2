@@ -3,11 +3,13 @@
 
 
 D3D11Shader::D3D11Shader(
+	UINT16 ShaderIndex,
 	const NameHash& ShaderName,
 	D3D11ShaderParamTable* pParamTable,
 	ID3D11VertexShader* pVS
 )
-	: m_ShaderName(ShaderName)
+	: m_ShaderIndex(ShaderIndex)
+	, m_ShaderName(ShaderName)
 	, m_ShaderType(SHADER_TYPE::VERTEX)
 	, m_pParamTable(pParamTable)
 	, m_pVS(pVS)
@@ -21,11 +23,13 @@ D3D11Shader::D3D11Shader(
 }
 
 D3D11Shader::D3D11Shader(
+	UINT16 ShaderIndex,
 	const NameHash& ShaderName,
 	D3D11ShaderParamTable* pParamTable,
 	ID3D11PixelShader* pPS
 )
-	: m_ShaderName(ShaderName)
+	: m_ShaderIndex(ShaderIndex)
+	, m_ShaderName(ShaderName)
 	, m_ShaderType(SHADER_TYPE::PIXEL)
 	, m_pParamTable(pParamTable)
 	, m_pPS(pPS)
@@ -39,11 +43,13 @@ D3D11Shader::D3D11Shader(
 }
 
 D3D11Shader::D3D11Shader(
+	UINT16 ShaderIndex,
 	const NameHash& ShaderName,
 	D3D11ShaderParamTable* pParamTable,
 	ID3D11ComputeShader* pCS
 )
-	: m_ShaderName(ShaderName)
+	: m_ShaderIndex(ShaderIndex)
+	, m_ShaderName(ShaderName)
 	, m_ShaderType(SHADER_TYPE::COMPUTE)
 	, m_pParamTable(pParamTable)
 	, m_pCS(pCS)

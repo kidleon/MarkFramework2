@@ -114,6 +114,14 @@ private:
 	D3D11ConstantBufferPool* m_pConstantBufferPool = nullptr;
 	D3D11ShaderCache* m_pShaderCache = nullptr;
 	D3D11RenderStateCache* m_pRenderStateCache = nullptr;
+
+	volatile UINT16 m_VertexShaderIndex = 0;
+	volatile UINT16 m_PixelShaderIndex = 0;
+	volatile UINT16 m_ComputeShaderIndex = 0;
+	volatile UINT8 m_BlendStateIndex = 0;
+	volatile UINT8 m_SamplerStateIndex = 0;
+	volatile UINT8 m_RasterizerStateIndex = 0;
+	volatile UINT8 m_DepthStencilStateIndex = 0;
 };
 
 

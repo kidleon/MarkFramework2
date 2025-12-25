@@ -4,6 +4,8 @@
 #include "IPrimitiveBuffer.h"
 
 
+class D3D11Buffer;
+
 class D3D11PrimitiveBuffer final : public IPrimitiveBuffer
 {
 public:
@@ -33,8 +35,8 @@ private:
 	UINT32 m_ID = 0;
 	LOAD_STAT m_LoadStat = LOAD_STAT::NOT_LOADED;
 
-	ID3D11Buffer* m_pVertexBuffer = nullptr;
-	ID3D11Buffer* m_pIndexBuffer = nullptr;
+	D3D11Buffer* m_pVertexBuffer = nullptr;
+	D3D11Buffer* m_pIndexBuffer = nullptr;
 	size_t m_BufferSize = 0;
 
 };
