@@ -19,7 +19,7 @@ struct D3D11_RENDER_PASS
 	CONSTANT_STATE ConstantState[MAX_CONSTANT_SLOT]; // 상수 버퍼 상태
 
 	size_t NumTextureState; // 텍스처 상태 수
-	TEXTURE_STATE TextureState[MAX_TEXTURE_SLOT]; // 1D 텍스처 상태
+	TEXTURE_STATE TextureState[MAX_TEXTURE_SLOT]; // 텍스처 상태
 	RS_SAMPLER_STATE SamplerState[MAX_SAMPLER_SLOT]; // 샘플러 상태
 	RS_BLEND_STATE BlendState; // 블렌드 상태
 	RS_DEPTH_STENCIL_STATE DepthStencilState; // 깊이-스텐실 상태

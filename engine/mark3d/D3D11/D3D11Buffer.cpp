@@ -56,9 +56,25 @@ D3D11Buffer::D3D11Buffer(
 
 D3D11Buffer::~D3D11Buffer() noexcept
 {
-	if (m_pD3D11Buffer)
+	switch(m_BufferStrategy)
 	{
-		m_pD3D11Buffer->Release();
-		m_pD3D11Buffer = nullptr;
+		case D3D11_BUFFER_STRATEGY::INDEPENDENT:
+		{
+			if (m_pD3D11Buffer)
+			{
+				m_pD3D11Buffer->Release();
+				m_pD3D11Buffer = nullptr;
+			}
+		} break;
+
+		case D3D11_BUFFER_STRATEGY::POOL:
+			// 독립 버퍼와 풀 버퍼는 여기서 해제
+			break;
+
+		case D3D11_BUFFER_STRATEGY::TRANSIENT:
+			// 트랜지언트 버퍼는 D3D11TransientBuffer에서 관리하므로 여기서 해제하지 않음
+			return;
 	}
+
+	
 }

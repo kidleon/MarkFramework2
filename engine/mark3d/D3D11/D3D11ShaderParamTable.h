@@ -1,4 +1,4 @@
-#ifndef __D3D11_SHADER_PARAM_TABLE_H__
+﻿#ifndef __D3D11_SHADER_PARAM_TABLE_H__
 #define __D3D11_SHADER_PARAM_TABLE_H__
 
 #include "D3D11RenderDef.h"
@@ -114,7 +114,6 @@ public:
 		}
 		return nullptr;
 	}
-
 
 private:
 	D3D11_SHADER_PARAMS m_CBufferParams[MAX_CONSTANT_SLOT] = {};
