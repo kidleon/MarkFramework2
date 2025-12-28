@@ -95,8 +95,8 @@ do
 			
 			postbuildcommands
 			{
-				"{COPY} %{prj.location}../baselib/public/*.h %{incoutputdir}",
-				"{COPY} %{prj.location}../common/predefine.h %{incoutputdir}",
+				"{COPY} %{prj.location}../engine/baselib/public/*.h %{incoutputdir}",
+				"{COPY} %{prj.location}../engine/common/predefine.h %{incoutputdir}",
 				"{COPY} %{outputdir}/*.dll %{sdk_bin_dir}",
 				"{COPY} %{outputdir}/*.lib %{sdk_lib_dir}",
 				"{COPY} %{outputdir}/*.pdb %{sdk_sym_dir}",

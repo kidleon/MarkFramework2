@@ -3,3 +3,5 @@ engine/output/
 samples/build/
 samples/output/
 engine/external/build/
+build/
+output/

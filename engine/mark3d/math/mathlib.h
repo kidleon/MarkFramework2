@@ -2,6 +2,7 @@
 #define __MATHLIB_H__
 
 #include <math.h>
+#include <stdint.h>
 
 
 #define TMIN(a, b) a < b ? a : b; // 

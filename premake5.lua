@@ -9,9 +9,9 @@ do
 	
 	sample_output_dir = "%{wks.location}/../../samples/output"
 	
-	include "baselib"
-	include "mark3d"
-	include "renderer_d3d11"
-	--include "samples/core_app"
+	include "engine/baselib"
+	include "engine/mark3d"
+	include "engine/renderer_d3d11"
+	include "samples/sample_rendering"
 
 end

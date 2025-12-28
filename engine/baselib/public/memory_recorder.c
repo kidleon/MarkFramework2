@@ -106,6 +106,8 @@ void memrec_shutdown(HANDLE hRecorder)
 	}
 
 	recorder->pfnLeakReporter = NULL;
+
+	crt_free(recorder);
 }
 
 void memrec_report_leaks(HANDLE hRecorder)

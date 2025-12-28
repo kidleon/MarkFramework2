@@ -114,7 +114,7 @@ BOOL D3D11Heap_Init(
 		int line,
 		const char* func,
 		size_t size
-		)
+	)
 )
 {
 	HANDLE hTempHeap = temppool_create(TempSize, FALSE);

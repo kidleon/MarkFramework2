@@ -64,8 +64,11 @@ do
 			
 			postbuildcommands
 			{
-				"{COPY} %{prj.location}../mark3d/renderer/public/*.h %{incoutputdir}",
-				"{COPY} %{prj.location}../common/predefine.h %{incoutputdir}",
+				"{COPY} %{prj.location}../engine/mark3d/renderer/public/*.h %{incoutputdir}",
+				"{COPY} %{prj.location}../engine/mark3d/core/public/*.h %{incoutputdir}",
+				"{COPY} %{prj.location}../engine/mark3d/math/*.h %{incoutputdir}",
+				"{COPY} %{prj.location}../engine/mark3d/math/*.inl %{incoutputdir}",
+				"{COPY} %{prj.location}../engine/common/predefine.h %{incoutputdir}",
 				"{COPY} %{outputdir}/*.dll %{sdk_bin_dir}",
 				"{COPY} %{outputdir}/*.lib %{sdk_lib_dir}",
 				"{COPY} %{outputdir}/*.pdb %{sdk_sym_dir}",

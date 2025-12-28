@@ -180,7 +180,9 @@ typedef unsigned long long ULONG64;
 #	define __INLINE inline 
 #	define __FORCEINLINE __forceinline 
 #	define __STRUCT__ struct
+#ifndef INTERFACE
 #	define INTERFACE __STRUCT__
+#endif // INTERFACE
 #endif // defined(__TARGET_COMPILER_GCC) || defined(__TARGET_COMPILER_CLANG)
 
 typedef int8_t int8;
@@ -261,7 +263,7 @@ typedef long double LONG_DOUBLE;
 #	define __ASSERT(Expr, Msg) __noop
 #endif //_DEBUG
 
-#define ALIGNED_SIZE(alloc_size, alignment) (alloc_size + (alignment - (alloc_size & (alignment - 1))) & (alignment - 1))
+#define ALIGNED_SIZE(alloc_size, alignment) (((alloc_size) + (alignment) - 1) & ~((alignment) - 1))
 #define ALIGNED_PADDING(alloc_size, alignment) ((alignment - (alloc_size & (alignment - 1))) & (alignment - 1))
 
 #if defined(_M_X64) || defined(__aarch64__) || defined(_M_ARM64)

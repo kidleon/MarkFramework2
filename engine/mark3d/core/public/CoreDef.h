@@ -4,6 +4,7 @@
 #include "predefine.h"
 #include "linked_list.h"
 #include "hash_table.h"
+#include "unicode.h"
 
 
 struct IUNKNOWN_IMPL : public IUNKNOWN

@@ -1,8 +1,11 @@
 ﻿#include "pch.h"
 #include "RenderSystemFactory.h"
 
+#if defined(__TARGET_OS_WINDOWS)
+HMODULE g_hModule = nullptr;
+#endif // defined(__TARGET_OS_WINDOWS)
 
-BOOL __stdcall CreateRenderSystem(
+BOOL __stdcall CreateAndInitRenderModule(
 	const ENGINE_CREATE_DESC& CreateDesc,
 	IRenderSystem** ppRenderSystem
 )
@@ -10,6 +13,8 @@ BOOL __stdcall CreateRenderSystem(
 	if(CreateDesc.RenderAPI == RENDER_API::D3D11)
 	{
 #if defined(__TARGET_OS_WINDOWS)
+		if (g_hModule) return FALSE;
+
 		typedef BOOL(__stdcall* PFN_CREATE_RENDERER_D3D11)(
 			HWND,
 			uint32,
@@ -18,14 +23,19 @@ BOOL __stdcall CreateRenderSystem(
 			IRenderSystem**
 		);
 
-		HMODULE hModule = LoadLibraryA("renderer_d3d11.dll");
-		if(!hModule)
+#if defined(_DEBUG)
+		g_hModule = LoadLibraryA(".\\renderer_d3d11_d.dll");
+#else 
+		g_hModule = LoadLibraryA(".\\renderer_d3d11.dll");
+#endif // defined(_DEBUG)
+		
+		if(!g_hModule)
 			return FALSE;
 
-		PFN_CREATE_RENDERER_D3D11 pfnCreateRendererD3D11 = (PFN_CREATE_RENDERER_D3D11)GetProcAddress(hModule, "CreateRendererD3D11");
+		PFN_CREATE_RENDERER_D3D11 pfnCreateRendererD3D11 = (PFN_CREATE_RENDERER_D3D11)GetProcAddress(g_hModule, "CreateRendererD3D11");
 		if (!pfnCreateRendererD3D11)
 		{
-			FreeLibrary(hModule);
+			FreeLibrary(g_hModule);
 			return FALSE;
 		}
 
@@ -37,7 +47,7 @@ BOOL __stdcall CreateRenderSystem(
 			ppRenderSystem
 		))
 		{
-			FreeLibrary(hModule);
+			FreeLibrary(g_hModule);
 			return FALSE;
 		}
 #else
@@ -50,4 +60,15 @@ BOOL __stdcall CreateRenderSystem(
 	}
 
 	return TRUE;
+}
+
+void __stdcall CleanupRenderModule()
+{
+#if defined(__TARGET_OS_WINDOWS)
+	if (g_hModule)
+	{
+		FreeLibrary(g_hModule);
+		g_hModule = nullptr;
+	}
+#endif // defined(__TARGET_OS_WINDOWS)
 }

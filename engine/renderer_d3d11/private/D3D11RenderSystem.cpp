@@ -4,6 +4,27 @@
 #include "D3D11RenderCamera.h"
 #include "D3D11RenderTarget.h"
 #include "D3D11RenderContext.h"
+#include "D3D11PrivateHeap.h"
+
+
+void MemoryReporter(
+	const char* type,
+	const char* file,
+	int line,
+	const char* func,
+	size_t size
+)
+{
+	char szTemp[512] = { '\0' };
+	sprintf(szTemp, "Memory Report: Type = %s, Size = %zu bytes, Location = %s(%d) %s\n",
+		type,
+		size,
+		file,
+		line,
+		func
+	);
+	OutputDebugStringA(szTemp);
+}
 
 
 D3D11RenderSystem::~D3D11RenderSystem() noexcept
@@ -41,6 +62,8 @@ BOOL D3D11RenderSystem::Initialize(
 {
 	BOOL DebugDevice = FALSE;
 
+	D3D11Heap_Init(1024 * 1024 * 10, MemoryReporter);
+
 #if defined(_DEBUG) || defined(DEBUG)
 	DebugDevice = TRUE;
 #endif // defined(_DEBUG)
@@ -65,6 +88,8 @@ void D3D11RenderSystem::Shutdown()
 		D3D11_DELETE(m_pRenderDevice, D3D11RenderDevice);
 		m_pRenderDevice = nullptr;
 	}
+
+	D3D11Heap_Shutdown();
 }
 
 BOOL D3D11RenderSystem::CreateRenderCamera(
