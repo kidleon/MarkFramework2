@@ -80,7 +80,7 @@ size_t D3D11_HEAP_BLOCK_COUNT_TABLE[MAX_HEAP_SIZE_IDX] =
 };
 
 
-struct D3D11HEAP
+struct D3D11_HEAP
 {
 	HANDLE hPoolHeap[MAX_HEAP_SIZE_IDX];
 	HANDLE hTempHeap;
@@ -93,7 +93,7 @@ struct D3D11HEAP
 	volatile size_t TempUsedAllocSize;
 };
 
-static D3D11HEAP g_D3D11Heap = {};
+static D3D11_HEAP g_D3D11Heap = {};
 
 static inline int get_heap_size_index(size_t size)
 {

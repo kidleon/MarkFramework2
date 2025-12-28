@@ -36,7 +36,6 @@ BOOL D3D11RenderSystem::Initialize(
 	HWND hWnd,
 	uint32 ScreenWidth,
 	uint32 ScreenHeight,
-	int32 MinLogLevel,
 	BOOL Fullscreen
 )
 {

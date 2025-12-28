@@ -37,7 +37,6 @@ BOOL __stdcall CreateRendererD3D11(
     HWND hWnd,
     uint32 ScreenWidth,
     uint32 ScreenHeight,
-    int32 MinLogLevel,
     BOOL Fullscreen,
     IRenderSystem** ppRenderSystem
 )
@@ -50,7 +49,6 @@ BOOL __stdcall CreateRendererD3D11(
         hWnd,
         ScreenWidth,
         ScreenHeight,
-        MinLogLevel,
         Fullscreen
     ))
     {

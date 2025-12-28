@@ -59,12 +59,12 @@ do
 			
 			postbuildcommands
 			{
-				"{COPY} %{prj.location}../renderer_d3d11/public/*.h %{incoutputdir}",
-				"{COPY} %{prj.location}../common/predefine.h %{incoutputdir}",
+				--"{COPY} %{prj.location}../renderer_d3d11/public/*.h %{incoutputdir}",
+				--"{COPY} %{prj.location}../common/predefine.h %{incoutputdir}",
 				"{COPY} %{outputdir}/*.dll %{sdk_bin_dir}",
 				"{COPY} %{outputdir}/*.lib %{sdk_lib_dir}",
 				"{COPY} %{outputdir}/*.pdb %{sdk_sym_dir}",
-				"{COPY} %{incoutputdir}/*.h %{sdk_inc_dir}",
+				--"{COPY} %{incoutputdir}/*.h %{sdk_inc_dir}",
 				-- "{COPY} %{incoutputdir}/*.inl %{sdk_inc_dir}",
 				"{COPY} %{outputdir}/*.dll %{sample_output_dir}",
 			}

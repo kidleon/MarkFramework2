@@ -9,8 +9,8 @@
 enum class RENDER_API : UINT32
 {
 	UNKNOWN = 0, // 알 수 없음
-	DIRECT3D11 = 1, // Direct3D 11
-	DIRECT3D12 = 2, // Direct3D 12
+	D3D11 = 1, // Direct3D 11
+	D3D12 = 2, // Direct3D 12
 	VULKAN = 3, // Vulkan
 	OPENGL = 4, // OpenGL
 	METAL = 5, // Metal
@@ -538,11 +538,12 @@ struct MARKENGINE_API ENGINE_CREATE_DESC
 #if defined(__TARGET_OS_WINDOWS)
 	HWND hWnd; // 윈도우 핸들
 #endif // __TARGET_OS_WINDOWS
-
+	RENDER_API RenderAPI; // 렌더링 API
 	UINT32 ScreenWidth; // 화면 너비
 	UINT32 ScreenHeight; // 화면 높이
-	LOG_LEVEL MinLogLevel; // 최소 로그 레벨
+
 	BOOL Fullscreen; // 전체 화면 모드 여부
+	
 };
 
 /**
@@ -1568,7 +1569,6 @@ public:
 		HWND hWnd,
 		uint32 ScreenWidth,
 		uint32 ScreenHeight,
-		int32 MinLogLevel,
 		BOOL Fullscreen
 	) = 0;
 
