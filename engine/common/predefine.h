@@ -301,6 +301,161 @@ struct __IUnknown
 
 typedef __IUnknown IUNKNOWN;
 
+enum class ALLOC_TYPE : unsigned
+{
+	SYSCALL,
+	POOL,
+	TEMP,
+};
+
+struct MemoryStats
+{
+	size_t sys_alloc_count;
+	size_t pool_alloc_count;
+	size_t peak_temp_count;
+
+	size_t sys_alloc_size;
+	size_t pool_alloc_size;
+	size_t peak_temp_size;
+};
+
+class MARKENGINE_API NameHash
+{
+public:
+	NameHash() = default;
+	NameHash(const char* szName) : m_Hash(0)
+	{
+		if (szName)
+			m_Hash = gen_fnv1(szName);
+	}
+
+	explicit NameHash(uint32 Hash)
+		: m_Hash(Hash)
+	{
+	}
+
+	NameHash(const NameHash& Other)
+		: m_Hash(Other.m_Hash)
+	{
+	}
+
+	NameHash(NameHash&& Other) noexcept
+	{
+		m_Hash = Other.m_Hash;
+	}
+
+	inline NameHash& operator=(const char* Other) noexcept
+	{
+		if (Other)
+			m_Hash = gen_fnv1(Other);
+		return *this;
+	}
+
+	inline NameHash& operator=(const NameHash& Other) noexcept
+	{
+		m_Hash = Other.m_Hash;
+		return *this;
+	}
+
+	inline NameHash& operator=(NameHash&& Other) noexcept
+	{
+		m_Hash = Other.m_Hash;
+		return *this;
+	}
+
+	inline bool operator ==(const NameHash& Other) const noexcept
+	{
+		return m_Hash == Other.m_Hash;
+	}
+
+	inline bool operator ==(uint32 Other) const noexcept
+	{
+		return m_Hash == Other;
+	}
+
+	inline bool operator ==(const char* Other) noexcept
+	{
+		uint32 OtherHash = (nullptr != Other) ? gen_fnv1(Other) : 0;
+		return m_Hash == OtherHash;
+	}
+
+	inline bool operator !=(const NameHash& Other) const noexcept
+	{
+		return m_Hash != Other.m_Hash;
+	}
+
+	inline bool operator !=(uint32 Other) const noexcept
+	{
+		return m_Hash != Other;
+	}
+
+	inline bool operator !=(const char* Other) noexcept
+	{
+		uint32 OtherHash = (nullptr != Other) ? gen_fnv1(Other) : 0;
+		return m_Hash != OtherHash;
+	}
+
+	inline bool operator >(const NameHash& Other) const noexcept
+	{
+		return m_Hash > Other.m_Hash;
+	}
+
+	inline bool operator >(uint32 Other) const noexcept
+	{
+		return m_Hash > Other;
+	}
+
+	inline bool operator <(const NameHash& Other) const noexcept
+	{
+		return m_Hash < Other.m_Hash;
+	}
+
+	inline bool operator <(uint32 Other) const noexcept
+	{
+		return m_Hash < Other;
+	}
+
+	inline operator uint32() noexcept
+	{
+		return m_Hash;
+	}
+
+	inline operator const uint32() const noexcept
+	{
+		return m_Hash;
+	}
+
+	inline bool empty() const noexcept
+	{
+		return !m_Hash ? true : false;
+	}
+
+	inline uint32 value() const noexcept
+	{
+		return m_Hash;
+	}
+
+private:
+	inline uint32 gen_fnv1(const char* str)
+	{
+		const uint8* pData = (const uint8*)str;
+
+		uint32 c;
+
+		//FNV1_INITIAL_VALUE 2166136261U
+		uint32 initial = 2166136261U;
+
+		while ((c = (uint8)*pData++) != 0)
+			initial = (initial * 16777619) ^ c;
+
+		return initial;
+	}
+
+private:
+	uint32 m_Hash = 0;
+
+};
+
 
 #endif // __cplusplus
 

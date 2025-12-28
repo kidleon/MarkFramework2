@@ -1,4 +1,4 @@
-project("mark3d")
+project("renerer_d3d11")
 do
 	language "C++"
 	cppdialect "C++17"
@@ -15,19 +15,14 @@ do
 	files { 
 		"pch.h",
 		"pch.cpp",
-		"core/**.h",
-		"core/**.inl",
-		"core/**.cpp",
-		"math/**.h",
-		"math/**.inl",
-		"math/**.cpp",
-		"renderer/**.h",
-		"renderer/**.inl",
-		"renderer/**.cpp",
+		"public/**.h",
+		"public/**.inl",
+		"public/**.cpp",
+		"private/**.h",
+		"private/**.inl",
+		"private/**.cpp",
 		"../common/*.h",
-		"../common/generic/*.h",
-		"../common/generic/*.cpp"
-		
+		"../common/generic/*.h"
 	}
 	
 	includedirs { 
@@ -35,11 +30,11 @@ do
 		"../common",
 		"../common/generic",
 		"../baselib/public",
-		"math",
-		"core/public",
-		"core/private",
-		"renderer/public",
-		"renderer/private"
+		"../mark3d/math",
+		"../mark3d/core/public",
+		"../mark3d/renderer/public",
+		"public",
+		"private"
 	}
 	
 	externalincludedirs {
@@ -64,17 +59,15 @@ do
 			
 			postbuildcommands
 			{
-				"{COPY} %{prj.location}../mark3d/renderer/public/*.h %{incoutputdir}",
+				"{COPY} %{prj.location}../renderer_d3d11/public/*.h %{incoutputdir}",
 				"{COPY} %{prj.location}../common/predefine.h %{incoutputdir}",
 				"{COPY} %{outputdir}/*.dll %{sdk_bin_dir}",
 				"{COPY} %{outputdir}/*.lib %{sdk_lib_dir}",
 				"{COPY} %{outputdir}/*.pdb %{sdk_sym_dir}",
 				"{COPY} %{incoutputdir}/*.h %{sdk_inc_dir}",
-				"{COPY} %{incoutputdir}/*.inl %{sdk_inc_dir}",
+				-- "{COPY} %{incoutputdir}/*.inl %{sdk_inc_dir}",
 				"{COPY} %{outputdir}/*.dll %{sample_output_dir}",
 			}
-			
-			defines { "__MARK3D_RENDERSYSTEM_D3D11__" }
 			
 			files {
 				"**.cpp",
@@ -85,7 +78,7 @@ do
 			do
 				defines{"DEBUG", "USE_DLL", "MARKENGINE_EXPORTS", "_CRT_SECURE_NO_WARNINGS"}
 				symbols "On"
-				targetname("mark3d_d")
+				targetname("renderer_d3d11_d")
 				links { "baselib_d" }
 			end
 			
@@ -93,9 +86,8 @@ do
 			do
 				defines{"NDEBUG", "RELEASE", "USE_DLL", "MARKENGINE_EXPORTS", "_CRT_SECURE_NO_WARNINGS"}
 				optimize "On"
-				
 				symbols "On"
-				targetname("mark3d")
+				targetname("renderer_d3d11")
 				links { "baselib" }
 			end
 			
@@ -104,7 +96,7 @@ do
 				defines{"NDEBUG", "MASTER", "USE_DLL", "MARKENGINE_EXPORTS", "_CRT_SECURE_NO_WARNINGS"}
 				optimize "On"
 				symbols "On"
-				targetname("mark3d")
+				targetname("renderer_d3d11")
 				links { "baselib" }
 			end
 		end

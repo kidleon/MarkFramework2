@@ -1,0 +1,82 @@
+﻿#ifndef __D3D11_CONSTANT_BUFFER_H__
+#define __D3D11_CONSTANT_BUFFER_H__
+
+#include "D3D11ConstantBufferBlock.h"
+
+
+struct D3D11_CONSTANT_BUFFER_BLOCK;
+
+class D3D11ConstantBufferImpl final : public IConstantBuffer
+{
+public:
+	D3D11ConstantBufferImpl() = default;
+
+	// IUNKNOWN interface
+	virtual long AddRef() final;
+	virtual long Release() final;
+	virtual long RefCnt() final;
+
+	// IAsset interface
+	virtual UINT32 GetID() const noexcept final;
+	virtual ASSET_TYPE GetAssetType() const noexcept final;
+	virtual LOAD_STAT GetLoadStat() const noexcept final;
+
+	// IConstantBuffer interface
+	virtual void UpdateData(const void* pData, size_t DataSize) final;
+
+	virtual void UpdateDataRef(const void* pData, size_t DataSize) final;
+
+	__FORCEINLINE BOOL INL_IsDataRef() const noexcept
+	{
+		return (m_pDataRefPtr != nullptr) && (m_DataRefSize > 0);
+	}
+
+	__FORCEINLINE const void* INL_GetDataPtr() const noexcept
+	{
+		if (INL_IsDataRef())
+		{
+			return m_pDataRefPtr;
+		}
+		else if (m_pCBufferBlock)
+		{
+			return m_pCBufferBlock->pData;
+		}
+
+		return nullptr;
+	}
+
+	__FORCEINLINE size_t INL_GetDataSize() const noexcept
+	{
+		if (INL_IsDataRef())
+		{
+			return m_DataRefSize;
+		}
+		else if (m_pCBufferBlock)
+		{
+			return m_pCBufferBlock->BufferSize;
+		}
+
+		return 0;
+	}
+
+protected:
+	virtual ~D3D11ConstantBufferImpl() noexcept;
+
+private:
+	volatile long m_RefCnt = 1;
+#if defined(__TARGET_OS_WINDOWS)
+	unsigned PADDING_OR_RESERVED = 0;
+#endif // defined(__TARGET_OS_WINDOWS)
+
+	UINT32 m_ID = 0;
+	LOAD_STAT m_LoadStat = LOAD_STAT::NOT_LOADED;
+
+	D3D11_CONSTANT_BUFFER_BLOCK* m_pCBufferBlock = nullptr;
+
+	void* m_pDataRefPtr = nullptr;
+	size_t m_DataRefSize = 0;
+
+};
+
+
+#endif // __D3D11_CONSTANT_BUFFER_H__
