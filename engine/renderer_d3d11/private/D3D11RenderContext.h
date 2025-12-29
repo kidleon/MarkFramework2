@@ -2,6 +2,10 @@
 #define __D3D11_RENDER_CONTEXT_H__
 
 
+class D3D11RenderCamera;
+class D3D11SurfaceMaterial;
+class D3D11PrimitiveBuffer;
+
 class D3D11RenderContext final : public IRenderContext
 {
 public:
@@ -25,6 +29,10 @@ private:
 #if defined(__TARGET_OS_WINDOWS)
 	unsigned PADDING_OR_RESERVED = 0;
 #endif // defined(__TARGET_OS_WINDOWS)
+
+	D3D11RenderCamera* m_pSetRenderCamera = nullptr;
+	D3D11SurfaceMaterial* m_pSetSurfaceMaterial = nullptr;
+	D3D11PrimitiveBuffer* m_pSetPrimitiveBuffer = nullptr;
 
 };
 

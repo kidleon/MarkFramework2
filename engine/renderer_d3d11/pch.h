@@ -22,5 +22,6 @@
 #include "D3D11RenderDef.h"
 #include "D3D11PrivateHeap.h"
 
+#include "D3D11AutoSync.h"
 
 #endif // __PCH_H__
