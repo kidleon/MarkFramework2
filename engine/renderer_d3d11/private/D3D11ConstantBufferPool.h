@@ -17,6 +17,11 @@ public:
 	D3D11ConstantBuffer* Allocate(size_t AllocSize);
 	void Release(D3D11ConstantBuffer* pBuffer);
 
+	__FORCEINLINE LINK_NODE* INL_GetCacheNode() noexcept
+	{
+		return &m_CacheNode;
+	}
+
 private:
 	BOOL CreateD3D11ConstantBuffer(LINKED_LIST* pStoreList, size_t SizeInBytes, size_t Count);
 
@@ -24,6 +29,8 @@ private:
 	D3D11RenderDevice* m_pRenderDevice = nullptr;
 	LINKED_LIST m_FreeList[POOL_BLOCK_TYPE_COUNT] = {};
 	LINKED_LIST m_UsedList[POOL_BLOCK_TYPE_COUNT] = {};
+
+	LINK_NODE m_CacheNode;
 
 };
 

@@ -48,11 +48,8 @@ extern "C"
 #define D3D11_TEMP_RESET() D3D11Heap_TempReset()
 
 #define D3D11_NEW(type) new (D3D11_SYS_ALLOC(sizeof(type))) type
-#define D3D11_NEW_ARRAY(type, count) new (D3D11_SYS_ALLOC(sizeof(type) * (count))) type[count]
 #define D3D11_DELETE(ptr, type) {type* p = ptr; if(p) { (p)->~type(); D3D11_SYS_FREE(p); p = nullptr; } }
-
 #define D3D11_POOL_NEW(type) new (D3D11_POOL_ALLOC(sizeof(type))) type
-#define D3D11_POOL_NEW_ARRAY(type, count) new (D3D11_POOL_ALLOC(sizeof(type) * (count))) type[count]
 #define D3D11_POOL_DELETE(ptr, type) {type* p = ptr; if(p) { (p)->~type(); D3D11_POOL_FREE(p); p = nullptr; } }
 
 
@@ -125,7 +122,8 @@ struct TD3D11Allocator
 	}
 };
 
-
+using TA_POOL = TD3D11Allocator<ALLOC_TYPE::POOL>;
+using TA_SYSCALL = TD3D11Allocator<ALLOC_TYPE::SYSCALL>;
 
 
 

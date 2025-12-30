@@ -204,7 +204,6 @@ BOOL D3D11RenderDevice::CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOO
 		m_pDepthStencilTexture,
 		m_pDepthStencilView
 	);
-
 	
 	pBackBuffer->Release();
 

@@ -4,6 +4,7 @@
 
 interface IRenderCamera;
 class D3D11RenderDevice;
+class D3D11RenderManager;
 class D3D11RenderContext;
 
 class D3D11RenderSystem final : public IRenderSystem
@@ -40,8 +41,9 @@ private:
 #endif // defined(__TARGET_OS_WINDOWS)
 
 	D3D11RenderDevice* m_pRenderDevice = nullptr;
+	D3D11RenderManager* m_pRenderMgr = nullptr;
 	D3D11RenderContext* m_pRenderContext = nullptr;
-
+	
 };
 
 

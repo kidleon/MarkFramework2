@@ -5,6 +5,11 @@
 #include "D3D11RenderState.h"
 
 
+D3D11RenderQueue::D3D11RenderQueue()
+{
+	m_LinkNode.data = this;
+}
+
 D3D11RenderQueue::~D3D11RenderQueue() noexcept
 {
 	Shutdown();
@@ -12,9 +17,9 @@ D3D11RenderQueue::~D3D11RenderQueue() noexcept
 
 void D3D11RenderQueue::Init(size_t InitialCapacity)
 {
-	for (int32 q = 0; q < RENDER_QUEUE_TYPE_EMAX; ++q)
+	for (int32 q = 0; q < EMAX_RQ; ++q)
 	{
-		m_RenderCommands[q].reserve(InitialCapacity);
+		m_CmdList[q].reserve(InitialCapacity);
 	}
 }
 
@@ -25,21 +30,23 @@ void D3D11RenderQueue::Shutdown()
 
 void D3D11RenderQueue::Clear()
 {
-	for (int32 q = 0; q < RENDER_QUEUE_TYPE_EMAX; ++q)
+	for (int32 q = 0; q < EMAX_RQ; ++q)
 	{
-		for(size_t i = 0; i < m_RenderCommands[q].size(); ++i)
+		for(size_t i = 0; i < m_CmdList[q].size(); ++i)
 		{
-			D3D11RenderCommandPool::Get()->Release(m_RenderCommands[q][i]);
+			D3D11RenderCommandPool::Get()->Release(m_CmdList[q][i]);
 		}
-		m_RenderCommands[q].clear();
+		m_CmdList[q].clear();
 	}
+
+	m_pRenderCamera = nullptr;
 }
 
 void D3D11RenderQueue::Add(RENDER_QUEUE_TYPE QueueType, MESH_RENDER_COMMAND* pRenderCommand)
 {
-	if (QueueType >= RENDER_QUEUE_TYPE_EMAX || !pRenderCommand)
+	if (QueueType >= EMAX_RQ || !pRenderCommand)
 		return;
-	m_RenderCommands[QueueType].push_back(pRenderCommand);
+	m_CmdList[QueueType].push_back(pRenderCommand);
 }
 
 void D3D11RenderQueue::Process()

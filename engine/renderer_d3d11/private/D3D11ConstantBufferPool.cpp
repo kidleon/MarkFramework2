@@ -49,6 +49,7 @@ __FORCEINLINE size_t GetPoolBlockTypeIndex(size_t SizeInBytes)
 D3D11ConstantBufferPool::D3D11ConstantBufferPool(D3D11RenderDevice* pRenderDevice)
 	: m_pRenderDevice(pRenderDevice)
 {
+	m_CacheNode.data = this;
 }
 
 D3D11ConstantBufferPool::~D3D11ConstantBufferPool() noexcept

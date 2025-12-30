@@ -26,16 +26,18 @@ struct MESH_RENDER_SORT_KEY
 	};
 };
 
-struct MESH_RENDER_COMMAND
+struct BASE_RENDER_COMMAND
+{
+	LINK_NODE LinkNode;
+};
+
+struct MESH_RENDER_COMMAND : public BASE_RENDER_COMMAND
 {
 	MESH_RENDER_SORT_KEY SortKey;
-
 	D3D11Shader* pVertexShader;
 	D3D11Shader* pPixelShader;
 	D3D11RenderPipelineState* pRPS;
 	D3D11DynamicRenderPipelineState* pDynamicRPS;
-
-	LINK_NODE LinkNode;
 
 	__FORCEINLINE bool operator==(const MESH_RENDER_COMMAND& Other) const noexcept
 	{

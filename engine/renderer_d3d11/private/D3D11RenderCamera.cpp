@@ -17,11 +17,14 @@ D3D11RenderCamera::D3D11RenderCamera(
 	, m_View{ {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f} }
 	, m_ViewportID(VIEWPORT_COUNTER++)
 {
+	m_ID = D3D11Global::GetUID();
+	m_LoadStat = LOAD_STAT::LOADED;
 }
 
 D3D11RenderCamera::~D3D11RenderCamera() noexcept
 {
 	CHECK_RELEASE(m_pRenderTarget);
+	D3D11Global::ReleaseUID(m_ID);
 }
 
 long D3D11RenderCamera::AddRef()

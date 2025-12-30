@@ -45,7 +45,7 @@ void D3D11RenderCommandPool::Cleanup()
 	{
 		LINK_NODE* pNextNode = pNode->next;
 		MESH_RENDER_COMMAND* pCommand = (MESH_RENDER_COMMAND*)pNode->data;
-		D3D11_POOL_FREE(pCommand, MESH_RENDER_COMMAND);
+		D3D11_POOL_FREE(pCommand);
 		pNode = pNextNode;
 	}
 

@@ -5,6 +5,7 @@
 #include "D3D11RenderTarget.h"
 #include "D3D11RenderContext.h"
 #include "D3D11PrivateHeap.h"
+#include "D3D11RenderManager.h"
 
 
 void MemoryReporter(
@@ -60,6 +61,8 @@ BOOL D3D11RenderSystem::Initialize(
 	BOOL Fullscreen
 )
 {
+	D3D11Global::Init();
+
 	BOOL DebugDevice = FALSE;
 
 	D3D11Heap_Init(1024 * 1024 * 10, MemoryReporter);
@@ -78,11 +81,17 @@ BOOL D3D11RenderSystem::Initialize(
 		return FALSE;
 	}
 
+	m_pRenderMgr = D3D11_NEW(D3D11RenderManager)();
+	m_pRenderContext = D3D11_NEW(D3D11RenderContext);
+
 	return TRUE;
 }
 
 void D3D11RenderSystem::Shutdown()
 {
+	CHECK_RELEASE(m_pRenderContext);
+	D3D11_DELETE(m_pRenderMgr, D3D11RenderManager);
+
 	if (m_pRenderDevice)
 	{
 		D3D11_DELETE(m_pRenderDevice, D3D11RenderDevice);
@@ -90,6 +99,8 @@ void D3D11RenderSystem::Shutdown()
 	}
 
 	D3D11Heap_Shutdown();
+
+	D3D11Global::Shutdown();
 }
 
 BOOL D3D11RenderSystem::CreateRenderCamera(

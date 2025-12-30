@@ -5,6 +5,7 @@
 class D3D11RenderCamera;
 class D3D11SurfaceMaterial;
 class D3D11PrimitiveBuffer;
+class D3D11RenderQueue;
 
 class D3D11RenderContext final : public IRenderContext
 {
@@ -31,9 +32,11 @@ private:
 #endif // defined(__TARGET_OS_WINDOWS)
 
 	D3D11RenderCamera* m_pSetRenderCamera = nullptr;
+	D3D11RenderQueue* m_pSetRQ = nullptr;
+
 	D3D11SurfaceMaterial* m_pSetSurfaceMaterial = nullptr;
 	D3D11PrimitiveBuffer* m_pSetPrimitiveBuffer = nullptr;
-
+	
 };
 
 
