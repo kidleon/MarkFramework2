@@ -137,6 +137,7 @@ D3D11Buffer* D3D11TransientBuffer::Alloc(size_t AllocSize)
 	void* pCPUAddress = static_cast<char*>(Mapped.pData) + AlignedOffset;
 	pD3D11Context->Unmap(pCurrBuffer, 0);
 
+	/*
 	D3D11Buffer* pBuffer = D3D11_POOL_NEW(D3D11Buffer)(
 		D3D11_BUFFER_TYPE::VERTEX_BUFFER,
 		AllocSize,
@@ -148,4 +149,6 @@ D3D11Buffer* D3D11TransientBuffer::Alloc(size_t AllocSize)
 	m_CurrOffset = AlignedOffset + AllocSize;
 
 	return pBuffer;
+	*/
+	return NULL;
 }

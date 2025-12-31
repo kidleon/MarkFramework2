@@ -156,6 +156,14 @@ BOOL D3D11RenderSystem::CreateRenderCamera(
 	return TRUE;
 }
 
+BOOL D3D11RenderSystem::CreatePrimitiveBuffer(
+	const PRIMITIVEBUFFER_CREATE_DESC& Desc,
+	IPrimitiveBuffer** ppOut
+)
+{
+	return TRUE;
+}
+
 IRenderContext* D3D11RenderSystem::GetRenderContext() const noexcept
 {
 	return m_pRenderContext;

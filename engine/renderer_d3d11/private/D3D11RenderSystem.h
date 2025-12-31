@@ -24,10 +24,8 @@ public:
 
 	virtual void Shutdown() final;
 
-	virtual BOOL CreateRenderCamera(
-		const RENDERCAMERA_CREATE_DESC& Desc,
-		IRenderCamera** ppOut
-	) final;
+	virtual BOOL CreateRenderCamera(const RENDERCAMERA_CREATE_DESC& Desc, IRenderCamera** ppOut) final;
+	virtual BOOL CreatePrimitiveBuffer(const PRIMITIVEBUFFER_CREATE_DESC& Desc, IPrimitiveBuffer** ppOut) final;
 
 	IRenderContext* GetRenderContext() const noexcept final;
 

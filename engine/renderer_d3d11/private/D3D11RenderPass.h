@@ -37,6 +37,9 @@ struct D3D11_RENDER_PASS
 	uint64 BlendStateHash; // BlendState 해시값
 	uint64 DepthStencilStateHash; // DepthStencilState 해시값
 	uint64 RasterizerStateHash; // RasterizerState 해시값
+	BOOL DirtyBlendState;
+	BOOL DirtyDepthStencilState;
+	BOOL DirtyRasterizerState;
 
 	// DynamicRenderPipelineState
 	CONSTANT_STATE ConstantState[MAX_CONSTANT_SLOT]; // 상수 버퍼 상태

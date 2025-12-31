@@ -6,9 +6,11 @@
 #include "D3D11RenderQueue.h"
 #include "D3D11RenderQueuePool.h"
 #include "D3D11RenderManager.h"
+#include "D3D11RenderDevice.h"
 
 
-D3D11RenderContext::D3D11RenderContext()
+D3D11RenderContext::D3D11RenderContext(D3D11RenderDevice* pRenderDevice)
+	: m_pRenderDevice(pRenderDevice)
 {
 
 }
@@ -96,7 +98,43 @@ void D3D11RenderContext::SetPrimitiveBuffer(IPrimitiveBuffer* pPrimitiveBuffer)
 
 void D3D11RenderContext::DrawPrimitive(int32 PrimitiveIndex)
 {
+	// Set SurfaceMaterial
+	int32 NumPass = m_pSetSurfaceMaterial->INL_GetNumPass();
+
+	for (int32 pass = 0; pass < NumPass; ++pass)
+	{
+		D3D11_RENDER_PASS& RenderPass = m_pSetSurfaceMaterial->INL_GetRenderPass(pass);
+
+
+
+
+		// Build D3D11RenderPipelineState for each pass
+		m_pRenderDevice->GetOrCreateRenderPipelineState(
+			RenderPass.BlendState,
+			RenderPass.RasterizerState,
+			RenderPass.DepthStencilState,
+			&m_pSetSurfaceMaterial->INL_GetShader(pass)->INL_GetInputLayout(),
+			&m_pSetSurfaceMaterial->INL_GetShader(pass)->INL_GetVertexShader(),
+			&m_pSetSurfaceMaterial->INL_GetShader(pass)->INL_GetPixelShader(),
+			&m_pSetSurfaceMaterial->INL_GetShader(pass)->INL_GetGeometryShader(),
+			&m_pSetSurfaceMaterial->INL_GetShader(pass)->INL_GetHullShader(),
+			&m_pSetSurfaceMaterial->INL_GetShader(pass)->INL_GetDomainShader(),
+			&m_pSetSurfaceMaterial->INL_GetShader(pass)->INL_GetComputeShader(),
+			&m_pSetSurfaceMaterial->INL_GetRenderPipelineState(pass)
+
+		)
+		
+
+		// Build D3D11DynamicRenderPipelineState for each pass
+	}
+
+
+
 	// Set D3D11RenderPipelineState
+	auto& Primitive = m_pSetPrimitiveBuffer->INL_GetPrimitive(PrimitiveIndex);
+	
+
+
 	
 	// Set D3D11DynamicRenderPipelineState
 

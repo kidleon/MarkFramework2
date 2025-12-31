@@ -97,14 +97,14 @@ static constexpr D3D11_STENCIL_OP D3D11_IMPL_STENCIL_OP[(int)STENCIL_OP::EMAX] =
     D3D11_STENCIL_OP_DECR
 };
 
-enum class D3D11_BUFFER_TYPE
+enum class D3D11_BUFFER_TYPE : uint8
 {
     VERTEX_BUFFER,
     INDEX_BUFFER,
 	CONSTANT_BUFFER
 };
 
-enum class D3D11_BUFFER_STRATEGY
+enum class D3D11_BUFFER_STRATEGY : uint8
 {
 	// 독립, 버퍼풀, 트랜지언트 버퍼
 	INDEPENDENT,

@@ -150,6 +150,15 @@ public:
 	void SetDepthBiasEnable(int32 Pass, BOOL Enable) final;
 	void SetDepthBiasParams(int32 Pass, int32 DepthBias, float DepthBiasClamp, float SlopeScaledDepthBias) final;
 
+	__FORCEINLINE int32 INL_GetNumPass() const noexcept { return m_pMaterialBlock->NumRenderPass; }
+	__FORCEINLINE D3D11_RENDER_PASS& INL_GetRenderPass(int32 Pass) const noexcept
+	{
+		assert(Pass >= 0 && Pass < m_pMaterialBlock->NumRenderPass);
+		return m_pMaterialBlock->RenderPasses[Pass];
+	}
+
+
+
 protected:
 	D3D11SurfaceMaterial() = delete;
 	~D3D11SurfaceMaterial() noexcept;

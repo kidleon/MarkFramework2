@@ -10,7 +10,7 @@ class D3D11RenderQueue;
 class D3D11RenderContext final : public IRenderContext
 {
 public:
-	D3D11RenderContext();
+	D3D11RenderContext(D3D11RenderDevice* pRenderDevice);
 	~D3D11RenderContext() noexcept;
 
 	// IUNKNOWN interface
@@ -31,6 +31,7 @@ private:
 	unsigned PADDING_OR_RESERVED = 0;
 #endif // defined(__TARGET_OS_WINDOWS)
 
+	D3D11RenderDevice* m_pRenderDevice = nullptr;
 	D3D11RenderCamera* m_pSetRenderCamera = nullptr;
 	D3D11RenderQueue* m_pSetRQ = nullptr;
 

@@ -183,7 +183,7 @@ inline size_t CalculateTextureSize(COLOR_FORMAT format, size_t width, size_t hei
 	return width * height * pixelSize;
 }
 
-enum class PRIMITIVE_TYPE : unsigned int
+enum class PRIMITIVE_TYPE : uint8
 {
 	UNKNOWN = 0,
 	POINT_LIST,
@@ -198,7 +198,7 @@ enum class PRIMITIVE_TYPE : unsigned int
 /**
 * @brief 셰이더 타입 열거형
 */
-enum class SHADER_TYPE : unsigned int
+enum class SHADER_TYPE : uint8
 {
 	UNKNOWN = 0,
 	VERTEX,
@@ -211,7 +211,7 @@ enum class SHADER_TYPE : unsigned int
 /**
 * @brief 버퍼 사용 용도 열거형
 */
-enum class BUFFER_USAGE : unsigned int
+enum class BUFFER_USAGE : uint8
 {
 	DEFAULT = 0, 
 	DYNAMIC, 
@@ -316,6 +316,7 @@ enum class VERTEX_FORMAT_STRIDE : unsigned int
 static constexpr UINT32 MAX_VERTEX_FORMAT = 16; // 최대 버텍스 포맷 수
 static constexpr int32 MAX_RENDER_PASS = 4; // 서피스 메테리얼의 최대 렌더 패스 수 (추가 패스는 별도의 메테리얼로 구현)
 static constexpr int32 MAX_BLEND_TARGET = 8; // 최대 블렌드 타겟 수 (MRT 지원)
+static constexpr uint32 MAX_PRIMITIVE = 32; // 최대 프리미티브 수
 
 static constexpr int32 MAX_TEXTURE_SLOT = 16; // 최대 텍스처 슬롯 수
 static constexpr int32 MAX_SAMPLER_SLOT = 8; // 최대 샘플러 슬롯 수
@@ -590,6 +591,11 @@ struct MARKENGINE_API RENDERCAMERA_CREATE_DESC
 	UINT8 Sencil; // 스텐실 값
 	UINT8 CameraOrder; // 카메라 렌더링 순서
 	UINT8 PADDING[2];
+};
+
+struct MARKENGINE_API PRIMITIVEBUFFER_CREATE_DESC
+{
+
 };
 
 /**
@@ -1510,6 +1516,27 @@ struct IMesh : public IAsset
 */
 struct IPrimitiveBuffer : public IAsset
 {
+	virtual void AddPrimitive(
+		PRIMITIVE_TYPE PrimitiveType,
+		uint32 VertexOffset,
+		uint32 VertexCount,
+		uint32 IndexOffset,
+		uint32 IndexCount
+	) noexcept = 0;
+
+	virtual uint32 GetNumPrimitives() const noexcept = 0;
+
+	virtual void UpdateVertex(
+		int32 PrimitiveIndex,
+		const void* pVertexData,
+		size_t VertexSize
+	) = 0;
+
+	virtual void UpdateIndex(
+		int32 PrimitiveIndex,
+		const void* pIndexData,
+		size_t IndexSize
+	) = 0;
 };
 
 
@@ -1578,6 +1605,12 @@ public:
 		const RENDERCAMERA_CREATE_DESC& Desc,
 		IRenderCamera** ppOut
 	) = 0;
+
+	virtual BOOL CreatePrimitiveBuffer(
+		const PRIMITIVEBUFFER_CREATE_DESC& Desc,
+		IPrimitiveBuffer** ppOut
+	) = 0;
+
 
 	virtual IRenderContext* GetRenderContext() const noexcept = 0;
 

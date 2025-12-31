@@ -101,6 +101,7 @@ public:
 
 	__FORCEINLINE D3D11RenderTarget* INL_GetBackBuffer_RenderTarget() const noexcept { return m_pBackBuffer_RT; }
 
+
 private:
 	void DestroyDevice() noexcept;
 
