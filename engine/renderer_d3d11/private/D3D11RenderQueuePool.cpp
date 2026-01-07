@@ -8,12 +8,18 @@ D3D11RenderQueuePool* D3D11RenderQueuePool::s_pInstance = nullptr;
 D3D11RenderQueuePool::D3D11RenderQueuePool()
 	: m_FreeList{}
 	, m_UsedList{}
+	, m_Shutdown(FALSE)
 {
+	if (!s_pInstance)
+		s_pInstance = this;
 }
 
 D3D11RenderQueuePool::~D3D11RenderQueuePool() noexcept
 {
 	Shutdown();
+
+	if (s_pInstance == this)
+		s_pInstance = nullptr;
 }
 
 void D3D11RenderQueuePool::Init()
@@ -26,6 +32,8 @@ void D3D11RenderQueuePool::Init()
 
 void D3D11RenderQueuePool::Shutdown() noexcept
 {
+	m_Shutdown = TRUE;
+
 	while (!linked_list_empty(&m_UsedList))
 	{
 		LINK_NODE* pNode = linked_list_pop_front(&m_UsedList);
@@ -43,6 +51,9 @@ void D3D11RenderQueuePool::Shutdown() noexcept
 
 D3D11RenderQueue* D3D11RenderQueuePool::GetRQ() noexcept
 {
+	if (m_Shutdown)
+		return nullptr;
+
 	if (linked_list_empty(&m_FreeList))
 		AllocRQ(4);
 

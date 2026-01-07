@@ -18,6 +18,7 @@ extern "C"
 
 	void D3D11Heap_Shutdown();
 	HANDLE D3D11Heap_GetHandle();
+	void D3D11Heap_ReportLeaks();
 
 	void* D3D11Heap_SysAlloc(size_t size, const char* file, int line, const char* func);
 	void* D3D11Heap_SysRealloc(void* ptr, size_t newSize, const char* file, int line, const char* func);

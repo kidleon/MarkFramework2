@@ -18,12 +18,17 @@ D3D11RenderQueue::~D3D11RenderQueue() noexcept
 void D3D11RenderQueue::SetRenderCamera(D3D11RenderCamera* pCamera) noexcept
 {
 	m_pRenderCamera = pCamera;
+	m_pRenderCamera->AddRef();
 }
 
 
 void D3D11RenderQueue::Reset()
 {
-	
+	if (m_pRenderCamera)
+	{
+		m_pRenderCamera->Release();
+		m_pRenderCamera = nullptr;
+	}
 }
 
 void D3D11RenderQueue::Add(RENDER_QUEUE_TYPE QueueType, BASE_RENDER_COMMAND* pRenderCmd) noexcept

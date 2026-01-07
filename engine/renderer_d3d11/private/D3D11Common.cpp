@@ -21,7 +21,7 @@ BOOL D3D11Common::Init() noexcept
 void D3D11Common::Shutdown() noexcept
 {
 	// 종료 코드 작성
-	if(RENDER_QUEUE_POOL)
+	if (RENDER_QUEUE_POOL)
 	{
 		D3D11_DELETE(RENDER_QUEUE_POOL, D3D11RenderQueuePool);
 		RENDER_QUEUE_POOL = nullptr;

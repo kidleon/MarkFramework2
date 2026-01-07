@@ -156,6 +156,14 @@ HANDLE D3D11Heap_GetHandle()
 	return (HANDLE)&g_D3D11Heap;
 }
 
+void D3D11Heap_ReportLeaks()
+{
+	if (g_D3D11Heap.hMemRecorder)
+	{
+		memrec_report_leaks(g_D3D11Heap.hMemRecorder);
+	}
+}
+
 void* D3D11Heap_SysAlloc(size_t size, const char* file, int line, const char* func)
 {
 	void* pHeap = crt_malloc(size);

@@ -90,20 +90,39 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 				pContext->OMSetRenderTargets(1, &pRTV, pDSV);
 
 				const D3D11RenderCamera::CLEAR_TARGET_DESC& ClearDesc = pCamera->INL_GetClearTargetDesc();
-				pContext->ClearRenderTargetView(
-					pRTV,
-					ClearDesc.ClearColor.v
-				);
 
-				if (pDSV)
+				if (ClearDesc.ClearBuffers & (uint32)CLEAR_BUFFER::COLOR)
+				{
+					pContext->ClearRenderTargetView(
+						pRTV,
+						ClearDesc.ClearColor.v
+					);
+				}
+
+				UINT ClearFlags = 0;
+				if (ClearDesc.ClearBuffers & (uint32)CLEAR_BUFFER::DEPTH && ClearDesc.ClearBuffers & (uint32)CLEAR_BUFFER::STENCIL)
+				{
+					ClearFlags = D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL;
+				}
+				else if (ClearDesc.ClearBuffers & (uint32)CLEAR_BUFFER::DEPTH && !(ClearDesc.ClearBuffers & (uint32)CLEAR_BUFFER::STENCIL))
+				{
+					ClearFlags = D3D11_CLEAR_DEPTH;
+				}
+				else if (!(ClearDesc.ClearBuffers & (uint32)CLEAR_BUFFER::DEPTH) && (ClearDesc.ClearBuffers & (uint32)CLEAR_BUFFER::STENCIL))
+				{
+					ClearFlags = D3D11_CLEAR_STENCIL;
+				}
+
+				if (pDSV && ClearFlags > 0)
 				{
 					pContext->ClearDepthStencilView(
 						pDSV,
-						D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
+						ClearFlags,
 						ClearDesc.Depth,
 						static_cast<UINT8>(ClearDesc.Stencil)
 					);
 				}
+				
 				
 				// 뷰포트 설정
 				D3D11_VIEWPORT viewport = {};
@@ -116,6 +135,9 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 				pContext->RSSetViewports(1, &viewport);
 			}
 		}
+
+		pRQ->Reset();
+		D3D11RenderQueuePool::Get().ReleaseRQ(pRQ);
 	}
 
 	IDXGISwapChain* pSwapChain = m_pRenderDevice->INL_GetSwapChain();

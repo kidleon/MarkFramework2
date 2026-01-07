@@ -45,7 +45,21 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 
 void D3D11Application::OnUpdate()
 {
+	if (!m_pRenderSystem || !m_pRenderCamera)
+		return;
 
+	IRenderContext* pRenderContext = nullptr;
+	if (!m_pRenderSystem->GetOrCreateRenderContext(&pRenderContext))
+		return;
+
+	pRenderContext->BeginFrame();
+	pRenderContext->BeginRenderCamera(m_pRenderCamera);
+	pRenderContext->EndRenderCamera();
+	pRenderContext->EndFrame();
+
+	pRenderContext->Release();
+
+	m_pRenderSystem->Update();
 }
 
 void D3D11Application::OnDestroy()

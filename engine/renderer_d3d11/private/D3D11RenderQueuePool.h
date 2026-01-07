@@ -25,5 +25,6 @@ private:
 private:
 	LINKED_LIST m_FreeList;
 	LINKED_LIST m_UsedList;
+	BOOL m_Shutdown;
 
 };

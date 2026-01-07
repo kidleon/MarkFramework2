@@ -115,6 +115,49 @@ void memrec_report_leaks(HANDLE hRecorder)
 	struct memory_record_t* recorder = (struct memory_record_t*)hRecorder;
 	if (!recorder)
 		return;
+
+	if (recorder->pfnLeakReporter)
+	{
+		for (size_t b = 0; b < recorder->sysalloc_table->bucket_size; ++b)
+		{
+			struct HASH_NODE* node = recorder->sysalloc_table->buckets[b];
+			while (node)
+			{
+				struct memory_block_t* mem_block = (struct memory_block_t*)node->data;
+				if (mem_block)
+				{
+					recorder->pfnLeakReporter(
+						"SysAlloc",
+						mem_block->file,
+						mem_block->line,
+						mem_block->func,
+						mem_block->size
+					);
+				}
+				node = node->next;
+			}
+		}
+
+		for (size_t b = 0; b < recorder->poolalloc_table->bucket_size; ++b)
+		{
+			struct HASH_NODE* node = recorder->poolalloc_table->buckets[b];
+			while (node)
+			{
+				struct memory_block_t* mem_block = (struct memory_block_t*)node->data;
+				if (mem_block)
+				{
+					recorder->pfnLeakReporter(
+						"PoolAlloc",
+						mem_block->file,
+						mem_block->line,
+						mem_block->func,
+						mem_block->size
+					);
+				}
+				node = node->next;
+			}
+		}
+	}
 }
 
 void memrec_onalloc_syscall(
@@ -141,7 +184,8 @@ void memrec_onalloc_syscall(
 	node->line = line;
 	node->hash_node.data = (void*)node;
 
-	uint64 hash_key = fnv64(ptr, sizeof(void*), 0); // 해시값 계산
+	uintptr_t ptr_value = (uintptr_t)ptr;
+	uint64 hash_key = fnv64(&ptr_value, sizeof(uintptr_t), 0); // 해시값 계산
 
 	acquire_spin_lock(&recorder->sys_lock);
 
@@ -166,7 +210,8 @@ void memrec_onfree_syscall(
 	if (!recorder || !ptr)
 		return;
 
-	uint64 hash_key = fnv64(ptr, sizeof(void*), 0); // 해시값 계산
+	uintptr_t ptr_value = (uintptr_t)ptr;
+	uint64 hash_key = fnv64(&ptr_value, sizeof(uintptr_t), 0); // 해시값 계산
 
 	acquire_spin_lock(&recorder->sys_lock);
 	struct memory_block_t* node = (struct memory_block_t*)query_hash_node(recorder->sysalloc_table, hash_key);
@@ -205,7 +250,8 @@ void memrec_onalloc_pool(
 	node->line = line;
 	node->hash_node.data = (void*)node;
 
-	uint64 hash_key = fnv64(ptr, sizeof(void*), 0); // 해시값 계산
+	uintptr_t ptr_value = (uintptr_t)ptr;
+	uint64 hash_key = fnv64(&ptr_value, sizeof(uintptr_t), 0); // 해시값 계산
 
 	acquire_spin_lock(&recorder->pool_lock);
 	insert_hash_node(
@@ -229,7 +275,8 @@ void memrec_onfree_pool(
 	if (!recorder || !ptr)
 		return;
 
-	uint64 hash_key = fnv64(ptr, sizeof(void*), 0); // 해시값 계산
+	uintptr_t ptr_value = (uintptr_t)ptr;
+	uint64 hash_key = fnv64(&ptr_value, sizeof(uintptr_t), 0); // 해시값 계산
 
 	acquire_spin_lock(&recorder->pool_lock);
 

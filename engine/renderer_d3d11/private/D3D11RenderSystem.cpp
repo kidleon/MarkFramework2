@@ -86,6 +86,12 @@ BOOL D3D11RenderSystem::Init(
 
 void D3D11RenderSystem::Shutdown()
 {
+	if (m_pRenderCommandExecutor)
+	{
+		D3D11_DELETE(m_pRenderCommandExecutor, D3D11RenderCommandExecutor);
+		m_pRenderCommandExecutor = nullptr;
+	}
+
 	if (m_pRenderContext)
 	{
 		D3D11_DELETE(m_pRenderContext, D3D11RenderContext);
@@ -100,6 +106,7 @@ void D3D11RenderSystem::Shutdown()
 	
 	D3D11Common::Shutdown();
 
+	D3D11Heap_ReportLeaks();
 	D3D11Heap_Shutdown();
 }
 
