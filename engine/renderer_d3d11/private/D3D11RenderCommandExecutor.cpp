@@ -42,19 +42,18 @@ void D3D11RenderCommandExecutor::Push(D3D11RenderQueue* pRQ) noexcept
 	m_RQGroups[m_CurrentFrameIndex].lstRenderQueue.push_back(pRQ);
 }
 
-void D3D11RenderCommandExecutor::Reset()
+void D3D11RenderCommandExecutor::ResetFrame(size_t Frame)
 {
-	for (size_t i = 0; i < m_RQGroups[m_CurrentFrameIndex].lstRenderQueue.size(); ++i)
+	for (size_t i = 0; i < m_RQGroups[Frame].lstRenderQueue.size(); ++i)
 	{
-		D3D11RenderQueue* pRQ = m_RQGroups[m_CurrentFrameIndex].lstRenderQueue[i];
+		D3D11RenderQueue* pRQ = m_RQGroups[Frame].lstRenderQueue[i];
 		if (pRQ)
 		{
-			pRQ->Reset();
 			D3D11RenderQueuePool::Get().ReleaseRQ(pRQ);
 		}
 	}
 
-	m_RQGroups[m_CurrentFrameIndex].lstRenderQueue.clear();
+	m_RQGroups[Frame].lstRenderQueue.clear();
 }
 
 void D3D11RenderCommandExecutor::Execute() noexcept
@@ -122,8 +121,7 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 						static_cast<UINT8>(ClearDesc.Stencil)
 					);
 				}
-				
-				
+
 				// 뷰포트 설정
 				D3D11_VIEWPORT viewport = {};
 				viewport.TopLeftX = 0.0f;
@@ -135,10 +133,9 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 				pContext->RSSetViewports(1, &viewport);
 			}
 		}
-
-		pRQ->Reset();
-		D3D11RenderQueuePool::Get().ReleaseRQ(pRQ);
 	}
+
+	ResetFrame(CurrentFrameIndex);
 
 	IDXGISwapChain* pSwapChain = m_pRenderDevice->INL_GetSwapChain();
 	HRESULT hr = pSwapChain->Present(RenderSettings.VSyncEnabled, 0); // 프레임 업데이트!

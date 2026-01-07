@@ -63,7 +63,6 @@ D3D11RenderQueue* D3D11RenderQueuePool::GetRQ() noexcept
 	linked_list_push_back(&m_UsedList, pNode);
 
 	return pRQ;
-
 }
 
 void D3D11RenderQueuePool::ReleaseRQ(D3D11RenderQueue* pRQ) noexcept

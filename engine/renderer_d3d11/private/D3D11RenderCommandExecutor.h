@@ -20,11 +20,12 @@ public:
 	D3D11RenderCommandExecutor(D3D11RenderDevice* pRenderDevice);
 	~D3D11RenderCommandExecutor() noexcept;
 	void Push(D3D11RenderQueue* pRQ) noexcept;
-	void Reset();
-
 	void Execute() noexcept;
 
 	static inline D3D11RenderCommandExecutor& Get() noexcept { return *s_pInstance; }
+
+private:
+	void ResetFrame(size_t Frame);
 
 private:
 	D3D11RenderDevice* m_pRenderDevice;

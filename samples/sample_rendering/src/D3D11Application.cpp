@@ -33,7 +33,7 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	CameraDesc.AspectRatio = static_cast<FLOAT>(width) / static_cast<FLOAT>(height);
 	CameraDesc.NearZ = 0.1f;
 	CameraDesc.FarZ = 1000.0f;
-	CameraDesc.ClearColor = FLOAT4{ 0.0f, 1.0f, 0.0f, 1.0f };
+	CameraDesc.ClearColor = FLOAT4{ 0.0f, 0.0f, 1.0f, 1.0f };
 	CameraDesc.ClearFlags = static_cast<UINT32>(CLEAR_BUFFER::ALL);
 	CameraDesc.Depth = 1.0f;
 	CameraDesc.Stencil = 0;
