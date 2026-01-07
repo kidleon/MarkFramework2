@@ -46,8 +46,8 @@ public:
 
 public:
 	explicit D3D11RenderCamera(
-		D3D11RenderTarget* pRenderTarget,
-		CAMERA_MODE CameraMode
+		CAMERA_MODE CameraMode,
+		D3D11RenderTarget* pRenderTarget
 	);
 
 	// IUNKNOWN interface
@@ -56,7 +56,7 @@ public:
 	virtual long RefCnt() final;
 
 	// IAsset interface
-	virtual UINT32 GetID() const noexcept final;
+	virtual UINT64 GetID() const noexcept final;
 	virtual ASSET_TYPE GetAssetType() const noexcept final;
 	virtual LOAD_STAT GetLoadStat() const noexcept final;
 
@@ -94,7 +94,6 @@ public:
 
 	void SetViewportLayer(INT8 Layer) noexcept final;
 
-	__INLINE UINT32 INL_GetViewportID() const noexcept { return m_ViewportID; }
 	__INLINE INT32 INL_GetViewportLayer() const noexcept { return m_ViewportLayer; }
 
 	__INLINE const CLEAR_TARGET_DESC& INL_GetClearTargetDesc() const noexcept { return m_ClearTarget; }
@@ -118,8 +117,9 @@ private:
 	unsigned PADDING_OR_RESERVED = 0;
 #endif // defined(__TARGET_OS_WINDOWS)
 
-	UINT32 m_ID = 0;
+	UINT64 m_ID = 0;
 	LOAD_STAT m_LoadStat = LOAD_STAT::NOT_LOADED;
+	INT32 m_ViewportLayer = 0;
 
 	CLEAR_TARGET_DESC m_ClearTarget;
 	PERSPECTIVE_DESC m_Perspective;
@@ -128,15 +128,13 @@ private:
 	CAMERA_MODE m_CameraMode = CAMERA_MODE::PERSPECTIVE;
 	UINT32 m_CameraFlags = 0;
 
-	UINT32 m_ViewportID = 0;
-	INT32 m_ViewportLayer = 0;
-
 	MATRIX4 m_ViewMatrix = MATRIX4_IDENT;
 	MATRIX4 m_ProjectionMatrix = MATRIX4_IDENT;
 
 	D3D11_VIEWPORT m_Viewport = {};
 
 	D3D11RenderTarget* m_pRenderTarget = nullptr;
+
 
 };
 

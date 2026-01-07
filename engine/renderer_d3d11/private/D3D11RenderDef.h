@@ -407,6 +407,41 @@ static constexpr DXGI_FORMAT D3D11_IMPL_COLOR_FORMAT[(int)COLOR_FORMAT::EMAX] =
     
 };
 
+/**
+* @brief 텍스처 상태 구조체
+*/
+struct D3D11_TEXTURE_STATE
+{
+    NameHash Name; // 텍스처 이름 해시
+    INT32 BindIndex; // 바인드 인덱스
+
+    TEXTURE_TYPE TextureType; // 텍스처 타입
+    UINT32 SamplerIndex; // 샘플러 인덱스
+
+    union
+    {
+        ITexture1D* pTexture1D; // 1D 텍스처 포인터
+        ITexture2D* pTexture2D; // 2D 텍스처 포인터
+    };
+
+};
+
+
+class D3D11ConstantBuffer;
+
+struct D3D11_CONSTANT_STATE
+{
+    NameHash Name; // 상수 버퍼 이름 해시
+    INT32 BindIndex; // 바인드 인덱스
+    D3D11ConstantBuffer* pCB; // 상수 버퍼 포인터
+
+    constexpr D3D11_CONSTANT_STATE()
+        : BindIndex(-1)
+        , pCB(nullptr)
+    {
+    }
+};
+
 // 입력 레이아웃 생성 구조체
 struct D3D11_INPUTLAYOUT_DESC
 {
@@ -500,8 +535,6 @@ struct D3D11_RENDERTARGET_CREATE_DESC
 };
 
 static constexpr size_t POOL_BLOCK_TYPE_COUNT = 11;
-static constexpr size_t MAX_SHADER_INDEX = 65535;
-static constexpr size_t MAX_STATE_INDEX = 65535;
 
 
 #endif // __D3D11_RENDER_DEF_H__

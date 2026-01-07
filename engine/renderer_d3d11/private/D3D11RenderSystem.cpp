@@ -4,8 +4,7 @@
 #include "D3D11RenderCamera.h"
 #include "D3D11RenderTarget.h"
 #include "D3D11RenderContext.h"
-#include "D3D11PrivateHeap.h"
-#include "D3D11RenderManager.h"
+#include "D3D11RenderCommandExecutor.h"
 
 
 void MemoryReporter(
@@ -54,18 +53,17 @@ long D3D11RenderSystem::RefCnt()
 	return m_RefCnt;
 }
 
-BOOL D3D11RenderSystem::Initialize(
+BOOL D3D11RenderSystem::Init(
 	HWND hWnd,
 	uint32 ScreenWidth,
 	uint32 ScreenHeight,
 	BOOL Fullscreen
 )
 {
-	D3D11Global::Init();
+	D3D11Heap_Init(1024 * 1024 * 10, MemoryReporter);
+	D3D11Common::Init();
 
 	BOOL DebugDevice = FALSE;
-
-	D3D11Heap_Init(1024 * 1024 * 10, MemoryReporter);
 
 #if defined(_DEBUG) || defined(DEBUG)
 	DebugDevice = TRUE;
@@ -81,26 +79,38 @@ BOOL D3D11RenderSystem::Initialize(
 		return FALSE;
 	}
 
-	m_pRenderMgr = D3D11_NEW(D3D11RenderManager)();
-	m_pRenderContext = D3D11_NEW(D3D11RenderContext);
+	m_pRenderCommandExecutor = D3D11_NEW(D3D11RenderCommandExecutor)(m_pRenderDevice);
 
 	return TRUE;
 }
 
 void D3D11RenderSystem::Shutdown()
 {
-	CHECK_RELEASE(m_pRenderContext);
-	D3D11_DELETE(m_pRenderMgr, D3D11RenderManager);
+	if (m_pRenderContext)
+	{
+		D3D11_DELETE(m_pRenderContext, D3D11RenderContext);
+		m_pRenderContext = nullptr;
+	}
 
 	if (m_pRenderDevice)
 	{
 		D3D11_DELETE(m_pRenderDevice, D3D11RenderDevice);
 		m_pRenderDevice = nullptr;
 	}
+	
+	D3D11Common::Shutdown();
 
 	D3D11Heap_Shutdown();
+}
 
-	D3D11Global::Shutdown();
+const RENDER_SETTINGS& D3D11RenderSystem::GetRenderSettings() const noexcept
+{
+	return D3D11Common::GetRenderSettings();
+}
+
+void D3D11RenderSystem::SettRenderSettings(const RENDER_SETTINGS& Settings) noexcept
+{
+	D3D11Common::SetRenderSettings(Settings);
 }
 
 BOOL D3D11RenderSystem::CreateRenderCamera(
@@ -112,8 +122,8 @@ BOOL D3D11RenderSystem::CreateRenderCamera(
 	pRenderTarget->AddRef();
 
 	D3D11RenderCamera* pRenderCamera = D3D11_POOL_NEW(D3D11RenderCamera)(
-		pRenderTarget,
-		Desc.CameraMode
+		Desc.CameraMode,
+		pRenderTarget
 	);
 
 	pRenderCamera->SetCameraMode(Desc.CameraMode);
@@ -146,7 +156,7 @@ BOOL D3D11RenderSystem::CreateRenderCamera(
 		Desc.ClearFlags,
 		Desc.ClearColor,
 		Desc.Depth,
-		Desc.Sencil
+		Desc.Stencil
 	);
 
 	pRenderCamera->SetViewportLayer(Desc.CameraOrder);
@@ -156,15 +166,24 @@ BOOL D3D11RenderSystem::CreateRenderCamera(
 	return TRUE;
 }
 
-BOOL D3D11RenderSystem::CreatePrimitiveBuffer(
-	const PRIMITIVEBUFFER_CREATE_DESC& Desc,
-	IPrimitiveBuffer** ppOut
-)
+
+BOOL D3D11RenderSystem::GetOrCreateRenderContext(IRenderContext** ppContext)
 {
+	if (m_pRenderContext == nullptr)
+	{
+		m_pRenderContext = D3D11_POOL_NEW(D3D11RenderContext)();
+	}
+
+	m_pRenderContext->AddRef();
+	*ppContext = m_pRenderContext;
+
 	return TRUE;
 }
 
-IRenderContext* D3D11RenderSystem::GetRenderContext() const noexcept
+void D3D11RenderSystem::Update()
 {
-	return m_pRenderContext;
+	if (m_pRenderCommandExecutor)
+	{
+		m_pRenderCommandExecutor->Execute();
+	}
 }

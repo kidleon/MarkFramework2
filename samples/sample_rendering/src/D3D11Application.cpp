@@ -27,6 +27,19 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 		return FALSE;
 	}
 
+	RENDERCAMERA_CREATE_DESC CameraDesc = {};
+	CameraDesc.CameraMode = CAMERA_MODE::PERSPECTIVE;
+	CameraDesc.FOVY = 3.14159265f / 4.0f;
+	CameraDesc.AspectRatio = static_cast<FLOAT>(width) / static_cast<FLOAT>(height);
+	CameraDesc.NearZ = 0.1f;
+	CameraDesc.FarZ = 1000.0f;
+	CameraDesc.ClearColor = FLOAT4{ 0.0f, 1.0f, 0.0f, 1.0f };
+	CameraDesc.ClearFlags = static_cast<UINT32>(CLEAR_BUFFER::ALL);
+	CameraDesc.Depth = 1.0f;
+	CameraDesc.Stencil = 0;
+	CameraDesc.CameraOrder = 0;
+	m_pRenderSystem->CreateRenderCamera(CameraDesc, &m_pRenderCamera);
+
 	return TRUE;
 }
 
@@ -37,6 +50,7 @@ void D3D11Application::OnUpdate()
 
 void D3D11Application::OnDestroy()
 {
+	CHECK_RELEASE(m_pRenderCamera);
 	CHECK_RELEASE(m_pRenderSystem);
 	CleanupRenderModule();
 }

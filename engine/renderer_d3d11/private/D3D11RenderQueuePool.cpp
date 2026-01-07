@@ -1,8 +1,13 @@
 ﻿#include "pch.h"
 #include "D3D11RenderQueuePool.h"
+#include "D3D11RenderQueue.h"
 
+
+D3D11RenderQueuePool* D3D11RenderQueuePool::s_pInstance = nullptr;
 
 D3D11RenderQueuePool::D3D11RenderQueuePool()
+	: m_FreeList{}
+	, m_UsedList{}
 {
 }
 
@@ -11,65 +16,64 @@ D3D11RenderQueuePool::~D3D11RenderQueuePool() noexcept
 	Shutdown();
 }
 
-BOOL D3D11RenderQueuePool::Init(size_t InitialCapacity)
+void D3D11RenderQueuePool::Init()
 {
-	init_spin_lock(&m_Lock);
+	init_linked_list(&m_FreeList);
+	init_linked_list(&m_UsedList);
 
-	init_linked_list(&m_PoolList);
-
-	for (size_t i = 0; i < InitialCapacity; ++i)
-	{
-		D3D11RenderQueue* pRQ = D3D11_POOL_NEW(D3D11RenderQueue);
-		if (!pRQ)
-		{
-			SYS_LOG_E("D3D11RenderQueuePool::Init: Failed to allocate D3D11RenderQueue");
-
-			return FALSE;
-		}
-
-		pRQ->Init(256); // Initial capacity per RQ
-		
-		linked_list_push_back(&m_PoolList, pRQ->INL_GetLinkNode());
-	}
-
-	return TRUE;
+	AllocRQ(16);
 }
 
-void D3D11RenderQueuePool::Shutdown()
+void D3D11RenderQueuePool::Shutdown() noexcept
 {
-	while (!linked_list_empty(&m_PoolList))
+	while (!linked_list_empty(&m_UsedList))
 	{
-		LINK_NODE* pNode = linked_list_pop_front(&m_PoolList);
-		D3D11RenderQueue* pRQ = (D3D11RenderQueue*)pNode->data;
+		LINK_NODE* pNode = linked_list_pop_front(&m_UsedList);
+		D3D11RenderQueue* pRQ = static_cast<D3D11RenderQueue*>(pNode->data);
+		D3D11_POOL_DELETE(pRQ, D3D11RenderQueue);
+	}
+	
+	while (!linked_list_empty(&m_FreeList))
+	{
+		LINK_NODE* pNode = linked_list_pop_front(&m_FreeList);
+		D3D11RenderQueue* pRQ = static_cast<D3D11RenderQueue*>(pNode->data);
 		D3D11_POOL_DELETE(pRQ, D3D11RenderQueue);
 	}
 }
 
-D3D11RenderQueue* D3D11RenderQueuePool::GetRQ()
+D3D11RenderQueue* D3D11RenderQueuePool::GetRQ() noexcept
 {
-	D3D11_AUTO_SYNC sync(&m_Lock);
+	if (linked_list_empty(&m_FreeList))
+		AllocRQ(4);
 
-	if (linked_list_empty(&m_PoolList))
-	{
-		SYS_LOG_E("D3D11RenderQueuePool::GetRQ: Failed to allocate D3D11RenderQueue");
-		return nullptr;
-	}
+	LINK_NODE* pNode = linked_list_pop_front(&m_FreeList);
+	D3D11RenderQueue* pRQ = static_cast<D3D11RenderQueue*>(pNode->data);
 
-	// 풀에서 하나 꺼내기
-	LINK_NODE* pNode = linked_list_pop_front(&m_PoolList);
-	D3D11RenderQueue* pRQ = (D3D11RenderQueue*)pNode->data;
+	linked_list_push_back(&m_UsedList, pNode);
+
 	return pRQ;
+
 }
 
-void D3D11RenderQueuePool::ReleaseRQ(D3D11RenderQueue* pRQ)
+void D3D11RenderQueuePool::ReleaseRQ(D3D11RenderQueue* pRQ) noexcept
 {
-	if (!pRQ)
-		return;
+	if (!pRQ) return;
 
-	pRQ->Clear();
+	LINK_NODE* pNode = pRQ->INL_GetLinkNode();
+	pRQ->Reset();
 
-	D3D11_AUTO_SYNC sync(&m_Lock);
+	// UsedList에서 제거
+	linked_list_remove_node(&m_UsedList, pNode);
+	
+	// FreeList에 추가
+	linked_list_push_back(&m_FreeList, pNode);
+}
 
-	// 풀에 다시 넣기
-	linked_list_push_back(&m_PoolList, pRQ->INL_GetLinkNode());
+void D3D11RenderQueuePool::AllocRQ(size_t Count) noexcept
+{
+	for (size_t i = 0; i < Count; ++i)
+	{
+		D3D11RenderQueue* pRQ = D3D11_POOL_NEW(D3D11RenderQueue)();
+		linked_list_push_back(&m_FreeList, pRQ->INL_GetLinkNode());
+	}
 }

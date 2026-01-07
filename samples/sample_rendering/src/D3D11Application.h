@@ -17,5 +17,6 @@ private:
 
 	IRenderSystem* m_pRenderSystem = nullptr;
 
+	IRenderCamera* m_pRenderCamera = nullptr;
 };
 

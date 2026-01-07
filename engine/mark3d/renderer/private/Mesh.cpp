@@ -39,7 +39,7 @@ long Mesh::RefCnt()
 	return m_RefCnt;
 }
 
-UINT32 Mesh::GetID() const noexcept
+UINT64 Mesh::GetID() const noexcept
 {
 	return m_ID;
 }

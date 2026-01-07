@@ -5,7 +5,7 @@
 class TextAsset : public ITextAsset
 {
 public:
-	TextAsset(UINT32 ID);
+	TextAsset(UINT64 ID);
 	virtual ~TextAsset() noexcept;
 
 	// IUNKNOWN interface
@@ -14,7 +14,7 @@ public:
 	virtual long RefCnt() final;
 
 	// IAsset interface
-	virtual UINT32 GetID() const noexcept final;
+	virtual UINT64 GetID() const noexcept final;
 	virtual ASSET_TYPE GetAssetType() const noexcept final;
 	virtual LOAD_STAT GetLoadStat() const noexcept final;
 
@@ -30,7 +30,7 @@ public:
 	virtual BOOL ConvertWCHAR(wchar_t* pBuffer, size_t BufferSize, size_t* pResultSize) const noexcept final;
  
 	// Private inline methods
-	__FORCEINLINE UINT32 INL_GetID() const noexcept
+	__FORCEINLINE UINT64 INL_GetID() const noexcept
 	{
 		return m_ID;
 	}
@@ -71,7 +71,7 @@ private:
 	unsigned PADDING_OR_RESERVED = 0;
 #endif // defined(__TARGET_OS_WINDOWS)
 
-	UINT32 m_ID;
+	UINT64 m_ID;
 	LOAD_STAT m_LoadStat;
 
 	char* m_pData;

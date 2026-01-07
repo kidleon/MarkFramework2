@@ -78,7 +78,7 @@ long D3D11RenderTarget::RefCnt()
 	return m_RefCnt;
 }
 
-UINT32 D3D11RenderTarget::GetID() const noexcept
+UINT64 D3D11RenderTarget::GetID() const noexcept
 {
 	return m_ID;
 }

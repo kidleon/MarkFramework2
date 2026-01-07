@@ -45,7 +45,7 @@ BOOL __stdcall CreateRendererD3D11(
         return FALSE;
 
     D3D11RenderSystem* pRenderSystem = new D3D11RenderSystem();
-    if (!pRenderSystem->Initialize(
+    if (!pRenderSystem->Init(
         hWnd,
         ScreenWidth,
         ScreenHeight,

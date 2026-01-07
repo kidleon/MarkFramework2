@@ -1,29 +1,21 @@
-﻿#ifndef __D3D11_RENDER_CONTEXT_H__
-#define __D3D11_RENDER_CONTEXT_H__
+﻿#pragma once
 
-
-class D3D11RenderCamera;
-class D3D11SurfaceMaterial;
-class D3D11PrimitiveBuffer;
 class D3D11RenderQueue;
 
 class D3D11RenderContext final : public IRenderContext
 {
 public:
-	D3D11RenderContext(D3D11RenderDevice* pRenderDevice);
-	~D3D11RenderContext() noexcept;
-
 	// IUNKNOWN interface
 	long AddRef() final;
 	long Release() final;
 	long RefCnt() final;
 
 	// IRenderContext interface
-	void BeginRender(IRenderCamera* pRenderCamera) final;
-	void EndRender() final;
-	void SetSurfaceMaterial(ISurfaceMaterial* pSurfaceMaterial) final;
-	void SetPrimitiveBuffer(IPrimitiveBuffer* pPrimitiveBuffer) final;
-	void DrawPrimitive(int32 PrimitiveIndex) final;
+	void BeginFrame() noexcept final;
+	void EndFrame() noexcept final;
+
+	void BeginRenderCamera(IRenderCamera* pRenderCamera) noexcept final;
+	void EndRenderCamera() noexcept final;
 
 private:
 	volatile long m_RefCnt = 1;
@@ -31,14 +23,6 @@ private:
 	unsigned PADDING_OR_RESERVED = 0;
 #endif // defined(__TARGET_OS_WINDOWS)
 
-	D3D11RenderDevice* m_pRenderDevice = nullptr;
-	D3D11RenderCamera* m_pSetRenderCamera = nullptr;
-	D3D11RenderQueue* m_pSetRQ = nullptr;
+	D3D11RenderQueue* m_pCurRQ = nullptr;
 
-	D3D11SurfaceMaterial* m_pSetSurfaceMaterial = nullptr;
-	D3D11PrimitiveBuffer* m_pSetPrimitiveBuffer = nullptr;
-	
 };
-
-
-#endif // __D3D11_RENDER_CONTEXT_H__

@@ -318,9 +318,9 @@ static constexpr int32 MAX_RENDER_PASS = 4; // 서피스 메테리얼의 최대 
 static constexpr int32 MAX_BLEND_TARGET = 8; // 최대 블렌드 타겟 수 (MRT 지원)
 static constexpr uint32 MAX_PRIMITIVE = 32; // 최대 프리미티브 수
 
-static constexpr int32 MAX_TEXTURE_SLOT = 16; // 최대 텍스처 슬롯 수
-static constexpr int32 MAX_SAMPLER_SLOT = 8; // 최대 샘플러 슬롯 수
-static constexpr int32 MAX_CONSTANT_SLOT = 8; // 최대 상수 버퍼 슬롯 수
+//static constexpr int32 MAX_TEXTURE_SLOT = 16; // 최대 텍스처 슬롯 수
+static constexpr int32 MAX_SAMPLER_SLOT = 16; // 최대 샘플러 슬롯 수
+static constexpr int32 MAX_CONSTANT_SLOT = 14; // 최대 상수 버퍼 슬롯 수
 static constexpr int32 MAX_ANISOTROPY_LEVEL = 16; // 최대 이방성 필터링 레벨
 
 /**
@@ -526,6 +526,23 @@ enum class CAMERA_MODE : unsigned int
 	ORTHO,
 };
 
+/**
+* @brief 렌더 명령어 타입 열거형
+*/
+enum class COMMAND_TYPE : unsigned int
+{
+	NONE = 0,
+	CLEAR_RENDER_TARGET = 0x00000001,
+	SET_RENDER_TARGET = 0x00000002,
+	DRAW_MESH = 0x00000004,
+};
+
+enum class RENDER_QUEUE_TYPE : unsigned int
+{
+	RQ_OPAQUE = 0,
+	RQ_TRANSPARENT,
+	EMAX
+};
 
 /**
 * @brief 3D 엔진 생성 정보 구조체
@@ -588,7 +605,7 @@ struct MARKENGINE_API RENDERCAMERA_CREATE_DESC
 	FLOAT4 ClearColor; // 클리어 색상
 	UINT32 ClearFlags; // 클리어 플래그 (CLEAR_BUFFER 열거형의 비트 플래그 조합)
 	FLOAT Depth; // 깊이 값 (렌더링 순서에 사용)
-	UINT8 Sencil; // 스텐실 값
+	UINT8 Stencil; // 스텐실 값
 	UINT8 CameraOrder; // 카메라 렌더링 순서
 	UINT8 PADDING[2];
 };
@@ -598,13 +615,24 @@ struct MARKENGINE_API PRIMITIVEBUFFER_CREATE_DESC
 
 };
 
+struct MARKENGINE_API RENDER_SETTINGS
+{
+	BOOL VSyncEnabled; // 수직 동기화 활성화 여부
+
+	RENDER_SETTINGS()
+		: VSyncEnabled(FALSE)
+	{
+	}
+};
+
+
 /**
 * @brief 상수 버퍼 인터페이스
 */
 struct IConstantBuffer : public IAsset
 {
 	/**
-	* @brief 데이터 복사 후 업데이트. UpdateData 함수는 데이터를 복사하므로, 호출 후 pData의 메모리는 해제해도 됩니다.
+	* @brief 데이터 업데이트.
 	* @param pData 데이터 포인터
 	* @param DataSize 데이터 크기 (바이트 단위)
 	* @remark 내부 버퍼에 데이터를 복사합니다.
@@ -612,15 +640,7 @@ struct IConstantBuffer : public IAsset
 	* @note DataSize가 내부 버퍼 크기보다 크면 동작하지 않습니다.
 	* @return 없음
 	*/
-	virtual void UpdateData(const void* pData, size_t DataSize) = 0;
-
-	/**
-	* @brief 데이터 참조 후 업데이트. UpdateDataRef 함수는 데이터를 복사하지 않으므로, pData의 메모리는 유효해야 합니다.
-	* @param pData 데이터 포인터
-	* @param DataSize 데이터 크기 (바이트 단위)
-	* @return 없음
-	*/
-	virtual void UpdateDataRef(const void* pData, size_t DataSize) = 0;
+	virtual void UpdateData(void* pData, size_t DataSize) = 0;
 
 };
 
@@ -919,14 +939,13 @@ struct MARKENGINE_API RS_BLEND_STATE
 	BOOL IndependentBlendEnable; // 독립적 블렌드 활성화 여부 (MRT용..)
 	UINT32 PADDING;
 	RS_BLEND_TARGET BlendTarget[MAX_BLEND_TARGET]; // 블렌드 타겟 배열 (최대 8개:D3D11 기준)
-	FLOAT4 BlendFactor[MAX_BLEND_TARGET]; // 블렌드 팩터 배열
+	
 	constexpr RS_BLEND_STATE()
 		: NumBlendTargets(1)
 		, AlphaToCoverageEnable(FALSE)
 		, IndependentBlendEnable(FALSE)
 		, PADDING(0)
 		, BlendTarget{}
-		, BlendFactor{}
 	{
 	}
 };
@@ -1265,41 +1284,6 @@ struct MARKENGINE_API RS_RASTERIZER_STATE
 	}
 };
 
-/**
-* @brief 텍스처 상태 구조체
-*/
-struct MARKENGINE_API TEXTURE_STATE
-{
-	NameHash Name; // 텍스처 이름 해시
-	INT32 BindIndex; // 바인드 인덱스
-
-	TEXTURE_TYPE TextureType; // 텍스처 타입
-	UINT32 SamplerIndex; // 샘플러 인덱스
-
-	union
-	{
-		ITexture1D* pTexture1D; // 1D 텍스처 포인터
-		ITexture2D* pTexture2D; // 2D 텍스처 포인터
-	};
-
-};
-
-
-interface IConstantBuffer;
-
-struct MARKENGINE_API CONSTANT_STATE
-{
-	NameHash Name; // 상수 버퍼 이름 해시
-	INT32 BindIndex; // 바인드 인덱스
-	IConstantBuffer* pCB; // 상수 버퍼 포인터
-
-	constexpr CONSTANT_STATE()
-		: Name()
-		, BindIndex(-1)
-		, pCB(nullptr)
-	{
-	}
-};
 
 /**
 * @brief 서피스 메테리얼 인터페이스
@@ -1310,130 +1294,26 @@ public:
 	virtual int32 AddPass(const char* szPassName) noexcept = 0;
 	virtual int32 GetNumPass() const noexcept = 0;
 
-	// BeginPass와 EndPass를 통한 렌더 스테이트 설정
-	virtual void BeginPass(int32 Pass) noexcept = 0;
-	virtual void EndPass() noexcept = 0;
-
-	virtual void SetVertexShader(IShaderProgram* pVS) = 0;
-	virtual void SetPixelShader(IShaderProgram* pPS) = 0;
-
-	virtual IShaderProgram* GetVertexShader() noexcept = 0;
-	virtual IShaderProgram* GetPixelShader() noexcept = 0;
-
-	virtual void SetConstantBuffer(int SlotIndex, const NameHash& Name, IConstantBuffer* pCBuffer) = 0;
-
-	virtual void SetSamplerState(int32 SamplerIndex, const RS_SAMPLER_STATE& SamplerState) = 0;
-	virtual void SetFilter(int32 SamplerIndex, SAMPLER_FILTER MinFilter, SAMPLER_FILTER MagFilter, SAMPLER_FILTER MipFilter) = 0;
-	virtual void SetMinFilter(int32 SamplerIndex, SAMPLER_FILTER MinFilter) = 0;
-	virtual void SetMagFilter(int32 SamplerIndex, SAMPLER_FILTER MagFilter) = 0;
-	virtual void SetMipFilter(int32 SamplerIndex, SAMPLER_FILTER MipFilter) = 0;
-
-	virtual void SetAddressUVW(int32 SamplerIndex, TEXTURE_ADDRESS_MODE AddressU, TEXTURE_ADDRESS_MODE AddressV, TEXTURE_ADDRESS_MODE AddressW) = 0;
-	virtual void SetAddressUV(int32 SamplerIndex, TEXTURE_ADDRESS_MODE AddressU, TEXTURE_ADDRESS_MODE AddressV) = 0;
-	virtual void SetAddressU(int32 SamplerIndex, TEXTURE_ADDRESS_MODE AddressU) = 0;
-	virtual void SetAddressV(int32 SamplerIndex, TEXTURE_ADDRESS_MODE AddressV) = 0;
-	virtual void SetAddressW(int32 SamplerIndex, TEXTURE_ADDRESS_MODE AddressW) = 0;
-	virtual void SetAnisotropy(int32 SamplerIndex, uint8 MaxAnisotropy) = 0;
-	virtual void SetBorderColor(int32 SamplerIndex, BORDER_COLOR BorderColor) = 0;
-	virtual void SetComparisonFunc(int32 SamplerIndex, COMPARISON_FUNC ComparisonFunc) = 0;
-	virtual void SetLODParams(int32 SamplerIndex, float MipLODBias, float MinLOD, float MaxLOD) = 0;
-
-	virtual void SetTexture1D(int32 TextureSlot, const NameHash& Name, ITexture1D* pTexture) = 0;
-	virtual void SetTexture2D(int32 TextureSlot, const NameHash& Name, ITexture2D* pTexture) = 0;
-
-	virtual void SetBlendState(const RS_BLEND_STATE& BlendState) = 0;
-	virtual void SetBlendStateOption(BOOL AlphaToCoverageEnable, BOOL IndependentBlendEnable) = 0;
-
-	virtual void SetBlendTarget(int32 BlendTargetIndex, const RS_BLEND_TARGET& BlendTarget) = 0;
-	virtual void EnableBlendTarget(int32 BlendTargetIndex, BOOL Enable) = 0;
-
-	virtual void SetBlendTargetFactorOp(int32 BlendTargetIndex, BLEND_FACTOR SrcFactor, BLEND_FACTOR DstFactor, BLEND_OP BlendOp) = 0;
-	virtual void SetBlendTargetFactor(int32 BlendTargetIndex, BLEND_FACTOR SrcFactor, BLEND_FACTOR DstFactor) = 0;
-	virtual void SetBlendTargetOp(int32 BlendTargetIndex, BLEND_OP BlendOp) = 0;
-
-	virtual void SetBlendTargetAlphaFactorOp(int32 BlendTargetIndex, BLEND_FACTOR SrcAlphaFactor, BLEND_FACTOR DstAlphaFactor, BLEND_OP AlphaBlendOp) = 0;
-	virtual void SetBlendTargetAlphaFactor(int32 BlendTargetIndex, BLEND_FACTOR SrcAlphaFactor, BLEND_FACTOR DstAlphaFactor) = 0;
-	virtual void SetBlendTargetOpAlpha(int32 BlendTargetIndex, BLEND_OP AlphaBlendOp) = 0;
-	virtual void SetBlendTargetFactorValue(int32 BlendTargetIndex, FLOAT R, FLOAT G, FLOAT B, FLOAT A) = 0;
-	virtual void SetBlendTargetFactorValue(int32 BlendTargetIndex, const FLOAT4& Factor) = 0;
-
-	virtual void SetDepthStencilState(const RS_DEPTH_STENCIL_STATE& DepthStencilState) = 0;
-	virtual void EnableDepth(BOOL Enable) = 0;
-	virtual void EnableZWrite(BOOL Enable) = 0;
-	virtual void SetDepthState(BOOL ZEnable, BOOL ZWriteEnable, COMPARISON_FUNC DepthFunc) = 0;
-	virtual void SetStencilState(BOOL Enable, uint8 ReadMask, uint8 WriteMask) = 0;
-
-	virtual void SetRasterizerState(const RS_RASTERIZER_STATE& RasterizerState) = 0;
-	virtual void SetFillMode(FILL_MODE Mode) = 0;
-	virtual void SetCullMode(CULL_MODE Mode) = 0;
-	virtual void SetWireframeMode(BOOL Enable) = 0;
-	virtual void SetFrontCounterClockwise(BOOL Enable) = 0;
-	virtual void SetScissorEnable(BOOL Enable) = 0;
-	virtual void SetMultisampleEnable(BOOL Enable) = 0;
-	virtual void SetAntialiasedLineEnable(BOOL Enable) = 0;
-	virtual void SetDepthBiasEnable(BOOL Enable) = 0;
-	virtual void SetDepthBiasParams(int32 DepthBias, float DepthBiasClamp, float SlopeScaledDepthBias) = 0;
-
-	// 직접 PASS 접근
 	virtual void SetVertexShader(int32 Pass, IShaderProgram* pVS) = 0;
 	virtual void SetPixelShader(int32 Pass, IShaderProgram* pPS) = 0;
 
 	virtual IShaderProgram* GetVertexShader(int32 Pass) noexcept = 0;
 	virtual IShaderProgram* GetPixelShader(int32 Pass) noexcept = 0;
 
-	virtual void SetConstantBuffer(int32 Pass, int32 SlotIndex, const NameHash& Name, IConstantBuffer* pCBuffer) = 0;
+	virtual void SetConstantBuffer_VS(int32 SlotIndex, const NameHash& Name, IConstantBuffer* pCBuffer) = 0;
+	virtual void SetConstantBuffer_PS(int32 SlotIndex, const NameHash& Name, IConstantBuffer* pCBuffer) = 0;
+	virtual void SetConstantBuffer_VS(int32 Pass, int32 SlotIndex, const NameHash& Name, IConstantBuffer* pCBuffer) = 0;
+	virtual void SetConstantBuffer_PS(int32 Pass, int32 SlotIndex, const NameHash& Name, IConstantBuffer* pCBuffer) = 0;
 
 	virtual void SetSamplerState(int32 Pass, int32 SamplerIndex, const RS_SAMPLER_STATE& SamplerState) = 0;
-	virtual void SetFilter(int32 Pass, int32 SamplerIndex, SAMPLER_FILTER MinFilter, SAMPLER_FILTER MagFilter, SAMPLER_FILTER MipFilter) = 0;
-	virtual void SetMinFilter(int32 Pass, int32 SamplerIndex, SAMPLER_FILTER MinFilter) = 0;
-	virtual void SetMagFilter(int32 Pass, int32 SamplerIndex, SAMPLER_FILTER MagFilter) = 0;
-	virtual void SetMipFilter(int32 Pass, int32 SamplerIndex, SAMPLER_FILTER MipFilter) = 0;
-
-	virtual void SetAddressUVW(int32 Pass, int32 SamplerIndex, TEXTURE_ADDRESS_MODE AddressU, TEXTURE_ADDRESS_MODE AddressV, TEXTURE_ADDRESS_MODE AddressW) = 0;
-	virtual void SetAddressUV(int32 Pass, int32 SamplerIndex, TEXTURE_ADDRESS_MODE AddressU, TEXTURE_ADDRESS_MODE AddressV) = 0;
-	virtual void SetAddressU(int32 Pass, int32 SamplerIndex, TEXTURE_ADDRESS_MODE AddressU) = 0;
-	virtual void SetAddressV(int32 Pass, int32 SamplerIndex, TEXTURE_ADDRESS_MODE AddressV) = 0;
-	virtual void SetAddressW(int32 Pass, int32 SamplerIndex, TEXTURE_ADDRESS_MODE AddressW) = 0;
-	virtual void SetAnisotropy(int32 Pass, int32 SamplerIndex, uint8 MaxAnisotropy) = 0;
-	virtual void SetBorderColor(int32 Pass, int32 SamplerIndex, BORDER_COLOR BorderColor) = 0;
-	virtual void SetComparisonFunc(int32 Pass, int32 SamplerIndex, COMPARISON_FUNC ComparisonFunc) = 0;
-	virtual void SetLODParams(int32 Pass, int32 SamplerIndex, float MipLODBias, float MinLOD, float MaxLOD) = 0;
-
-	virtual void SetTexture1D(int32 Pass, int32 TextureSlot, const NameHash& Name, ITexture1D* pTexture) = 0;
-	virtual void SetTexture2D(int32 Pass, int32 TextureSlot, const NameHash& Name, ITexture2D* pTexture) = 0;
-
 	virtual void SetBlendState(int32 Pass, const RS_BLEND_STATE& BlendState) = 0;
-	virtual void SetBlendStateOption(int32 Pass, BOOL AlphaToCoverageEnable, BOOL IndependentBlendEnable) = 0;
-
 	virtual void SetBlendTarget(int32 Pass, int32 BlendTargetIndex, const RS_BLEND_TARGET& BlendTarget) = 0;
-	virtual void EnableBlendTarget(int32 Pass, int32 BlendTargetIndex, BOOL Enable) = 0;
-
-	virtual void SetBlendTargetFactorOp(int32 Pass, int32 BlendTargetIndex, BLEND_FACTOR SrcFactor, BLEND_FACTOR DstFactor, BLEND_OP BlendOp) = 0;
-	virtual void SetBlendTargetFactor(int32 Pass, int32 BlendTargetIndex, BLEND_FACTOR SrcFactor, BLEND_FACTOR DstFactor) = 0;
-	virtual void SetBlendTargetOp(int32 Pass, int32 BlendTargetIndex, BLEND_OP BlendOp) = 0;
-
-	virtual void SetBlendTargetAlphaFactorOp(int32 Pass, int32 BlendTargetIndex, BLEND_FACTOR SrcAlphaFactor, BLEND_FACTOR DstAlphaFactor, BLEND_OP AlphaBlendOp) = 0;
-	virtual void SetBlendTargetAlphaFactor(int32 Pass, int32 BlendTargetIndex, BLEND_FACTOR SrcAlphaFactor, BLEND_FACTOR DstAlphaFactor) = 0;
-	virtual void SetBlendTargetOpAlpha(int32 Pass, int32 BlendTargetIndex, BLEND_OP AlphaBlendOp) = 0;
-	virtual void SetBlendTargetFactorValue(int32 Pass, int32 BlendTargetIndex, FLOAT R, FLOAT G, FLOAT B, FLOAT A) = 0;
 	virtual void SetBlendTargetFactorValue(int32 Pass, int32 BlendTargetIndex, const FLOAT4& Factor) = 0;
-
 	virtual void SetDepthStencilState(int32 Pass, const RS_DEPTH_STENCIL_STATE& DepthStencilState) = 0;
-	virtual void EnableDepth(int32 Pass, BOOL Enable) = 0;
-	virtual void EnableZWrite(int32 Pass, BOOL Enable) = 0;
-	virtual void SetDepthState(int32 Pass, BOOL ZEnable, BOOL ZWriteEnable, COMPARISON_FUNC DepthFunc) = 0;
-	virtual void SetStencilState(int32 Pass, BOOL Enable, uint8 ReadMask, uint8 WriteMask) = 0;
-
 	virtual void SetRasterizerState(int32 Pass, const RS_RASTERIZER_STATE& RasterizerState) = 0;
-	virtual void SetFillMode(int32 Pas, FILL_MODE Mode) = 0;
-	virtual void SetCullMode(int32 Pass, CULL_MODE Mode) = 0;
-	virtual void SetWireframeMode(int32 Pass, BOOL Enable) = 0;
-	virtual void SetFrontCounterClockwise(int32 Pass, BOOL Enable) = 0;
-	virtual void SetScissorEnable(int32 Pass, BOOL Enable) = 0;
-	virtual void SetMultisampleEnable(int32 Pass, BOOL Enable) = 0;
-	virtual void SetAntialiasedLineEnable(int32 Pass, BOOL Enable) = 0;
-	virtual void SetDepthBiasEnable(int32 Pass, BOOL Enable) = 0;
-	virtual void SetDepthBiasParams(int32 Pass, int32 DepthBias, float DepthBiasClamp, float SlopeScaledDepthBias) = 0;
+
+	virtual void SetTexture1D(int32 Pass, int32 SamplerIndex, const NameHash& Name, ITexture1D* pTexture) = 0;
+	virtual void SetTexture2D(int32 Pass, int32 SamplerIndex, const NameHash& Name, ITexture2D* pTexture) = 0;
 
 };
 
@@ -1578,11 +1458,16 @@ struct IRenderCamera : public IAsset
 */
 struct IRenderContext : public IUNKNOWN
 {
-	virtual void BeginRender(IRenderCamera * pRenderCamera) = 0;
-	virtual void EndRender() = 0;
+	virtual void BeginFrame() noexcept = 0;
+	virtual void EndFrame() noexcept = 0;
+
+	virtual void BeginRenderCamera(IRenderCamera* pRenderCamera) noexcept = 0;
+	virtual void EndRenderCamera() noexcept = 0;
+	/*
 	virtual void SetSurfaceMaterial(ISurfaceMaterial* pSurfaceMaterial) = 0;
 	virtual void SetPrimitiveBuffer(IPrimitiveBuffer* pPrimitiveBuffer) = 0;
 	virtual void DrawPrimitive(int32 PrimitiveIndex) = 0;
+	*/
 };
 
 
@@ -1592,27 +1477,13 @@ struct IRenderContext : public IUNKNOWN
 struct IRenderSystem : public IUNKNOWN
 {
 public:
-	virtual BOOL Initialize(
-		HWND hWnd,
-		uint32 ScreenWidth,
-		uint32 ScreenHeight,
-		BOOL Fullscreen
-	) = 0;
+	virtual const RENDER_SETTINGS& GetRenderSettings() const noexcept = 0;
+	virtual void SettRenderSettings(const RENDER_SETTINGS& Settings) noexcept = 0;
 
-	virtual void Shutdown() = 0;
+	virtual BOOL CreateRenderCamera(const RENDERCAMERA_CREATE_DESC& Desc, IRenderCamera** ppOut) = 0;
+	virtual BOOL GetOrCreateRenderContext(IRenderContext** ppContext) = 0;
 
-	virtual BOOL CreateRenderCamera(
-		const RENDERCAMERA_CREATE_DESC& Desc,
-		IRenderCamera** ppOut
-	) = 0;
-
-	virtual BOOL CreatePrimitiveBuffer(
-		const PRIMITIVEBUFFER_CREATE_DESC& Desc,
-		IPrimitiveBuffer** ppOut
-	) = 0;
-
-
-	virtual IRenderContext* GetRenderContext() const noexcept = 0;
+	virtual void Update() = 0;
 
 };
 

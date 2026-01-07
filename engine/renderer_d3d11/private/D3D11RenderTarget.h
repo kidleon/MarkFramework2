@@ -32,7 +32,7 @@ public:
 	virtual long RefCnt() final;
 
 	// IAsset interface
-	virtual UINT32 GetID() const noexcept final;
+	virtual UINT64 GetID() const noexcept final;
 	virtual ASSET_TYPE GetAssetType() const noexcept final;
 	virtual LOAD_STAT GetLoadStat() const noexcept final;
 
@@ -55,10 +55,10 @@ public:
 	__INLINE UINT32 INL_GetDepthHeight() const noexcept { return m_DepthStencilHeight; }
 	__INLINE COLOR_FORMAT INL_GetDepthFormat() const noexcept { return m_DepthStencilFormat; }
 
-	__INLINE ID3D11Texture2D* INL_GetD3D11ColorTexture() const noexcept { return m_pD3D11ColorTexture; }
-	__INLINE ID3D11RenderTargetView* INL_GetD3D11RenderTargetView() const noexcept { return m_pD3D11RTV; }
-	__INLINE ID3D11Texture2D* INL_GetD3D11DepthStencilTexture() const noexcept { return m_pD3D11DepthStencilTexutre; }
-	__INLINE ID3D11DepthStencilView* INL_GetD3D11DepthStencilView() const noexcept { return m_pD3D11DSV; }
+	__INLINE ID3D11Texture2D* INL_GetColorTexture() const noexcept { return m_pD3D11ColorTexture; }
+	__INLINE ID3D11Texture2D* INL_GetDepthStencilTexture() const noexcept { return m_pD3D11DepthStencilTexutre; }
+	__INLINE ID3D11RenderTargetView* INL_GetRTV() const noexcept { return m_pD3D11RTV; }
+	__INLINE ID3D11DepthStencilView* INL_GetDSV() const noexcept { return m_pD3D11DSV; }
 
 private:
 	virtual ~D3D11RenderTarget() noexcept;

@@ -14,7 +14,7 @@ public:
 	virtual long RefCnt() final;
 
 	// IAsset interface
-	virtual UINT32 GetID() const noexcept final;
+	virtual UINT64 GetID() const noexcept final;
 	virtual ASSET_TYPE GetAssetType() const noexcept final;
 	virtual LOAD_STAT GetLoadStat() const noexcept final;
 

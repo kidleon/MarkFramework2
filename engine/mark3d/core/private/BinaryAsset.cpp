@@ -6,7 +6,7 @@
 #include "Assets.h"
 
 
-BinaryAsset::BinaryAsset(UINT32 ID)
+BinaryAsset::BinaryAsset(UINT64 ID)
 	: m_pData(nullptr)
 	, m_Size(0)
 	, m_CRC64Cache(0)
@@ -18,9 +18,6 @@ BinaryAsset::BinaryAsset(UINT32 ID)
 
 BinaryAsset::~BinaryAsset() noexcept
 {
-	idgen_release(Assets::ID_GEN_HANDLE, m_ID);
-	m_ID = 0;
-
 	if (m_pData)
 	{
 		CORE_SYS_FREE(m_pData);
@@ -49,7 +46,7 @@ long BinaryAsset::RefCnt()
 	return m_RefCnt;
 }
 
-UINT32 BinaryAsset::GetID() const noexcept
+UINT64 BinaryAsset::GetID() const noexcept
 {
 	return m_ID;
 }

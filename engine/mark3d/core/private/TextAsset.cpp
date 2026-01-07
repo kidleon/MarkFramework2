@@ -5,7 +5,7 @@
 #include "Assets.h"
 
 
-TextAsset::TextAsset(UINT32 ID)
+TextAsset::TextAsset(UINT64 ID)
 	: m_pData(nullptr)
 	, m_Size(0)
 {
@@ -15,9 +15,6 @@ TextAsset::TextAsset(UINT32 ID)
 
 TextAsset::~TextAsset() noexcept
 {
-	idgen_release(Assets::ID_GEN_HANDLE, m_ID);
-	m_ID = 0;
-
 	if (m_pData)
 	{
 		CORE_SYS_FREE(m_pData);
@@ -46,7 +43,7 @@ long TextAsset::RefCnt()
 	return m_RefCnt;
 }
 
-UINT32 TextAsset::GetID() const noexcept
+UINT64 TextAsset::GetID() const noexcept
 {
 	return m_ID;
 }

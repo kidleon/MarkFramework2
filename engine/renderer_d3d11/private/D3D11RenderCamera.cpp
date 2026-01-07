@@ -3,11 +3,9 @@
 #include "D3D11RenderTarget.h"
 
 
-static UINT32 VIEWPORT_COUNTER = 0;
-
 D3D11RenderCamera::D3D11RenderCamera(
-	D3D11RenderTarget* pRenderTarget,
-	CAMERA_MODE CameraMode
+	CAMERA_MODE CameraMode,
+	D3D11RenderTarget* pRenderTarget
 )
 	: m_pRenderTarget(pRenderTarget)
 	, m_CameraMode(CameraMode)
@@ -15,16 +13,14 @@ D3D11RenderCamera::D3D11RenderCamera(
 	, m_Perspective{ M_PI / 4.0f, 1.2f, 0.01f, 500.0f }
 	, m_Ortho{ 1280.0f, 720.0f, 0.01f, 500.0f }
 	, m_View{ {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f} }
-	, m_ViewportID(VIEWPORT_COUNTER++)
 {
-	m_ID = D3D11Global::GetUID();
+	m_ID = D3D11Common::GetUID();
 	m_LoadStat = LOAD_STAT::LOADED;
 }
 
 D3D11RenderCamera::~D3D11RenderCamera() noexcept
 {
 	CHECK_RELEASE(m_pRenderTarget);
-	D3D11Global::ReleaseUID(m_ID);
 }
 
 long D3D11RenderCamera::AddRef()
@@ -48,7 +44,7 @@ long D3D11RenderCamera::RefCnt()
 	return m_RefCnt;
 }
 
-UINT32 D3D11RenderCamera::GetID() const noexcept
+UINT64 D3D11RenderCamera::GetID() const noexcept
 {
 	return m_ID;
 }

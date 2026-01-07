@@ -4,8 +4,8 @@
 
 interface IRenderCamera;
 class D3D11RenderDevice;
-class D3D11RenderManager;
 class D3D11RenderContext;
+class D3D11RenderCommandExecutor;
 
 class D3D11RenderSystem final : public IRenderSystem
 {
@@ -15,19 +15,22 @@ public:
 	long Release() final;
 	long RefCnt() final;
 
-	virtual BOOL Initialize(
+	BOOL Init(
 		HWND hWnd,
 		uint32 ScreenWidth,
 		uint32 ScreenHeight,
 		BOOL Fullscreen
-	) final;
+	);
 
-	virtual void Shutdown() final;
+	void Shutdown();
+
+	virtual const RENDER_SETTINGS& GetRenderSettings() const noexcept final;
+	virtual void SettRenderSettings(const RENDER_SETTINGS& Settings) noexcept final;
 
 	virtual BOOL CreateRenderCamera(const RENDERCAMERA_CREATE_DESC& Desc, IRenderCamera** ppOut) final;
-	virtual BOOL CreatePrimitiveBuffer(const PRIMITIVEBUFFER_CREATE_DESC& Desc, IPrimitiveBuffer** ppOut) final;
+	virtual BOOL GetOrCreateRenderContext(IRenderContext** ppContext) final;
 
-	IRenderContext* GetRenderContext() const noexcept final;
+	virtual void Update() final;
 
 private:
 	virtual ~D3D11RenderSystem() noexcept;
@@ -39,9 +42,9 @@ private:
 #endif // defined(__TARGET_OS_WINDOWS)
 
 	D3D11RenderDevice* m_pRenderDevice = nullptr;
-	D3D11RenderManager* m_pRenderMgr = nullptr;
 	D3D11RenderContext* m_pRenderContext = nullptr;
-	
+	D3D11RenderCommandExecutor* m_pRenderCommandExecutor = nullptr;
+
 };
 
 
