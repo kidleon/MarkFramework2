@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "TQueue.h"
 #include "TArray.h"
 using namespace mark;
 
@@ -10,7 +11,7 @@ class D3D11RenderCommandExecutor
 {
 	static constexpr size_t MAX_RQ_GROUPS = 4;
 	static D3D11RenderCommandExecutor* s_pInstance;
-
+	
 	struct RenderQueueGroup
 	{
 		TArray<D3D11RenderQueue*, TA_POOL> lstRenderQueue;
@@ -19,6 +20,8 @@ class D3D11RenderCommandExecutor
 public:
 	D3D11RenderCommandExecutor(D3D11RenderDevice* pRenderDevice);
 	~D3D11RenderCommandExecutor() noexcept;
+
+	void Push(const RENDER_FRAME* pRenderFrame) noexcept;
 	void Push(D3D11RenderQueue* pRQ) noexcept;
 	void Execute() noexcept;
 
@@ -30,6 +33,11 @@ private:
 private:
 	D3D11RenderDevice* m_pRenderDevice;
 	RenderQueueGroup m_RQGroups[MAX_RQ_GROUPS];
+
+	TQueue<RENDER_FRAME*, TA_POOL> m_RenderFrameQueue;
+
 	size_t m_CurrentFrameIndex;
 
 };
+
+

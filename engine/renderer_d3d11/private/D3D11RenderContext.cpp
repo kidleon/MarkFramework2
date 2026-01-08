@@ -29,27 +29,63 @@ long D3D11RenderContext::RefCnt()
 
 void D3D11RenderContext::BeginFrame() noexcept
 {
+	m_CurrentFrameIndex = (m_LastFrameIndex + 1) % MAX_RENDER_FRAME;
 }
 
 void D3D11RenderContext::EndFrame() noexcept
 {
+	// 현재 프레임의 렌더 큐들을 렌더 커맨드 실행기로 전달
+	D3D11RenderCommandExecutor::Get().Push(&m_RenderFrames[m_CurrentFrameIndex]);
+	m_LastFrameIndex = m_CurrentFrameIndex;
+	m_CurrentFrameIndex = -1;
 }
 
 void D3D11RenderContext::BeginRenderCamera(IRenderCamera* pRenderCamera) noexcept
 {
-	D3D11RenderQueue* pRQ = D3D11RenderQueuePool::Get().GetRQ();
-	if (!pRQ)
-		return;
+	__ASSERT(0 <= m_CurrentFrameIndex, "Invalid render frame index.");
 
-	m_pCurRQ = pRQ;
-	m_pCurRQ->SetRenderCamera(static_cast<D3D11RenderCamera*>(pRenderCamera));
+	// 현재 프레임의 렌더 큐에서 해당 렌더 카메라에 대한 렌더 큐가 있는지 검색
+	int32 find_index = m_RenderFrames[m_CurrentFrameIndex].OpaqueRQs.find_index(
+		[pRenderCamera](const D3D11RenderQueue* pRQ)
+		{
+			return pRQ->INL_GetRenderCamera() == pRenderCamera;
+		}
+	);
+
+	// 있으면 해당 렌더 큐를 사용, 없으면 새로 생성
+	if (-1 != find_index)
+	{
+		m_pCurOpaqueRQ = m_RenderFrames[m_CurrentFrameIndex].OpaqueRQs[find_index];
+	}
+	else
+	{
+		D3D11RenderQueue* pNewRQ = D3D11RenderQueuePool::Get().GetRQ();
+		pNewRQ->SetRenderCamera(static_cast<D3D11RenderCamera*>(pRenderCamera));
+		m_RenderFrames[m_CurrentFrameIndex].OpaqueRQs.push_back(pNewRQ);
+		m_pCurOpaqueRQ = pNewRQ;
+	}
+
+	// 투명 렌더 큐도 동일하게 처리
+	find_index = m_RenderFrames[m_CurrentFrameIndex].TransparentRQs.find_index(
+		[pRenderCamera](const D3D11RenderQueue* pRQ)
+		{
+			return pRQ->INL_GetRenderCamera() == pRenderCamera;
+		}
+	);
+
+	if (-1 != find_index)
+	{
+		m_pCurTransparentRQ = m_RenderFrames[m_CurrentFrameIndex].TransparentRQs[find_index];
+	}
+	else
+	{
+		D3D11RenderQueue* pNewRQ = D3D11RenderQueuePool::Get().GetRQ();
+		pNewRQ->SetRenderCamera(static_cast<D3D11RenderCamera*>(pRenderCamera));
+		m_RenderFrames[m_CurrentFrameIndex].TransparentRQs.push_back(pNewRQ);
+		m_pCurTransparentRQ = pNewRQ;
+	}
 }
 
 void D3D11RenderContext::EndRenderCamera() noexcept
 {
-	if (!m_pCurRQ)
-		return;
-
-	D3D11RenderCommandExecutor::Get().Push(m_pCurRQ);
-	m_pCurRQ = nullptr;
 }
