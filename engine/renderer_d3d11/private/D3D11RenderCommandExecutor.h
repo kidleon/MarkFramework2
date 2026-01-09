@@ -6,6 +6,7 @@ using namespace mark;
 
 class D3D11RenderDevice;
 class D3D11RenderQueue;
+struct RENDER_FRAME;
 
 class D3D11RenderCommandExecutor
 {
@@ -22,7 +23,6 @@ public:
 	~D3D11RenderCommandExecutor() noexcept;
 
 	void Push(const RENDER_FRAME* pRenderFrame) noexcept;
-	void Push(D3D11RenderQueue* pRQ) noexcept;
 	void Execute() noexcept;
 
 	static inline D3D11RenderCommandExecutor& Get() noexcept { return *s_pInstance; }

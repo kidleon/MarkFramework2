@@ -88,4 +88,6 @@ void D3D11RenderContext::BeginRenderCamera(IRenderCamera* pRenderCamera) noexcep
 
 void D3D11RenderContext::EndRenderCamera() noexcept
 {
+	m_pCurOpaqueRQ = nullptr;
+	m_pCurTransparentRQ = nullptr;
 }

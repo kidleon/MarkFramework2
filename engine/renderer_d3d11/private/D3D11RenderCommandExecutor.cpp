@@ -37,9 +37,9 @@ D3D11RenderCommandExecutor::~D3D11RenderCommandExecutor() noexcept
 		s_pInstance = nullptr;
 }
 
-void D3D11RenderCommandExecutor::Push(D3D11RenderQueue* pRQ) noexcept
+void D3D11RenderCommandExecutor::Push(const RENDER_FRAME* pRenderFrame) noexcept
 {
-	m_RQGroups[m_CurrentFrameIndex].lstRenderQueue.push_back(pRQ);
+	m_RenderFrameQueue.push_back(const_cast<RENDER_FRAME*>(pRenderFrame));
 }
 
 void D3D11RenderCommandExecutor::ResetFrame(size_t Frame)
