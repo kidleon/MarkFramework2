@@ -74,7 +74,7 @@ void D3D11RenderContext::BeginRenderCamera(IRenderCamera* pRenderCamera) noexcep
 	}
 	else
 	{
-		if ((m_RenderFrames[m_CurrentFrameIndex].NumRQs + 1) >= D3D11_RENDER_FRAME::MAX_RQ_GROUPS)
+		if (m_RenderFrames[m_CurrentFrameIndex].NumRQs >= D3D11_RENDER_FRAME::MAX_RQ_GROUPS)
 		{
 			SYS_LOG_E("D3D11RenderContext::BeginRenderCamera: Exceeded maximum render queue groups per frame.");
 			m_pCurRQs = nullptr;
