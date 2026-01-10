@@ -2,7 +2,6 @@
 #include "D3D11RenderFrame.h"
 
 
-
 class D3D11RenderContext final : public IRenderContext
 {
 	static constexpr size_t MAX_RENDER_FRAME = 4;
@@ -26,9 +25,7 @@ private:
 	unsigned PADDING_OR_RESERVED = 0;
 #endif // defined(__TARGET_OS_WINDOWS)
 
-	D3D11RenderQueue* m_pCurOpaqueRQ = nullptr;
-	D3D11RenderQueue* m_pCurTransparentRQ = nullptr;
-	
+	D3D11_RENDER_QUEUE_GROUP* m_pCurRQs = nullptr;
 	D3D11_RENDER_FRAME m_RenderFrames[MAX_RENDER_FRAME];
 
 	int32 m_LastFrameIndex = -1;

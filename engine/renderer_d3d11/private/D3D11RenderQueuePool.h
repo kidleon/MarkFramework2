@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 
-class D3D11RenderQueue;
+class D3D11_RENDER_QUEUE;
 
 class D3D11RenderQueuePool
 {
@@ -14,8 +14,8 @@ public:
 	void Init();
 	void Shutdown() noexcept;
 
-	D3D11RenderQueue* GetRQ() noexcept;
-	void ReleaseRQ(D3D11RenderQueue* pRQ) noexcept;
+	D3D11_RENDER_QUEUE* GetRQ() noexcept;
+	void ReleaseRQ(D3D11_RENDER_QUEUE* pRQ) noexcept;
 
 	static inline D3D11RenderQueuePool& Get() noexcept { return *s_pInstance; }
 

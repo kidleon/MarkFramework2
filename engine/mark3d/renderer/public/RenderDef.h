@@ -1449,7 +1449,7 @@ struct IRenderCamera : public IAsset
 
 	virtual void LookAt(const FLOAT3& EyePos, const FLOAT3& Target) noexcept = 0;
 
-	virtual void SetViewportLayer(INT8 Layer) noexcept = 0;
+	virtual void SetCameraOrder(INT8 Order) noexcept = 0;
 };
 
 

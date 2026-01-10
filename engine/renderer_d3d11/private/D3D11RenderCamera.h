@@ -92,9 +92,9 @@ public:
 
 	void LookAt(const FLOAT3& EyePos, const FLOAT3& Target) noexcept final;
 
-	void SetViewportLayer(INT8 Layer) noexcept final;
+	void SetCameraOrder(INT8 Order) noexcept final;
 
-	__INLINE INT32 INL_GetViewportLayer() const noexcept { return m_ViewportLayer; }
+	__INLINE INT32 INL_GetCameraOrder() const noexcept { return m_CameraOrder; }
 
 	__INLINE const CLEAR_TARGET_DESC& INL_GetClearTargetDesc() const noexcept { return m_ClearTarget; }
 	__INLINE const PERSPECTIVE_DESC& INL_GetPerspectiveDesc() const noexcept { return m_Perspective; }
@@ -119,7 +119,7 @@ private:
 
 	UINT64 m_ID = 0;
 	LOAD_STAT m_LoadStat = LOAD_STAT::NOT_LOADED;
-	INT32 m_ViewportLayer = 0;
+	INT32 m_CameraOrder = 0;
 
 	CLEAR_TARGET_DESC m_ClearTarget;
 	PERSPECTIVE_DESC m_Perspective;

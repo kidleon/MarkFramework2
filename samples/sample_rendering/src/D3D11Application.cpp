@@ -56,7 +56,6 @@ void D3D11Application::OnUpdate()
 	pRenderContext->BeginRenderCamera(m_pRenderCamera);
 	pRenderContext->EndRenderCamera();
 	pRenderContext->EndFrame();
-
 	pRenderContext->Release();
 
 	m_pRenderSystem->Update();

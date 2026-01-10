@@ -124,7 +124,7 @@ void D3D11RenderCamera::LookAt(const FLOAT3& EyePos, const FLOAT3& Target) noexc
 	vec3_cross(&m_View.EyeDir, &m_View.EyeUp, &m_View.EyeRight);
 }
 
-void D3D11RenderCamera::SetViewportLayer(INT8 Layer) noexcept
+void D3D11RenderCamera::SetCameraOrder(INT8 Order) noexcept
 {
-	m_ViewportLayer = Layer;
+	m_CameraOrder = Order;
 }

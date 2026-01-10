@@ -6,6 +6,7 @@
 #include "D3D11RenderTarget.h"
 #include "D3D11RenderCamera.h"
 #include "D3D11RenderContext.h"
+#include "D3D11RenderFrame.h"
 
 
 D3D11RenderCommandExecutor* D3D11RenderCommandExecutor::s_pInstance = nullptr;
@@ -34,7 +35,6 @@ D3D11RenderCommandExecutor::~D3D11RenderCommandExecutor() noexcept
 		}
 	}
 	
-	
 	if (s_pInstance == this)
 		s_pInstance = nullptr;
 }
@@ -46,27 +46,9 @@ void D3D11RenderCommandExecutor::Push(const D3D11_RENDER_FRAME* pRenderFrame) no
 
 void D3D11RenderCommandExecutor::ResetFrame(D3D11_RENDER_FRAME* pRenderFrame)
 {
-	for (size_t i = 0; i < pRenderFrame->OpaqueRQs.size(); ++i)
-	{
-		D3D11RenderQueue* pRQ = pRenderFrame->OpaqueRQs[i];
-		if (pRQ)
-		{
-			D3D11RenderQueuePool::Get().ReleaseRQ(pRQ);
-		}
-	}
-
-	pRenderFrame->OpaqueRQs.clear();
-
-	for (size_t i = 0; i < pRenderFrame->TransparentRQs.size(); ++i)
-	{
-		D3D11RenderQueue* pRQ = pRenderFrame->TransparentRQs[i];
-		if (pRQ)
-		{
-			D3D11RenderQueuePool::Get().ReleaseRQ(pRQ);
-		}
-	}
-
-	pRenderFrame->TransparentRQs.clear();
+	for (size_t i = 0; i < pRenderFrame->NumRQs; ++i)
+		pRenderFrame->RQs[i].Reset();
+	pRenderFrame->NumRQs = 0;
 }
 
 void D3D11RenderCommandExecutor::Execute() noexcept
@@ -83,14 +65,12 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 	D3D11_RENDER_FRAME* pRenderFrame = m_RenderFrameQueue.front();
 	m_RenderFrameQueue.pop_front();
 
-	for (size_t i = 0; i < pRenderFrame->OpaqueRQs.size(); ++i)
+	for (size_t i = 0; i < pRenderFrame->NumRQs; ++i)
 	{
-		D3D11RenderQueue* pRQ = pRenderFrame->OpaqueRQs[i];
-		if (!pRQ)
-			continue;
+		D3D11_RENDER_QUEUE_GROUP* pRQGroup = &pRenderFrame->RQs[i];
 
 		// 렌더 카메라 설정
-		D3D11RenderCamera* pCamera = pRQ->INL_GetRenderCamera();
+		const D3D11RenderCamera* pCamera = pRQGroup->INL_GetRenderCamera();
 		if (!pCamera)
 			continue;
 

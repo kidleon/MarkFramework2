@@ -166,7 +166,7 @@ BOOL D3D11RenderSystem::CreateRenderCamera(
 		Desc.Stencil
 	);
 
-	pRenderCamera->SetViewportLayer(Desc.CameraOrder);
+	pRenderCamera->SetCameraOrder(Desc.CameraOrder);
 
 	*ppOut = pRenderCamera;
 

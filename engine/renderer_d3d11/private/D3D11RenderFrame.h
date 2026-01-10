@@ -2,17 +2,16 @@
 #include "TArray.h"
 using namespace mark;
 
+#include "D3D11RenderQueue.h"
 
-class D3D11RenderQueue;
 
 struct D3D11_RENDER_FRAME
 {
-	TArray<D3D11RenderQueue*, TA_POOL> OpaqueRQs;
-	TArray<D3D11RenderQueue*, TA_POOL> TransparentRQs;
-	/*
-	TArray<D3D11RenderQueue*, TA_POOL> ShadowRQs;
-	TArray<D3D11RenderQueue*, TA_POOL> SpriteRQs;
-	TArray<D3D11RenderQueue*, TA_POOL> UIRQs;
-	TArray<D3D11RenderQueue*, TA_POOL> OverrayRQs;
-	*/
+	static constexpr size_t MAX_RQ_GROUPS = 32;
+
+	size_t NumRQs = 0;
+	D3D11_RENDER_QUEUE_GROUP RQs[MAX_RQ_GROUPS];
+
+	void Reset();
+	void SortByCameraOrder();
 };

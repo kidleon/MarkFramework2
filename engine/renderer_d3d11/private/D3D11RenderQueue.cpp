@@ -1,37 +1,28 @@
 ﻿#include "pch.h"
 #include "D3D11RenderQueue.h"
 #include "D3D11RenderCamera.h"
+#include "D3D11RenderQueuePool.h"
 
 
-D3D11RenderQueue::D3D11RenderQueue()
-	: m_pRenderCamera(nullptr)
-	, m_LinkNode{}
+//-----------------------------------------------------------------------------
+// class D3D11_RENDER_QUEUE
+D3D11_RENDER_QUEUE::D3D11_RENDER_QUEUE()
+	: m_LinkNode{}
 {
 	m_LinkNode.data = this;
 }
 
-D3D11RenderQueue::~D3D11RenderQueue() noexcept
+D3D11_RENDER_QUEUE::~D3D11_RENDER_QUEUE() noexcept
 {
 	Reset();
 }
 
-void D3D11RenderQueue::SetRenderCamera(D3D11RenderCamera* pCamera) noexcept
+void D3D11_RENDER_QUEUE::Reset()
 {
-	m_pRenderCamera = pCamera;
-	m_pRenderCamera->AddRef();
-}
-
-void D3D11RenderQueue::Reset()
-{
-	if (m_pRenderCamera)
-	{
-		m_pRenderCamera->Release();
-		m_pRenderCamera = nullptr;
-	}
 	m_OpaqueCmdList.clear();
 }
 
-void D3D11RenderQueue::Add(RENDER_QUEUE_TYPE QueueType, BASE_RENDER_COMMAND* pRenderCmd) noexcept
+void D3D11_RENDER_QUEUE::Add(RENDER_QUEUE_TYPE QueueType, BASE_RENDER_COMMAND* pRenderCmd) noexcept
 {
 	switch (QueueType)
 	{
@@ -44,4 +35,61 @@ void D3D11RenderQueue::Add(RENDER_QUEUE_TYPE QueueType, BASE_RENDER_COMMAND* pRe
 		default:
 			break;
 	}
+}
+
+
+//-----------------------------------------------------------------------------
+// class D3D11_RENDER_QUEUE_GROUP
+D3D11_RENDER_QUEUE_GROUP::D3D11_RENDER_QUEUE_GROUP() noexcept
+	: m_pRenderCamera(nullptr)
+	, m_pOpaqueRQ(nullptr)
+	, m_pTransparentRQ(nullptr)
+{
+
+}
+
+D3D11_RENDER_QUEUE_GROUP::~D3D11_RENDER_QUEUE_GROUP() noexcept
+{
+	Reset();
+}
+
+void D3D11_RENDER_QUEUE_GROUP::PrepareRQ(D3D11RenderCamera* pRenderCamera)
+{
+	if (!m_pRenderCamera)
+	{
+		m_pRenderCamera = pRenderCamera;
+		m_pRenderCamera->AddRef();
+	}
+	
+	if (!m_pOpaqueRQ)
+	{
+		m_pOpaqueRQ = D3D11RenderQueuePool::Get().GetRQ();
+	}
+	
+	if (!m_pTransparentRQ)
+	{
+		m_pTransparentRQ = D3D11RenderQueuePool::Get().GetRQ();
+	}
+}
+
+void D3D11_RENDER_QUEUE_GROUP::Reset()
+{
+	if (m_pRenderCamera)
+	{
+		m_pRenderCamera->Release();
+		m_pRenderCamera = nullptr;
+	}
+
+	if (m_pOpaqueRQ)
+	{
+		D3D11RenderQueuePool::Get().ReleaseRQ(m_pOpaqueRQ);
+		m_pOpaqueRQ = nullptr;
+	}
+
+	if (m_pTransparentRQ)
+	{
+		D3D11RenderQueuePool::Get().ReleaseRQ(m_pTransparentRQ);
+		m_pTransparentRQ = nullptr;
+	}
+
 }

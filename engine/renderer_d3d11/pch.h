@@ -5,6 +5,7 @@
 #include <d3d11_3.h>
 #include <d3dcompiler.h>
 #include <dxgiformat.h>
+#include <algorithm>
 
 #include "predefine.h"
 #include "spin_lock.h"
