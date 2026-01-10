@@ -18,12 +18,12 @@ namespace mark
 
 		TQueue() = default;
 
-		TQueue(const TQueue<_T>& other)
+		TQueue(const TQueue<_T, _Alloc>& other)
 		{
 			_list_node = other._list_node;
 		}
 
-		TQueue(const TQueue<_T>&& other)
+		TQueue(const TQueue<_T, _Alloc>&& other)
 		{
 			_list_node = std::move(other);
 		}
@@ -49,13 +49,13 @@ namespace mark
 			return *this;
 		}
 
-		inline TQueue& operator=(const TQueue<_T>& rhs)
+		inline TQueue& operator=(const TQueue<_T, _Alloc>& rhs)
 		{
 			_list_node = rhs._list_node;
 			return *this;
 		}
 
-		inline TQueue& operator=(TQueue<_T>&& rhs)
+		inline TQueue& operator=(TQueue<_T, _Alloc>&& rhs)
 		{
 			_list_node = std::move(rhs);
 			return *this;

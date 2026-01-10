@@ -1,7 +1,6 @@
 ﻿#ifndef __THASH_SET_H__
 #define __THASH_SET_H__
 
-#include "TAllocator.h"
 #include "TCommon.h"
 #include "THash.h"
 

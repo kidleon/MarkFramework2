@@ -4,6 +4,7 @@
 #include "D3D11RenderQueuePool.h"
 #include "D3D11RenderCamera.h"
 #include "D3D11RenderCommandExecutor.h"
+#include "D3D11RenderFrame.h"
 
 
 long D3D11RenderContext::AddRef()

@@ -85,7 +85,7 @@ namespace mark
 
 			if (_capacity)
 			{
-				_data = static_cast<_T*>(_Alloc::alloc(sizeof(_T) * _capacity, _AllocType));
+				_data = static_cast<_T*>(_Alloc::alloc(sizeof(_T) * _capacity, __FILE__, __LINE__, __FUNCTION__));
 
 				if (_count)
 					memcpy(_data, other._data, sizeof(_T) * _count);
@@ -107,7 +107,7 @@ namespace mark
 		TArray(size_t capacity)
 			: _capacity(!capacity ? DEFAULT_HEAPARRAY_CAPACITY : capacity)
 		{
-			_data = static_cast<_T*>(_Alloc::alloc(sizeof(_T) * _capacity, _AllocType));
+			_data = static_cast<_T*>(_Alloc::alloc(sizeof(_T) * _capacity, __FILE__, __LINE__, __FUNCTION__));
 		}
 
 		TArray(std::initializer_list<value_type> init_list)
@@ -145,7 +145,7 @@ namespace mark
 
 			if (_capacity)
 			{
-				_data = static_cast<_T*>(_Alloc::alloc(sizeof(_T) * rhs._capacity, _AllocType));
+				_data = static_cast<_T*>(_Alloc::alloc(sizeof(_T) * rhs._capacity, __FILE__, __LINE__, __FUNCTION__));
 
 				if (_count)
 					memcpy(_data, rhs._data, sizeof(_T) * rhs._count);
