@@ -46,7 +46,7 @@ MARK_BASELIB_C_API uint32 vfreelist_alloc(
 */
 MARK_BASELIB_C_API void vfreelist_free(
 	HANDLE hFreelist,
-	uint64 offset
+	uint32 offset
 );
 
 

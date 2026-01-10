@@ -10,14 +10,8 @@ struct D3D11_RENDER_FRAME;
 
 class D3D11RenderCommandExecutor
 {
-	static constexpr size_t MAX_RQ_GROUPS = 4;
 	static D3D11RenderCommandExecutor* s_pInstance;
 	
-	struct RenderQueueGroup
-	{
-		TArray<D3D11RenderQueue*, TA_POOL> lstRenderQueue;
-	};
-
 public:
 	D3D11RenderCommandExecutor(D3D11RenderDevice* pRenderDevice);
 	~D3D11RenderCommandExecutor() noexcept;

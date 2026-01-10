@@ -404,11 +404,11 @@ uint32 vfreelist_alloc(
 
 void vfreelist_free(
 	HANDLE hFreelist,
-	uint64 offset
+	uint32 offset
 )
 {
 	struct free_list_t* freelist = (struct free_list_t*)hFreelist;
 	if (!freelist)
 		return;
-	freelist_free(freelist, (uint32)offset);
+	freelist_free(freelist, offset);
 }

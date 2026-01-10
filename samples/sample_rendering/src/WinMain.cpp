@@ -4,6 +4,7 @@
 #define NOMINMAX
 #include <Windows.h>
 #include "D3D11Application.h"
+#include "vfreelist.h"
 
 
 #define DEFAULT_WINDOW_CLASS "MARKFRAMEWORK2"
@@ -67,6 +68,15 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
     MSG msg;
     msg.message = WM_NULL;
     PeekMessage(&msg, nullptr, 0U, 0U, PM_NOREMOVE);
+
+	HANDLE hFreeList = vfreelist_create(1024, 16);
+    if (hFreeList)
+    {
+		uint32 offset = vfreelist_alloc(hFreeList, 32);
+		vfreelist_free(hFreeList, offset);
+
+        vfreelist_destroy(hFreeList);
+    }
 
     while (WM_QUIT != msg.message)
     {
