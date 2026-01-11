@@ -183,7 +183,7 @@ inline size_t CalculateTextureSize(COLOR_FORMAT format, size_t width, size_t hei
 	return width * height * pixelSize;
 }
 
-enum class PRIMITIVE_TYPE : uint8
+enum class PRIMITIVE_TYPE : uint32
 {
 	UNKNOWN = 0,
 	POINT_LIST,
@@ -211,7 +211,7 @@ enum class SHADER_TYPE : uint8
 /**
 * @brief 버퍼 사용 용도 열거형
 */
-enum class BUFFER_USAGE : uint8
+enum class BUFFER_USAGE : uint32
 {
 	DEFAULT = 0, 
 	DYNAMIC, 
@@ -1401,7 +1401,11 @@ struct IMesh : public IAsset
 */
 struct IPrimitiveBuffer : public IAsset
 {
-	virtual void AddPrimitive(
+	virtual BUFFER_USAGE GetUsage() const noexcept = 0;
+
+	virtual void ResetPrimitive() noexcept = 0;
+
+	virtual INT32 AddPrimitive(
 		PRIMITIVE_TYPE PrimitiveType,
 		uint32 VertexOffset,
 		uint32 VertexCount,
@@ -1409,15 +1413,15 @@ struct IPrimitiveBuffer : public IAsset
 		uint32 IndexCount
 	) noexcept = 0;
 
-	virtual uint32 GetNumPrimitives() const noexcept = 0;
+	virtual size_t GetNumPrimitives() const noexcept = 0;
 
-	virtual void UpdateVertex(
+	virtual BOOL UpdateVertex(
 		int32 PrimitiveIndex,
 		const void* pVertexData,
 		size_t VertexSize
 	) = 0;
 
-	virtual void UpdateIndex(
+	virtual BOOL UpdateIndex(
 		int32 PrimitiveIndex,
 		const void* pIndexData,
 		size_t IndexSize

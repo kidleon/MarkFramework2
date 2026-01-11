@@ -20,6 +20,8 @@ public:
 	// IConstantBuffer 인터페이스 구현
 	virtual void UpdateData(void* pData, size_t DataSize) final;
 
+	BOOL UploadToGPU(ID3D11DeviceContext* pDeviceContext, void* pBufferData, size_t BufferSize);
+
 	__FORCEINLINE ID3D11Buffer* INL_GetD3D11Buffer() const noexcept { return m_pD3D11Buffer; }
 	__FORCEINLINE size_t INL_GetBufferSize() const noexcept { return m_BufferSize; }
 

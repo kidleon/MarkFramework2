@@ -3,6 +3,8 @@
 #include "D3D11RenderDevice.h"
 #include "D3D11RenderCamera.h"
 #include "D3D11RenderTarget.h"
+#include "D3D11ConstantBuffer.h"
+#include "D3D11ConstantBufferAllocator.h"
 #include "D3D11RenderContext.h"
 #include "D3D11RenderCommandExecutor.h"
 
@@ -79,6 +81,9 @@ BOOL D3D11RenderSystem::Init(
 		return FALSE;
 	}
 
+	m_pCBAllocator = D3D11_NEW(D3D11ConstantBufferAllocator)();
+	m_pCBAllocator->Init(m_pRenderDevice);
+
 	m_pRenderCommandExecutor = D3D11_NEW(D3D11RenderCommandExecutor)(m_pRenderDevice);
 
 	return TRUE;
@@ -96,6 +101,12 @@ void D3D11RenderSystem::Shutdown()
 	{
 		D3D11_DELETE(m_pRenderContext, D3D11RenderContext);
 		m_pRenderContext = nullptr;
+	}
+
+	if (m_pCBAllocator)
+	{
+		D3D11_DELETE(m_pCBAllocator, D3D11ConstantBufferAllocator);
+		m_pCBAllocator = nullptr;
 	}
 
 	if (m_pRenderDevice)

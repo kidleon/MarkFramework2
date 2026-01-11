@@ -7,6 +7,9 @@
 #include "D3D11RenderCamera.h"
 #include "D3D11RenderContext.h"
 #include "D3D11RenderFrame.h"
+#include "D3D11ConstantBufferAllocator.h"
+#include "D3D11ConstantBuffer.h"
+#include "D3D11ShaderDef.h"
 
 
 D3D11RenderCommandExecutor* D3D11RenderCommandExecutor::s_pInstance = nullptr;
@@ -53,8 +56,10 @@ void D3D11RenderCommandExecutor::ResetFrame(D3D11_RENDER_FRAME* pRenderFrame)
 
 void D3D11RenderCommandExecutor::Execute() noexcept
 {
-	ID3D11DeviceContext* pContext = m_pRenderDevice->INL_GetD3D11Context();
-	if (!pContext)
+	D3D11ConstantBufferAllocator::Get()->ResetTemp();
+
+	ID3D11DeviceContext* pDeviceContext = m_pRenderDevice->INL_GetD3D11Context();
+	if (!pDeviceContext)
 		return;
 
 	const RENDER_SETTINGS& RenderSettings = D3D11Common::GetRenderSettings();
@@ -74,18 +79,43 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 		if (!pCamera)
 			continue;
 
+		// 카메라 상수 버퍼 설정
+		D3D11_CAMERA_CONSTANT CameraCB = {};
+		CameraCB.ViewMatrix = pCamera->INL_GetViewMatrix();
+		CameraCB.InvViewMatrix = mat4_inverse(&CameraCB.ViewMatrix);
+		CameraCB.ProjectionMatrix = pCamera->INL_GetProjectionMatrix();
+
+		const D3D11RenderCamera::VIEW_DESC& ViewDesc = pCamera->INL_GetViewDesc();
+		CameraCB.CameraPosition = { ViewDesc.EyePos.x, ViewDesc.EyePos.y, ViewDesc.EyePos.z, 1.0f };
+
+		// 임시 상수 버퍼 할당
+		D3D11ConstantBuffer* pCB = D3D11ConstantBufferAllocator::Get()->AcquireTemp(sizeof(D3D11_CAMERA_CONSTANT));
+		if (!pCB)
+		{
+			SYS_LOG_E("D3D11RenderCommandExecutor::Execute - D3D11ConstantBufferAllocator::AcquireTemp failed.");
+			continue;
+		}
+
+		// GPU 업로드
+		if (!pCB->UploadToGPU(pDeviceContext, &CameraCB, sizeof(D3D11_CAMERA_CONSTANT)))
+			continue;
+
+		ID3D11Buffer* pCameraCB = pCB->INL_GetD3D11Buffer();
+		pDeviceContext->VSSetConstantBuffers(0, 1, &pCameraCB);
+		pDeviceContext->PSSetConstantBuffers(0, 1, &pCameraCB);
+		
 		D3D11RenderTarget* pRT = pCamera->INL_GetRenderTarget();
 		if (pRT)
 		{
 			// 렌더 타겟 바인딩
 			ID3D11RenderTargetView* pRTV = pRT->INL_GetRTV();
 			ID3D11DepthStencilView* pDSV = pRT->INL_GetDSV();
-			pContext->OMSetRenderTargets(1, &pRTV, pDSV);
+			pDeviceContext->OMSetRenderTargets(1, &pRTV, pDSV);
 
 			const D3D11RenderCamera::CLEAR_TARGET_DESC& ClearDesc = pCamera->INL_GetClearTargetDesc();
 			if (ClearDesc.ClearBuffers & (uint32)CLEAR_BUFFER::COLOR)
 			{
-				pContext->ClearRenderTargetView(
+				pDeviceContext->ClearRenderTargetView(
 					pRTV,
 					ClearDesc.ClearColor.v
 				);
@@ -107,7 +137,7 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 
 			if (pDSV && ClearFlags > 0)
 			{
-				pContext->ClearDepthStencilView(
+				pDeviceContext->ClearDepthStencilView(
 					pDSV,
 					ClearFlags,
 					ClearDesc.Depth,
@@ -123,7 +153,12 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 			viewport.Height = static_cast<FLOAT>(pRT->INL_GetColorHeight());
 			viewport.MinDepth = 0.0f;
 			viewport.MaxDepth = 1.0f;
-			pContext->RSSetViewports(1, &viewport);
+			pDeviceContext->RSSetViewports(1, &viewport);
+
+			// SHADER CONSTANT BUFFER 설정
+
+			// PER FRAME CB
+
 		}
 	}
 

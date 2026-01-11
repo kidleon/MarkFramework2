@@ -265,7 +265,7 @@ void D3D11Heap_SysFreeAlign(void* ptr)
 		);
 	}
 
-	crt_free(ptr);
+	crt_free_align(ptr);
 }
 
 void* D3D11Heap_PoolAlloc(size_t size, const char* file, int line, const char* func)

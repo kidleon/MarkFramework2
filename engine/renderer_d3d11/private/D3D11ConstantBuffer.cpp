@@ -71,3 +71,30 @@ void D3D11ConstantBuffer::UpdateData(void* pData, size_t DataSize)
 
 	memcpy(m_pBufferData, pData, DataSize);
 }
+
+BOOL D3D11ConstantBuffer::UploadToGPU(
+	ID3D11DeviceContext* pDeviceContext,
+	void* pBufferData,
+	size_t BufferSize
+)
+{
+	D3D11_MAPPED_SUBRESOURCE MappedResource = {};
+	HRESULT hr = pDeviceContext->Map(
+		m_pD3D11Buffer,
+		0,
+		D3D11_MAP_WRITE_DISCARD,
+		0,
+		&MappedResource
+	);
+
+	if (FAILED(hr))
+	{
+		SYS_LOG_E("D3D11ConstantBuffer::UploadToGPU: Failed to map constant buffer to GPU.");
+		return FALSE;
+	}
+
+	memcpy(MappedResource.pData, pBufferData, BufferSize);
+	pDeviceContext->Unmap(m_pD3D11Buffer, 0);
+
+	return TRUE;
+}

@@ -10,9 +10,10 @@ D3D11ConstantBufferPool::~D3D11ConstantBufferPool()
 }
 
 BOOL D3D11ConstantBufferPool::Init(
-	D3D11RenderDevice* pRenderDevice,
-	size_t BufferSize,
-	size_t InitialCount
+    D3D11RenderDevice* pRenderDevice,
+    size_t BufferSize,
+    size_t InitialCount,
+    BOOL EnableReset
 )
 {
 	init_linked_list(&m_FreeList);
@@ -22,6 +23,7 @@ BOOL D3D11ConstantBufferPool::Init(
 	AllocBuffer(pRenderDevice, BufferSize, InitialCount);
 	
 	m_pRenderDevice = pRenderDevice;
+	m_EnableReset = EnableReset;
     
 	return TRUE;
 }
@@ -47,9 +49,16 @@ void D3D11ConstantBufferPool::Shutdown()
 
 void D3D11ConstantBufferPool::Reset()
 {
+    if (!m_EnableReset)
+        return;
+
     while (!linked_list_empty(&m_UsedList))
     {
         LINK_NODE* pNode = linked_list_pop_front(&m_UsedList);
+
+        D3D11ConstantBuffer* pCB = static_cast<D3D11ConstantBuffer*>(pNode->data);
+        pCB->Release();
+
         linked_list_push_back(&m_FreeList, pNode);
 	}
 }
@@ -65,8 +74,20 @@ D3D11ConstantBuffer* D3D11ConstantBufferPool::Acquire()
     linked_list_push_back(&m_UsedList, pNode);
 
     D3D11ConstantBuffer* pCB = static_cast<D3D11ConstantBuffer*>(pNode->data);
+    pCB->AddRef();
 
 	return pCB;
+}
+
+void D3D11ConstantBufferPool::Release(D3D11ConstantBuffer* pCB)
+{
+    if (!pCB) return;
+	pCB->Release();
+
+    LINK_NODE* pNode = pCB->INL_GetLinkNode();
+
+	linked_list_remove_node(&m_UsedList, pNode);
+    linked_list_push_back(&m_FreeList, pNode);
 }
 
 void D3D11ConstantBufferPool::AllocBuffer(
