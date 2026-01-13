@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 
+class D3D11_BLOB;
+
 class D3D11PrimitiveBuffer final : public IPrimitiveBuffer
 {
 	static constexpr size_t MAX_PRIMITIVES = 8;
@@ -75,11 +77,8 @@ private:
 	PRIMITIVE_DESC m_Primitives[MAX_PRIMITIVES] = {};
 	size_t m_NumPrimitives = 0;
 
-	void* m_pVertexData = nullptr;
-	size_t m_VertexDataSize = 0;
-
-	void* m_pIndexData = nullptr;
-	size_t m_IndexDataSize = 0;
+	D3D11_BLOB* m_pVertexBlob = nullptr;
+	D3D11_BLOB* m_pIndexBlob = nullptr;
 
 	ID3D11Buffer* m_pD3D11VertexBuffer = nullptr;
 	ID3D11Buffer* m_pD3D11IndexBuffer = nullptr;
