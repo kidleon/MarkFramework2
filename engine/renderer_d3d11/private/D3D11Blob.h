@@ -16,6 +16,7 @@ public:
 
 	__FORCEINLINE void* INL_GetPointer() const noexcept { return m_pBuffer; }
 	__FORCEINLINE size_t INL_GetSize() const noexcept { return m_BufferSize; }
+	__FORCEINLINE LINK_NODE* INL_GetLinkNode() noexcept { return &m_LinkNode; }
 
 private:
 	D3D11_BLOB() = default;
@@ -29,5 +30,7 @@ private:
 
 	void* m_pBuffer = nullptr;
 	size_t m_BufferSize = 0;
+
+	LINK_NODE m_LinkNode = {};
 
 };

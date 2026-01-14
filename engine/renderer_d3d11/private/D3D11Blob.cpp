@@ -2,6 +2,13 @@
 #include "D3D11Blob.h"
 
 
+D3D11_BLOB::D3D11_BLOB(void* pBuffer, size_t size)
+	: m_pBuffer(pBuffer)
+	, m_BufferSize(size)
+{
+	m_LinkNode.data = this;
+}
+
 D3D11_BLOB::~D3D11_BLOB()
 {
 	if (m_pBuffer)
@@ -22,7 +29,7 @@ long D3D11_BLOB::Release()
 	long NewRefCnt = interlock_decrement_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL);
 	if (NewRefCnt == 0)
 	{
-		D3D11_POOL_DELETE(this, D3D11_BLOB);
+		D3D11_DELETE(this, D3D11_BLOB);
 	}
 	return NewRefCnt;
 }
@@ -34,22 +41,13 @@ long D3D11_BLOB::RefCnt()
 
 void D3D11_BLOB::Update(void* pBuffer, size_t size)
 {
-	if (m_pBuffer)
-	{
-		D3D11_SYS_FREE(m_pBuffer);
-		m_pBuffer = nullptr;
-		m_BufferSize = 0;
-	}
+	if(!pBuffer || size == 0)
+		return;
 
-	if (pBuffer && size > 0)
-	{
-		m_pBuffer = D3D11_SYS_ALLOC(size);
-		if (m_pBuffer)
-		{
-			memcpy(m_pBuffer, pBuffer, size);
-			m_BufferSize = size;
-		}
-	}
+	if (size > m_BufferSize)
+		return;
+
+	memcpy(m_pBuffer, pBuffer, size);
 }
 
 void D3D11_BLOB::Update(void* pBuffer, size_t size, size_t offset)

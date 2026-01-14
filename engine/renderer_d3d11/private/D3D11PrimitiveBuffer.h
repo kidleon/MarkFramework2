@@ -77,6 +77,9 @@ private:
 	PRIMITIVE_DESC m_Primitives[MAX_PRIMITIVES] = {};
 	size_t m_NumPrimitives = 0;
 
+	BOOL m_DirtyVertexBuffer = FALSE;
+	BOOL m_DirtyIndexBuffer = FALSE;
+
 	D3D11_BLOB* m_pVertexBlob = nullptr;
 	D3D11_BLOB* m_pIndexBlob = nullptr;
 

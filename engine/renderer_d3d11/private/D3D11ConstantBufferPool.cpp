@@ -82,7 +82,9 @@ D3D11ConstantBuffer* D3D11ConstantBufferPool::Acquire()
 void D3D11ConstantBufferPool::Release(D3D11ConstantBuffer* pCB)
 {
     if (!pCB) return;
-	pCB->Release();
+
+	long RefCnt = pCB->Release();
+    if (!RefCnt) return;
 
     LINK_NODE* pNode = pCB->INL_GetLinkNode();
 

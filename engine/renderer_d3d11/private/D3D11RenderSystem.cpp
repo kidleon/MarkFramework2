@@ -5,6 +5,7 @@
 #include "D3D11RenderTarget.h"
 #include "D3D11ConstantBuffer.h"
 #include "D3D11ConstantBufferAllocator.h"
+#include "D3D11BlobAllocator.h"
 #include "D3D11RenderContext.h"
 #include "D3D11RenderCommandExecutor.h"
 
@@ -101,6 +102,12 @@ void D3D11RenderSystem::Shutdown()
 	{
 		D3D11_DELETE(m_pRenderContext, D3D11RenderContext);
 		m_pRenderContext = nullptr;
+	}
+
+	if (m_pBlobAllocator)
+	{
+		D3D11_DELETE(m_pBlobAllocator, D3D11BlobAllocator);
+		m_pBlobAllocator = nullptr;
 	}
 
 	if (m_pCBAllocator)

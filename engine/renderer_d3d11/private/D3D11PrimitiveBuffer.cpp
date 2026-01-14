@@ -1,5 +1,7 @@
 ﻿#include "pch.h"
 #include "D3D11PrimitiveBuffer.h"
+#include "D3D11BlobAllocator.h"
+#include "D3D11Blob.h"
 
 
 D3D11PrimitiveBuffer::D3D11PrimitiveBuffer(
@@ -16,17 +18,6 @@ D3D11PrimitiveBuffer::D3D11PrimitiveBuffer(
 
 D3D11PrimitiveBuffer::~D3D11PrimitiveBuffer() noexcept
 {
-	if (m_pVertexData)
-	{
-		D3D11_SYS_FREE(m_pVertexData);
-		m_pVertexData = nullptr;
-	}
-
-	if (m_pIndexData)
-	{
-		D3D11_SYS_FREE(m_pIndexData);
-		m_pIndexData = nullptr;
-	}
 }
 
 long D3D11PrimitiveBuffer::AddRef()
@@ -109,11 +100,39 @@ BOOL D3D11PrimitiveBuffer::UpdateVertex(
 	size_t VertexSize
 ) 
 {
-	if (m_Usage == BUFFER_USAGE::DEFAULT)
+	if (m_NumPrimitives < PrimitiveIndex)
 	{
-		SYS_LOG_E("D3D11PrimitiveBuffer::UpdateVertex - Cannot update vertex data on DEFAULT usage buffer.");
+		m_DirtyVertexBuffer = FALSE;
+		SYS_LOG_E("D3D11PrimitiveBuffer::UpdateVertex: Invalid primitive index.");
 		return FALSE;
 	}
+
+	if (m_pVertexBlob)
+	{
+		if (m_pVertexBlob->INL_GetSize() < VertexSize)
+		{
+			D3D11BlobAllocator::Get()->Release(m_pVertexBlob);
+			m_pVertexBlob = nullptr;
+		}
+	}
+
+	if (!m_pVertexBlob)
+	{
+		m_pVertexBlob = D3D11BlobAllocator::Get()->Acquire(VertexSize);
+		if (!m_pVertexBlob)
+		{
+			SYS_LOG_E("D3D11PrimitiveBuffer::UpdateVertex: Failed to acquire vertex blob.");
+			return FALSE;
+		}
+	}
+
+	m_pVertexBlob->Update(
+		const_cast<void*>(pVertexData), 
+		VertexSize, 
+		m_Primitives[PrimitiveIndex].VertexOffset
+	);
+
+	m_DirtyVertexBuffer = TRUE;
 
 	return TRUE;
 }
@@ -124,6 +143,35 @@ BOOL D3D11PrimitiveBuffer::UpdateIndex(
 	size_t IndexSize
 ) 
 {
+	if (m_NumPrimitives < PrimitiveIndex)
+	{
+		m_DirtyIndexBuffer = FALSE;
+		SYS_LOG_E("D3D11PrimitiveBuffer::UpdateIndex: Invalid primitive index.");
+		return FALSE;
+	}
+
+	if (m_pIndexBlob)
+	{
+		if (m_pIndexBlob->INL_GetSize() < IndexSize)
+		{
+			D3D11BlobAllocator::Get()->Release(m_pIndexBlob);
+			m_pIndexBlob = nullptr;
+		}
+	}
+
+	if (!m_pIndexBlob)
+	{
+		m_pIndexBlob = D3D11BlobAllocator::Get()->Acquire(IndexSize);
+		if (!m_pIndexBlob)
+		{
+			SYS_LOG_E("D3D11PrimitiveBuffer::UpdateIndex: Failed to acquire index blob.");
+			return FALSE;
+		}
+	}
+
+	m_pIndexBlob->Update(const_cast<void*>(pIndexData), IndexSize, );
+	m_DirtyIndexBuffer = TRUE;
+
 	return TRUE;
 }
 
