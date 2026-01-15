@@ -213,8 +213,10 @@ enum class SHADER_TYPE : uint8
 */
 enum class BUFFER_USAGE : uint32
 {
-	DEFAULT = 0, 
+	DEFAULT = 0,
+	IMMUTABLE,
 	DYNAMIC, 
+	STAGING,
 
 	EMAX
 };
@@ -615,9 +617,16 @@ struct MARKENGINE_API CONSTANTBUFFER_CREATE_DESC
 	size_t BufferSize; // 버퍼 크기 (바이트 단위)
 };
 
-struct MARKENGINE_API PRIMITIVEBUFFER_CREATE_DESC
+struct PRIMITIVEBUFFER_CREATE_DESC
 {
-
+	size_t VertexBufferSize;
+	size_t IndexBufferSize;
+	BUFFER_USAGE Usage;
+	BOOL IsInitialData;
+	void* pInitialVertexData;
+	void* pInitialIndexData;
+	size_t InitialVertexDataSize;
+	size_t InitialIndexDataSize;
 };
 
 struct MARKENGINE_API RENDER_SETTINGS
@@ -1407,10 +1416,10 @@ struct IPrimitiveBuffer : public IAsset
 
 	virtual INT32 AddPrimitive(
 		PRIMITIVE_TYPE PrimitiveType,
-		uint32 VertexOffset,
 		uint32 VertexCount,
-		uint32 IndexOffset,
-		uint32 IndexCount
+		uint32 VertexStride,
+		uint32 IndexCount,
+		uint32 IndexStride
 	) noexcept = 0;
 
 	virtual size_t GetNumPrimitives() const noexcept = 0;
@@ -1487,8 +1496,9 @@ struct IRenderSystem : public IUNKNOWN
 {
 public:
 	virtual const RENDER_SETTINGS& GetRenderSettings() const noexcept = 0;
-	virtual void SettRenderSettings(const RENDER_SETTINGS& Settings) noexcept = 0;
+	virtual void SetRenderSettings(const RENDER_SETTINGS& Settings) noexcept = 0;
 
+	virtual BOOL CreatePrimitiveBuffer(const PRIMITIVEBUFFER_CREATE_DESC& Desc, IPrimitiveBuffer** ppOut) = 0;
 	virtual BOOL CreateRenderCamera(const RENDERCAMERA_CREATE_DESC& Desc, IRenderCamera** ppOut) = 0;
 	virtual BOOL GetOrCreateRenderContext(IRenderContext** ppContext) = 0;
 

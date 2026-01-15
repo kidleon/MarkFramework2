@@ -27,8 +27,9 @@ public:
 	void Shutdown();
 
 	virtual const RENDER_SETTINGS& GetRenderSettings() const noexcept final;
-	virtual void SettRenderSettings(const RENDER_SETTINGS& Settings) noexcept final;
+	virtual void SetRenderSettings(const RENDER_SETTINGS& Settings) noexcept final;
 
+	virtual BOOL CreatePrimitiveBuffer(const PRIMITIVEBUFFER_CREATE_DESC& Desc, IPrimitiveBuffer** ppOut) final;
 	virtual BOOL CreateRenderCamera(const RENDERCAMERA_CREATE_DESC& Desc, IRenderCamera** ppOut) final;
 	virtual BOOL GetOrCreateRenderContext(IRenderContext** ppContext) final;
 

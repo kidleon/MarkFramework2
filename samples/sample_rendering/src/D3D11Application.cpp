@@ -40,6 +40,18 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	CameraDesc.CameraOrder = 0;
 	m_pRenderSystem->CreateRenderCamera(CameraDesc, &m_pRenderCamera);
 
+	PRIMITIVEBUFFER_CREATE_DESC PrimitiveBufferDesc = {};
+	PrimitiveBufferDesc.Usage = BUFFER_USAGE::DEFAULT;
+	PrimitiveBufferDesc.VertexBufferSize = 128;
+	PrimitiveBufferDesc.IndexBufferSize = 128;
+	PrimitiveBufferDesc.IsInitialData = FALSE;
+
+	IPrimitiveBuffer* pPrimitiveBuffer = nullptr;
+	m_pRenderSystem->CreatePrimitiveBuffer(PrimitiveBufferDesc, &pPrimitiveBuffer);
+
+	pPrimitiveBuffer->Release();
+
+
 	return TRUE;
 }
 

@@ -14,13 +14,17 @@ class D3D11PrimitiveBuffer final : public IPrimitiveBuffer
 		uint32 VertexCount;
 		uint32 IndexOffset;
 		uint32 IndexCount;
+		uint32 VertexStride;
+		uint32 IndexStride;
 	};;
 
 public:
-	// DEFAULT(STATIC) 버퍼용 생성자
 	D3D11PrimitiveBuffer(
+		BUFFER_USAGE Usage,
 		ID3D11Buffer* pVertexBuffer,
-		ID3D11Buffer* pIndexBuffer
+		ID3D11Buffer* pIndexBuffer,
+		size_t VertexBufferSize,
+		size_t IndexBufferSize
 	) noexcept;
 
 	// IUNKNOWN interface
@@ -40,10 +44,10 @@ public:
 
 	virtual INT32 AddPrimitive(
 		PRIMITIVE_TYPE PrimitiveType,
-		uint32 VertexOffset,
 		uint32 VertexCount,
-		uint32 IndexOffset,
-		uint32 IndexCount
+		uint32 VertexStride,
+		uint32 IndexCount,
+		uint32 IndexStride
 	) noexcept final;
 
 	virtual size_t GetNumPrimitives() const noexcept final;
@@ -83,6 +87,11 @@ private:
 	D3D11_BLOB* m_pVertexBlob = nullptr;
 	D3D11_BLOB* m_pIndexBlob = nullptr;
 
+	size_t m_CurrentVertexSize = 0;
+	size_t m_CurrentIndexSize = 0;
+
+	size_t m_VertexBufferSize = 0;
+	size_t m_IndexBufferSize = 0;
 	ID3D11Buffer* m_pD3D11VertexBuffer = nullptr;
 	ID3D11Buffer* m_pD3D11IndexBuffer = nullptr;
 

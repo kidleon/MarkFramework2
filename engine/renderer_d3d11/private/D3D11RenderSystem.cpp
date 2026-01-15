@@ -8,6 +8,7 @@
 #include "D3D11BlobAllocator.h"
 #include "D3D11RenderContext.h"
 #include "D3D11RenderCommandExecutor.h"
+#include "D3D11PrimitiveBuffer.h"
 
 
 void MemoryReporter(
@@ -133,9 +134,70 @@ const RENDER_SETTINGS& D3D11RenderSystem::GetRenderSettings() const noexcept
 	return D3D11Common::GetRenderSettings();
 }
 
-void D3D11RenderSystem::SettRenderSettings(const RENDER_SETTINGS& Settings) noexcept
+void D3D11RenderSystem::SetRenderSettings(const RENDER_SETTINGS& Settings) noexcept
 {
 	D3D11Common::SetRenderSettings(Settings);
+}
+
+BOOL D3D11RenderSystem::CreatePrimitiveBuffer(const PRIMITIVEBUFFER_CREATE_DESC& Desc, IPrimitiveBuffer** ppOut)
+{
+	D3D11_BUFFER_DESC VertexBufferDesc = {};
+	VertexBufferDesc.ByteWidth = static_cast<UINT>(Desc.VertexBufferSize);
+	VertexBufferDesc.Usage = D3D11_IMPL_BUFFER_USAGE[(int)Desc.Usage];
+	VertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	VertexBufferDesc.CPUAccessFlags = (Desc.Usage == BUFFER_USAGE::DYNAMIC) ? D3D11_CPU_ACCESS_WRITE : 0;
+
+	D3D11_BUFFER_DESC IndexBufferDesc = {};
+	IndexBufferDesc.ByteWidth = static_cast<UINT>(Desc.IndexBufferSize);
+	IndexBufferDesc.Usage = D3D11_IMPL_BUFFER_USAGE[(int)Desc.Usage];
+	IndexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	IndexBufferDesc.CPUAccessFlags = (Desc.Usage == BUFFER_USAGE::DYNAMIC) ? D3D11_CPU_ACCESS_WRITE : 0;
+
+	ID3D11Device* pDevice = m_pRenderDevice->INL_GetD3D11Device();
+
+	D3D11_SUBRESOURCE_DATA InitialVertexData = {};
+	InitialVertexData.pSysMem = Desc.pInitialVertexData;
+
+	ID3D11Buffer* pD3D11_VB = nullptr;
+	HRESULT hr = pDevice->CreateBuffer(
+		&VertexBufferDesc,
+		Desc.IsInitialData ? &InitialVertexData : nullptr,
+		&pD3D11_VB
+	);
+
+	if (FAILED(hr))
+	{
+		SYS_LOG_E("D3D11RenderSystem::CreatePrimitiveBuffer: Failed to create vertex buffer (HRESULT: 0x%08X)", hr);
+		return FALSE;
+	}
+
+	D3D11_SUBRESOURCE_DATA InitialIndexData = {};
+	InitialIndexData.pSysMem = Desc.pInitialIndexData;
+	ID3D11Buffer* pD3D11_IB = nullptr;
+	hr = pDevice->CreateBuffer(
+		&IndexBufferDesc,
+		Desc.IsInitialData ? &InitialIndexData : nullptr,
+		&pD3D11_IB
+	);
+
+	if (FAILED(hr))
+	{
+		SYS_LOG_E("D3D11RenderSystem::CreatePrimitiveBuffer: Failed to create index buffer (HRESULT: 0x%08X)", hr);
+		CHECK_RELEASE(pD3D11_VB);
+		return FALSE;
+	}
+
+	D3D11PrimitiveBuffer* pPrimitiveBuffer = D3D11_POOL_NEW(D3D11PrimitiveBuffer)(
+		Desc.Usage,
+		pD3D11_VB,
+		pD3D11_IB,
+		Desc.VertexBufferSize,
+		Desc.IndexBufferSize
+	);
+
+	*ppOut = static_cast<IPrimitiveBuffer*>(pPrimitiveBuffer);
+
+	return TRUE;
 }
 
 BOOL D3D11RenderSystem::CreateRenderCamera(

@@ -5,12 +5,17 @@
 
 
 D3D11PrimitiveBuffer::D3D11PrimitiveBuffer(
+	BUFFER_USAGE Usage,
 	ID3D11Buffer* pVertexBuffer,
-	ID3D11Buffer* pIndexBuffer
+	ID3D11Buffer* pIndexBuffer,
+	size_t VertexBufferSize,
+	size_t IndexBufferSize
 ) noexcept
-	: m_Usage(BUFFER_USAGE::DEFAULT)
+	: m_Usage(Usage)
 	, m_pD3D11VertexBuffer(pVertexBuffer)
 	, m_pD3D11IndexBuffer(pIndexBuffer)
+	, m_VertexBufferSize(VertexBufferSize)
+	, m_IndexBufferSize(IndexBufferSize)
 {
 	m_ID = static_cast<UINT64>(D3D11Common::GetUID());
 	m_LoadStat = LOAD_STAT::LOADED;
@@ -18,6 +23,20 @@ D3D11PrimitiveBuffer::D3D11PrimitiveBuffer(
 
 D3D11PrimitiveBuffer::~D3D11PrimitiveBuffer() noexcept
 {
+	CHECK_RELEASE(m_pD3D11VertexBuffer);
+	CHECK_RELEASE(m_pD3D11IndexBuffer);
+
+	if (m_pVertexBlob)
+	{
+		D3D11BlobAllocator::Get()->Release(m_pVertexBlob);
+		m_pVertexBlob = nullptr;
+	}
+
+	if (m_pIndexBlob)
+	{
+		D3D11BlobAllocator::Get()->Release(m_pIndexBlob);
+		m_pIndexBlob = nullptr;
+	}
 }
 
 long D3D11PrimitiveBuffer::AddRef()
@@ -68,10 +87,10 @@ void D3D11PrimitiveBuffer::ResetPrimitive() noexcept
 
 INT32 D3D11PrimitiveBuffer::AddPrimitive(
 	PRIMITIVE_TYPE PrimitiveType,
-	uint32 VertexOffset,
 	uint32 VertexCount,
-	uint32 IndexOffset,
-	uint32 IndexCount
+	uint32 VertexStride,
+	uint32 IndexCount,
+	uint32 IndexStride
 ) noexcept
 {
 	if (m_NumPrimitives >= MAX_PRIMITIVES)
@@ -80,12 +99,29 @@ INT32 D3D11PrimitiveBuffer::AddPrimitive(
 		return -1;
 	}
 
-	m_Primitives[m_NumPrimitives].PrimitiveType = PrimitiveType;
-	m_Primitives[m_NumPrimitives].VertexOffset = VertexOffset;
-	m_Primitives[m_NumPrimitives].VertexCount = VertexCount;
-	m_Primitives[m_NumPrimitives].IndexOffset = IndexOffset;
-	m_Primitives[m_NumPrimitives].IndexCount = IndexCount;
+	if (m_CurrentVertexSize + (VertexCount * VertexStride) > m_VertexBufferSize)
+	{
+		SYS_LOG_E("D3D11PrimitiveBuffer::AddPrimitive - Exceeded vertex buffer size.");
+		return -1;
+	}
 
+	if (m_CurrentIndexSize + (IndexCount * IndexStride) > m_IndexBufferSize)
+	{
+		SYS_LOG_E("D3D11PrimitiveBuffer::AddPrimitive - Exceeded index buffer size.");
+		return -1;
+	}
+
+	m_Primitives[m_NumPrimitives].PrimitiveType = PrimitiveType;
+	m_Primitives[m_NumPrimitives].VertexOffset = static_cast<UINT32>(m_CurrentVertexSize);
+	m_Primitives[m_NumPrimitives].VertexCount = VertexCount;
+	m_Primitives[m_NumPrimitives].VertexStride = VertexStride;
+	m_Primitives[m_NumPrimitives].IndexOffset = static_cast<UINT32>(m_CurrentIndexSize);
+	m_Primitives[m_NumPrimitives].IndexCount = IndexCount;
+	m_Primitives[m_NumPrimitives].IndexStride = IndexStride;
+
+	m_CurrentVertexSize += (VertexCount * VertexStride);
+	m_CurrentIndexSize += (IndexCount * IndexStride);
+	
 	return static_cast<INT32>(m_NumPrimitives++);
 }
 
@@ -98,12 +134,19 @@ BOOL D3D11PrimitiveBuffer::UpdateVertex(
 	int32 PrimitiveIndex,
 	const void* pVertexData,
 	size_t VertexSize
-) 
+)
 {
 	if (m_NumPrimitives < PrimitiveIndex)
 	{
 		m_DirtyVertexBuffer = FALSE;
 		SYS_LOG_E("D3D11PrimitiveBuffer::UpdateVertex: Invalid primitive index.");
+		return FALSE;
+	}
+
+	if (m_Primitives[PrimitiveIndex].VertexCount * m_Primitives[PrimitiveIndex].VertexStride < VertexSize)
+	{
+		m_DirtyVertexBuffer = FALSE;
+		SYS_LOG_E("D3D11PrimitiveBuffer::UpdateVertex: Vertex size exceeds primitive vertex buffer size.");
 		return FALSE;
 	}
 
@@ -127,8 +170,8 @@ BOOL D3D11PrimitiveBuffer::UpdateVertex(
 	}
 
 	m_pVertexBlob->Update(
-		const_cast<void*>(pVertexData), 
-		VertexSize, 
+		const_cast<void*>(pVertexData),
+		VertexSize,
 		m_Primitives[PrimitiveIndex].VertexOffset
 	);
 
@@ -150,6 +193,13 @@ BOOL D3D11PrimitiveBuffer::UpdateIndex(
 		return FALSE;
 	}
 
+	if (m_Primitives[PrimitiveIndex].IndexCount * m_Primitives[PrimitiveIndex].IndexStride < IndexSize)
+	{
+		m_DirtyIndexBuffer = FALSE;
+		SYS_LOG_E("D3D11PrimitiveBuffer::UpdateVertex: Vertex size exceeds primitive vertex buffer size.");
+		return FALSE;
+	}
+
 	if (m_pIndexBlob)
 	{
 		if (m_pIndexBlob->INL_GetSize() < IndexSize)
@@ -164,12 +214,17 @@ BOOL D3D11PrimitiveBuffer::UpdateIndex(
 		m_pIndexBlob = D3D11BlobAllocator::Get()->Acquire(IndexSize);
 		if (!m_pIndexBlob)
 		{
-			SYS_LOG_E("D3D11PrimitiveBuffer::UpdateIndex: Failed to acquire index blob.");
+			SYS_LOG_E("D3D11PrimitiveBuffer::UpdateVertex: Failed to acquire vertex blob.");
 			return FALSE;
 		}
 	}
 
-	m_pIndexBlob->Update(const_cast<void*>(pIndexData), IndexSize, );
+	m_pIndexBlob->Update(
+		const_cast<void*>(pIndexData),
+		IndexSize,
+		m_Primitives[PrimitiveIndex].IndexOffset
+	);
+
 	m_DirtyIndexBuffer = TRUE;
 
 	return TRUE;
