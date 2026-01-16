@@ -617,7 +617,7 @@ struct MARKENGINE_API CONSTANTBUFFER_CREATE_DESC
 	size_t BufferSize; // 버퍼 크기 (바이트 단위)
 };
 
-struct PRIMITIVEBUFFER_CREATE_DESC
+struct MARKENGINE_API PRIMITIVEBUFFER_CREATE_DESC
 {
 	size_t VertexBufferSize;
 	size_t IndexBufferSize;

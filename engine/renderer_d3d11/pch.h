@@ -3,9 +3,11 @@
 
 #include <d3d11.h>
 #include <d3d11_3.h>
+#include <dxgidebug.h>
 #include <d3dcompiler.h>
 #include <dxgiformat.h>
 #include <algorithm>
+#include <wrl/client.h>  // ComPtr 사용시
 
 #include "predefine.h"
 #include "spin_lock.h"

@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "D3D11RenderDevice.h"
 #include "D3D11RenderTarget.h"
+using Microsoft::WRL::ComPtr;
 
 
 D3D11RenderDevice* D3D11RenderDevice::s_pInstance = nullptr;
@@ -82,9 +83,11 @@ BOOL D3D11RenderDevice::CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOO
 			if (SUCCEEDED(hr))
 			{
 				hr = pAdapter->GetParent(__uuidof(IDXGIFactory1), reinterpret_cast<void**>(&pDxgiFactory));
-				pAdapter->Release();
+				ULONG refCnt = pAdapter->Release();
+				int a = 0;
 			}
-			pDxgiDevice->Release();
+			ULONG refCnt = pDxgiDevice->Release();
+			int a = 0;
 		}
 	}
 
@@ -117,7 +120,8 @@ BOOL D3D11RenderDevice::CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOO
 			hr = m_pSwapChain1->QueryInterface(__uuidof(IDXGISwapChain), reinterpret_cast<void**>(&m_pSwapChain));
 		}
 
-		pDxgiFactory2->Release();
+		ULONG refcnt = pDxgiFactory2->Release();
+		int a = 0;
 	}
 	else
 	{
@@ -140,7 +144,8 @@ BOOL D3D11RenderDevice::CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOO
 
 	pDxgiFactory->MakeWindowAssociation(hWnd, DXGI_MWA_NO_ALT_ENTER);
 
-	pDxgiFactory->Release();
+	ULONG refCnt = pDxgiFactory->Release();
+	int a = 20;
 
 	if (FAILED(hr))
 		return FALSE;
@@ -223,4 +228,39 @@ void D3D11RenderDevice::DestroyDevice() noexcept
 
 	CHECK_RELEASE(m_pD3D11Device1);
 	CHECK_RELEASE(m_pD3D11Device);
+
+	ReportLiveObjects();
+}
+
+void D3D11RenderDevice::ReportLiveObjects() noexcept
+{
+	typedef HRESULT(WINAPI* DXGIGetDebugInterfaceFunc)(REFIID, void**);
+
+	HMODULE hModule = GetModuleHandleW(L"dxgidebug.dll");
+	if (!hModule)
+	{
+		hModule = LoadLibraryW(L"dxgidebug.dll");
+	}
+
+	if (hModule)
+	{
+		auto dxgiGetDebugInterface = reinterpret_cast<DXGIGetDebugInterfaceFunc>(
+			GetProcAddress(hModule, "DXGIGetDebugInterface")
+			);
+
+		if (dxgiGetDebugInterface)
+		{
+			ComPtr<IDXGIDebug> dxgiDebug;
+			if (SUCCEEDED(dxgiGetDebugInterface(IID_PPV_ARGS(&dxgiDebug))))
+			{
+				OutputDebugStringW(L"\n========== Live Object Report ==========\n");
+
+				// DXGI_DEBUG_ALL: 모든 DXGI/D3D 객체 보고
+				// DXGI_DEBUG_RLO_ALL: 상세 정보 포함
+				dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
+
+				OutputDebugStringW(L"=========================================\n\n");
+			}
+		}
+	}
 }

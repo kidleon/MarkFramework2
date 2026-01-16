@@ -28,6 +28,7 @@ public:
 
 private:
 	void DestroyDevice() noexcept;
+	void ReportLiveObjects() noexcept;
 
 private:
 	HWND m_hWnd = nullptr;
