@@ -9,6 +9,8 @@
 #include "D3D11RenderContext.h"
 #include "D3D11RenderCommandExecutor.h"
 #include "D3D11PrimitiveBuffer.h"
+#include "D3D11ShaderProgram.h"
+#include "D3D11ShaderProgramCache.h"
 
 
 void MemoryReporter(
@@ -86,6 +88,9 @@ BOOL D3D11RenderSystem::Init(
 	m_pCBAllocator = D3D11_NEW(D3D11ConstantBufferAllocator)();
 	m_pCBAllocator->Init(m_pRenderDevice);
 
+	m_pShaderProgramCache = D3D11_NEW(D3D11ShaderProgramCache)();
+	m_pShaderProgramCache->Init();
+
 	m_pRenderCommandExecutor = D3D11_NEW(D3D11RenderCommandExecutor)(m_pRenderDevice);
 
 	return TRUE;
@@ -99,9 +104,15 @@ void D3D11RenderSystem::Shutdown()
 		m_pRenderCommandExecutor = nullptr;
 	}
 
+	if (m_pShaderProgramCache)
+	{
+		D3D11_DELETE(m_pShaderProgramCache, D3D11ShaderProgramCache);
+		m_pShaderProgramCache = nullptr;
+	}
+
 	if (m_pRenderContext)
 	{
-		D3D11_DELETE(m_pRenderContext, D3D11RenderContext);
+		m_pRenderContext->Release();
 		m_pRenderContext = nullptr;
 	}
 
@@ -253,12 +264,41 @@ BOOL D3D11RenderSystem::CreateRenderCamera(
 	return TRUE;
 }
 
+BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DESC& Desc, IShaderProgram** ppOut)
+{
+	if (Desc.ShaderName.empty())
+	{
+		SYS_LOG_E("D3D11RenderSystem::GetOrCreateShaderProgram: ShaderName is empty");
+		(*ppOut) = nullptr;
+		return FALSE;
+	}
+
+	D3D11ShaderProgram* pSP = m_pShaderProgramCache->Find(Desc.ShaderType, Desc.ShaderName);
+	if (pSP)
+	{
+		(*ppOut) = pSP;
+		return TRUE;
+	}
+
+	if (!Desc.pShaderSource)
+	{
+		SYS_LOG_E("D3D11RenderSystem::GetOrCreateShaderProgram: Shader source is null for shader '%u'", (uint32)Desc.ShaderName);
+		(*ppOut) = nullptr;
+		return FALSE;
+	}
+
+	// COMPILE SHADER
+	
+
+
+	return TRUE;
+}
 
 BOOL D3D11RenderSystem::GetOrCreateRenderContext(IRenderContext** ppContext)
 {
 	if (m_pRenderContext == nullptr)
 	{
-		m_pRenderContext = D3D11_NEW(D3D11RenderContext)();
+		m_pRenderContext = D3D11_POOL_NEW(D3D11RenderContext)();
 	}
 
 	m_pRenderContext->AddRef();

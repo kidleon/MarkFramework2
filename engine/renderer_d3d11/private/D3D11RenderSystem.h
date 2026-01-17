@@ -7,6 +7,7 @@ class D3D11RenderDevice;
 class D3D11ConstantBufferAllocator;
 class D3D11BlobAllocator;
 class D3D11RenderContext;
+class D3D11ShaderProgramCache;
 class D3D11RenderCommandExecutor;
 
 class D3D11RenderSystem final : public IRenderSystem
@@ -31,6 +32,8 @@ public:
 
 	virtual BOOL CreatePrimitiveBuffer(const PRIMITIVEBUFFER_CREATE_DESC& Desc, IPrimitiveBuffer** ppOut) final;
 	virtual BOOL CreateRenderCamera(const RENDERCAMERA_CREATE_DESC& Desc, IRenderCamera** ppOut) final;
+	virtual BOOL GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DESC& Desc, IShaderProgram** ppOut) final;
+
 	virtual BOOL GetOrCreateRenderContext(IRenderContext** ppContext) final;
 
 	virtual void Update() final;
@@ -48,6 +51,7 @@ private:
 	D3D11ConstantBufferAllocator* m_pCBAllocator = nullptr;
 	D3D11BlobAllocator* m_pBlobAllocator = nullptr;
 	D3D11RenderContext* m_pRenderContext = nullptr;
+	D3D11ShaderProgramCache* m_pShaderProgramCache = nullptr;
 	D3D11RenderCommandExecutor* m_pRenderCommandExecutor = nullptr;
 
 };

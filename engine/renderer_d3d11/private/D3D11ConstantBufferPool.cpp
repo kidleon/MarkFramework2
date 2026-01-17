@@ -57,7 +57,6 @@ void D3D11ConstantBufferPool::Reset()
         LINK_NODE* pNode = linked_list_pop_front(&m_UsedList);
 
         D3D11ConstantBuffer* pCB = static_cast<D3D11ConstantBuffer*>(pNode->data);
-        pCB->Release();
 
         linked_list_push_back(&m_FreeList, pNode);
 	}
@@ -74,7 +73,6 @@ D3D11ConstantBuffer* D3D11ConstantBufferPool::Acquire()
     linked_list_push_back(&m_UsedList, pNode);
 
     D3D11ConstantBuffer* pCB = static_cast<D3D11ConstantBuffer*>(pNode->data);
-    pCB->AddRef();
 
 	return pCB;
 }
@@ -83,8 +81,8 @@ void D3D11ConstantBufferPool::Release(D3D11ConstantBuffer* pCB)
 {
     if (!pCB) return;
 
-	long RefCnt = pCB->Release();
-    if (!RefCnt) return;
+	//long RefCnt = pCB->Release();
+    //if (!RefCnt) return;
 
     LINK_NODE* pNode = pCB->INL_GetLinkNode();
 

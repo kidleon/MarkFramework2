@@ -198,11 +198,12 @@ enum class PRIMITIVE_TYPE : uint32
 /**
 * @brief 셰이더 타입 열거형
 */
-enum class SHADER_TYPE : uint8
+enum class SHADER_TYPE : uint32
 {
 	UNKNOWN = 0,
 	VERTEX,
 	PIXEL,
+	GEOMETRY,
 	COMPUTE,
 
 	MAX
@@ -221,7 +222,6 @@ enum class BUFFER_USAGE : uint32
 	EMAX
 };
 
-
 /**
 * @brief 버퍼 클리어 옵션 열거형
 */
@@ -232,7 +232,6 @@ enum class CLEAR_BUFFER : unsigned int
 	STENCIL = 0x00000004u,
 	ALL = COLOR | DEPTH | STENCIL
 };
-
 
 /**
 * @brief 버텍스 포맷 열거형
@@ -569,7 +568,7 @@ struct MARKENGINE_API ENGINE_CREATE_DESC
 /**
 * @brief 1D 텍스처 생성 정보 구조체
 */
-struct MARKENGINE_API TEXTURE1D_CREATE_DESC
+struct TEXTURE1D_CREATE_DESC
 {
 	TEXTURE_TYPE Type; // 텍스처 타입
 	UINT32 Width; // 텍스처 너비
@@ -582,7 +581,7 @@ struct MARKENGINE_API TEXTURE1D_CREATE_DESC
 /**
 * @brief 2D 텍스처 생성 정보 구조체
 */
-struct MARKENGINE_API TEXTURE2D_CREATE_DESC
+struct TEXTURE2D_CREATE_DESC
 {
 	TEXTURE_TYPE Type; // 텍스처 타입
 	UINT32 Width; // 텍스처 너비
@@ -594,7 +593,7 @@ struct MARKENGINE_API TEXTURE2D_CREATE_DESC
 };
 
 
-struct MARKENGINE_API RENDERCAMERA_CREATE_DESC
+struct RENDERCAMERA_CREATE_DESC
 {
 	CAMERA_MODE CameraMode; // 카메라 모드
 	FLOAT FOVY; // 시야각 (라디안 단위, 원근 카메라에만 해당)
@@ -612,12 +611,7 @@ struct MARKENGINE_API RENDERCAMERA_CREATE_DESC
 	UINT8 PADDING[2];
 };
 
-struct MARKENGINE_API CONSTANTBUFFER_CREATE_DESC
-{
-	size_t BufferSize; // 버퍼 크기 (바이트 단위)
-};
-
-struct MARKENGINE_API PRIMITIVEBUFFER_CREATE_DESC
+struct PRIMITIVEBUFFER_CREATE_DESC
 {
 	size_t VertexBufferSize;
 	size_t IndexBufferSize;
@@ -629,6 +623,16 @@ struct MARKENGINE_API PRIMITIVEBUFFER_CREATE_DESC
 	size_t InitialIndexDataSize;
 };
 
+struct SHADER_PROGRAM_CREATE_DESC
+{
+	NameHash ShaderName;
+	SHADER_TYPE ShaderType;
+	char pEntryPoint[64];
+	char pTargetProfile[32];
+	void* pShaderSource;
+	size_t ShaderSourceSize;
+};
+
 struct MARKENGINE_API RENDER_SETTINGS
 {
 	BOOL VSyncEnabled; // 수직 동기화 활성화 여부
@@ -638,7 +642,6 @@ struct MARKENGINE_API RENDER_SETTINGS
 	{
 	}
 };
-
 
 /**
 * @brief 상수 버퍼 인터페이스
@@ -665,7 +668,7 @@ struct IConstantBuffer : public IAsset
 struct IShaderProgram : IAsset
 {
 public:
-	virtual int32 GetBindIndexByName(const NameHash & Name) const = 0;
+	virtual SHADER_TYPE GetShaderType() const noexcept = 0;
 
 };
 
@@ -1500,6 +1503,8 @@ public:
 
 	virtual BOOL CreatePrimitiveBuffer(const PRIMITIVEBUFFER_CREATE_DESC& Desc, IPrimitiveBuffer** ppOut) = 0;
 	virtual BOOL CreateRenderCamera(const RENDERCAMERA_CREATE_DESC& Desc, IRenderCamera** ppOut) = 0;
+	virtual BOOL GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DESC& Desc, IShaderProgram** ppOut) = 0;
+
 	virtual BOOL GetOrCreateRenderContext(IRenderContext** ppContext) = 0;
 
 	virtual void Update() = 0;

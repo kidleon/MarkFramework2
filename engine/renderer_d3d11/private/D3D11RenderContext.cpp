@@ -7,6 +7,14 @@
 #include "D3D11RenderFrame.h"
 
 
+D3D11RenderContext::~D3D11RenderContext() noexcept
+{
+	for (int32 i = 0; i < MAX_RENDER_FRAME; ++i)
+	{
+		m_RenderFrames[i].Reset();
+	}
+}
+
 long D3D11RenderContext::AddRef()
 {
 	interlock_increment_l(&m_RefCnt, MEMORY_ORDER_RELAXED);

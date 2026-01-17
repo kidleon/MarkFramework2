@@ -39,17 +39,15 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	CameraDesc.Stencil = 0;
 	CameraDesc.CameraOrder = 0;
 	m_pRenderSystem->CreateRenderCamera(CameraDesc, &m_pRenderCamera);
-	
 
-	/*PRIMITIVEBUFFER_CREATE_DESC PBDesc = {};
+	PRIMITIVEBUFFER_CREATE_DESC PBDesc = {};
 	PBDesc.Usage = BUFFER_USAGE::DEFAULT;
 	PBDesc.VertexBufferSize = 256;
 	PBDesc.IndexBufferSize = 256;
 
 	IPrimitiveBuffer* pPrimitiveBuffer = nullptr;
 	m_pRenderSystem->CreatePrimitiveBuffer(PBDesc, &pPrimitiveBuffer);
-	pPrimitiveBuffer->Release();*/
-
+	pPrimitiveBuffer->Release();
 
 	return TRUE;
 }
@@ -59,6 +57,7 @@ void D3D11Application::OnUpdate()
 	if (!m_pRenderSystem || !m_pRenderCamera)
 		return;
 
+	
 	IRenderContext* pRenderContext = nullptr;
 	if (!m_pRenderSystem->GetOrCreateRenderContext(&pRenderContext))
 		return;
@@ -68,8 +67,9 @@ void D3D11Application::OnUpdate()
 	pRenderContext->EndRenderCamera();
 	pRenderContext->EndFrame();
 	pRenderContext->Release();
-
+	
 	m_pRenderSystem->Update();
+	
 }
 
 void D3D11Application::OnDestroy()

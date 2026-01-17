@@ -56,8 +56,6 @@ void D3D11RenderCommandExecutor::ResetFrame(D3D11_RENDER_FRAME* pRenderFrame)
 
 void D3D11RenderCommandExecutor::Execute() noexcept
 {
-	D3D11ConstantBufferAllocator::Get()->ResetTemp();
-
 	ID3D11DeviceContext* pDeviceContext = m_pRenderDevice->INL_GetD3D11Context();
 	if (!pDeviceContext)
 		return;
@@ -66,6 +64,8 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 
 	if (m_RenderFrameQueue.empty())
 		return;
+
+	D3D11ConstantBufferAllocator::Get()->ResetTemp();
 
 	D3D11_RENDER_FRAME* pRenderFrame = m_RenderFrameQueue.front();
 	m_RenderFrameQueue.pop_front();
@@ -162,13 +162,13 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 		}
 	}
 
-	ResetFrame(pRenderFrame);
-
 	IDXGISwapChain* pSwapChain = m_pRenderDevice->INL_GetSwapChain();
 	HRESULT hr = pSwapChain->Present(RenderSettings.VSyncEnabled, 0); // 프레임 업데이트!
 	if (FAILED(hr))
 	{
 		SYS_LOG_E("D3D11RenderCommandExecutor::Execute - IDXGISwapChain::Present failed. hr = 0x%08X", hr);
 	}
+	
+	ResetFrame(pRenderFrame);
 }
 

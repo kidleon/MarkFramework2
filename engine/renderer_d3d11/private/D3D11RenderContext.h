@@ -20,6 +20,9 @@ public:
 	void EndRenderCamera() noexcept final;
 
 private:
+	~D3D11RenderContext() noexcept;
+
+private:
 	volatile long m_RefCnt = 1;
 #if defined(__TARGET_OS_WINDOWS)
 	unsigned PADDING_OR_RESERVED = 0;
