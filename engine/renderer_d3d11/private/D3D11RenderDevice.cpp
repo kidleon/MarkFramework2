@@ -83,11 +83,10 @@ BOOL D3D11RenderDevice::CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOO
 			if (SUCCEEDED(hr))
 			{
 				hr = pAdapter->GetParent(__uuidof(IDXGIFactory1), reinterpret_cast<void**>(&pDxgiFactory));
-				ULONG refCnt = pAdapter->Release();
-				int a = 0;
+				pAdapter->Release();
 			}
-			ULONG refCnt = pDxgiDevice->Release();
-			int a = 0;
+
+			pDxgiDevice->Release();
 		}
 	}
 
@@ -96,7 +95,7 @@ BOOL D3D11RenderDevice::CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOO
 
 	IDXGIFactory2* pDxgiFactory2 = nullptr;
 	hr = pDxgiFactory->QueryInterface(__uuidof(IDXGIFactory2), reinterpret_cast<void**>(&pDxgiFactory2));
-	if (pDxgiFactory2)
+	if (SUCCEEDED(hr))
 	{
 		// DirectX 11.1 시스템
 		hr = m_pD3D11Device->QueryInterface(__uuidof(ID3D11Device1), reinterpret_cast<void**>(&m_pD3D11Device1));
@@ -119,9 +118,6 @@ BOOL D3D11RenderDevice::CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOO
 		{
 			hr = m_pSwapChain1->QueryInterface(__uuidof(IDXGISwapChain), reinterpret_cast<void**>(&m_pSwapChain));
 		}
-
-		ULONG refcnt = pDxgiFactory2->Release();
-		int a = 0;
 	}
 	else
 	{
@@ -144,11 +140,9 @@ BOOL D3D11RenderDevice::CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOO
 
 	pDxgiFactory->MakeWindowAssociation(hWnd, DXGI_MWA_NO_ALT_ENTER);
 
-	ULONG refCnt = pDxgiFactory->Release();
-	int a = 20;
+	pDxgiFactory2->Release();
 
-	if (FAILED(hr))
-		return FALSE;
+	pDxgiFactory->Release();
 
 	m_hWnd = hWnd;
 
@@ -158,9 +152,9 @@ BOOL D3D11RenderDevice::CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOO
 		return FALSE;
 
 	hr = m_pD3D11Device->CreateRenderTargetView(pBackBuffer, nullptr, &m_pRenderTargetView);
-
 	if (FAILED(hr))
 		return FALSE;
+
 
 	// 깊이-스텐실 텍스처 생성
 	D3D11_TEXTURE2D_DESC descDepth = {};
@@ -188,7 +182,6 @@ BOOL D3D11RenderDevice::CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOO
 	if (FAILED(hr))
 		return FALSE;
 
-	pBackBuffer->AddRef();
 	m_pRenderTargetView->AddRef();
 	m_pDepthStencilTexture->AddRef();
 	m_pDepthStencilView->AddRef();
@@ -205,23 +198,26 @@ BOOL D3D11RenderDevice::CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOO
 		m_pDepthStencilTexture,
 		m_pDepthStencilView
 	);
-	
-	pBackBuffer->Release();
-
 
 	return TRUE;
 }
 
 void D3D11RenderDevice::DestroyDevice() noexcept
 {
+	if (m_pImmediateContext)
+	{
+		m_pImmediateContext->ClearState();
+		m_pImmediateContext->Flush();
+	}
+
 	CHECK_RELEASE(m_pBackBuffer_RT);
 
 	CHECK_RELEASE(m_pDepthStencilView);
 	CHECK_RELEASE(m_pDepthStencilTexture);
 	CHECK_RELEASE(m_pRenderTargetView);
 
-	CHECK_RELEASE(m_pSwapChain1);
 	CHECK_RELEASE(m_pSwapChain);
+	CHECK_RELEASE(m_pSwapChain1);
 
 	CHECK_RELEASE(m_pImmediateContext1);
 	CHECK_RELEASE(m_pImmediateContext);

@@ -39,6 +39,7 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	CameraDesc.Stencil = 0;
 	CameraDesc.CameraOrder = 0;
 	m_pRenderSystem->CreateRenderCamera(CameraDesc, &m_pRenderCamera);
+	
 
 	/*PRIMITIVEBUFFER_CREATE_DESC PBDesc = {};
 	PBDesc.Usage = BUFFER_USAGE::DEFAULT;
