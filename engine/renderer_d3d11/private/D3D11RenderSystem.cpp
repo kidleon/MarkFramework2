@@ -11,6 +11,7 @@
 #include "D3D11PrimitiveBuffer.h"
 #include "D3D11ShaderProgram.h"
 #include "D3D11ShaderProgramCache.h"
+#include "D3D11ShaderProgramCompile.h"
 
 
 void MemoryReporter(
@@ -273,7 +274,9 @@ BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DES
 		return FALSE;
 	}
 
-	D3D11ShaderProgram* pSP = m_pShaderProgramCache->Find(Desc.ShaderType, Desc.ShaderName);
+	uint32 ShaderDefinesHash = fnv1(Desc.szShaderDefines, MAX_SHADER_DEFINE * MAX_SHADER_DEFINE_LENGTH, 0);
+
+	D3D11ShaderProgram* pSP = m_pShaderProgramCache->Find(Desc.ShaderType, Desc.ShaderName, ShaderDefinesHash);
 	if (pSP)
 	{
 		(*ppOut) = pSP;

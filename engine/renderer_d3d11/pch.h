@@ -17,6 +17,7 @@
 #include "hash_table.h"
 #include "crt_memory.h"
 #include "strings.h"
+#include "fnv.h"
 
 #include "Log.h"
 #include "CoreDef.h"

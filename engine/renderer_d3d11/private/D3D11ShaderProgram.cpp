@@ -1,14 +1,16 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "D3D11ShaderProgram.h"
 
 
 D3D11ShaderProgram::D3D11ShaderProgram(
 	UINT64 ID,
 	NameHash ShaderName,
+	UINT32 ShaderDefinesHash,
 	ID3D11VertexShader* pVertexShader
 )
 	: m_ID(ID)
 	, m_ShaderName(ShaderName)
+	, m_ShaderDefinesHash(ShaderDefinesHash)
 	, m_ShaderType(SHADER_TYPE::VERTEX)
 	, m_pVertexShader(pVertexShader)
 {
@@ -19,10 +21,12 @@ D3D11ShaderProgram::D3D11ShaderProgram(
 D3D11ShaderProgram::D3D11ShaderProgram(
 	UINT64 ID,
 	NameHash ShaderName,
+	UINT32 ShaderDefinesHash,
 	ID3D11PixelShader* pPixelShader
 )
 	: m_ID(ID)
 	, m_ShaderName(ShaderName)
+	, m_ShaderDefinesHash(ShaderDefinesHash)
 	, m_ShaderType(SHADER_TYPE::PIXEL)
 	, m_pPixelShader(pPixelShader)
 {
@@ -33,10 +37,12 @@ D3D11ShaderProgram::D3D11ShaderProgram(
 D3D11ShaderProgram::D3D11ShaderProgram(
 	UINT64 ID,
 	NameHash ShaderName,
+	UINT32 ShaderDefinesHash,
 	ID3D11GeometryShader* pGeometryShader
 )
 	: m_ID(ID)
 	, m_ShaderName(ShaderName)
+	, m_ShaderDefinesHash(ShaderDefinesHash)
 	, m_ShaderType(SHADER_TYPE::UNKNOWN)
 	, m_pGeometryShader(pGeometryShader)
 {
@@ -47,10 +53,12 @@ D3D11ShaderProgram::D3D11ShaderProgram(
 D3D11ShaderProgram::D3D11ShaderProgram(
 	UINT64 ID,
 	NameHash ShaderName,
+	UINT32 ShaderDefinesHash,
 	ID3D11ComputeShader* pComputeShader
 )
 	: m_ID(ID)
 	, m_ShaderName(ShaderName)
+	, m_ShaderDefinesHash(ShaderDefinesHash)
 	, m_ShaderType(SHADER_TYPE::COMPUTE)
 	, m_pComputeShader(pComputeShader)
 {

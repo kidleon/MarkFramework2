@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 
 class D3D11ShaderProgram final : public IShaderProgram
@@ -7,24 +7,28 @@ public:
 	explicit D3D11ShaderProgram(
 		UINT64 ID,
 		NameHash ShaderName,
+		UINT32 ShaderDefinesHash,
 		ID3D11VertexShader* pVertexShader
 	);
 
 	explicit D3D11ShaderProgram(
 		UINT64 ID,
 		NameHash ShaderName,
+		UINT32 ShaderDefinesHash,
 		ID3D11PixelShader* pPixelShader
 	);
 
 	explicit D3D11ShaderProgram(
 		UINT64 ID,
 		NameHash ShaderName,
+		UINT32 ShaderDefinesHash,
 		ID3D11GeometryShader* pGeometryShader
 	);
 
 	explicit D3D11ShaderProgram(
 		UINT64 ID,
 		NameHash ShaderName,
+		UINT32 ShaderDefinesHash,
 		ID3D11ComputeShader* pComputeShader
 	);
 
@@ -42,6 +46,7 @@ public:
 
 	__FORCEINLINE SHADER_TYPE INL_GetShaderType() const noexcept { return m_ShaderType; }
 	__FORCEINLINE NameHash INL_GetShaderName() const noexcept { return m_ShaderName; }
+	__FORCEINLINE UINT32 INL_GetShaderDefinesHash() const noexcept { return m_ShaderDefinesHash; }
 	__FORCEINLINE HASH_NODE* INL_GetHashNode() noexcept { return &m_HashNode; }
 
 private:
@@ -58,7 +63,7 @@ private:
 
 	NameHash m_ShaderName;
 	SHADER_TYPE m_ShaderType;
-	UINT32 PADDING = 0;
+	UINT32 m_ShaderDefinesHash;
 
 	union
 	{

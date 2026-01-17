@@ -271,21 +271,21 @@ BOOL Assets::LoadAsync(const char* szRelativePath, ITexture2D** ppOut)
 	return TRUE;
 }
 
-BOOL Assets::CreateMesh(UINT32 m_BufferFormat, size_t MaxVertexCount, size_t MaxIndexCount, IMesh** ppOut)
+BOOL Assets::CreateMesh(UINT32 BufferFormat, size_t MaxVertexCount, size_t MaxIndexCount, IMesh** ppOut)
 {
 	if (!ppOut) return FALSE;
 
-	Mesh* pMesh = CORE_POOL_NEW(Mesh)(m_BufferFormat, MaxVertexCount, MaxIndexCount);
+	Mesh* pMesh = CORE_POOL_NEW(Mesh)(BufferFormat, MaxVertexCount, MaxIndexCount);
 	*ppOut = pMesh;
 
 	return TRUE;
 }
 
-BOOL Assets::CreateMesh(const NameHash& Name, UINT32 m_BufferFormat, size_t MaxVertexCount, size_t MaxIndexCount, IMesh** ppOut)
+BOOL Assets::CreateMesh(const NameHash& Name, UINT32 BufferFormat, size_t MaxVertexCount, size_t MaxIndexCount, IMesh** ppOut)
 {
 	if (!ppOut) return FALSE;
 
-	Mesh* pMesh = CORE_POOL_NEW(Mesh)(m_BufferFormat, MaxVertexCount, MaxIndexCount);
+	Mesh* pMesh = CORE_POOL_NEW(Mesh)(BufferFormat, MaxVertexCount, MaxIndexCount);
 	*ppOut = pMesh;
 
 	return TRUE;

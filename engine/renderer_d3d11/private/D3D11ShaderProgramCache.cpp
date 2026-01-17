@@ -1,6 +1,7 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "D3D11ShaderProgramCache.h"
 #include "D3D11ShaderProgram.h"
+#include "fnv.h"
 
 
 D3D11ShaderProgramCache* D3D11ShaderProgramCache::s_pInstance = nullptr;
@@ -81,6 +82,11 @@ void D3D11ShaderProgramCache::DestroyHashTable(HASH_TABLE* pHashTable) noexcept
 	delete_hash_table(pHashTable);
 }
 
+static inline uint64 MakeShaderHash(NameHash ShaderName, UINT32 ShaderDefinesHash)
+{
+	return ((uint64)ShaderName.value() << 32) | (uint64)ShaderDefinesHash;
+}
+
 void D3D11ShaderProgramCache::Register(D3D11ShaderProgram* pShaderProgram) noexcept
 {
 	if (!pShaderProgram)
@@ -110,15 +116,20 @@ void D3D11ShaderProgramCache::Register(D3D11ShaderProgram* pShaderProgram) noexc
 
 	if (pHashTable)
 	{
+		uint64 ShaderHash = MakeShaderHash(
+			pShaderProgram->INL_GetShaderName(),
+			pShaderProgram->INL_GetShaderDefinesHash()
+		);
+
 		insert_hash_node(
 			pHashTable,
-			pShaderProgram->INL_GetShaderName().value(),
+			ShaderHash,
 			pShaderProgram->INL_GetHashNode()
 		);
 	}
 }
 
-D3D11ShaderProgram* D3D11ShaderProgramCache::Find(SHADER_TYPE ShaderType, NameHash ShaderName) noexcept
+D3D11ShaderProgram* D3D11ShaderProgramCache::Find(SHADER_TYPE ShaderType, NameHash ShaderName, UINT32 ShaderDefinesHash) noexcept
 {
 	HASH_TABLE* pHashTable = nullptr;
 
@@ -144,13 +155,12 @@ D3D11ShaderProgram* D3D11ShaderProgramCache::Find(SHADER_TYPE ShaderType, NameHa
 	if (!pHashTable)
 		return nullptr;
 
+	uint64 ShaderHash = MakeShaderHash(ShaderName, ShaderDefinesHash);
+
 	D3D11ShaderProgram* pSP = (D3D11ShaderProgram*)query_hash_node(
 		pHashTable,
-		ShaderName.value()
+		ShaderHash
 	);
-
-	if (pSP)
-		pSP->AddRef();
 
 	return pSP;
 }

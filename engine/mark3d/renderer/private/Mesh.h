@@ -6,7 +6,7 @@ class Mesh : public IMesh
 {
 public:
 	Mesh() = default;
-	Mesh(uint32 m_BufferFormat, size_t TotalVertexCount, size_t TotalIndexCount);
+	Mesh(uint32 BufferFormat, size_t TotalVertexCount, size_t TotalIndexCount);
 
 	// IUNKNOWN interface
 	virtual long AddRef() final;
@@ -138,7 +138,7 @@ protected:
 	virtual ~Mesh() noexcept;
 	void Clear() noexcept;
 	void AllocBuffer(
-		uint32 m_BufferFormat, 
+		uint32 BufferFormat, 
 		size_t TotalVertexCount, 
 		size_t TotalIndexCount
 	) noexcept;

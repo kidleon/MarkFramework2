@@ -468,7 +468,7 @@ struct D3D11_SHADER_COMPILE_DESC
     char szShaderDefines[32][64];
     void* pBuffer;
     UINT32 BufferSize;
-    UINT32 DefineCount;
+    UINT32 NumDefines;
     SHADER_TYPE ShaderType;
     BOOL Debug;
 };
@@ -497,12 +497,13 @@ struct D3D11_SHADER_PARAMS
 };
 
 // 셰이더 컴파일 결과 구조체
+constexpr size_t MAX_SHADER_PARAMS = 32;
 struct D3D11_SHADER_COMPILE_RESULT
 {
     ID3DBlob* pShaderBlob;
-	D3D11_SHADER_PARAMS* pShaderParams;
+    D3D11_SHADER_PARAMS ShaderParams[MAX_SHADER_PARAMS];
     UINT32 NumShaderParams;
-    UINT32 m_BufferFormat;
+    UINT32 BufferFormat;
 	UINT32 VertexFormats[MAX_VERTEX_FORMAT];
 	UINT32 NumVertexFormat;
 };
