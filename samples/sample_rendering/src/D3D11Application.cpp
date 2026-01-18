@@ -47,6 +47,7 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 
 	IPrimitiveBuffer* pPrimitiveBuffer = nullptr;
 	m_pRenderSystem->CreatePrimitiveBuffer(PBDesc, &pPrimitiveBuffer);
+
 	pPrimitiveBuffer->Release();
 
 	return TRUE;
@@ -57,7 +58,6 @@ void D3D11Application::OnUpdate()
 	if (!m_pRenderSystem || !m_pRenderCamera)
 		return;
 
-	
 	IRenderContext* pRenderContext = nullptr;
 	if (!m_pRenderSystem->GetOrCreateRenderContext(&pRenderContext))
 		return;
