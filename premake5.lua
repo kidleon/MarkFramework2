@@ -7,7 +7,7 @@ do
 	objoutdir = "%{wks.location}/immediate/%{prj.name}"
 	objdir (objoutdir)
 	
-	sample_output_dir = "%{wks.location}/../../samples/output"
+	sample_output_dir = "%{wks.location}/../samples/output"
 	
 	include "engine/baselib"
 	include "engine/mark3d"

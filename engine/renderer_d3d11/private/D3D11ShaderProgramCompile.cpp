@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "D3D11ShaderProgramCompile.h"
+#include "D3D11RenderDevice.h"
 
 
 BOOL __stdcall D3D11ShaderReflect(

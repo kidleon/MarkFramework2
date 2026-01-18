@@ -8,9 +8,8 @@ do
 	sdk_lib_dir = "%{prj.location}/../output/sdk/lib"
 	sdk_sym_dir = "%{prj.location}/../output/sdk/sym"
 	sdk_inc_dir = "%{prj.location}/../output/sdk/inc"
-	outputdir = "%{prj.location}/../output/%{prj.name}/bin"
-	incoutputdir = "%{prj.location}/../output/%{prj.name}/inc"
-	targetdir (outputdir);
+	output_dir = "%{sample_output_dir}"
+	targetdir (output_dir);
 	
 	files { 
 		"src/*.cpp",
@@ -33,7 +32,7 @@ do
 	
 	pchheader "pch.h"
 	pchsource "src/pch.cpp"
-	debugdir "%{sdk_bin_dir}"
+	debugdir "%{sample_output_dir}"
 	
 	filter { "system:windows" }
 	do

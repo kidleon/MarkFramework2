@@ -16,7 +16,7 @@ private:
 	int m_Height = 0;
 
 	IRenderSystem* m_pRenderSystem = nullptr;
-
 	IRenderCamera* m_pRenderCamera = nullptr;
+
 };
 

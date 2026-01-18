@@ -7,9 +7,9 @@ do
 	sdk_lib_dir = "%{prj.location}/../output/sdk/lib"
 	sdk_sym_dir = "%{prj.location}/../output/sdk/sym"
 	sdk_inc_dir = "%{prj.location}/../output/sdk/inc"
-	outputdir = "%{prj.location}/../output/%{prj.name}/bin"
-	incoutputdir = "%{prj.location}/../output/%{prj.name}/inc"
-	targetdir (outputdir);
+	output_dir = "%{prj.location}/../output/%{prj.name}/bin"
+	inc_output_dir = "%{prj.location}/../output/%{prj.name}/inc"
+	targetdir (output_dir)
 	
 	files { 
 		"*.h",
@@ -97,11 +97,11 @@ do
 			{
 				"{COPY} %{prj.location}../engine/baselib/public/*.h %{incoutputdir}",
 				"{COPY} %{prj.location}../engine/common/predefine.h %{incoutputdir}",
-				"{COPY} %{outputdir}/*.dll %{sdk_bin_dir}",
-				"{COPY} %{outputdir}/*.lib %{sdk_lib_dir}",
-				"{COPY} %{outputdir}/*.pdb %{sdk_sym_dir}",
-				"{COPY} %{incoutputdir}/*.h %{sdk_inc_dir}",
-				"{COPY} %{outputdir}/*.dll %{sample_output_dir}",
+				"{COPY} %{output_dir}/*.dll %{sdk_bin_dir}",
+				"{COPY} %{output_dir}/*.lib %{sdk_lib_dir}",
+				"{COPY} %{output_dir}/*.pdb %{sdk_sym_dir}",
+				"{COPY} %{inc_output_dir}/*.h %{sdk_inc_dir}",
+				"{COPY} %{output_dir}/*.dll %{sample_output_dir}",
 			}
 			
 			filter "configurations:Debug"
