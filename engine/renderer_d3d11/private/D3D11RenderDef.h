@@ -462,14 +462,16 @@ struct D3D11_INPUTLAYOUT_DESC
 // 셰이더 컴파일 구조체
 struct D3D11_SHADER_COMPILE_DESC
 {
-    char szShaderName[64];
+    NameHash ShaderName;
+    SHADER_TYPE ShaderType;
+
     char szEntryPoint[64];
     char szShaderModel[32];
-    char szShaderDefines[32][64];
+    char szShaderDefines[MAX_SHADER_DEFINE][MAX_SHADER_DEFINE_LENGTH];
     void* pBuffer;
     UINT32 BufferSize;
     UINT32 NumDefines;
-    SHADER_TYPE ShaderType;
+    
     BOOL Debug;
 };
 
@@ -503,8 +505,8 @@ struct D3D11_SHADER_COMPILE_RESULT
     ID3DBlob* pShaderBlob;
     D3D11_SHADER_PARAMS ShaderParams[MAX_SHADER_PARAMS];
     UINT32 NumShaderParams;
-    UINT32 BufferFormat;
-	UINT32 VertexFormats[MAX_VERTEX_FORMAT];
+    UINT32 VertexFormat;
+	VERTEX_FORMAT VertexFormats[MAX_VERTEX_FORMAT];
 	UINT32 NumVertexFormat;
 };
 

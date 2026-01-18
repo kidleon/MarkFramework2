@@ -6,6 +6,7 @@ D3D11ShaderProgram::D3D11ShaderProgram(
 	UINT64 ID,
 	NameHash ShaderName,
 	UINT32 ShaderDefinesHash,
+	UINT32 InputVertexFormat,
 	ID3D11VertexShader* pVertexShader
 )
 	: m_ID(ID)
@@ -13,6 +14,7 @@ D3D11ShaderProgram::D3D11ShaderProgram(
 	, m_ShaderDefinesHash(ShaderDefinesHash)
 	, m_ShaderType(SHADER_TYPE::VERTEX)
 	, m_pVertexShader(pVertexShader)
+	, m_InputVertexFormat(InputVertexFormat)
 {
 	m_LoadStat = LOAD_STAT::LOADED;
 	m_HashNode.data = this;

@@ -628,9 +628,10 @@ constexpr size_t MAX_SHADER_DEFINE = 32;
 constexpr size_t MAX_SHADER_DEFINE_LENGTH = 64;
 struct SHADER_PROGRAM_CREATE_DESC
 {
+	char szDebugName[64];
 	NameHash ShaderName;
 	SHADER_TYPE ShaderType;
-	char pEntryPoint[64];
+	char pEntryPoint[32];
 	char pTargetProfile[32];
 	char szShaderDefines[MAX_SHADER_DEFINE][MAX_SHADER_DEFINE_LENGTH];
 	void* pShaderSource;

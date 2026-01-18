@@ -95,13 +95,13 @@ do
 			
 			postbuildcommands
 			{
-				"{COPY} %{prj.location}../engine/baselib/public/*.h %{incoutputdir}",
-				"{COPY} %{prj.location}../engine/common/predefine.h %{incoutputdir}",
-				"{COPY} %{output_dir}/*.dll %{sdk_bin_dir}",
-				"{COPY} %{output_dir}/*.lib %{sdk_lib_dir}",
-				"{COPY} %{output_dir}/*.pdb %{sdk_sym_dir}",
+				"{COPY} %{prj.location}../engine/baselib/public/*.h %{inc_output_dir}",
+				"{COPY} %{prj.location}../engine/common/predefine.h %{inc_output_dir}",
+				"{COPY} %{prj.location}../output/%{prj.name}/bin/*.dll %{sdk_bin_dir}",
+				"{COPY} %{prj.location}../output/%{prj.name}/bin/*.lib %{sdk_lib_dir}",
+				"{COPY} %{prj.location}../output/%{prj.name}/bin/*.pdb %{sdk_sym_dir}",
 				"{COPY} %{inc_output_dir}/*.h %{sdk_inc_dir}",
-				"{COPY} %{output_dir}/*.dll %{sample_output_dir}",
+				"{COPY} %{prj.location}../output/%{prj.name}/bin/*.dll %{sample_output_dir}",
 			}
 			
 			filter "configurations:Debug"

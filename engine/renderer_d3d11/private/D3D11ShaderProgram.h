@@ -8,6 +8,7 @@ public:
 		UINT64 ID,
 		NameHash ShaderName,
 		UINT32 ShaderDefinesHash,
+		UINT32 InputVertexFormat,
 		ID3D11VertexShader* pVertexShader
 	);
 
@@ -64,7 +65,8 @@ private:
 	NameHash m_ShaderName;
 	SHADER_TYPE m_ShaderType;
 	UINT32 m_ShaderDefinesHash;
-
+	UINT32 m_InputVertexFormat = 0;
+	UINT32 PADDING = 0;
 	union
 	{
 		ID3D11VertexShader* m_pVertexShader;

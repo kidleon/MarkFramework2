@@ -9,13 +9,13 @@ BOOL __stdcall D3D11ShaderReflect(
 );
 
 BOOL __stdcall D3D11CompileShaderProgram(
-	const D3D11_SHADER_COMPILE_DESC* pCompileDesc,
-	D3D11_SHADER_COMPILE_RESULT* pResult
+	const D3D11_SHADER_COMPILE_DESC& CompileDesc,
+	D3D11_SHADER_COMPILE_RESULT& Result
 )
 {
 	UINT32 ShaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
 
-	if (pCompileDesc->Debug)
+	if (CompileDesc.Debug)
 	{
 		ShaderFlags |= D3DCOMPILE_DEBUG;
 		ShaderFlags |= D3DCOMPILE_SKIP_OPTIMIZATION;
@@ -26,25 +26,25 @@ BOOL __stdcall D3D11CompileShaderProgram(
 
 	D3D_SHADER_MACRO D3D11_SHADER_MACROS[32 + 1] = {};
 
-	if (pCompileDesc->NumDefines)
+	if (CompileDesc.NumDefines)
 	{
-		DWORD MaxDefines = T_MIN(32u, pCompileDesc->NumDefines);
+		DWORD MaxDefines = T_MIN(32u, CompileDesc.NumDefines);
 
 		for (DWORD i = 0; i < MaxDefines; ++i)
 		{
-			D3D11_SHADER_MACROS[i].Name = pCompileDesc->szShaderDefines[i];
-			D3D11_SHADER_MACROS[i].Definition = pCompileDesc->szShaderDefines[i];
+			D3D11_SHADER_MACROS[i].Name = CompileDesc.szShaderDefines[i];
+			D3D11_SHADER_MACROS[i].Definition = CompileDesc.szShaderDefines[i];
 		}
 	}
 
 	HRESULT hr = D3DCompile(
-		pCompileDesc->pBuffer,
-		pCompileDesc->BufferSize,
+		CompileDesc.pBuffer,
+		CompileDesc.BufferSize,
 		nullptr,
-		(pCompileDesc->NumDefines == 0) ? nullptr : D3D11_SHADER_MACROS,
+		(CompileDesc.NumDefines == 0) ? nullptr : D3D11_SHADER_MACROS,
 		D3D_COMPILE_STANDARD_FILE_INCLUDE,
-		pCompileDesc->szEntryPoint,
-		pCompileDesc->szShaderModel,
+		CompileDesc.szEntryPoint,
+		CompileDesc.szShaderModel,
 		ShaderFlags,
 		0,
 		&pResultBlob,
@@ -69,7 +69,7 @@ BOOL __stdcall D3D11CompileShaderProgram(
 
 	BOOL ReflectResult = D3D11ShaderReflect(
 		pResultBlob,
-		pResult
+		&Result
 	);
 
 	if (!ReflectResult)
@@ -79,7 +79,7 @@ BOOL __stdcall D3D11CompileShaderProgram(
 		return FALSE;
 	}
 
-	pResult->pShaderBlob = pResultBlob;
+	Result.pShaderBlob = pResultBlob;
 
 	return TRUE;
 }
@@ -208,7 +208,7 @@ BOOL __stdcall D3D11ShaderReflect(
 		}
 	}
 
-	pCompileResult->BufferFormat = VertexFormat;
+	pCompileResult->VertexFormat = VertexFormat;
 	memcpy(pCompileResult->VertexFormats, VertexFormats, sizeof(VERTEX_FORMAT) * MAX_VERTEX_FORMAT);
 	pCompileResult->NumVertexFormat = NumVertexFormat;
 

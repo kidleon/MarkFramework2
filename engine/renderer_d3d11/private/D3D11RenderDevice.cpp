@@ -228,6 +228,132 @@ void D3D11RenderDevice::DestroyDevice() noexcept
 	ReportLiveObjects();
 }
 
+BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, ID3D11InputLayout** ppOut)
+{
+	D3D11_INPUT_ELEMENT_DESC InputElementDesc[MAX_VERTEX_FORMAT] = {};
+	
+	for (UINT32 i = 0; i < Desc.NumVertexFormat; ++i)
+	{
+		InputElementDesc[i].SemanticIndex = i;
+		InputElementDesc[i].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+
+		switch (Desc.VertexFormats[i])
+		{
+			case VERTEX_FORMAT::POSITION:
+			{
+				InputElementDesc[i].SemanticName = "POSITION";
+				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+			} break;
+
+			case VERTEX_FORMAT::NORMAL:
+			{
+				InputElementDesc[i].SemanticName = "NORMAL";
+				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+			} break;
+
+			case VERTEX_FORMAT::TEXCOORD:
+			{
+				InputElementDesc[i].SemanticName = "TEXCOORD";
+				InputElementDesc[i].Format = DXGI_FORMAT_R32G32_FLOAT;
+			} break;
+
+			case VERTEX_FORMAT::COLOR:
+			{
+				InputElementDesc[i].SemanticName = "COLOR";
+				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			} break;
+
+			case VERTEX_FORMAT::TANGENT:
+			{
+				InputElementDesc[i].SemanticName = "TANGENT";
+				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+			} break;
+
+			case VERTEX_FORMAT::BINORMAL:
+			{
+				InputElementDesc[i].SemanticName = "BINORMAL";
+				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+			} break;
+
+			case VERTEX_FORMAT::BONE:
+			{
+				InputElementDesc[i].SemanticName = "BONE";
+				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_UINT;
+			} break;
+
+			case VERTEX_FORMAT::WEIGHT:
+			{
+				InputElementDesc[i].SemanticName = "WEIGHT";
+				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			} break;
+
+			case VERTEX_FORMAT::TEXCOORD1:
+			{
+				InputElementDesc[i].SemanticName = "TEXCOORD1";
+				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			} break;
+
+			case VERTEX_FORMAT::TEXCOORD2:
+			{
+				InputElementDesc[i].SemanticName = "TEXCOORD2";
+				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			} break;
+
+			case VERTEX_FORMAT::TEXCOORD3:
+			{
+				InputElementDesc[i].SemanticName = "TEXCOORD3";
+				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			} break;
+
+			case VERTEX_FORMAT::TEXCOORD4:
+			{
+				InputElementDesc[i].SemanticName = "TEXCOORD4";
+				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			} break;
+
+			case VERTEX_FORMAT::TEXCOORD5:
+			{
+				InputElementDesc[i].SemanticName = "TEXCOORD5";
+				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			} break;
+
+			case VERTEX_FORMAT::TEXCOORD6:
+			{
+				InputElementDesc[i].SemanticName = "TEXCOORD6";
+				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			} break;
+
+			case VERTEX_FORMAT::TEXCOORD7:
+			{
+				InputElementDesc[i].SemanticName = "TEXCOORD7";
+				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			} break;
+
+			case VERTEX_FORMAT::TEXCOORD8:
+			{
+				InputElementDesc[i].SemanticName = "TEXCOORD8";
+				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			} break;
+		}
+	}
+
+	ID3D11InputLayout* pD3D11InputLayout = nullptr;
+	HRESULT hr = m_pD3D11Device->CreateInputLayout(
+		InputElementDesc,
+		Desc.NumVertexFormat,
+		Desc.pShaderBlob->GetBufferPointer(),
+		Desc.pShaderBlob->GetBufferSize(),
+		&pD3D11InputLayout
+	);
+
+	if (FAILED(hr))
+		return FALSE;
+
+	*ppOut = pD3D11InputLayout;
+	
+	return TRUE;
+}
+
 void D3D11RenderDevice::ReportLiveObjects() noexcept
 {
 	typedef HRESULT(WINAPI* DXGIGetDebugInterfaceFunc)(REFIID, void**);

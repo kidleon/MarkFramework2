@@ -9,6 +9,7 @@ class D3D11BlobAllocator;
 class D3D11RenderContext;
 class D3D11ShaderProgramCache;
 class D3D11RenderCommandExecutor;
+class D3D11InputLayoutCache;
 
 class D3D11RenderSystem final : public IRenderSystem
 {
@@ -53,6 +54,7 @@ private:
 	D3D11RenderContext* m_pRenderContext = nullptr;
 	D3D11ShaderProgramCache* m_pShaderProgramCache = nullptr;
 	D3D11RenderCommandExecutor* m_pRenderCommandExecutor = nullptr;
+	D3D11InputLayoutCache* m_pInputLayoutCache = nullptr;
 
 };
 

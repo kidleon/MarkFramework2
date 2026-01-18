@@ -61,12 +61,12 @@ do
 			{
 				--"{COPY} %{prj.location}../renderer_d3d11/public/*.h %{incoutputdir}",
 				--"{COPY} %{prj.location}../common/predefine.h %{incoutputdir}",
-				"{COPY} %{output_dir}/*.dll %{sdk_bin_dir}",
+				"{COPY} %{prj.location}../output/%{prj.name}/bin/*.dll %{sdk_bin_dir}",
 				-- "{COPY} %{output_dir}/*.lib %{sdk_lib_dir}",
-				"{COPY} %{output_dir}/*.pdb %{sdk_sym_dir}",
+				"{COPY} %{prj.location}../output/%{prj.name}/bin/*.pdb %{sdk_sym_dir}",
 				--"{COPY} %{incoutputdir}/*.h %{sdk_inc_dir}",
 				-- "{COPY} %{incoutputdir}/*.inl %{sdk_inc_dir}",
-				"{COPY} %{output_dir}/*.dll %{sample_output_dir}",
+				"{COPY} %{prj.location}../output/%{prj.name}/bin/*.dll %{sample_output_dir}",
 			}
 			
 			files {
