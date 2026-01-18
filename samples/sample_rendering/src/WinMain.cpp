@@ -131,7 +131,7 @@ HRESULT __stdcall WMCreateMainWindow(
     DWORD dwStyle = 0;
 
     dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
-    dwStyle = WS_OVERLAPPEDWINDOW;
+    dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
 
     RECT rc;
     SetRect(&rc, 0, 0, Width, Height);
