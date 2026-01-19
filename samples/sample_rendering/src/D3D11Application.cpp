@@ -47,8 +47,52 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 
 	IPrimitiveBuffer* pPrimitiveBuffer = nullptr;
 	m_pRenderSystem->CreatePrimitiveBuffer(PBDesc, &pPrimitiveBuffer);
-
 	pPrimitiveBuffer->Release();
+
+	char szCurrentDir[MAX_FILE_LENGTH];
+	GetCurrentDirectoryA(MAX_FILE_LENGTH, szCurrentDir);
+
+	IFileSystem* pFileSystem = nullptr;
+	if (!CreateOSFileSystem(szCurrentDir, &pFileSystem))
+	{
+		return FALSE;
+	}
+
+	IDataStream* pDataStream = pFileSystem->OpenFile("/assets/shader/OnlyColor.hlsl", TRUE);
+
+	if (pDataStream)
+	{
+		size_t ShaderFileSize = pDataStream->GetSize() + 1;
+		char* pShaderSource = (char*)malloc(ShaderFileSize);
+	
+		memset(pShaderSource, 0, sizeof(char) * ShaderFileSize);
+		pDataStream->Read(pShaderSource, ShaderFileSize);
+		pShaderSource[ShaderFileSize - 1] = '\0';
+
+		SHADER_PROGRAM_CREATE_DESC ShaderDesc_VS = {};
+		ShaderDesc_VS.ShaderType = SHADER_TYPE::VERTEX;
+		ShaderDesc_VS.ShaderName = NameHash("OnlyColor_VS");
+		fstrlcpy(ShaderDesc_VS.pEntryPoint, "VS_MAIN", 63);
+		fstrlcpy(ShaderDesc_VS.pTargetProfile, "vs_5_0", 31);
+		ShaderDesc_VS.pShaderSource = pShaderSource;
+		ShaderDesc_VS.ShaderSourceSize = ShaderFileSize;
+		m_pRenderSystem->GetOrCreateShaderProgram(ShaderDesc_VS, &m_pShaderProgram_VS);
+
+		SHADER_PROGRAM_CREATE_DESC ShaderDesc_PS = {};
+		ShaderDesc_PS.ShaderType = SHADER_TYPE::PIXEL;
+		ShaderDesc_PS.ShaderName = NameHash("OnlyColor_PS");
+		fstrlcpy(ShaderDesc_PS.pEntryPoint, "PS_MAIN", 63);
+		fstrlcpy(ShaderDesc_PS.pTargetProfile, "ps_5_0", 31);
+		ShaderDesc_PS.pShaderSource = pShaderSource;
+		ShaderDesc_PS.ShaderSourceSize = ShaderFileSize;
+		m_pRenderSystem->GetOrCreateShaderProgram(ShaderDesc_PS, &m_pShaderProgram_PS);
+
+		free(pShaderSource);
+		pDataStream->Release();
+	}
+
+	pFileSystem->Release();
+	
 
 	return TRUE;
 }

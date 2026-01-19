@@ -17,6 +17,8 @@ private:
 
 	IRenderSystem* m_pRenderSystem = nullptr;
 	IRenderCamera* m_pRenderCamera = nullptr;
+	IShaderProgram* m_pShaderProgram_VS = nullptr;
+	IShaderProgram* m_pShaderProgram_PS = nullptr;
 
 };
 

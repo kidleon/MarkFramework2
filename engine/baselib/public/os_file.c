@@ -45,14 +45,27 @@ HANDLE open_file(
 	switch (mode)
 	{
 	case FILE_MODE_READ:
-		mode_str = "rb";
+		mode_str = "r";
 		break;
 	case FILE_MODE_WRITE:
-		mode_str = "wb";
+		mode_str = "w";
 		break;
 	case FILE_MODE_APPEND:
-		mode_str = "ab";
+		mode_str = "a+";
 		break;
+
+	case FILE_MODE_READ_BINARY:
+		mode_str = "rb";
+		break;
+
+	case FILE_MODE_WRITE_BINARY:
+		mode_str = "wb";
+		break;
+
+	case FILE_MODE_APPEND_BINARY:
+		mode_str = "a+b";
+		break;
+
 	default:
 		free(file);
 		return NULL;
