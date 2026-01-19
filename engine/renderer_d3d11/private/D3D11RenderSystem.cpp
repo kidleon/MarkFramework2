@@ -356,19 +356,18 @@ BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DES
 			InputLayoutDesc.NumVertexFormat = CompileResult.NumVertexFormat;
 
 			memcpy(
-				InputLayoutDesc.VertexFormats, 
-				CompileResult.VertexFormats, 
+				InputLayoutDesc.VertexFormats,
+				CompileResult.VertexFormats,
 				sizeof(VERTEX_FORMAT) * CompileResult.NumVertexFormat
 			);
 
 			InputLayoutDesc.VertexFormat = CompileResult.VertexFormat;
 			InputLayoutDesc.pShaderBlob = CompileResult.pShaderBlob;
 
-			if(!m_pRenderDevice->CreateInputLayout(InputLayoutDesc, &pIL))
+			if (!m_pRenderDevice->CreateInputLayout(InputLayoutDesc, &pIL))
 			{
 				SYS_LOG_E("D3D11RenderSystem::GetOrCreateShaderProgram: Failed to create input layout for shader '%s'", Desc.szDebugName);
-				if (CompileResult.pShaderBlob)
-					CompileResult.pShaderBlob->Release();
+				CHECK_RELEASE(CompileResult.pShaderBlob);
 				(*ppOut) = nullptr;
 				return FALSE;
 			}
@@ -388,8 +387,7 @@ BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DES
 		)))
 		{
 			SYS_LOG_E("D3D11RenderSystem::GetOrCreateShaderProgram: Failed to create vertex shader for shader '%s'", Desc.szDebugName);
-			if (CompileResult.pShaderBlob)
-				CompileResult.pShaderBlob->Release();
+			CHECK_RELEASE(CompileResult.pShaderBlob);
 			(*ppOut) = nullptr;
 			return FALSE;
 		}
@@ -405,6 +403,7 @@ BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DES
 		CHECK_RELEASE(CompileResult.pShaderBlob);
 
 		*ppOut = static_cast<IShaderProgram*>(pShaderProgram);
+		pShaderProgram->AddRef();
 
 		m_pShaderProgramCache->Register(pShaderProgram);
 	}
@@ -437,14 +436,14 @@ BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DES
 		CHECK_RELEASE(CompileResult.pShaderBlob);
 
 		*ppOut = static_cast<IShaderProgram*>(pShaderProgram);
+		pShaderProgram->AddRef();
 
 		m_pShaderProgramCache->Register(pShaderProgram);
 	}
 	else
 	{
 		SYS_LOG_E("D3D11RenderSystem::GetOrCreateShaderProgram: Unsupported shader type for shader '%s'", Desc.szDebugName);
-		if (CompileResult.pShaderBlob)
-			CompileResult.pShaderBlob->Release();
+		CHECK_RELEASE(CompileResult.pShaderBlob);
 		(*ppOut) = nullptr;
 		return FALSE;
 	}

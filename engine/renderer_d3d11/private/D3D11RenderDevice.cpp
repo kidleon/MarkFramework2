@@ -232,111 +232,163 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, ID
 {
 	D3D11_INPUT_ELEMENT_DESC InputElementDesc[MAX_VERTEX_FORMAT] = {};
 	
+	size_t AlignedOffset = 0;
+	UINT32 TextureCoordCount = 0;
 	for (UINT32 i = 0; i < Desc.NumVertexFormat; ++i)
 	{
-		InputElementDesc[i].SemanticIndex = i;
+		InputElementDesc[i].InputSlot = 0;
 		InputElementDesc[i].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 
 		switch (Desc.VertexFormats[i])
 		{
 			case VERTEX_FORMAT::POSITION:
 			{
+				InputElementDesc[i].SemanticIndex = 0;
 				InputElementDesc[i].SemanticName = "POSITION";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				AlignedOffset += sizeof(FLOAT3);
 			} break;
 
 			case VERTEX_FORMAT::NORMAL:
 			{
+				InputElementDesc[i].SemanticIndex = 0;
 				InputElementDesc[i].SemanticName = "NORMAL";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				AlignedOffset += sizeof(FLOAT3);
 			} break;
 
 			case VERTEX_FORMAT::TEXCOORD:
 			{
+				InputElementDesc[i].SemanticIndex = 0;
 				InputElementDesc[i].SemanticName = "TEXCOORD";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32_FLOAT;
+				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				AlignedOffset += sizeof(FLOAT2);
+				TextureCoordCount++;
 			} break;
 
 			case VERTEX_FORMAT::COLOR:
 			{
+				InputElementDesc[i].SemanticIndex = 0;
 				InputElementDesc[i].SemanticName = "COLOR";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				AlignedOffset += sizeof(FLOAT4);
 			} break;
 
 			case VERTEX_FORMAT::TANGENT:
 			{
+				InputElementDesc[i].SemanticIndex = 0;
 				InputElementDesc[i].SemanticName = "TANGENT";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				AlignedOffset += sizeof(FLOAT3);
 			} break;
 
 			case VERTEX_FORMAT::BINORMAL:
 			{
+				InputElementDesc[i].SemanticIndex = 0;
 				InputElementDesc[i].SemanticName = "BINORMAL";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				AlignedOffset += sizeof(FLOAT3);
 			} break;
 
 			case VERTEX_FORMAT::BONE:
 			{
+				InputElementDesc[i].SemanticIndex = 0;
 				InputElementDesc[i].SemanticName = "BONE";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_UINT;
+				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				AlignedOffset += sizeof(UINT4);
 			} break;
 
 			case VERTEX_FORMAT::WEIGHT:
 			{
+				InputElementDesc[i].SemanticIndex = 0;
 				InputElementDesc[i].SemanticName = "WEIGHT";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				AlignedOffset += sizeof(FLOAT4);
 			} break;
 
 			case VERTEX_FORMAT::TEXCOORD1:
 			{
+				InputElementDesc[i].SemanticIndex = TextureCoordCount++;
 				InputElementDesc[i].SemanticName = "TEXCOORD1";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				AlignedOffset += sizeof(FLOAT4);
 			} break;
 
 			case VERTEX_FORMAT::TEXCOORD2:
 			{
+				InputElementDesc[i].SemanticIndex = TextureCoordCount++;
 				InputElementDesc[i].SemanticName = "TEXCOORD2";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				AlignedOffset += sizeof(FLOAT4);
 			} break;
 
 			case VERTEX_FORMAT::TEXCOORD3:
 			{
+				InputElementDesc[i].SemanticIndex = TextureCoordCount++;
 				InputElementDesc[i].SemanticName = "TEXCOORD3";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				AlignedOffset += sizeof(FLOAT4);
 			} break;
 
 			case VERTEX_FORMAT::TEXCOORD4:
 			{
+				InputElementDesc[i].SemanticIndex = TextureCoordCount++;
 				InputElementDesc[i].SemanticName = "TEXCOORD4";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				AlignedOffset += sizeof(FLOAT4);
 			} break;
 
 			case VERTEX_FORMAT::TEXCOORD5:
 			{
+				InputElementDesc[i].SemanticIndex = TextureCoordCount++;
 				InputElementDesc[i].SemanticName = "TEXCOORD5";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				AlignedOffset += sizeof(FLOAT4);
 			} break;
 
 			case VERTEX_FORMAT::TEXCOORD6:
 			{
+				InputElementDesc[i].SemanticIndex = TextureCoordCount++;
 				InputElementDesc[i].SemanticName = "TEXCOORD6";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				AlignedOffset += sizeof(FLOAT4);
 			} break;
 
 			case VERTEX_FORMAT::TEXCOORD7:
 			{
+				InputElementDesc[i].SemanticIndex = TextureCoordCount++;
 				InputElementDesc[i].SemanticName = "TEXCOORD7";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				AlignedOffset += sizeof(FLOAT4);
 			} break;
 
 			case VERTEX_FORMAT::TEXCOORD8:
 			{
+				InputElementDesc[i].SemanticIndex = TextureCoordCount++;
 				InputElementDesc[i].SemanticName = "TEXCOORD8";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				AlignedOffset += sizeof(FLOAT4);
 			} break;
 		}
 	}
 
+	size_t s = Desc.pShaderBlob->GetBufferSize();
 	ID3D11InputLayout* pD3D11InputLayout = nullptr;
 	HRESULT hr = m_pD3D11Device->CreateInputLayout(
 		InputElementDesc,

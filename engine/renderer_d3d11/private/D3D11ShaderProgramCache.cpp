@@ -162,5 +162,8 @@ D3D11ShaderProgram* D3D11ShaderProgramCache::Find(SHADER_TYPE ShaderType, NameHa
 		ShaderHash
 	);
 
+	if (pSP)
+		pSP->AddRef();
+
 	return pSP;
 }

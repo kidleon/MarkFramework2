@@ -52,6 +52,8 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	char szCurrentDir[MAX_FILE_LENGTH];
 	GetCurrentDirectoryA(MAX_FILE_LENGTH, szCurrentDir);
 
+	fstrcat(szCurrentDir, "/..");
+
 	IFileSystem* pFileSystem = nullptr;
 	if (!CreateOSFileSystem(szCurrentDir, &pFileSystem))
 	{
@@ -72,7 +74,7 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 		SHADER_PROGRAM_CREATE_DESC ShaderDesc_VS = {};
 		ShaderDesc_VS.ShaderType = SHADER_TYPE::VERTEX;
 		ShaderDesc_VS.ShaderName = NameHash("OnlyColor_VS");
-		fstrlcpy(ShaderDesc_VS.pEntryPoint, "VS_MAIN", 63);
+		fstrlcpy(ShaderDesc_VS.pEntryPoint, "VS_MAIN", 31);
 		fstrlcpy(ShaderDesc_VS.pTargetProfile, "vs_5_0", 31);
 		ShaderDesc_VS.pShaderSource = pShaderSource;
 		ShaderDesc_VS.ShaderSourceSize = ShaderFileSize;
@@ -81,7 +83,7 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 		SHADER_PROGRAM_CREATE_DESC ShaderDesc_PS = {};
 		ShaderDesc_PS.ShaderType = SHADER_TYPE::PIXEL;
 		ShaderDesc_PS.ShaderName = NameHash("OnlyColor_PS");
-		fstrlcpy(ShaderDesc_PS.pEntryPoint, "PS_MAIN", 63);
+		fstrlcpy(ShaderDesc_PS.pEntryPoint, "PS_MAIN", 31);
 		fstrlcpy(ShaderDesc_PS.pTargetProfile, "ps_5_0", 31);
 		ShaderDesc_PS.pShaderSource = pShaderSource;
 		ShaderDesc_PS.ShaderSourceSize = ShaderFileSize;
@@ -118,6 +120,8 @@ void D3D11Application::OnUpdate()
 
 void D3D11Application::OnDestroy()
 {
+	CHECK_RELEASE(m_pShaderProgram_VS);
+	CHECK_RELEASE(m_pShaderProgram_PS);
 	CHECK_RELEASE(m_pRenderCamera);
 	CHECK_RELEASE(m_pRenderSystem);
 	CleanupRenderModule();
