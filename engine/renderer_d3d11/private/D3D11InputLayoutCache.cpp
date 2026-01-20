@@ -38,7 +38,7 @@ void D3D11InputLayoutCache::Shutdown()
 			if (pCacheData)
 			{
 				CHECK_RELEASE(pCacheData->pInputLayout);
-				D3D11_POOL_FREE(pCacheData, CACHE_DATA);
+				D3D11_POOL_FREE(pCacheData);
 				pCacheData = nullptr;
 			}
 			pNode = pNextNode;

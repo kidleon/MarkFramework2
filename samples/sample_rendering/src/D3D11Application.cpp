@@ -32,7 +32,7 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	CameraDesc.FOVY = 3.14159265f / 4.0f;
 	CameraDesc.AspectRatio = static_cast<FLOAT>(width) / static_cast<FLOAT>(height);
 	CameraDesc.NearZ = 0.1f;
-	CameraDesc.FarZ = 1000.0f;
+	CameraDesc.FarZ = 100.0f;
 	CameraDesc.ClearColor = FLOAT4{ 0.0f, 0.0f, 1.0f, 1.0f };
 	CameraDesc.ClearFlags = static_cast<UINT32>(CLEAR_BUFFER::ALL);
 	CameraDesc.Depth = 1.0f;
@@ -45,9 +45,29 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	PBDesc.VertexBufferSize = 256;
 	PBDesc.IndexBufferSize = 256;
 
-	IPrimitiveBuffer* pPrimitiveBuffer = nullptr;
-	m_pRenderSystem->CreatePrimitiveBuffer(PBDesc, &pPrimitiveBuffer);
-	pPrimitiveBuffer->Release();
+	if (m_pRenderSystem->CreatePrimitiveBuffer(PBDesc, &m_pPrimitiveBuffer))
+	{
+		FLOAT3 Vertices[3] = {
+			{ -0.5f, -0.5f, 0.0f },
+			{ 0.5f, -0.5f, 0.0f },
+			{ 0.0f, 0.5f, 0.0f }
+		};
+
+		UINT32 Indices[3] = { 0, 1, 2 };
+
+		m_pPrimitiveBuffer->AddPrimitive(PRIMITIVE_TYPE::TRIANGLE_LIST, 3, sizeof(FLOAT3), 3, sizeof(UINT32));
+
+		m_pPrimitiveBuffer->UpdateVertex(
+			0,
+			Vertices,
+			sizeof(FLOAT3) * 3
+		);
+		m_pPrimitiveBuffer->UpdateIndex(
+			0,
+			Indices,
+			sizeof(UINT32) * 3
+		);
+	}
 
 	char szCurrentDir[MAX_FILE_LENGTH];
 	GetCurrentDirectoryA(MAX_FILE_LENGTH, szCurrentDir);
@@ -120,6 +140,7 @@ void D3D11Application::OnUpdate()
 
 void D3D11Application::OnDestroy()
 {
+	CHECK_RELEASE(m_pPrimitiveBuffer);
 	CHECK_RELEASE(m_pShaderProgram_VS);
 	CHECK_RELEASE(m_pShaderProgram_PS);
 	CHECK_RELEASE(m_pRenderCamera);

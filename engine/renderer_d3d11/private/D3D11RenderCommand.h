@@ -1,13 +1,30 @@
 ﻿#pragma once
 
-struct BASE_RENDER_COMMAND
+
+// 기본 메시 드로우 커맨더
+struct D3D11_DRAW_COMMAND
 {
-	UINT32 Flags;
+	struct DRAW_SORT_KEY
+	{
+		union
+		{
+			uint64 Hash;
+			struct
+			{
+				uint64 Pass : 4; // 16
+				uint64 VertexShaderIndex : 12; // 4096
+				uint64 PixelShaderIndex : 12; // 4096
+				uint64 RenderStateHash : 14; // 16384
+				uint64 Depth : 14; // 16384
+				uint64 Reserved : 8;
+			};
+		};
+	};
+
+	DRAW_SORT_KEY SortKey;
+	ISurfaceMaterial* pSurfaceMaterial;
+	IPrimitiveBuffer* pPrimitiveBuffer;
+	uint32 DrawPrimitiveIndex;
+	uint32 PADDING;
 	LINK_NODE LinkNode;
 };
-
-struct D3D11_MESH_DRAW_COMMAND : public BASE_RENDER_COMMAND
-{
-};
-
-

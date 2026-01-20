@@ -1317,11 +1317,24 @@ public:
 	virtual int32 GetNumPass() const noexcept = 0;
 
 	virtual void SetVertexShader(int32 Pass, IShaderProgram* pVS) = 0;
+	virtual void SetVertexShader(IShaderProgram* pVS) = 0;
+
 	virtual void SetPixelShader(int32 Pass, IShaderProgram* pPS) = 0;
+	virtual void SetPixelShader(IShaderProgram* pPS) = 0;
 
 	virtual IShaderProgram* GetVertexShader(int32 Pass) noexcept = 0;
-	virtual IShaderProgram* GetPixelShader(int32 Pass) noexcept = 0;
+	virtual IShaderProgram* GetVertexShader() noexcept = 0;
 
+	virtual IShaderProgram* GetPixelShader(int32 Pass) noexcept = 0;
+	virtual IShaderProgram* GetPixelShader() noexcept = 0;
+
+	virtual void SetColor(int32 Pass, const FLOAT4& Color) = 0;
+	virtual void SetColor(const FLOAT4& Color) = 0;
+
+	virtual const FLOAT4& GetColor(int32 Pass) const noexcept = 0;
+	virtual const FLOAT4& GetColor() const noexcept = 0;
+
+	/*
 	virtual void SetConstantBuffer_VS(int32 SlotIndex, const NameHash& Name, IConstantBuffer* pCBuffer) = 0;
 	virtual void SetConstantBuffer_PS(int32 SlotIndex, const NameHash& Name, IConstantBuffer* pCBuffer) = 0;
 	virtual void SetConstantBuffer_VS(int32 Pass, int32 SlotIndex, const NameHash& Name, IConstantBuffer* pCBuffer) = 0;
@@ -1336,7 +1349,7 @@ public:
 
 	virtual void SetTexture1D(int32 Pass, int32 SamplerIndex, const NameHash& Name, ITexture1D* pTexture) = 0;
 	virtual void SetTexture2D(int32 Pass, int32 SamplerIndex, const NameHash& Name, ITexture2D* pTexture) = 0;
-
+	*/
 };
 
 

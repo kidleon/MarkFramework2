@@ -8,6 +8,8 @@ class D3D11ConstantBufferAllocator;
 class D3D11BlobAllocator;
 class D3D11RenderContext;
 class D3D11ShaderProgramCache;
+class D3D11SurfaceMaterialBlockPool;
+class D3D11RenderCommandPool;
 class D3D11RenderCommandExecutor;
 class D3D11InputLayoutCache;
 
@@ -53,6 +55,8 @@ private:
 	D3D11BlobAllocator* m_pBlobAllocator = nullptr;
 	D3D11RenderContext* m_pRenderContext = nullptr;
 	D3D11ShaderProgramCache* m_pShaderProgramCache = nullptr;
+	D3D11SurfaceMaterialBlockPool* m_pSurfaceMaterialBlockPool = nullptr;
+	D3D11RenderCommandPool* m_pRenderCommandPool = nullptr;
 	D3D11RenderCommandExecutor* m_pRenderCommandExecutor = nullptr;
 	D3D11InputLayoutCache* m_pInputLayoutCache = nullptr;
 
