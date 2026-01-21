@@ -475,7 +475,7 @@ BOOL D3D11RenderSystem::GetOrCreateRenderContext(IRenderContext** ppContext)
 {
 	if (m_pRenderContext == nullptr)
 	{
-		m_pRenderContext = D3D11_POOL_NEW(D3D11RenderContext)();
+		m_pRenderContext = D3D11_NEW(D3D11RenderContext)();
 	}
 
 	m_pRenderContext->AddRef();

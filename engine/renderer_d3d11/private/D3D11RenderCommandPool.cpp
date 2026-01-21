@@ -75,6 +75,8 @@ void D3D11RenderCommandPool::Release(D3D11_DRAW_COMMAND* pCommand)
 	if (!pCommand)
 		return;
 
+	pCommand->Reset();
+
 	// Remove from used list
 	linked_list_remove_node(&m_UsedList, &pCommand->LinkNode);
 

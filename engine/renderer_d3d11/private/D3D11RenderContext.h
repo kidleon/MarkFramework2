@@ -7,6 +7,8 @@ class D3D11RenderContext final : public IRenderContext
 	static constexpr size_t MAX_RENDER_FRAME = 4;
 
 public:
+	D3D11RenderContext() = default;
+
 	// IUNKNOWN interface
 	long AddRef() final;
 	long Release() final;
@@ -18,6 +20,10 @@ public:
 
 	void BeginRenderCamera(IRenderCamera* pRenderCamera) noexcept final;
 	void EndRenderCamera() noexcept final;
+
+	void SetSurfaceMaterial(ISurfaceMaterial* pSurfaceMaterial) final;
+	void SetPrimitiveBuffer(IPrimitiveBuffer* pPrimitiveBuffer) final;
+	void DrawPrimitive(int32 PrimitiveIndex) final;
 
 private:
 	~D3D11RenderContext() noexcept;

@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "D3D11RenderPipeline.h"
+
 
 // 기본 메시 드로우 커맨더
 struct D3D11_DRAW_COMMAND
@@ -22,9 +24,14 @@ struct D3D11_DRAW_COMMAND
 	};
 
 	DRAW_SORT_KEY SortKey;
-	ISurfaceMaterial* pSurfaceMaterial;
+	D3D11_RENDER_PIPELINE RenderPipeline;
+	D3D11_DYNAMIC_RENDER_PIPELINE DynamicRenderPipeline;
 	IPrimitiveBuffer* pPrimitiveBuffer;
 	uint32 DrawPrimitiveIndex;
 	uint32 PADDING;
+	
 	LINK_NODE LinkNode;
+
+	void Reset();
+	
 };

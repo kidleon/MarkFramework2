@@ -1502,11 +1502,11 @@ struct IRenderContext : public IUNKNOWN
 
 	virtual void BeginRenderCamera(IRenderCamera* pRenderCamera) noexcept = 0;
 	virtual void EndRenderCamera() noexcept = 0;
-	/*
+	
 	virtual void SetSurfaceMaterial(ISurfaceMaterial* pSurfaceMaterial) = 0;
 	virtual void SetPrimitiveBuffer(IPrimitiveBuffer* pPrimitiveBuffer) = 0;
 	virtual void DrawPrimitive(int32 PrimitiveIndex) = 0;
-	*/
+
 };
 
 

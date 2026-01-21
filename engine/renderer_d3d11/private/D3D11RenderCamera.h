@@ -109,6 +109,7 @@ public:
 	__INLINE D3D11RenderTarget* INL_GetRenderTarget() const noexcept { return m_pRenderTarget; }
 
 protected:
+	D3D11RenderCamera() = delete;
 	virtual ~D3D11RenderCamera() noexcept;
 
 private:

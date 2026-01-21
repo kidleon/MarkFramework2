@@ -61,6 +61,7 @@ public:
 	__INLINE ID3D11DepthStencilView* INL_GetDSV() const noexcept { return m_pD3D11DSV; }
 
 private:
+	D3D11RenderTarget() = delete;
 	virtual ~D3D11RenderTarget() noexcept;
 
 private:
