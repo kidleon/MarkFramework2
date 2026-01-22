@@ -302,6 +302,9 @@ __FORCEINLINE int compare_strings(const void* a, const void* b)
 
 BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DESC& Desc, IShaderProgram** ppOut)
 {
+	static volatile unsigned long s_ShaderProgramIndex_VS = 0;
+	static volatile unsigned long s_ShaderProgramIndex_PS = 0;
+
 	if (Desc.ShaderName.empty())
 	{
 		SYS_LOG_E("D3D11RenderSystem::GetOrCreateShaderProgram: ShaderName is empty");
@@ -412,8 +415,11 @@ BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DES
 			return FALSE;
 		}
 
+		interlock_increment_ul(&s_ShaderProgramIndex_VS, MEMORY_ORDER_RELAXED);
+
 		D3D11ShaderProgram* pShaderProgram = D3D11_POOL_NEW(D3D11ShaderProgram)(
 			D3D11Common::GetUID(),
+			(UINT32)s_ShaderProgramIndex_VS,
 			Desc.ShaderName,
 			ShaderDefinesHash,
 			CompileResult.VertexFormat,
@@ -446,8 +452,11 @@ BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DES
 			return FALSE;
 		}
 
+		interlock_increment_ul(&s_ShaderProgramIndex_PS, MEMORY_ORDER_RELAXED);
+
 		D3D11ShaderProgram* pShaderProgram = D3D11_POOL_NEW(D3D11ShaderProgram)(
 			D3D11Common::GetUID(),
+			(UINT32)s_ShaderProgramIndex_PS,
 			Desc.ShaderName,
 			ShaderDefinesHash,
 			pPS

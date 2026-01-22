@@ -1,8 +1,6 @@
 ﻿#include "pch.h"
 #include "D3D11SurfaceMaterial.h"
-#include "D3D11SurfaceMaterialBlock.h"
 #include "D3D11SurfaceMaterialBlockPool.h"
-#include "D3D11ShaderProgram.h"
 
 
 D3D11SurfaceMaterial::D3D11SurfaceMaterial(UINT64 ID, D3D11_SURFACE_MATERIAL_BLOCK* pMaterialBlock)
@@ -71,6 +69,8 @@ int32 D3D11SurfaceMaterial::AddPass(const char* szPassName) noexcept
 	);
 
 	m_pMaterialBlock->NumPasses++;
+
+	return NewPassIndex;
 }
 
 int32 D3D11SurfaceMaterial::GetNumPass() const noexcept

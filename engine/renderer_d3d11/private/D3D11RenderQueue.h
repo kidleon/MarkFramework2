@@ -5,7 +5,7 @@ using namespace mark;
 #include "D3D11RenderCamera.h"
 
 
-struct BASE_RENDER_COMMAND;
+struct D3D11_DRAW_COMMAND;
 
 class D3D11_RENDER_QUEUE
 {
@@ -14,12 +14,12 @@ public:
 	~D3D11_RENDER_QUEUE() noexcept;
 
 	void Reset();
-	void Add(RENDER_QUEUE_TYPE QueueType, BASE_RENDER_COMMAND* pRenderCmd) noexcept;
+	void Add(RENDER_QUEUE_TYPE QueueType, D3D11_DRAW_COMMAND* pRenderCmd) noexcept;
 	
 	__FORCEINLINE LINK_NODE* INL_GetLinkNode() noexcept { return &m_LinkNode; }
 
 private:
-	TArray<BASE_RENDER_COMMAND*, TA_POOL> m_OpaqueCmdList;
+	TArray<D3D11_DRAW_COMMAND*, TA_POOL> m_OpaqueCmdList;
 
 	LINK_NODE m_LinkNode;
 
@@ -102,7 +102,7 @@ public:
 		return m_pRenderCamera;
 	}
 
-	__FORCEINLINE const D3D11_RENDER_QUEUE* INL_GetOpaqueRQ() const noexcept
+	__FORCEINLINE D3D11_RENDER_QUEUE* INL_GetOpaqueRQ() const noexcept
 	{
 		return m_pOpaqueRQ;
 	}

@@ -6,6 +6,7 @@ class D3D11ShaderProgram final : public IShaderProgram
 public:
 	explicit D3D11ShaderProgram(
 		UINT64 ID,
+		UINT32 Index,
 		NameHash ShaderName,
 		UINT32 ShaderDefinesHash,
 		UINT32 InputVertexFormat,
@@ -14,6 +15,7 @@ public:
 
 	explicit D3D11ShaderProgram(
 		UINT64 ID,
+		UINT32 Index,
 		NameHash ShaderName,
 		UINT32 ShaderDefinesHash,
 		ID3D11PixelShader* pPixelShader
@@ -21,6 +23,7 @@ public:
 
 	explicit D3D11ShaderProgram(
 		UINT64 ID,
+		UINT32 Index,
 		NameHash ShaderName,
 		UINT32 ShaderDefinesHash,
 		ID3D11GeometryShader* pGeometryShader
@@ -28,6 +31,7 @@ public:
 
 	explicit D3D11ShaderProgram(
 		UINT64 ID,
+		UINT32 Index,
 		NameHash ShaderName,
 		UINT32 ShaderDefinesHash,
 		ID3D11ComputeShader* pComputeShader
@@ -45,6 +49,7 @@ public:
 
 	virtual SHADER_TYPE GetShaderType() const noexcept final;
 
+	__FORCEINLINE UINT32 INL_GetShaderIndex() const noexcept { return m_ShaderIndex; }
 	__FORCEINLINE SHADER_TYPE INL_GetShaderType() const noexcept { return m_ShaderType; }
 	__FORCEINLINE NameHash INL_GetShaderName() const noexcept { return m_ShaderName; }
 	__FORCEINLINE UINT32 INL_GetShaderDefinesHash() const noexcept { return m_ShaderDefinesHash; }
@@ -66,7 +71,7 @@ private:
 	SHADER_TYPE m_ShaderType;
 	UINT32 m_ShaderDefinesHash;
 	UINT32 m_InputVertexFormat = 0;
-	UINT32 PADDING = 0;
+	UINT32 m_ShaderIndex = 0;
 	union
 	{
 		ID3D11VertexShader* m_pVertexShader;

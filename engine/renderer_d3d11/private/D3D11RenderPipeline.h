@@ -7,6 +7,7 @@ struct D3D11_RENDER_PIPELINE
 {
 	D3D11ShaderProgram* pVertexShader;
 	D3D11ShaderProgram* pPixelShader;
+	FLOAT4 Color;
 };
 
 struct D3D11_DYNAMIC_RENDER_PIPELINE

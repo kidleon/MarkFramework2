@@ -2,6 +2,7 @@
 #include "D3D11RenderQueue.h"
 #include "D3D11RenderCamera.h"
 #include "D3D11RenderQueuePool.h"
+#include "D3D11RenderCommand.h"
 
 
 //-----------------------------------------------------------------------------
@@ -22,13 +23,13 @@ void D3D11_RENDER_QUEUE::Reset()
 	m_OpaqueCmdList.clear();
 }
 
-void D3D11_RENDER_QUEUE::Add(RENDER_QUEUE_TYPE QueueType, BASE_RENDER_COMMAND* pRenderCmd) noexcept
+void D3D11_RENDER_QUEUE::Add(RENDER_QUEUE_TYPE QueueType, D3D11_DRAW_COMMAND* pDrawCmd) noexcept
 {
 	switch (QueueType)
 	{
 		case RENDER_QUEUE_TYPE::RQ_OPAQUE:
 		{
-			m_OpaqueCmdList.push_back(pRenderCmd);
+			m_OpaqueCmdList.push_back(pDrawCmd);
 		}
 		break;
 

@@ -2,6 +2,9 @@
 #include "D3D11RenderFrame.h"
 
 
+class D3D11SurfaceMaterial;
+class D3D11PrimitiveBuffer;
+
 class D3D11RenderContext final : public IRenderContext
 {
 	static constexpr size_t MAX_RENDER_FRAME = 4;
@@ -33,6 +36,9 @@ private:
 #if defined(__TARGET_OS_WINDOWS)
 	unsigned PADDING_OR_RESERVED = 0;
 #endif // defined(__TARGET_OS_WINDOWS)
+
+	D3D11SurfaceMaterial* m_pCurSurfaceMaterial = nullptr;
+	D3D11PrimitiveBuffer* m_pCurPrimitiveBuffer = nullptr;
 
 	D3D11_RENDER_QUEUE_GROUP* m_pCurRQs = nullptr;
 	D3D11_RENDER_FRAME m_RenderFrames[MAX_RENDER_FRAME];

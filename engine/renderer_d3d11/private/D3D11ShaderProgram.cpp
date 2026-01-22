@@ -4,12 +4,14 @@
 
 D3D11ShaderProgram::D3D11ShaderProgram(
 	UINT64 ID,
+	UINT32 Index,
 	NameHash ShaderName,
 	UINT32 ShaderDefinesHash,
 	UINT32 InputVertexFormat,
 	ID3D11VertexShader* pVertexShader
 )
 	: m_ID(ID)
+	, m_ShaderIndex(Index)
 	, m_ShaderName(ShaderName)
 	, m_ShaderDefinesHash(ShaderDefinesHash)
 	, m_ShaderType(SHADER_TYPE::VERTEX)
@@ -22,11 +24,13 @@ D3D11ShaderProgram::D3D11ShaderProgram(
 
 D3D11ShaderProgram::D3D11ShaderProgram(
 	UINT64 ID,
+	UINT32 Index,
 	NameHash ShaderName,
 	UINT32 ShaderDefinesHash,
 	ID3D11PixelShader* pPixelShader
 )
 	: m_ID(ID)
+	, m_ShaderIndex(Index)
 	, m_ShaderName(ShaderName)
 	, m_ShaderDefinesHash(ShaderDefinesHash)
 	, m_ShaderType(SHADER_TYPE::PIXEL)
@@ -38,11 +42,13 @@ D3D11ShaderProgram::D3D11ShaderProgram(
 
 D3D11ShaderProgram::D3D11ShaderProgram(
 	UINT64 ID,
+	UINT32 Index,
 	NameHash ShaderName,
 	UINT32 ShaderDefinesHash,
 	ID3D11GeometryShader* pGeometryShader
 )
 	: m_ID(ID)
+	, m_ShaderIndex(Index)
 	, m_ShaderName(ShaderName)
 	, m_ShaderDefinesHash(ShaderDefinesHash)
 	, m_ShaderType(SHADER_TYPE::UNKNOWN)
@@ -54,11 +60,13 @@ D3D11ShaderProgram::D3D11ShaderProgram(
 
 D3D11ShaderProgram::D3D11ShaderProgram(
 	UINT64 ID,
+	UINT32 Index,
 	NameHash ShaderName,
 	UINT32 ShaderDefinesHash,
 	ID3D11ComputeShader* pComputeShader
 )
 	: m_ID(ID)
+	, m_ShaderIndex(Index)
 	, m_ShaderName(ShaderName)
 	, m_ShaderDefinesHash(ShaderDefinesHash)
 	, m_ShaderType(SHADER_TYPE::COMPUTE)

@@ -4,7 +4,11 @@
 #include "D3D11RenderQueuePool.h"
 #include "D3D11RenderCamera.h"
 #include "D3D11RenderCommandExecutor.h"
+#include "D3D11RenderCommand.h"
+#include "D3D11RenderCommandPool.h"
 #include "D3D11RenderFrame.h"
+#include "D3D11SurfaceMaterial.h"
+#include "D3D11PrimitiveBuffer.h"
 
 
 D3D11RenderContext::~D3D11RenderContext() noexcept
@@ -104,15 +108,60 @@ void D3D11RenderContext::EndRenderCamera() noexcept
 
 void D3D11RenderContext::SetSurfaceMaterial(ISurfaceMaterial* pSurfaceMaterial)
 {
+	CHECK_RELEASE(m_pCurSurfaceMaterial);
 
+	if (pSurfaceMaterial)
+	{
+		m_pCurSurfaceMaterial = static_cast<D3D11SurfaceMaterial*>(pSurfaceMaterial);
+		m_pCurSurfaceMaterial->AddRef();
+	}
 }
 
 void D3D11RenderContext::SetPrimitiveBuffer(IPrimitiveBuffer* pPrimitiveBuffer)
 {
-
+	CHECK_RELEASE(m_pCurPrimitiveBuffer);
+	if (pPrimitiveBuffer)
+	{
+		m_pCurPrimitiveBuffer = static_cast<D3D11PrimitiveBuffer*>(pPrimitiveBuffer);
+		m_pCurPrimitiveBuffer->AddRef();
+	}
 }
 
 void D3D11RenderContext::DrawPrimitive(int32 PrimitiveIndex)
 {
+	if (!m_pCurSurfaceMaterial || !m_pCurPrimitiveBuffer || !m_pCurRQs)
+		return;
 
+	int32 NumPass = m_pCurSurfaceMaterial->INL_GetNumPass();
+
+	if (0 >= NumPass)
+		return;
+
+	for (int32 p = 0; p < NumPass; ++p)
+	{
+		D3D11_DRAW_COMMAND* pDrawCommand = D3D11RenderCommandPool::Get()->Acquire();
+
+		m_pCurPrimitiveBuffer->AddRef();
+		pDrawCommand->pPrimitiveBuffer = m_pCurPrimitiveBuffer;
+		pDrawCommand->DrawPrimitiveIndex = PrimitiveIndex;
+
+		pDrawCommand->RenderPipeline.pVertexShader = m_pCurSurfaceMaterial->INL_GetVertexShader(p);
+		pDrawCommand->RenderPipeline.pPixelShader = m_pCurSurfaceMaterial->INL_GetPixelShader(p);
+		pDrawCommand->RenderPipeline.Color = m_pCurSurfaceMaterial->INL_GetColor(p);
+
+		pDrawCommand->SortKey.Pass = p;
+
+		pDrawCommand->SortKey.VertexShaderIndex = pDrawCommand->RenderPipeline.pVertexShader ?
+			pDrawCommand->RenderPipeline.pVertexShader->INL_GetShaderIndex() % 4096 : 0;
+
+		pDrawCommand->SortKey.PixelShaderIndex = pDrawCommand->RenderPipeline.pPixelShader ?
+			pDrawCommand->RenderPipeline.pPixelShader->INL_GetShaderIndex() % 4096 : 0;
+
+		pDrawCommand->SortKey.RenderStateHash = 0; // TODO: 렌더 상태 해시 계산
+		pDrawCommand->SortKey.Depth = 0; // TODO: 깊이 값 설정
+
+		// 일단 임시로 불투명 렌더 큐에 추가
+		D3D11_RENDER_QUEUE* pRQ = m_pCurRQs->INL_GetOpaqueRQ();
+		pRQ->Add(RENDER_QUEUE_TYPE::RQ_OPAQUE, pDrawCommand);
+	}
 }

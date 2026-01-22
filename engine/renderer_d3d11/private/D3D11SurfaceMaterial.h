@@ -1,7 +1,8 @@
 ﻿#pragma once
 
+#include "D3D11SurfaceMaterialBlock.h"
+#include "D3D11ShaderProgram.h"
 
-struct D3D11_SURFACE_MATERIAL_BLOCK;
 
 class D3D11SurfaceMaterial final : public ISurfaceMaterial
 {
@@ -39,6 +40,32 @@ public:
 
 	virtual const FLOAT4& GetColor(int32 Pass) const noexcept final;
 	virtual const FLOAT4& GetColor() const noexcept final;
+
+	__FORCEINLINE int32 INL_GetNumPass() const noexcept
+	{
+		return (int32)m_pMaterialBlock->NumPasses;
+	}
+
+	__FORCEINLINE D3D11ShaderProgram* INL_GetVertexShader(int32 Pass) noexcept
+	{
+		if (m_pMaterialBlock->RenderPasses[Pass].pVertexShader)
+			m_pMaterialBlock->RenderPasses[Pass].pVertexShader->AddRef();
+
+		return m_pMaterialBlock->RenderPasses[Pass].pVertexShader;
+	}
+
+	__FORCEINLINE D3D11ShaderProgram* INL_GetPixelShader(int32 Pass) noexcept
+	{
+		if (m_pMaterialBlock->RenderPasses[Pass].pPixelShader)
+			m_pMaterialBlock->RenderPasses[Pass].pPixelShader->AddRef();
+
+		return m_pMaterialBlock->RenderPasses[Pass].pPixelShader;
+	}
+
+	__FORCEINLINE const FLOAT4& INL_GetColor(int32 Pass) const noexcept
+	{
+		return m_pMaterialBlock->RenderPasses[Pass].Color;
+	}
 
 private:
 	D3D11SurfaceMaterial() = delete;
