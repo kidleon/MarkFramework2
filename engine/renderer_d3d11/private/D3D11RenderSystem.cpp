@@ -15,6 +15,7 @@
 #include "D3D11ShaderProgramCompile.h"
 #include "D3D11InputLayoutCache.h"
 #include "D3D11SurfaceMaterialBlockPool.h"
+#include "D3D11RenderCommand.h"
 
 
 void MemoryReporter(
@@ -417,6 +418,11 @@ BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DES
 
 		interlock_increment_ul(&s_ShaderProgramIndex_VS, MEMORY_ORDER_RELAXED);
 
+		if (MAX_VERTEX_SHADER_INDEX <= s_ShaderProgramIndex_VS)
+		{
+			SYS_LOG_W("D3D11RenderSystem::GetOrCreateShaderProgram: Vertex shader index exceeded the maximum limit");
+		}
+
 		D3D11ShaderProgram* pShaderProgram = D3D11_POOL_NEW(D3D11ShaderProgram)(
 			D3D11Common::GetUID(),
 			(UINT32)s_ShaderProgramIndex_VS,
@@ -453,6 +459,11 @@ BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DES
 		}
 
 		interlock_increment_ul(&s_ShaderProgramIndex_PS, MEMORY_ORDER_RELAXED);
+
+		if (MAX_PIXEL_SHADER_INDEX <= s_ShaderProgramIndex_PS)
+		{
+			SYS_LOG_W("D3D11RenderSystem::GetOrCreateShaderProgram: Pixel shader index exceeded the maximum limit");
+		}
 
 		D3D11ShaderProgram* pShaderProgram = D3D11_POOL_NEW(D3D11ShaderProgram)(
 			D3D11Common::GetUID(),

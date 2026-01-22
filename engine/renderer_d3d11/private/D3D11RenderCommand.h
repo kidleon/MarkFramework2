@@ -4,6 +4,10 @@
 
 
 // 기본 메시 드로우 커맨더
+constexpr size_t MAX_VERTEX_SHADER_INDEX = 4096;
+constexpr size_t MAX_PIXEL_SHADER_INDEX = 4096;
+
+
 struct D3D11_DRAW_COMMAND
 {
 	struct DRAW_SORT_KEY

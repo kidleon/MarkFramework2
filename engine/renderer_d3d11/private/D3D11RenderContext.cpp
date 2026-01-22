@@ -152,10 +152,10 @@ void D3D11RenderContext::DrawPrimitive(int32 PrimitiveIndex)
 		pDrawCommand->SortKey.Pass = p;
 
 		pDrawCommand->SortKey.VertexShaderIndex = pDrawCommand->RenderPipeline.pVertexShader ?
-			pDrawCommand->RenderPipeline.pVertexShader->INL_GetShaderIndex() % 4096 : 0;
+			pDrawCommand->RenderPipeline.pVertexShader->INL_GetShaderIndex() % MAX_VERTEX_SHADER_INDEX : 0;
 
 		pDrawCommand->SortKey.PixelShaderIndex = pDrawCommand->RenderPipeline.pPixelShader ?
-			pDrawCommand->RenderPipeline.pPixelShader->INL_GetShaderIndex() % 4096 : 0;
+			pDrawCommand->RenderPipeline.pPixelShader->INL_GetShaderIndex() % MAX_PIXEL_SHADER_INDEX : 0;
 
 		pDrawCommand->SortKey.RenderStateHash = 0; // TODO: 렌더 상태 해시 계산
 		pDrawCommand->SortKey.Depth = 0; // TODO: 깊이 값 설정
