@@ -406,6 +406,34 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, ID
 	return TRUE;
 }
 
+BOOL D3D11RenderDevice::CreateRasterizerState(const RS_RASTERIZER_STATE& RasterizerState, ID3D11RasterizerState** ppOut)
+{
+	D3D11_RASTERIZER_DESC Desc = {};
+
+	Desc.FillMode = D3D11_IMPL_FILL_MODE[(int)RasterizerState.FillMode]; // 채우기 모드 설정
+	Desc.CullMode = D3D11_IMPL_CULL_MODE[(int)RasterizerState.CullMode]; // 컬링 모드 설정
+	Desc.FrontCounterClockwise = RasterizerState.IsFrontCounterClockwise();
+	Desc.DepthBias = RasterizerState.DepthBias;
+	Desc.DepthBiasClamp = RasterizerState.DepthBiasClamp;
+	Desc.SlopeScaledDepthBias = RasterizerState.SlopeScaledDepthBias;
+	Desc.DepthClipEnable = RasterizerState.IsDepthClipEnabled();
+	Desc.ScissorEnable = RasterizerState.IsScissorEnabled();
+	Desc.MultisampleEnable = RasterizerState.IsMultisampleEnabled();
+	Desc.AntialiasedLineEnable = RasterizerState.IsAntialiasedLineEnabled();
+
+	ID3D11RasterizerState* pD3D11RasterizerState = nullptr;
+	if (FAILED(m_pD3D11Device->CreateRasterizerState(&Desc, &pD3D11RasterizerState)))
+	{
+		SYS_LOG_E("D3D11RenderDevice::CreateRasterizerState - Failed to create rasterizer state.");
+		*ppOut = nullptr;
+		return FALSE;
+	}
+
+	*ppOut = pD3D11RasterizerState;
+
+	return TRUE;
+}
+
 void D3D11RenderDevice::ReportLiveObjects() noexcept
 {
 	typedef HRESULT(WINAPI* DXGIGetDebugInterfaceFunc)(REFIID, void**);
