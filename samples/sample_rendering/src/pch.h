@@ -6,4 +6,4 @@
 #include <strings.h>
 #include "CoreDef.h"
 #include "RenderDef.h"
-
+#include "mathlib.h"

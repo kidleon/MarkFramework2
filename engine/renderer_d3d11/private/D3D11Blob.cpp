@@ -7,13 +7,14 @@ D3D11_BLOB::D3D11_BLOB(void* pBuffer, size_t size)
 	, m_BufferSize(size)
 {
 	m_LinkNode.data = this;
+	Clear();
 }
 
 D3D11_BLOB::~D3D11_BLOB()
 {
 	if (m_pBuffer)
 	{
-		D3D11_SYS_FREE(m_pBuffer);
+		D3D11_SYS_FREE_ALIGN(m_pBuffer);
 		m_pBuffer = nullptr;
 	}
 }
@@ -61,4 +62,12 @@ void D3D11_BLOB::Update(void* pBuffer, size_t size, size_t offset)
 		return;
 
 	memcpy((char*)m_pBuffer + offset, pBuffer, size);
+}
+
+void D3D11_BLOB::Clear() noexcept
+{
+	if (m_pBuffer && m_BufferSize > 0)
+	{
+		memset(m_pBuffer, 0, m_BufferSize);
+	}
 }

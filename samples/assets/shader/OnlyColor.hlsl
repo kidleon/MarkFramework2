@@ -15,8 +15,7 @@ cbuffer OBJECT_DATA : register(b1)
 //--------------------------------------------------------------------------------------
 struct VS_INPUT
 {
-    float4 Pos : POSITION;
-    float4 Color : COLOR;
+    float3 Pos : POSITION;
 };
 
 struct PS_INPUT
@@ -27,14 +26,9 @@ struct PS_INPUT
 
 PS_INPUT VS_MAIN(VS_INPUT input)
 {
-    PS_INPUT output = (PS_INPUT) 0;
-    /*
-    output.Pos = mul(input.Pos, World);
-    output.Pos = mul(output.Pos, View);
-    output.Pos = mul(output.Pos, Projection);
-    */
-    output.Pos = mul(input.Pos, WorldViewProjection);
-    output.Color = input.Color;
+    PS_INPUT output = (PS_INPUT)0;
+    output.Pos = mul(float4(input.Pos, 1.0f), WorldViewProjection);
+    output.Color = float4(1.0f, 0.0f, 0.0f, 1.0f); // Solid red color
     
     return output;
 }

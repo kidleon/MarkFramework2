@@ -111,6 +111,15 @@ struct MATRIX4
 	};
 };
 
+struct LOCAL_TRANSFORM
+{
+	FLOAT4 Position;
+	QUAT Rotation;
+	FLOAT4 Scale;
+
+	MATRIX4 TM;
+};
+
 typedef FLOAT4 COLOR4;
 typedef FLOAT4 QUATERNION;
 
@@ -439,6 +448,7 @@ inline void mat4_frustum_lh(float left, float right, float bottom, float top, fl
 inline MATRIX4 mat4_frustum_rh(float left, float right, float bottom, float top, float nearZ, float farZ);
 inline void mat4_frustum_rh(float left, float right, float bottom, float top, float nearZ, float farZ, MATRIX4* out);
 
+inline void compute_transform(LOCAL_TRANSFORM* tf);
 
 
 #include "mathlib.inl"

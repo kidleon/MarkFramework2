@@ -14,7 +14,7 @@ D3D11RenderCamera::D3D11RenderCamera(
 	, m_Ortho{ 1280.0f, 720.0f, 0.01f, 500.0f }
 	, m_View{ {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f} }
 {
-	m_ID = D3D11Common::GetUID();
+	m_ID = D3D11_COMMON::GetUID();
 	m_LoadStat = LOAD_STAT::LOADED;
 }
 
@@ -127,4 +127,38 @@ void D3D11RenderCamera::LookAt(const FLOAT3& EyePos, const FLOAT3& Target) noexc
 void D3D11RenderCamera::SetCameraOrder(INT8 Order) noexcept
 {
 	m_CameraOrder = Order;
+}
+
+void D3D11RenderCamera::ComputeCamera() noexcept
+{
+	// 뷰 행렬 계산
+	mat4_lookto_lh(
+		&m_View.EyePos,
+		&m_View.EyeDir,
+		&m_View.EyeUp,
+		&m_ViewMatrix
+	);
+
+	// 투영 행렬 계산
+	if (m_CameraMode == CAMERA_MODE::PERSPECTIVE)
+	{
+		mat4_perspective_rh(
+			m_Perspective.Fovy,
+			m_Perspective.Aspect,
+			m_Perspective.NearZ,
+			m_Perspective.FarZ,
+			&m_ProjectionMatrix
+		);
+	}
+	else if (m_CameraMode == CAMERA_MODE::ORTHO)
+	{
+		mat4_ortho_rh(
+			m_Ortho.ViewWidth,
+			m_Ortho.ViewHeight,
+			m_Ortho.NearZ,
+			m_Ortho.FarZ,
+			&m_ProjectionMatrix
+		);
+	}
+
 }

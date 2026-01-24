@@ -15,7 +15,10 @@ public:
 
 	void Reset();
 	void Add(RENDER_QUEUE_TYPE QueueType, D3D11_DRAW_COMMAND* pRenderCmd) noexcept;
+	void Sort() noexcept;
 	
+	__FORCEINLINE size_t INL_GetNumCommands() const noexcept { return m_OpaqueCmdList.size(); }
+	__FORCEINLINE D3D11_DRAW_COMMAND* INL_GetCommandAt(size_t Index) noexcept { return m_OpaqueCmdList[Index]; }
 	__FORCEINLINE LINK_NODE* INL_GetLinkNode() noexcept { return &m_LinkNode; }
 
 private:

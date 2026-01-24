@@ -17,6 +17,8 @@ BOOL D3D11BlobPool::Init(
     init_linked_list(&m_UsedList);
 
     m_InitialCount = InitialCount;
+	m_BufferSize = BufferSize;
+
     AllocBlob(BufferSize, InitialCount);
 
     return TRUE;
@@ -51,6 +53,7 @@ D3D11_BLOB* D3D11BlobPool::Acquire()
 
     D3D11_BLOB* pBlob = static_cast<D3D11_BLOB*>(pNode->data);
     pBlob->AddRef();
+	pBlob->Clear();
 
     return pBlob;
 }

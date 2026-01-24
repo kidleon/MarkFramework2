@@ -94,6 +94,8 @@ public:
 
 	void SetCameraOrder(INT8 Order) noexcept final;
 
+	void ComputeCamera() noexcept;
+
 	__INLINE INT32 INL_GetCameraOrder() const noexcept { return m_CameraOrder; }
 
 	__INLINE const CLEAR_TARGET_DESC& INL_GetClearTargetDesc() const noexcept { return m_ClearTarget; }
@@ -107,6 +109,16 @@ public:
 	__INLINE const MATRIX4& INL_GetProjectionMatrix() const noexcept { return m_ProjectionMatrix; }
 	__INLINE const D3D11_VIEWPORT INL_GetViewport() const noexcept { return m_Viewport; }
 	__INLINE D3D11RenderTarget* INL_GetRenderTarget() const noexcept { return m_pRenderTarget; }
+
+	__FORCEINLINE FLOAT INL_GetDepthFarZ() const noexcept
+	{
+		return (m_CameraMode == CAMERA_MODE::PERSPECTIVE) ? m_Perspective.FarZ : m_Ortho.FarZ;
+	}
+
+	__FORCEINLINE FLOAT3 INL_GetEyePos() const noexcept
+	{
+		return m_View.EyePos;
+	}
 
 protected:
 	D3D11RenderCamera() = delete;

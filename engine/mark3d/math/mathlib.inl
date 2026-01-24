@@ -2877,3 +2877,12 @@ inline void mat4_frustum_rh(float left, float right, float bottom, float top, fl
 	out->m33 = 0.0f;
 }
 
+inline void compute_transform(LOCAL_TRANSFORM* tf)
+{
+	MATRIX4 s, r, t, sr;
+	mat4_scale((FLOAT3*)&tf->Scale, &s);
+	mat4_rotation_quat(&tf->Rotation, &r);
+	mat4_mul(&s, &r, &sr);
+	mat4_trans((FLOAT3*)&tf->Position, &t);
+	mat4_mul(&sr, &t, &tf->TM);
+}

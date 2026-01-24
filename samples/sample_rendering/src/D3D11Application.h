@@ -19,6 +19,7 @@ private:
 	IRenderCamera* m_pRenderCamera = nullptr;
 	IShaderProgram* m_pShaderProgram_VS = nullptr;
 	IShaderProgram* m_pShaderProgram_PS = nullptr;
+	ISurfaceMaterial* m_pSurfaceMaterial = nullptr;
 	IPrimitiveBuffer* m_pPrimitiveBuffer = nullptr;
 
 };

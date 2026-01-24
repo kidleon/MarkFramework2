@@ -3,6 +3,8 @@
 #include "D3D11RenderCamera.h"
 #include "D3D11RenderQueuePool.h"
 #include "D3D11RenderCommand.h"
+#include "D3D11RenderCommandPool.h"
+#include "TAlgorithm.h"
 
 
 //-----------------------------------------------------------------------------
@@ -20,6 +22,14 @@ D3D11_RENDER_QUEUE::~D3D11_RENDER_QUEUE() noexcept
 
 void D3D11_RENDER_QUEUE::Reset()
 {
+	for (D3D11_DRAW_COMMAND* pCmd : m_OpaqueCmdList)
+	{
+		if (pCmd)
+		{
+			D3D11RenderCommandPool::Get()->Release(pCmd);
+		}
+	}
+
 	m_OpaqueCmdList.clear();
 }
 
@@ -38,6 +48,20 @@ void D3D11_RENDER_QUEUE::Add(RENDER_QUEUE_TYPE QueueType, D3D11_DRAW_COMMAND* pD
 	}
 }
 
+void D3D11_RENDER_QUEUE::Sort() noexcept
+{
+	if (m_OpaqueCmdList.empty())
+		return;
+
+	mark::sort(
+		&m_OpaqueCmdList[0], 
+		m_OpaqueCmdList.size(),
+		[](D3D11_DRAW_COMMAND* pA, D3D11_DRAW_COMMAND* pB) noexcept
+		{
+			return pA->SortKey.Value < pB->SortKey.Value;
+		}
+	);
+}
 
 //-----------------------------------------------------------------------------
 // class D3D11_RENDER_QUEUE_GROUP

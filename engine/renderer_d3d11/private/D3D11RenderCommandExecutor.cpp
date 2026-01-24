@@ -10,6 +10,10 @@
 #include "D3D11ConstantBufferAllocator.h"
 #include "D3D11ConstantBuffer.h"
 #include "D3D11ShaderDef.h"
+#include "D3D11ShaderProgram.h"
+#include "D3D11RenderCommand.h"
+#include "D3D11PrimitiveBuffer.h"
+#include "D3D11InputLayoutCache.h"
 
 
 D3D11RenderCommandExecutor* D3D11RenderCommandExecutor::s_pInstance = nullptr;
@@ -49,9 +53,7 @@ void D3D11RenderCommandExecutor::Push(const D3D11_RENDER_FRAME* pRenderFrame) no
 
 void D3D11RenderCommandExecutor::ResetFrame(D3D11_RENDER_FRAME* pRenderFrame)
 {
-	for (size_t i = 0; i < pRenderFrame->NumRQs; ++i)
-		pRenderFrame->RQs[i].Reset();
-	pRenderFrame->NumRQs = 0;
+	pRenderFrame->Reset();
 }
 
 void D3D11RenderCommandExecutor::Execute() noexcept
@@ -60,7 +62,7 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 	if (!pDeviceContext)
 		return;
 
-	const RENDER_SETTINGS& RenderSettings = D3D11Common::GetRenderSettings();
+	const RENDER_SETTINGS& RenderSettings = D3D11_COMMON::GetRenderSettings();
 
 	if (m_RenderFrameQueue.empty())
 		return;
@@ -69,6 +71,29 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 
 	D3D11_RENDER_FRAME* pRenderFrame = m_RenderFrameQueue.front();
 	m_RenderFrameQueue.pop_front();
+
+	// 리소스 커맨드 처리
+	for(size_t i = 0; i < pRenderFrame->ResourceCommands.size(); ++i)
+	{
+		D3D11_RESOURCE_COMMAND* pResCmd = pRenderFrame->ResourceCommands[i];
+		if (!pResCmd)
+			continue;
+
+		switch (pResCmd->CommandFunc)
+		{
+			case D3D11_RESOURCE_COMMAND::COMMAND_FUNC::UPDATE_PRIMITIVE_BUFFER: // 프리미티브 버퍼 업데이트
+			{
+				D3D11PrimitiveBuffer* pPB = pResCmd->pPrimitiveBuffer;
+				if (pPB)
+				{
+					pPB->UploadToGPU_VB(pDeviceContext);
+					pPB->UploadToGPU_IB(pDeviceContext);
+				}
+			} break;
+		default:
+			break;
+		}
+	}
 
 	for (size_t i = 0; i < pRenderFrame->NumRQs; ++i)
 	{
@@ -81,9 +106,9 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 
 		// 카메라 상수 버퍼 설정
 		D3D11_CAMERA_CONSTANT CameraCB = {};
-		CameraCB.ViewMatrix = pCamera->INL_GetViewMatrix();
-		CameraCB.InvViewMatrix = mat4_inverse(&CameraCB.ViewMatrix);
-		CameraCB.ProjectionMatrix = pCamera->INL_GetProjectionMatrix();
+		CameraCB.ViewMatrix = mat4_transpose((MATRIX4*)&pCamera->INL_GetViewMatrix());
+		CameraCB.InvViewMatrix = mat4_transpose((MATRIX4*)&mat4_inverse(&CameraCB.ViewMatrix));
+		CameraCB.ProjectionMatrix = mat4_transpose((MATRIX4*)&pCamera->INL_GetProjectionMatrix());
 
 		const D3D11RenderCamera::VIEW_DESC& ViewDesc = pCamera->INL_GetViewDesc();
 		CameraCB.CameraPosition = { ViewDesc.EyePos.x, ViewDesc.EyePos.y, ViewDesc.EyePos.z, 1.0f };
@@ -158,7 +183,130 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 			// SHADER CONSTANT BUFFER 설정
 
 			// PER FRAME CB
+			D3D11_RENDER_QUEUE* pRQ = pRQGroup->INL_GetOpaqueRQ();
+			pRQ->Sort();
 
+			D3D11ShaderProgram* pSetVS = nullptr;
+			D3D11ShaderProgram* pSetPS = nullptr;
+			D3D11PrimitiveBuffer* pSetPB = nullptr;
+
+			UINT32 SetInputVertexFormat = 0;
+			ID3D11InputLayout* pSetIL = nullptr;
+
+			size_t NumCommands = pRQ->INL_GetNumCommands();
+			for (size_t c = 0; c < NumCommands; ++c)
+			{
+				D3D11_DRAW_COMMAND* pCmd = pRQ->INL_GetCommandAt(c);
+				if (!pCmd) continue;
+
+				// 셰이더 프로그램 바인딩
+
+				// 버텍스 셰이더
+				if (pSetVS != pCmd->RenderPipeline.pVertexShader)
+				{
+					CHECK_RELEASE(pSetVS);
+
+					pSetVS = pCmd->RenderPipeline.pVertexShader;
+					pSetVS->AddRef();
+
+					ID3D11VertexShader* pVS = pSetVS ? pSetVS->INL_GetVertexShader() : nullptr;
+					pDeviceContext->VSSetShader(pVS, nullptr, 0);
+
+					UINT32 InputVertexFormat = pSetVS->INL_GetInputVertexFormat();
+					if (SetInputVertexFormat != InputVertexFormat)
+					{
+						SetInputVertexFormat = InputVertexFormat;
+
+						pSetIL = D3D11InputLayoutCache::Get()->Find(SetInputVertexFormat);
+						pDeviceContext->IASetInputLayout(pSetIL);
+					}
+				}
+
+				// 픽셀 셰이더
+				if (pSetPS != pCmd->RenderPipeline.pPixelShader)
+				{
+					CHECK_RELEASE(pSetPS);
+
+					pSetPS = pCmd->RenderPipeline.pPixelShader;
+					pSetPS->AddRef();
+
+					ID3D11PixelShader* pPS = pSetPS ? pSetPS->INL_GetPixelShader() : nullptr;
+					pDeviceContext->PSSetShader(pPS, nullptr, 0);
+				}
+
+				D3D11ConstantBuffer* pObjCB = D3D11ConstantBufferAllocator::Get()->AcquireTemp(sizeof(D3D11_OBJECT_CONSTANT));
+				if (!pObjCB)
+				{
+					SYS_LOG_E("D3D11RenderCommandExecutor::Execute - D3D11ConstantBufferAllocator::AcquireTemp failed.");
+					continue;
+				}
+
+				D3D11_OBJECT_CONSTANT ObjCB = {};
+				pObjCB->UploadToGPU(pDeviceContext, &pCmd->ObjectConstant, sizeof(D3D11_OBJECT_CONSTANT));
+
+				ID3D11Buffer* pObjCBBuffer = pObjCB->INL_GetD3D11Buffer();
+
+				pDeviceContext->VSSetConstantBuffers(1, 1, &pObjCBBuffer);
+				pDeviceContext->PSSetConstantBuffers(1, 1, &pObjCBBuffer);
+
+				if (!pCmd->pPrimitiveBuffer)
+				{
+					SYS_LOG_W("D3D11RenderCommandExecutor::Execute - pCmd->pPrimitiveBuffer is nullptr.");
+					continue;
+				}
+
+				// 프리미티브 버퍼 바인딩
+				if (pSetPB != pCmd->pPrimitiveBuffer)
+				{
+					CHECK_RELEASE(pSetPB);
+
+					pSetPB = pCmd->pPrimitiveBuffer;
+					if (pSetPB)
+						pSetPB->AddRef();
+				}
+
+				const D3D11PrimitiveBuffer::PRIMITIVE_DESC& PrimitiveDesc = pSetPB->INL_GetPrimitiveDesc(pCmd->DrawPrimitiveIndex);
+
+				if (!PrimitiveDesc.VertexCount || !PrimitiveDesc.IndexCount)
+				{
+					SYS_LOG_W("D3D11RenderCommandExecutor::Execute - PrimitiveDesc has zero VertexCount or IndexCount.");
+					continue;
+				}
+
+				ID3D11Buffer* pVB = pSetPB->INL_GetD3D11VertexBuffer();
+				ID3D11Buffer* pIB = pSetPB->INL_GetD3D11IndexBuffer();
+
+				UINT32 VertexOffset = PrimitiveDesc.VertexOffset;
+				UINT32 IndexOffset = PrimitiveDesc.IndexOffset;
+
+				UINT32 VertexStride = PrimitiveDesc.VertexStride;
+				UINT32 IndexStride = PrimitiveDesc.IndexStride;
+
+				pDeviceContext->IASetVertexBuffers(
+					0,
+					1,
+					&pVB,
+					&VertexStride,
+					&VertexOffset
+				);
+
+				DXGI_FORMAT IndexFormat = (IndexStride == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+				pDeviceContext->IASetIndexBuffer(pIB, IndexFormat, IndexOffset);
+
+				D3D11_PRIMITIVE_TOPOLOGY D3D11PrimitiveTopology = D3D11_IMPL_PRIMITIVE_TOPOLOGY[(UINT32)PrimitiveDesc.PrimitiveType];
+				pDeviceContext->IASetPrimitiveTopology(D3D11PrimitiveTopology);
+
+				// 드로우 콜
+				pDeviceContext->DrawIndexed(
+					PrimitiveDesc.IndexCount,
+					0,
+					0
+				);
+			}
+
+			CHECK_RELEASE(pSetPB);
+			CHECK_RELEASE(pSetVS);
+			CHECK_RELEASE(pSetPS);
 		}
 	}
 

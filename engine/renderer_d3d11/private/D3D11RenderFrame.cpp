@@ -1,8 +1,8 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "D3D11RenderFrame.h"
 #include "D3D11RenderCamera.h"
 #include "D3D11RenderQueue.h"
-
+#include "D3D11ResourceCommandPool.h"
 
 
 void D3D11_RENDER_FRAME::Reset()
@@ -11,6 +11,11 @@ void D3D11_RENDER_FRAME::Reset()
 	{
 		RQs[i].Reset();
 	}
+	NumRQs = 0;
+
+	for(size_t i = 0; i < ResourceCommands.size(); ++i)
+		D3D11ResourceCommandPool::Get()->Release(ResourceCommands[i]);
+	ResourceCommands.clear();
 }
 
 void D3D11_RENDER_FRAME::SortByCameraOrder()

@@ -7,16 +7,20 @@ class D3D11PrimitiveBuffer final : public IPrimitiveBuffer
 {
 	static constexpr size_t MAX_PRIMITIVES = 8;
 
+
+public:
 	struct PRIMITIVE_DESC
 	{
 		PRIMITIVE_TYPE PrimitiveType;
 		uint32 VertexOffset;
 		uint32 VertexCount;
+		uint32 VertexStride;
 		uint32 IndexOffset;
 		uint32 IndexCount;
-		uint32 VertexStride;
 		uint32 IndexStride;
-	};;
+	};
+
+	static PRIMITIVE_DESC INVALID_PRIMITIVE_DESC;
 
 public:
 	D3D11PrimitiveBuffer(
@@ -63,6 +67,29 @@ public:
 		const void* pIndexData,
 		size_t IndexSize
 	) final;
+
+	void UploadToGPU_VB(ID3D11DeviceContext* pDeviceContext);
+	void UploadToGPU_IB(ID3D11DeviceContext* pDeviceContext);
+
+	__FORCEINLINE const PRIMITIVE_DESC& INL_GetPrimitiveDesc(size_t PrimitiveIndex) const noexcept
+	{
+		if (PrimitiveIndex >= m_NumPrimitives)
+			return INVALID_PRIMITIVE_DESC;
+		return m_Primitives[PrimitiveIndex];
+	}
+
+	__FORCEINLINE ID3D11Buffer* INL_GetD3D11VertexBuffer() const noexcept
+	{
+		return m_pD3D11VertexBuffer;
+	}
+
+	__FORCEINLINE ID3D11Buffer* INL_GetD3D11IndexBuffer() const noexcept
+	{
+		return m_pD3D11IndexBuffer;
+	}
+
+	__FORCEINLINE BOOL INL_IsDirtyVertexBuffer() const noexcept { return m_DirtyVertexBuffer; }
+	__FORCEINLINE BOOL INL_IsDirtyIndexBuffer() const noexcept { return m_DirtyIndexBuffer; }
 
 private:
 	virtual ~D3D11PrimitiveBuffer() noexcept;

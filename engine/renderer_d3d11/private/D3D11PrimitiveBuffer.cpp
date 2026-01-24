@@ -4,6 +4,8 @@
 #include "D3D11Blob.h"
 
 
+D3D11PrimitiveBuffer::PRIMITIVE_DESC D3D11PrimitiveBuffer::INVALID_PRIMITIVE_DESC = {};
+
 D3D11PrimitiveBuffer::D3D11PrimitiveBuffer(
 	BUFFER_USAGE Usage,
 	ID3D11Buffer* pVertexBuffer,
@@ -17,7 +19,7 @@ D3D11PrimitiveBuffer::D3D11PrimitiveBuffer(
 	, m_VertexBufferSize(VertexBufferSize)
 	, m_IndexBufferSize(IndexBufferSize)
 {
-	m_ID = static_cast<UINT64>(D3D11Common::GetUID());
+	m_ID = static_cast<UINT64>(D3D11_COMMON::GetUID());
 	m_LoadStat = LOAD_STAT::LOADED;
 }
 
@@ -150,18 +152,9 @@ BOOL D3D11PrimitiveBuffer::UpdateVertex(
 		return FALSE;
 	}
 
-	if (m_pVertexBlob)
-	{
-		if (m_pVertexBlob->INL_GetSize() < VertexSize)
-		{
-			D3D11BlobAllocator::Get()->Release(m_pVertexBlob);
-			m_pVertexBlob = nullptr;
-		}
-	}
-
 	if (!m_pVertexBlob)
 	{
-		m_pVertexBlob = D3D11BlobAllocator::Get()->Acquire(VertexSize);
+		m_pVertexBlob = D3D11BlobAllocator::Get()->Acquire(m_VertexBufferSize);
 		if (!m_pVertexBlob)
 		{
 			SYS_LOG_E("D3D11PrimitiveBuffer::UpdateVertex: Failed to acquire vertex blob.");
@@ -200,18 +193,9 @@ BOOL D3D11PrimitiveBuffer::UpdateIndex(
 		return FALSE;
 	}
 
-	if (m_pIndexBlob)
-	{
-		if (m_pIndexBlob->INL_GetSize() < IndexSize)
-		{
-			D3D11BlobAllocator::Get()->Release(m_pIndexBlob);
-			m_pIndexBlob = nullptr;
-		}
-	}
-
 	if (!m_pIndexBlob)
 	{
-		m_pIndexBlob = D3D11BlobAllocator::Get()->Acquire(IndexSize);
+		m_pIndexBlob = D3D11BlobAllocator::Get()->Acquire(m_IndexBufferSize);
 		if (!m_pIndexBlob)
 		{
 			SYS_LOG_E("D3D11PrimitiveBuffer::UpdateVertex: Failed to acquire vertex blob.");
@@ -228,5 +212,118 @@ BOOL D3D11PrimitiveBuffer::UpdateIndex(
 	m_DirtyIndexBuffer = TRUE;
 
 	return TRUE;
+}
+
+void D3D11PrimitiveBuffer::UploadToGPU_VB(ID3D11DeviceContext* pDeviceContext)
+{
+	if (!m_DirtyVertexBuffer)
+		return;
+
+	m_DirtyVertexBuffer = FALSE;
+	if (m_Usage == BUFFER_USAGE::IMMUTABLE)
+	{
+		SYS_LOG_E("D3D11PrimitiveBuffer::UpdateToGPU_VB: Cannot update immutable vertex buffer.");
+	}
+	else if (m_Usage == BUFFER_USAGE::DEFAULT)
+	{
+		pDeviceContext->UpdateSubresource(
+			m_pD3D11VertexBuffer,
+			0,
+			nullptr,
+			m_pVertexBlob->INL_GetPointer(),
+			(UINT32)m_VertexBufferSize,
+			0
+		);
+	}
+	else if (m_Usage == BUFFER_USAGE::STAGING)
+	{
+		SYS_LOG_E("D3D11PrimitiveBuffer::UpdateToGPU_VB: Cannot update staging vertex buffer.");
+	}
+	else if (m_Usage == BUFFER_USAGE::DYNAMIC)
+	{
+		// 계속 진행
+		D3D11_MAPPED_SUBRESOURCE MappedResource = {};
+
+		HRESULT hr = pDeviceContext->Map(
+			m_pD3D11VertexBuffer,
+			0,
+			D3D11_MAP_WRITE_DISCARD,
+			0,
+			&MappedResource
+		);
+
+		if (FAILED(hr))
+		{
+			SYS_LOG_E("D3D11PrimitiveBuffer::UpdateToGPU_VB: Failed to map vertex buffer to GPU.");
+			return;
+		}
+
+		memcpy(
+			MappedResource.pData,
+			m_pVertexBlob->INL_GetPointer(),
+			m_VertexBufferSize
+		);
+
+		pDeviceContext->Unmap(m_pD3D11VertexBuffer, 0);
+	}
+}
+
+void D3D11PrimitiveBuffer::UploadToGPU_IB(ID3D11DeviceContext* pDeviceContext)
+{
+	if (!m_DirtyIndexBuffer)
+		return;
+
+	m_DirtyIndexBuffer = FALSE;
+
+	if (m_Usage == BUFFER_USAGE::IMMUTABLE)
+	{
+		SYS_LOG_E("D3D11PrimitiveBuffer::UpdateToGPU_IB: Cannot update immutable index buffer.");
+	}
+	else if (m_Usage == BUFFER_USAGE::DEFAULT)
+	{
+		pDeviceContext->UpdateSubresource(
+			m_pD3D11IndexBuffer,
+			0,
+			nullptr,
+			m_pIndexBlob->INL_GetPointer(),
+			m_IndexBufferSize,
+			0
+		);
+	}
+	else if (m_Usage == BUFFER_USAGE::STAGING)
+	{
+		SYS_LOG_E("D3D11PrimitiveBuffer::UpdateToGPU_IB: Cannot update staging index buffer.");
+	}
+	else if(m_Usage == BUFFER_USAGE::DYNAMIC)
+	{
+		// 계속 진행
+		D3D11_MAPPED_SUBRESOURCE MappedResource = {};
+
+		HRESULT hr = pDeviceContext->Map(
+			m_pD3D11IndexBuffer,
+			0,
+			D3D11_MAP_WRITE_DISCARD,
+			0,
+			&MappedResource
+		);
+
+		if (FAILED(hr))
+		{
+			SYS_LOG_E("D3D11PrimitiveBuffer::UpdateToGPU_IB: Failed to map index buffer to GPU.");
+			return;
+		}
+
+		memcpy(
+			MappedResource.pData,
+			m_pIndexBlob->INL_GetPointer(),
+			m_IndexBufferSize
+		);
+
+		pDeviceContext->Unmap(m_pD3D11IndexBuffer, 0);
+	}
+	else
+	{
+		SYS_LOG_E("D3D11PrimitiveBuffer::UpdateToGPU_IB: Unknown buffer usage.");
+	}
 }
 

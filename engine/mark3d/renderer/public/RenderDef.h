@@ -638,6 +638,17 @@ struct SHADER_PROGRAM_CREATE_DESC
 	size_t ShaderSourceSize;
 };
 
+struct RENDER_TRANSFORM
+{
+	FLOAT4 LocalPosition;
+	QUATERNION LocalRotation;
+	FLOAT4 LocalScale;
+
+	MATRIX4 LocalTM;
+	MATRIX4 WorldTM;
+	MATRIX4 InvWorldTM;
+};
+
 struct MARKENGINE_API RENDER_SETTINGS
 {
 	BOOL VSyncEnabled; // 수직 동기화 활성화 여부
@@ -1505,7 +1516,8 @@ struct IRenderContext : public IUNKNOWN
 	
 	virtual void SetSurfaceMaterial(ISurfaceMaterial* pSurfaceMaterial) = 0;
 	virtual void SetPrimitiveBuffer(IPrimitiveBuffer* pPrimitiveBuffer) = 0;
-	virtual void DrawPrimitive(int32 PrimitiveIndex) = 0;
+	
+	virtual void DrawPrimitive(const LOCAL_TRANSFORM& Transform, int32 PrimitiveIndex) = 0;
 
 };
 
@@ -1521,6 +1533,7 @@ public:
 
 	virtual BOOL CreatePrimitiveBuffer(const PRIMITIVEBUFFER_CREATE_DESC& Desc, IPrimitiveBuffer** ppOut) = 0;
 	virtual BOOL CreateRenderCamera(const RENDERCAMERA_CREATE_DESC& Desc, IRenderCamera** ppOut) = 0;
+	virtual BOOL CreateSurfaceMaterial(ISurfaceMaterial** ppOut) = 0;
 	virtual BOOL GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DESC& Desc, IShaderProgram** ppOut) = 0;
 
 	virtual BOOL GetOrCreateRenderContext(IRenderContext** ppContext) = 0;

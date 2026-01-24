@@ -54,6 +54,17 @@ public:
 	__FORCEINLINE NameHash INL_GetShaderName() const noexcept { return m_ShaderName; }
 	__FORCEINLINE UINT32 INL_GetShaderDefinesHash() const noexcept { return m_ShaderDefinesHash; }
 	__FORCEINLINE HASH_NODE* INL_GetHashNode() noexcept { return &m_HashNode; }
+	__FORCEINLINE UINT32 INL_GetInputVertexFormat() const noexcept { return m_InputVertexFormat; }
+
+	__FORCEINLINE ID3D11VertexShader* INL_GetVertexShader() noexcept
+	{
+		return (m_ShaderType == SHADER_TYPE::VERTEX) ? m_pVertexShader : nullptr;
+	}
+
+	__FORCEINLINE ID3D11PixelShader* INL_GetPixelShader() noexcept
+	{
+		return (m_ShaderType == SHADER_TYPE::PIXEL) ? m_pPixelShader : nullptr;
+	}
 
 private:
 	virtual ~D3D11ShaderProgram() noexcept;

@@ -9,7 +9,7 @@ D3D11ConstantBuffer::D3D11ConstantBuffer(ID3D11Buffer* pBuffer, void* pAlignedBu
 	, m_pBufferDataRef(nullptr)
 	, m_LinkNode{}
 {
-	m_ID = static_cast<UINT32>(D3D11Common::GetUID());
+	m_ID = static_cast<UINT32>(D3D11_COMMON::GetUID());
 	m_LoadStat = LOAD_STAT::LOADED;
 	m_LinkNode.data = this;
 }

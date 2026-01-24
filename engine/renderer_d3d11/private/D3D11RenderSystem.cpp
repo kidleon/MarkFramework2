@@ -7,6 +7,7 @@
 #include "D3D11ConstantBufferAllocator.h"
 #include "D3D11BlobAllocator.h"
 #include "D3D11RenderContext.h"
+#include "D3D11ResourceCommandPool.h"
 #include "D3D11RenderCommandPool.h"
 #include "D3D11RenderCommandExecutor.h"
 #include "D3D11PrimitiveBuffer.h"
@@ -15,6 +16,8 @@
 #include "D3D11ShaderProgramCompile.h"
 #include "D3D11InputLayoutCache.h"
 #include "D3D11SurfaceMaterialBlockPool.h"
+#include "D3D11SurfaceMaterial.h"
+#include "D3D11SurfaceMaterialBlock.h"
 #include "D3D11RenderCommand.h"
 
 
@@ -72,7 +75,7 @@ BOOL D3D11RenderSystem::Init(
 )
 {
 	D3D11Heap_Init(1024 * 1024 * 10, MemoryReporter);
-	D3D11Common::Init();
+	D3D11_COMMON::Init();
 
 	BOOL DebugDevice = FALSE;
 
@@ -90,6 +93,9 @@ BOOL D3D11RenderSystem::Init(
 		return FALSE;
 	}
 
+	m_pBlobAllocator = D3D11_NEW(D3D11BlobAllocator)();
+	m_pBlobAllocator->Init();
+
 	m_pCBAllocator = D3D11_NEW(D3D11ConstantBufferAllocator)();
 	m_pCBAllocator->Init(m_pRenderDevice);
 
@@ -102,8 +108,11 @@ BOOL D3D11RenderSystem::Init(
 	m_pSurfaceMaterialBlockPool = D3D11_NEW(D3D11SurfaceMaterialBlockPool)();
 	m_pSurfaceMaterialBlockPool->Init(512);
 
+	m_pResourceCommandPool = D3D11_NEW(D3D11ResourceCommandPool)();
+	m_pResourceCommandPool->Init(64);
+
 	m_pRenderCommandPool = D3D11_NEW(D3D11RenderCommandPool)();
-	m_pRenderCommandPool->Init(1024 * 16);
+	m_pRenderCommandPool->Init(64);
 
 	m_pRenderCommandExecutor = D3D11_NEW(D3D11RenderCommandExecutor)(m_pRenderDevice);
 
@@ -122,6 +131,12 @@ void D3D11RenderSystem::Shutdown()
 	{
 		D3D11_DELETE(m_pRenderCommandPool, D3D11RenderCommandPool);
 		m_pRenderCommandPool = nullptr;
+	}
+
+	if (m_pResourceCommandPool)
+	{
+		D3D11_DELETE(m_pResourceCommandPool, D3D11ResourceCommandPool);
+		m_pResourceCommandPool = nullptr;
 	}
 
 	if (m_pSurfaceMaterialBlockPool)
@@ -166,7 +181,7 @@ void D3D11RenderSystem::Shutdown()
 		m_pRenderDevice = nullptr;
 	}
 	
-	D3D11Common::Shutdown();
+	D3D11_COMMON::Shutdown();
 
 	D3D11Heap_ReportLeaks();
 	D3D11Heap_Shutdown();
@@ -174,12 +189,12 @@ void D3D11RenderSystem::Shutdown()
 
 const RENDER_SETTINGS& D3D11RenderSystem::GetRenderSettings() const noexcept
 {
-	return D3D11Common::GetRenderSettings();
+	return D3D11_COMMON::GetRenderSettings();
 }
 
 void D3D11RenderSystem::SetRenderSettings(const RENDER_SETTINGS& Settings) noexcept
 {
-	D3D11Common::SetRenderSettings(Settings);
+	D3D11_COMMON::SetRenderSettings(Settings);
 }
 
 BOOL D3D11RenderSystem::CreatePrimitiveBuffer(const PRIMITIVEBUFFER_CREATE_DESC& Desc, IPrimitiveBuffer** ppOut)
@@ -296,6 +311,26 @@ BOOL D3D11RenderSystem::CreateRenderCamera(
 	return TRUE;
 }
 
+BOOL D3D11RenderSystem::CreateSurfaceMaterial(ISurfaceMaterial** ppOut)
+{
+	D3D11_SURFACE_MATERIAL_BLOCK* pBlock = m_pSurfaceMaterialBlockPool->Acquire();
+	if (!pBlock)
+	{
+		SYS_LOG_E("D3D11RenderSystem::CreateSurfaceMaterial: Failed to acquire surface material block");
+		*ppOut = nullptr;
+		return FALSE;
+	}
+
+	D3D11SurfaceMaterial* pSurfaceMaterial = D3D11_POOL_NEW(D3D11SurfaceMaterial)(
+		D3D11_COMMON::GetUID(),
+		pBlock
+	);
+
+	*ppOut = pSurfaceMaterial;
+
+	return TRUE;
+}
+
 __FORCEINLINE int compare_strings(const void* a, const void* b) 
 {
 	return strcmp((const char*)a, (const char*)b);
@@ -339,7 +374,7 @@ BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DES
 	fstrlcpy(CompileDesc.szShaderModel, Desc.pTargetProfile, 32);
 	
 	UINT32 NumDefines = 0;
-	for(size_t i = 0; i < MAX_SHADER_DEFINE; i++)
+	for (size_t i = 0; i < MAX_SHADER_DEFINE; i++)
 	{
 		if (Desc.szShaderDefines[i][0] == '\0')
 			break;
@@ -357,6 +392,12 @@ BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DES
 	CompileDesc.NumDefines = NumDefines;
 	CompileDesc.pBuffer = Desc.pShaderSource;
 	CompileDesc.BufferSize = static_cast<UINT32>(Desc.ShaderSourceSize);
+
+#if defined(_DEBUG) || defined(DEBUG)
+	CompileDesc.Debug = TRUE;
+#else
+	CompileDesc.Debug = FALSE;
+#endif // defined(_DEBUG)
 
 	BOOL CompileOK = D3D11CompileShaderProgram(
 		CompileDesc,
@@ -424,7 +465,7 @@ BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DES
 		}
 
 		D3D11ShaderProgram* pShaderProgram = D3D11_POOL_NEW(D3D11ShaderProgram)(
-			D3D11Common::GetUID(),
+			D3D11_COMMON::GetUID(),
 			(UINT32)s_ShaderProgramIndex_VS,
 			Desc.ShaderName,
 			ShaderDefinesHash,
@@ -466,7 +507,7 @@ BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DES
 		}
 
 		D3D11ShaderProgram* pShaderProgram = D3D11_POOL_NEW(D3D11ShaderProgram)(
-			D3D11Common::GetUID(),
+			D3D11_COMMON::GetUID(),
 			(UINT32)s_ShaderProgramIndex_PS,
 			Desc.ShaderName,
 			ShaderDefinesHash,
@@ -484,7 +525,9 @@ BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DES
 	{
 		SYS_LOG_E("D3D11RenderSystem::GetOrCreateShaderProgram: Unsupported shader type for shader '%s'", Desc.szDebugName);
 		CHECK_RELEASE(CompileResult.pShaderBlob);
+
 		(*ppOut) = nullptr;
+
 		return FALSE;
 	}
 

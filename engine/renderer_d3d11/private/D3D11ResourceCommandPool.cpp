@@ -1,11 +1,11 @@
 ﻿#include "pch.h"
-#include "D3D11RenderCommandPool.h"
-#include "D3D11RenderCommand.h"
+#include "D3D11ResourceCommandPool.h"
+#include "D3D11ResourceCommand.h"
 
 
-D3D11RenderCommandPool* D3D11RenderCommandPool::s_pInstance = nullptr;
+D3D11ResourceCommandPool* D3D11ResourceCommandPool::s_pInstance = nullptr;
 
-D3D11RenderCommandPool::D3D11RenderCommandPool()
+D3D11ResourceCommandPool::D3D11ResourceCommandPool()
 {
 	if (!s_pInstance)
 	{
@@ -13,26 +13,26 @@ D3D11RenderCommandPool::D3D11RenderCommandPool()
 	}
 }
 
-D3D11RenderCommandPool::~D3D11RenderCommandPool() noexcept
+D3D11ResourceCommandPool::~D3D11ResourceCommandPool() noexcept
 {
 	Cleanup();
 	s_pInstance = nullptr;
 }
 
-BOOL D3D11RenderCommandPool::Init(size_t InitialCapacity)
+BOOL D3D11ResourceCommandPool::Init(size_t InitialCapacity)
 {
 	ExpandPool(InitialCapacity);
 	return TRUE;
 }
 
-void D3D11RenderCommandPool::Cleanup()
+void D3D11ResourceCommandPool::Cleanup()
 {
 	LINK_NODE* pNode = m_FreeList.head;
 
 	while (pNode)
 	{
 		LINK_NODE* pNextNode = pNode->next;
-		D3D11_DRAW_COMMAND* pCommand = (D3D11_DRAW_COMMAND*)pNode->data;
+		D3D11_RESOURCE_COMMAND* pCommand = (D3D11_RESOURCE_COMMAND*)pNode->data;
 		D3D11_SYS_FREE(pCommand);
 		pNode = pNextNode;
 	}
@@ -44,7 +44,7 @@ void D3D11RenderCommandPool::Cleanup()
 	while (pNode)
 	{
 		LINK_NODE* pNextNode = pNode->next;
-		D3D11_DRAW_COMMAND* pCommand = (D3D11_DRAW_COMMAND*)pNode->data;
+		D3D11_RESOURCE_COMMAND* pCommand = (D3D11_RESOURCE_COMMAND*)pNode->data;
 		D3D11_SYS_FREE(pCommand);
 		pNode = pNextNode;
 	}
@@ -53,7 +53,7 @@ void D3D11RenderCommandPool::Cleanup()
 	m_UsedList.tail = nullptr;
 }
 
-D3D11_DRAW_COMMAND* D3D11RenderCommandPool::Acquire()
+D3D11_RESOURCE_COMMAND* D3D11ResourceCommandPool::Acquire()
 {
 	if (m_FreeList.size == 0)
 	{
@@ -67,10 +67,10 @@ D3D11_DRAW_COMMAND* D3D11RenderCommandPool::Acquire()
 	// Add to used list
 	linked_list_push_back(&m_UsedList, pNode);
 
-	return (D3D11_DRAW_COMMAND*)pNode->data;
+	return (D3D11_RESOURCE_COMMAND*)pNode->data;
 }
 
-void D3D11RenderCommandPool::Release(D3D11_DRAW_COMMAND* pCommand)
+void D3D11ResourceCommandPool::Release(D3D11_RESOURCE_COMMAND* pCommand)
 {
 	if (!pCommand)
 		return;
@@ -84,12 +84,12 @@ void D3D11RenderCommandPool::Release(D3D11_DRAW_COMMAND* pCommand)
 	linked_list_push_front(&m_FreeList, &pCommand->LinkNode);
 }
 
-void D3D11RenderCommandPool::ExpandPool(size_t Count)
+void D3D11ResourceCommandPool::ExpandPool(size_t Count)
 {
 	for (size_t i = 0; i < Count; ++i)
 	{
-		D3D11_DRAW_COMMAND* pCommand = (D3D11_DRAW_COMMAND*)D3D11_SYS_ALLOC(sizeof(D3D11_DRAW_COMMAND));
-		memset(pCommand, 0, sizeof(D3D11_DRAW_COMMAND));
+		D3D11_RESOURCE_COMMAND* pCommand = (D3D11_RESOURCE_COMMAND*)D3D11_SYS_ALLOC(sizeof(D3D11_RESOURCE_COMMAND));
+		memset(pCommand, 0, sizeof(D3D11_RESOURCE_COMMAND));
 		pCommand->LinkNode.data = pCommand;
 		linked_list_push_front(&m_FreeList, &pCommand->LinkNode);
 	}

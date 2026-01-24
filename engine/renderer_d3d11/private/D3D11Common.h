@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "idgen.h"
 
-class D3D11Common
+class D3D11_COMMON
 {
 public:
 	static BOOL Init() noexcept;

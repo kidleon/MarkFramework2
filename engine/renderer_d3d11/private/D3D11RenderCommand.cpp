@@ -6,7 +6,7 @@
 
 void D3D11_DRAW_COMMAND::Reset()
 {
-	SortKey.Hash = 0;
+	SortKey.Value = 0;
 	CHECK_RELEASE(RenderPipeline.pVertexShader);
 	CHECK_RELEASE(RenderPipeline.pPixelShader);
 	DynamicRenderPipeline.BlendFactor = FLOAT4{ 1.0f, 1.0f, 1.0f, 1.0f };

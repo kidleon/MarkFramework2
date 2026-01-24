@@ -40,6 +40,12 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	CameraDesc.CameraOrder = 0;
 	m_pRenderSystem->CreateRenderCamera(CameraDesc, &m_pRenderCamera);
 
+	m_pRenderCamera->SetView(
+		FLOAT3{ 0.0f, 0.0f, -10.0f },
+		FLOAT3{ 0.0f, 0.0f, 1.0f },
+		FLOAT3{ 0.0f, 1.0f, 0.0f }
+	);
+
 	PRIMITIVEBUFFER_CREATE_DESC PBDesc = {};
 	PBDesc.Usage = BUFFER_USAGE::DEFAULT;
 	PBDesc.VertexBufferSize = 256;
@@ -86,7 +92,7 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	{
 		size_t ShaderFileSize = pDataStream->GetSize() + 1;
 		char* pShaderSource = (char*)malloc(ShaderFileSize);
-	
+
 		memset(pShaderSource, 0, sizeof(char) * ShaderFileSize);
 		pDataStream->Read(pShaderSource, ShaderFileSize);
 		pShaderSource[ShaderFileSize - 1] = '\0';
@@ -114,7 +120,11 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	}
 
 	pFileSystem->Release();
-	
+
+	m_pRenderSystem->CreateSurfaceMaterial(&m_pSurfaceMaterial);
+	m_pSurfaceMaterial->AddPass("MainPass");
+	m_pSurfaceMaterial->SetVertexShader(m_pShaderProgram_VS);
+	m_pSurfaceMaterial->SetPixelShader(m_pShaderProgram_PS);
 
 	return TRUE;
 }
@@ -130,17 +140,30 @@ void D3D11Application::OnUpdate()
 
 	pRenderContext->BeginFrame();
 	pRenderContext->BeginRenderCamera(m_pRenderCamera);
+	
+	pRenderContext->SetSurfaceMaterial(m_pSurfaceMaterial);
+	pRenderContext->SetPrimitiveBuffer(m_pPrimitiveBuffer);
+
+	LOCAL_TRANSFORM Transform = {};
+	Transform.Position = FLOAT4{ 0.0f, 0.0f, 0.0f, 1.0f };
+	Transform.Rotation = QUAT{ 0.0f, 0.0f, 0.0f, 1.0f };
+	Transform.Scale = FLOAT4{ 1.0f, 1.0f, 1.0f, 0.0f };
+	compute_transform(&Transform);
+
+	pRenderContext->DrawPrimitive(Transform, 0);
+
 	pRenderContext->EndRenderCamera();
 	pRenderContext->EndFrame();
+	
 	pRenderContext->Release();
 	
 	m_pRenderSystem->Update();
-	
 }
 
 void D3D11Application::OnDestroy()
 {
 	CHECK_RELEASE(m_pPrimitiveBuffer);
+	CHECK_RELEASE(m_pSurfaceMaterial);
 	CHECK_RELEASE(m_pShaderProgram_VS);
 	CHECK_RELEASE(m_pShaderProgram_PS);
 	CHECK_RELEASE(m_pRenderCamera);

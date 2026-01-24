@@ -9,6 +9,7 @@ class D3D11BlobAllocator;
 class D3D11RenderContext;
 class D3D11ShaderProgramCache;
 class D3D11SurfaceMaterialBlockPool;
+class D3D11ResourceCommandPool;
 class D3D11RenderCommandPool;
 class D3D11RenderCommandExecutor;
 class D3D11InputLayoutCache;
@@ -35,6 +36,7 @@ public:
 
 	virtual BOOL CreatePrimitiveBuffer(const PRIMITIVEBUFFER_CREATE_DESC& Desc, IPrimitiveBuffer** ppOut) final;
 	virtual BOOL CreateRenderCamera(const RENDERCAMERA_CREATE_DESC& Desc, IRenderCamera** ppOut) final;
+	virtual BOOL CreateSurfaceMaterial(ISurfaceMaterial** ppOut) final;
 	virtual BOOL GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DESC& Desc, IShaderProgram** ppOut) final;
 
 	virtual BOOL GetOrCreateRenderContext(IRenderContext** ppContext) final;
@@ -56,6 +58,7 @@ private:
 	D3D11RenderContext* m_pRenderContext = nullptr;
 	D3D11ShaderProgramCache* m_pShaderProgramCache = nullptr;
 	D3D11SurfaceMaterialBlockPool* m_pSurfaceMaterialBlockPool = nullptr;
+	D3D11ResourceCommandPool* m_pResourceCommandPool = nullptr;
 	D3D11RenderCommandPool* m_pRenderCommandPool = nullptr;
 	D3D11RenderCommandExecutor* m_pRenderCommandExecutor = nullptr;
 	D3D11InputLayoutCache* m_pInputLayoutCache = nullptr;
