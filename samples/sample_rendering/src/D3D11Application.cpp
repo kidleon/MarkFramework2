@@ -127,6 +127,7 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	m_pSurfaceMaterial->SetPixelShader(m_pShaderProgram_PS);
 
 	RS_RASTERIZER_STATE RasterizerState = GetRS_TwoSide();
+	RasterizerState.SetFrontCounterClockwise(true);
 	m_pSurfaceMaterial->SetRasterizerState(RasterizerState);
 
 	return TRUE;
