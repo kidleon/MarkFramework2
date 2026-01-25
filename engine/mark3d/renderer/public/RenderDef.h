@@ -1134,7 +1134,7 @@ struct MARKENGINE_API RS_DEPTH_STENCIL_STATE
 */
 struct MARKENGINE_API RS_RASTERIZER_STATE
 {
-	static RS_RASTERIZER_STATE DEFAULT; // 기본 래스터라이저 상태
+	static RS_RASTERIZER_STATE DEFAULT;
 	static RS_RASTERIZER_STATE WIREFRAME; // 와이어프레임 모드
 	static RS_RASTERIZER_STATE WIREFRAME_TWOSIDE; // 와이어프레임 + 양면 렌더링
 	static RS_RASTERIZER_STATE TWO_SIDE; // 양면 렌더링
@@ -1172,6 +1172,26 @@ struct MARKENGINE_API RS_RASTERIZER_STATE
 		, DepthBias(0)
 		, DepthBiasClamp(0.0f)
 		, SlopeScaledDepthBias(0.0f)
+	{
+	}
+
+	constexpr RS_RASTERIZER_STATE(
+		FILL_MODE fillMode, 
+		CULL_MODE cullMode, 
+		CONSERVATIVE_RASTER_MODE 
+		conservativeRaster, 
+		uint8_t flags, 
+		int32_t depthBias,
+		float depthBiasClamp, 
+		float slopeScaledDepthBias
+	)
+		: FillMode(fillMode)
+		, CullMode(cullMode)
+		, ConservativeRaster(conservativeRaster)
+		, Flags(flags)
+		, DepthBias(depthBias)
+		, DepthBiasClamp(depthBiasClamp)
+		, SlopeScaledDepthBias(slopeScaledDepthBias)
 	{
 	}
 
