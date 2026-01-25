@@ -1134,11 +1134,6 @@ struct MARKENGINE_API RS_DEPTH_STENCIL_STATE
 */
 struct MARKENGINE_API RS_RASTERIZER_STATE
 {
-	static RS_RASTERIZER_STATE DEFAULT;
-	static RS_RASTERIZER_STATE WIREFRAME; // 와이어프레임 모드
-	static RS_RASTERIZER_STATE WIREFRAME_TWOSIDE; // 와이어프레임 + 양면 렌더링
-	static RS_RASTERIZER_STATE TWO_SIDE; // 양면 렌더링
-
 	// 기본 래스터화 설정
 	FILL_MODE FillMode;
 	CULL_MODE CullMode;
@@ -1337,6 +1332,32 @@ struct MARKENGINE_API RS_RASTERIZER_STATE
 	}
 };
 
+inline RS_RASTERIZER_STATE GetRS_Default()
+{
+	return RS_RASTERIZER_STATE();
+}
+
+inline RS_RASTERIZER_STATE GetRS_TwoSide()
+{
+	RS_RASTERIZER_STATE state = GetRS_Default();
+	state.CullMode = CULL_MODE::NONE;
+	return state;
+}
+
+inline RS_RASTERIZER_STATE GetRS_Wireframe()
+{
+	RS_RASTERIZER_STATE state = GetRS_Default();
+	state.FillMode = FILL_MODE::WIREFRAME;
+	return state;
+}
+
+inline RS_RASTERIZER_STATE GetRS_WireframeTwoSide()
+{
+	RS_RASTERIZER_STATE state = GetRS_Default();
+	state.FillMode = FILL_MODE::WIREFRAME;
+	state.CullMode = CULL_MODE::NONE;
+	return state;
+}
 
 /**
 * @brief 서피스 메테리얼 인터페이스
@@ -1358,6 +1379,9 @@ public:
 
 	virtual IShaderProgram* GetPixelShader(int32 Pass) noexcept = 0;
 	virtual IShaderProgram* GetPixelShader() noexcept = 0;
+
+	virtual void SetRasterizerState(int32 Pass, const RS_RASTERIZER_STATE& RasterizerState) = 0;
+	virtual void SetRasterizerState(const RS_RASTERIZER_STATE& RasterizerState) = 0;
 
 	virtual void SetColor(int32 Pass, const FLOAT4& Color) = 0;
 	virtual void SetColor(const FLOAT4& Color) = 0;

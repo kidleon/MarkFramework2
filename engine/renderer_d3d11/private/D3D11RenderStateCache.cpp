@@ -9,7 +9,7 @@ static inline D3D11RasterizerState* CreateRasterizerState(
 )
 {
 	ID3D11RasterizerState* pD3D11_RS = nullptr;
-	if (!D3D11RenderDevice::Get().CreateRasterizerState(RS_RASTERIZER_STATE::DEFAULT, &pD3D11_RS))
+	if (!D3D11RenderDevice::Get().CreateRasterizerState(RasterizerState, &pD3D11_RS))
 	{
 		SYS_LOG_E("CreateRasterizerState - Failed to create default rasterizer state.");
 		return nullptr;
@@ -19,16 +19,20 @@ static inline D3D11RasterizerState* CreateRasterizerState(
 	return pRS;
 }
 
+D3D11RenderStateCache* D3D11RenderStateCache::s_pInstance = nullptr;
+
 D3D11RenderStateCache::D3D11RenderStateCache()
 	: m_pRasterizerStateCache(nullptr)
 	, m_pBlendStateCache(nullptr)
 {
 	// Constructor
+	s_pInstance = this;
 }
 
 D3D11RenderStateCache::~D3D11RenderStateCache() noexcept
 {
 	Shutdown();
+	s_pInstance = nullptr;
 }
 
 void D3D11RenderStateCache::Init()
@@ -38,8 +42,9 @@ void D3D11RenderStateCache::Init()
 
 	// Pre-create common rasterizer states
 	{
-		uint64 Hash = fnv64_c(&RS_RASTERIZER_STATE::DEFAULT, sizeof(RS_RASTERIZER_STATE));
-		D3D11RasterizerState* pRS = CreateRasterizerState(RS_RASTERIZER_STATE::DEFAULT);
+		RS_RASTERIZER_STATE DefaultState = GetRS_Default();
+		uint64 Hash = fnv64_c(&DefaultState, sizeof(RS_RASTERIZER_STATE));
+		D3D11RasterizerState* pRS = CreateRasterizerState(DefaultState);
 		insert_hash_node(
 			m_pRasterizerStateCache,
 			(int64)Hash,
@@ -48,8 +53,9 @@ void D3D11RenderStateCache::Init()
 	}
 	
 	{
-		uint64 Hash = fnv64_c(&RS_RASTERIZER_STATE::WIREFRAME, sizeof(RS_RASTERIZER_STATE));
-		D3D11RasterizerState* pRS = CreateRasterizerState(RS_RASTERIZER_STATE::WIREFRAME);
+		RS_RASTERIZER_STATE WireframeState = GetRS_Wireframe();
+		uint64 Hash = fnv64_c(&WireframeState, sizeof(RS_RASTERIZER_STATE));
+		D3D11RasterizerState* pRS = CreateRasterizerState(WireframeState);
 		insert_hash_node(
 			m_pRasterizerStateCache,
 			(int64)Hash,
@@ -58,8 +64,9 @@ void D3D11RenderStateCache::Init()
 	}
 
 	{
-		uint64 Hash = fnv64_c(&RS_RASTERIZER_STATE::WIREFRAME_TWOSIDE, sizeof(RS_RASTERIZER_STATE));
-		D3D11RasterizerState* pRS = CreateRasterizerState(RS_RASTERIZER_STATE::WIREFRAME_TWOSIDE);
+		RS_RASTERIZER_STATE WireframeTwoSideState = GetRS_WireframeTwoSide();
+		uint64 Hash = fnv64_c(&WireframeTwoSideState, sizeof(RS_RASTERIZER_STATE));
+		D3D11RasterizerState* pRS = CreateRasterizerState(WireframeTwoSideState);
 		insert_hash_node(
 			m_pRasterizerStateCache,
 			(int64)Hash,
@@ -68,8 +75,9 @@ void D3D11RenderStateCache::Init()
 	}
 
 	{
-		uint64 Hash = fnv64_c(&RS_RASTERIZER_STATE::TWO_SIDE, sizeof(RS_RASTERIZER_STATE));
-		D3D11RasterizerState* pRS = CreateRasterizerState(RS_RASTERIZER_STATE::TWO_SIDE);
+		RS_RASTERIZER_STATE TwoSideState = GetRS_TwoSide();
+		uint64 Hash = fnv64_c(&TwoSideState, sizeof(RS_RASTERIZER_STATE));
+		D3D11RasterizerState* pRS = CreateRasterizerState(TwoSideState);
 		insert_hash_node(
 			m_pRasterizerStateCache,
 			(int64)Hash,
@@ -135,24 +143,29 @@ void D3D11RenderStateCache::Shutdown()
 	}
 }
 
-void D3D11RenderStateCache::Register(const RS_RASTERIZER_STATE& RasterizerState) noexcept
+ID3D11RasterizerState* D3D11RenderStateCache::Register(const RS_RASTERIZER_STATE& RasterizerState) noexcept
 {
-	uint64 Hash = fnv64_c(&RS_RASTERIZER_STATE::DEFAULT, sizeof(RS_RASTERIZER_STATE));
+	uint64 Hash = fnv64_c(&RasterizerState, sizeof(RS_RASTERIZER_STATE));
 
-	void* pNode = query_hash_node(
+	D3D11RasterizerState* pRS = (D3D11RasterizerState*)query_hash_node(
 		m_pRasterizerStateCache,
 		(int64)Hash
 	);
 
-	if (pNode) return; // 이미 등록된 상태이면 무시
+	if (pRS)
+	{
+		return pRS->INL_GetD3D11RasterizerState();
+	}
 
-	D3D11RasterizerState* pRS = CreateRasterizerState(RasterizerState);
+	pRS = CreateRasterizerState(RasterizerState);
 
 	insert_hash_node(
 		m_pRasterizerStateCache,
 		(int64)Hash,
 		pRS->INL_GetHashNode()
 	);
+
+	return pRS->INL_GetD3D11RasterizerState();
 }
 
 void D3D11RenderStateCache::Register(const RS_BLEND_STATE& BlendState) noexcept
@@ -161,8 +174,13 @@ void D3D11RenderStateCache::Register(const RS_BLEND_STATE& BlendState) noexcept
 
 ID3D11RasterizerState* D3D11RenderStateCache::Find(const RS_RASTERIZER_STATE& RasterizerState) noexcept
 {
-	uint64 Hash = fnv64_c(&RS_RASTERIZER_STATE::DEFAULT, sizeof(RS_RASTERIZER_STATE));
+	uint64 Hash = fnv64_c(&RasterizerState, sizeof(RS_RASTERIZER_STATE));
 
+	return Find(Hash);
+}
+
+ID3D11RasterizerState* D3D11RenderStateCache::Find(uint64 Hash) noexcept
+{
 	D3D11RasterizerState* pRS = (D3D11RasterizerState*)query_hash_node(
 		m_pRasterizerStateCache,
 		(int64)Hash

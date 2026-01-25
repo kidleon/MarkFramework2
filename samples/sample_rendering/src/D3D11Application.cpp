@@ -41,7 +41,7 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	m_pRenderSystem->CreateRenderCamera(CameraDesc, &m_pRenderCamera);
 
 	m_pRenderCamera->SetView(
-		FLOAT3{ 0.0f, 0.0f, -10.0f },
+		FLOAT3{ 0.0f, 0.0f, -5.0f },
 		FLOAT3{ 0.0f, 0.0f, 1.0f },
 		FLOAT3{ 0.0f, 1.0f, 0.0f }
 	);
@@ -125,6 +125,9 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	m_pSurfaceMaterial->AddPass("MainPass");
 	m_pSurfaceMaterial->SetVertexShader(m_pShaderProgram_VS);
 	m_pSurfaceMaterial->SetPixelShader(m_pShaderProgram_PS);
+
+	RS_RASTERIZER_STATE RasterizerState = GetRS_TwoSide();
+	m_pSurfaceMaterial->SetRasterizerState(RasterizerState);
 
 	return TRUE;
 }

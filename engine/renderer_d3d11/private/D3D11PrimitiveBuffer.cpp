@@ -286,7 +286,7 @@ void D3D11PrimitiveBuffer::UploadToGPU_IB(ID3D11DeviceContext* pDeviceContext)
 			0,
 			nullptr,
 			m_pIndexBlob->INL_GetPointer(),
-			m_IndexBufferSize,
+			(UINT)m_IndexBufferSize,
 			0
 		);
 	}

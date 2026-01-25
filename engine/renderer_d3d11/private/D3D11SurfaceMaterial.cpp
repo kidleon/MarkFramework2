@@ -1,6 +1,8 @@
 ﻿#include "pch.h"
 #include "D3D11SurfaceMaterial.h"
 #include "D3D11SurfaceMaterialBlockPool.h"
+#include "D3D11RenderStateCache.h"
+#include "D3D11RenderState.h"
 
 
 D3D11SurfaceMaterial::D3D11SurfaceMaterial(UINT64 ID, D3D11_SURFACE_MATERIAL_BLOCK* pMaterialBlock)
@@ -160,6 +162,31 @@ IShaderProgram* D3D11SurfaceMaterial::GetPixelShader() noexcept
 		return nullptr;
 
 	return m_pMaterialBlock->RenderPasses[0].pPixelShader;
+}
+
+void D3D11SurfaceMaterial::SetRasterizerState(int32 Pass, const RS_RASTERIZER_STATE& RasterizerState)
+{
+	if (!m_pMaterialBlock->NumPasses || Pass < 0 || Pass >= (int32)m_pMaterialBlock->NumPasses)
+		return;
+
+	uint64 Hash = fnv64_c(&RasterizerState, sizeof(RS_RASTERIZER_STATE));
+	
+	if (m_pMaterialBlock->RenderPasses[Pass].RasterizerStateHash != Hash)
+	{
+		m_pMaterialBlock->RenderPasses[Pass].RasterizerStateHash = Hash;
+		m_pMaterialBlock->RenderPasses[Pass].pRasterizerState = D3D11RenderStateCache::Get()->Find(Hash);
+		if (!m_pMaterialBlock->RenderPasses[Pass].pRasterizerState)
+		{
+			m_pMaterialBlock->RenderPasses[Pass].pRasterizerState = D3D11RenderStateCache::Get()->Register(RasterizerState);
+		}
+	}
+}
+
+void D3D11SurfaceMaterial::SetRasterizerState(const RS_RASTERIZER_STATE& RasterizerState)
+{
+	if (!m_pMaterialBlock->NumPasses)
+		return;
+	SetRasterizerState(0, RasterizerState);
 }
 
 void D3D11SurfaceMaterial::SetColor(int32 Pass, const FLOAT4& Color)

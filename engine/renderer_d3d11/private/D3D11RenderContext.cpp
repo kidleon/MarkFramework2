@@ -210,6 +210,7 @@ void D3D11RenderContext::DrawPrimitive(const LOCAL_TRANSFORM& Transform, int32 P
 
 		pDrawCommand->RenderPipeline.pVertexShader = m_pCurSurfaceMaterial->INL_GetVertexShader(p);
 		pDrawCommand->RenderPipeline.pPixelShader = m_pCurSurfaceMaterial->INL_GetPixelShader(p);
+		pDrawCommand->RenderPipeline.pRasterizerState = m_pCurSurfaceMaterial->INL_GetRasterizerState(p);
 		pDrawCommand->RenderPipeline.Color = m_pCurSurfaceMaterial->INL_GetColor(p);
 
 		pDrawCommand->SortKey.Value = 0;

@@ -18,6 +18,7 @@
 #include "D3D11SurfaceMaterialBlockPool.h"
 #include "D3D11SurfaceMaterial.h"
 #include "D3D11SurfaceMaterialBlock.h"
+#include "D3D11RenderStateCache.h"
 #include "D3D11RenderCommand.h"
 
 
@@ -105,6 +106,9 @@ BOOL D3D11RenderSystem::Init(
 	m_pShaderProgramCache = D3D11_NEW(D3D11ShaderProgramCache)();
 	m_pShaderProgramCache->Init();
 
+	m_pRenderStateCache = D3D11_NEW(D3D11RenderStateCache)();
+	m_pRenderStateCache->Init();
+
 	m_pSurfaceMaterialBlockPool = D3D11_NEW(D3D11SurfaceMaterialBlockPool)();
 	m_pSurfaceMaterialBlockPool->Init(512);
 
@@ -143,6 +147,12 @@ void D3D11RenderSystem::Shutdown()
 	{
 		D3D11_DELETE(m_pSurfaceMaterialBlockPool, D3D11SurfaceMaterialBlockPool);
 		m_pSurfaceMaterialBlockPool = nullptr;
+	}
+
+	if (m_pRenderStateCache)
+	{
+		D3D11_DELETE(m_pRenderStateCache, D3D11RenderStateCache);
+		m_pRenderStateCache = nullptr;
 	}
 
 	if (m_pShaderProgramCache)

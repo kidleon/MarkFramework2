@@ -189,6 +189,7 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 			D3D11ShaderProgram* pSetVS = nullptr;
 			D3D11ShaderProgram* pSetPS = nullptr;
 			D3D11PrimitiveBuffer* pSetPB = nullptr;
+			ID3D11RasterizerState* pSetRS = nullptr;
 
 			UINT32 SetInputVertexFormat = 0;
 			ID3D11InputLayout* pSetIL = nullptr;
@@ -248,6 +249,13 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 
 				pDeviceContext->VSSetConstantBuffers(1, 1, &pObjCBBuffer);
 				pDeviceContext->PSSetConstantBuffers(1, 1, &pObjCBBuffer);
+
+				// 렌더 스테이트 설정
+				if (pSetRS != pCmd->RenderPipeline.pRasterizerState)
+				{
+					pSetRS = pCmd->RenderPipeline.pRasterizerState;
+					pDeviceContext->RSSetState(pSetRS);
+				}
 
 				if (!pCmd->pPrimitiveBuffer)
 				{

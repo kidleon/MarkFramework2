@@ -10,6 +10,9 @@ struct D3D11_SURFACE_RENDER_PASS
 	D3D11ShaderProgram* pVertexShader;
 	D3D11ShaderProgram* pPixelShader;
 
+	ID3D11RasterizerState* pRasterizerState;
+	UINT64 RasterizerStateHash;
+
 	FLOAT4 Color;
 };
 

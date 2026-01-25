@@ -7,6 +7,7 @@ struct D3D11_RENDER_PIPELINE
 {
 	D3D11ShaderProgram* pVertexShader;
 	D3D11ShaderProgram* pPixelShader;
+	ID3D11RasterizerState* pRasterizerState;
 	FLOAT4 Color;
 };
 

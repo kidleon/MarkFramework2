@@ -35,6 +35,9 @@ public:
 	virtual IShaderProgram* GetPixelShader(int32 Pass) noexcept final;
 	virtual IShaderProgram* GetPixelShader() noexcept final;
 
+	virtual void SetRasterizerState(int32 Pass, const RS_RASTERIZER_STATE& RasterizerState) final;
+	virtual void SetRasterizerState(const RS_RASTERIZER_STATE& RasterizerState) final;
+
 	virtual void SetColor(int32 Pass, const FLOAT4& Color) final;
 	virtual void SetColor(const FLOAT4& Color) final;
 
@@ -60,6 +63,11 @@ public:
 			m_pMaterialBlock->RenderPasses[Pass].pPixelShader->AddRef();
 
 		return m_pMaterialBlock->RenderPasses[Pass].pPixelShader;
+	}
+
+	__FORCEINLINE ID3D11RasterizerState* INL_GetRasterizerState(int32 Pass) noexcept
+	{
+		return m_pMaterialBlock->RenderPasses[Pass].pRasterizerState;
 	}
 
 	__FORCEINLINE const FLOAT4& INL_GetColor(int32 Pass) const noexcept

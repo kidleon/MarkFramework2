@@ -13,6 +13,7 @@ class D3D11ResourceCommandPool;
 class D3D11RenderCommandPool;
 class D3D11RenderCommandExecutor;
 class D3D11InputLayoutCache;
+class D3D11RenderStateCache;
 
 class D3D11RenderSystem final : public IRenderSystem
 {
@@ -58,6 +59,7 @@ private:
 	D3D11RenderContext* m_pRenderContext = nullptr;
 	D3D11ShaderProgramCache* m_pShaderProgramCache = nullptr;
 	D3D11SurfaceMaterialBlockPool* m_pSurfaceMaterialBlockPool = nullptr;
+	D3D11RenderStateCache* m_pRenderStateCache = nullptr;
 	D3D11ResourceCommandPool* m_pResourceCommandPool = nullptr;
 	D3D11RenderCommandPool* m_pRenderCommandPool = nullptr;
 	D3D11RenderCommandExecutor* m_pRenderCommandExecutor = nullptr;
