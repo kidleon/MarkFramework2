@@ -19,7 +19,7 @@ public:
 	void Shutdown();
 
 	void Register(UINT32 VertexFormat, ID3D11InputLayout* pInputLayout) noexcept;
-	ID3D11InputLayout* Find(UINT32 VertexFormat) noexcept;
+	ID3D11InputLayout* Find_RS(UINT32 VertexFormat) noexcept;
 
 	static inline D3D11InputLayoutCache* Get() noexcept { return s_pInstance; }
 

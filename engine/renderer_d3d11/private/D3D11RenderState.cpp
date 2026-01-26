@@ -26,3 +26,16 @@ D3D11BlendState::~D3D11BlendState() noexcept
 {
 	CHECK_RELEASE(m_pD3D11BlendState);
 }
+
+//------------------------------------------------------------------------------
+D3D11DepthStencilState::D3D11DepthStencilState(ID3D11DepthStencilState* pDepthStencilState)
+	: m_pD3D11DepthStencilState(pDepthStencilState)
+	, m_HashNode{}
+{
+	m_HashNode.data = this;
+}
+
+D3D11DepthStencilState::~D3D11DepthStencilState() noexcept
+{
+	CHECK_RELEASE(m_pD3D11DepthStencilState);
+}

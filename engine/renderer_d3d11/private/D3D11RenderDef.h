@@ -84,6 +84,12 @@ static constexpr D3D11_CULL_MODE D3D11_IMPL_CULL_MODE[(int)CULL_MODE::EMAX] =
     D3D11_CULL_BACK
 };
 
+static constexpr D3D11_DEPTH_WRITE_MASK D3D11_IMPL_DEPTH_WRITE_MASK[(int)DEPTH_WRITE_MASK::EMAX] =
+{
+    D3D11_DEPTH_WRITE_MASK_ZERO,
+    D3D11_DEPTH_WRITE_MASK_ALL
+};
+
 // STENCIL_OP와 D3D11_STENCIL_OP 매핑 테이블
 static constexpr D3D11_STENCIL_OP D3D11_IMPL_STENCIL_OP[(int)STENCIL_OP::EMAX] =
 {
@@ -557,6 +563,13 @@ struct D3D11_RENDERTARGET_CREATE_DESC
 };
 
 static constexpr size_t POOL_BLOCK_TYPE_COUNT = 11;
+
+static constexpr uint64 SORT_PASS_BIT = 4; // 16
+static constexpr uint64 SORT_VERTEX_SHADER_BIT = 12; // 4096
+static constexpr uint64 SORT_PIXEL_SHADER_BIT = 12; // 4096
+static constexpr uint64 SORT_TEXTURE_ID_BIT = 15; // 32768
+static constexpr uint64 SORT_STATE_INDEX_BIT = 12; // 4096
+static constexpr uint64 SORT_DEPTH_BIT = 9; // 512
 
 
 #endif // __D3D11_RENDER_DEF_H__

@@ -1053,6 +1053,8 @@ struct MARKENGINE_API RS_DEPTH_STENCIL_STATE
 	BOOL8 DepthEnable;
 	BOOL8 DepthWriteEnable;
 	COMPARISON_FUNC DepthFunc;
+	DEPTH_WRITE_MASK DepthWriteMask;
+	UINT8 PADDING_DEPTH;
 
 	// 스텐실 설정
 	BOOL8 StencilEnable;
@@ -1069,6 +1071,8 @@ struct MARKENGINE_API RS_DEPTH_STENCIL_STATE
 		: DepthEnable(TRUE)
 		, DepthWriteEnable(TRUE)
 		, DepthFunc(COMPARISON_FUNC::LESS)
+		, DepthWriteMask(DEPTH_WRITE_MASK::ALL)
+		, PADDING_DEPTH(0)
 		, StencilEnable(FALSE)
 		, StencilReadMask(0xFF)
 		, StencilWriteMask(0xFF)
@@ -1382,6 +1386,21 @@ public:
 
 	virtual void SetRasterizerState(int32 Pass, const RS_RASTERIZER_STATE& RasterizerState) = 0;
 	virtual void SetRasterizerState(const RS_RASTERIZER_STATE& RasterizerState) = 0;
+
+	virtual void SetBlendState(int32 Pass, const RS_BLEND_STATE& BlendState) = 0;
+	virtual void SetBlendState(const RS_BLEND_STATE& BlendState) = 0;
+
+	virtual void SetBlendFactor(int32 Pass, const FLOAT4& BlendFactor) = 0;
+	virtual void SetBlendFactor(const FLOAT4& BlendFactor) = 0;
+
+	virtual void SetSampleMask(int32 Pass, UINT32 SampleMask) = 0;
+	virtual void SetSampleMask(UINT32 SampleMask) = 0;
+
+	virtual void SetDepthStencilState(int32 Pass, const RS_DEPTH_STENCIL_STATE& DepthStencilState) = 0;
+	virtual void SetDepthStencilState(const RS_DEPTH_STENCIL_STATE& DepthStencilState) = 0;
+
+	virtual void SetStencilRef(int32 Pass, UINT8 StencilRef) = 0;
+	virtual void SetStencilRef(UINT8 StencilRef) = 0;
 
 	virtual void SetColor(int32 Pass, const FLOAT4& Color) = 0;
 	virtual void SetColor(const FLOAT4& Color) = 0;

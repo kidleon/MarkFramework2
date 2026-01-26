@@ -174,7 +174,8 @@ void D3D11SurfaceMaterial::SetRasterizerState(int32 Pass, const RS_RASTERIZER_ST
 	if (m_pMaterialBlock->RenderPasses[Pass].RasterizerStateHash != Hash)
 	{
 		m_pMaterialBlock->RenderPasses[Pass].RasterizerStateHash = Hash;
-		m_pMaterialBlock->RenderPasses[Pass].pRasterizerState = D3D11RenderStateCache::Get()->Find(Hash);
+		m_pMaterialBlock->RenderPasses[Pass].pRasterizerState = D3D11RenderStateCache::Get()->Find_RS(Hash);
+
 		if (!m_pMaterialBlock->RenderPasses[Pass].pRasterizerState)
 		{
 			m_pMaterialBlock->RenderPasses[Pass].pRasterizerState = D3D11RenderStateCache::Get()->Register(RasterizerState);
@@ -187,6 +188,101 @@ void D3D11SurfaceMaterial::SetRasterizerState(const RS_RASTERIZER_STATE& Rasteri
 	if (!m_pMaterialBlock->NumPasses)
 		return;
 	SetRasterizerState(0, RasterizerState);
+}
+
+void D3D11SurfaceMaterial::SetBlendState(int32 Pass, const RS_BLEND_STATE& BlendState)
+{
+	if (!m_pMaterialBlock->NumPasses || Pass < 0 || Pass >= (int32)m_pMaterialBlock->NumPasses)
+		return;
+
+	uint64 Hash = fnv64_c(&BlendState, sizeof(RS_BLEND_STATE));
+	if (m_pMaterialBlock->RenderPasses[Pass].BlendStateHash != Hash)
+	{
+		m_pMaterialBlock->RenderPasses[Pass].BlendStateHash = Hash;
+		m_pMaterialBlock->RenderPasses[Pass].pBlendState = D3D11RenderStateCache::Get()->Find_BS(Hash);
+
+		if (!m_pMaterialBlock->RenderPasses[Pass].pBlendState)
+		{
+			m_pMaterialBlock->RenderPasses[Pass].pBlendState = D3D11RenderStateCache::Get()->Register(BlendState);
+		}
+	}
+}
+void D3D11SurfaceMaterial::SetBlendState(const RS_BLEND_STATE& BlendState)
+{
+	if (!m_pMaterialBlock->NumPasses)
+		return;
+
+	SetBlendState(0, BlendState);
+}
+
+void D3D11SurfaceMaterial::SetBlendFactor(int32 Pass, const FLOAT4& BlendFactor)
+{
+	if (!m_pMaterialBlock->NumPasses || Pass < 0 || Pass >= (int32)m_pMaterialBlock->NumPasses)
+		return;
+
+	m_pMaterialBlock->RenderPasses[Pass].BlendFactor = BlendFactor;
+}
+
+void D3D11SurfaceMaterial::SetBlendFactor(const FLOAT4& BlendFactor)
+{
+	if (!m_pMaterialBlock->NumPasses)
+		return;
+
+	m_pMaterialBlock->RenderPasses[0].BlendFactor = BlendFactor;
+}
+
+void D3D11SurfaceMaterial::SetSampleMask(int32 Pass, UINT32 SampleMask)
+{
+	if (!m_pMaterialBlock->NumPasses || Pass < 0 || Pass >= (int32)m_pMaterialBlock->NumPasses)
+		return;
+	m_pMaterialBlock->RenderPasses[Pass].SampleMask = SampleMask;
+}
+
+void D3D11SurfaceMaterial::SetSampleMask(UINT32 SampleMask)
+{
+	if (!m_pMaterialBlock->NumPasses)
+		return;
+	m_pMaterialBlock->RenderPasses[0].SampleMask = SampleMask;
+}
+
+void D3D11SurfaceMaterial::SetDepthStencilState(int32 Pass, const RS_DEPTH_STENCIL_STATE& DepthStencilState)
+{
+	if (!m_pMaterialBlock->NumPasses || Pass < 0 || Pass >= (int32)m_pMaterialBlock->NumPasses)
+		return;
+
+	uint64 Hash = fnv64_c(&DepthStencilState, sizeof(RS_DEPTH_STENCIL_STATE));
+	if (m_pMaterialBlock->RenderPasses[Pass].DepthStencilStateHash != Hash)
+	{
+		m_pMaterialBlock->RenderPasses[Pass].DepthStencilStateHash = Hash;
+		m_pMaterialBlock->RenderPasses[Pass].pDepthStencilState = D3D11RenderStateCache::Get()->Find_DSS(Hash);
+
+		if (!m_pMaterialBlock->RenderPasses[Pass].pDepthStencilState)
+		{
+			m_pMaterialBlock->RenderPasses[Pass].pDepthStencilState = D3D11RenderStateCache::Get()->Register(DepthStencilState);
+		}
+	}
+}
+
+void D3D11SurfaceMaterial::SetDepthStencilState(const RS_DEPTH_STENCIL_STATE& DepthStencilState)
+{
+	if (!m_pMaterialBlock->NumPasses)
+		return;
+
+	SetDepthStencilState(0, DepthStencilState);
+}
+
+void D3D11SurfaceMaterial::SetStencilRef(int32 Pass, UINT8 StencilRef)
+{
+	if (!m_pMaterialBlock->NumPasses || Pass < 0 || Pass >= (int32)m_pMaterialBlock->NumPasses)
+		return;
+	m_pMaterialBlock->RenderPasses[Pass].StencilRef = StencilRef;
+}
+
+void D3D11SurfaceMaterial::SetStencilRef(UINT8 StencilRef)
+{
+	if (!m_pMaterialBlock->NumPasses)
+		return;
+	m_pMaterialBlock->RenderPasses[0].StencilRef = StencilRef;
 }
 
 void D3D11SurfaceMaterial::SetColor(int32 Pass, const FLOAT4& Color)

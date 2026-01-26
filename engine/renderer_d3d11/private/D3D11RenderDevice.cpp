@@ -434,6 +434,72 @@ BOOL D3D11RenderDevice::CreateRasterizerState(const RS_RASTERIZER_STATE& Rasteri
 	return TRUE;
 }
 
+BOOL D3D11RenderDevice::CreateBlendState(const RS_BLEND_STATE& BlendState, ID3D11BlendState** ppOut)
+{
+	D3D11_BLEND_DESC Desc = {};
+
+	Desc.AlphaToCoverageEnable = BlendState.AlphaToCoverageEnable;
+	Desc.IndependentBlendEnable = BlendState.IndependentBlendEnable;
+
+	for (INT32 i = 0; i < BlendState.NumBlendTargets; ++i)
+	{
+		const RS_BLEND_TARGET& BlendTarget = BlendState.BlendTarget[i];
+
+		Desc.RenderTarget[i].BlendEnable = BlendTarget.BlendEnable;
+		Desc.RenderTarget[i].SrcBlend = D3D11_IMPL_BLEND_FACTOR[(int)BlendTarget.SrcBlend];
+		Desc.RenderTarget[i].DestBlend = D3D11_IMPL_BLEND_FACTOR[(int)BlendTarget.DestBlend];
+		Desc.RenderTarget[i].BlendOp = D3D11_IMPL_BLEND_OP[(int)BlendTarget.BlendOp];
+		Desc.RenderTarget[i].SrcBlendAlpha = D3D11_IMPL_BLEND_FACTOR[(int)BlendTarget.SrcBlendAlpha];
+		Desc.RenderTarget[i].DestBlendAlpha = D3D11_IMPL_BLEND_FACTOR[(int)BlendTarget.DestBlendAlpha];
+		Desc.RenderTarget[i].BlendOpAlpha = D3D11_IMPL_BLEND_OP[(int)BlendTarget.BlendOpAlpha];
+		Desc.RenderTarget[i].RenderTargetWriteMask = BlendTarget.RenderTargetWriteMask;
+	}
+
+	ID3D11BlendState* pD3D11BlendState = nullptr;
+	if (FAILED(m_pD3D11Device->CreateBlendState(&Desc, &pD3D11BlendState)))
+	{
+		SYS_LOG_E("D3D11RenderDevice::CreateBlendState - Failed to create blend state.");
+		*ppOut = nullptr;
+		return FALSE;
+	}
+
+	*ppOut = pD3D11BlendState;
+
+	return TRUE;
+}
+
+BOOL D3D11RenderDevice::CreateDepthStencilState(const RS_DEPTH_STENCIL_STATE& DepthStencilState, ID3D11DepthStencilState** ppOut)
+{
+	D3D11_DEPTH_STENCIL_DESC Desc = {};
+
+	Desc.DepthEnable = DepthStencilState.DepthEnable;
+	Desc.DepthWriteMask = D3D11_IMPL_DEPTH_WRITE_MASK[(int)DepthStencilState.DepthWriteMask];
+	Desc.DepthFunc = D3D11_IMPL_COMPARISON_FUNC[(int)DepthStencilState.DepthFunc];
+	Desc.StencilEnable = DepthStencilState.StencilEnable;
+	Desc.StencilReadMask = DepthStencilState.StencilReadMask;
+	Desc.StencilWriteMask = DepthStencilState.StencilWriteMask;
+	Desc.FrontFace.StencilFailOp = D3D11_IMPL_STENCIL_OP[(int)DepthStencilState.FrontFace.StencilFailOp];
+	Desc.FrontFace.StencilDepthFailOp = D3D11_IMPL_STENCIL_OP[(int)DepthStencilState.FrontFace.StencilDepthFailOp];
+	Desc.FrontFace.StencilPassOp = D3D11_IMPL_STENCIL_OP[(int)DepthStencilState.FrontFace.StencilPassOp];
+	Desc.FrontFace.StencilFunc = D3D11_IMPL_COMPARISON_FUNC[(int)DepthStencilState.FrontFace.StencilFunc];
+	Desc.BackFace.StencilFailOp = D3D11_IMPL_STENCIL_OP[(int)DepthStencilState.BackFace.StencilFailOp];
+	Desc.BackFace.StencilDepthFailOp = D3D11_IMPL_STENCIL_OP[(int)DepthStencilState.BackFace.StencilDepthFailOp];
+	Desc.BackFace.StencilPassOp = D3D11_IMPL_STENCIL_OP[(int)DepthStencilState.BackFace.StencilPassOp];
+	Desc.BackFace.StencilFunc = D3D11_IMPL_COMPARISON_FUNC[(int)DepthStencilState.BackFace.StencilFunc];
+
+	ID3D11DepthStencilState* pD3D11DepthStencilState = nullptr;
+	if (FAILED(m_pD3D11Device->CreateDepthStencilState(&Desc, &pD3D11DepthStencilState)))
+	{
+		SYS_LOG_E("D3D11RenderDevice::CreateDepthStencilState - Failed to create depth-stencil state.");
+		*ppOut = nullptr;
+		return FALSE;
+	}
+
+	*ppOut = pD3D11DepthStencilState;
+
+	return TRUE;
+}
+
 void D3D11RenderDevice::ReportLiveObjects() noexcept
 {
 	typedef HRESULT(WINAPI* DXGIGetDebugInterfaceFunc)(REFIID, void**);

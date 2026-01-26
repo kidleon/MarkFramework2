@@ -15,6 +15,8 @@ public:
 	BOOL CreateDevice(HWND hWnd, uint32 Width, uint32 Height, BOOL DebugDevice);
 	BOOL CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, ID3D11InputLayout** ppOut);
 	BOOL CreateRasterizerState(const RS_RASTERIZER_STATE& RasterizerState, ID3D11RasterizerState** ppOut);
+	BOOL CreateBlendState(const RS_BLEND_STATE& BlendState, ID3D11BlendState** ppOut);
+	BOOL CreateDepthStencilState(const RS_DEPTH_STENCIL_STATE& DepthStencilState, ID3D11DepthStencilState** ppOut);
 
 	__FORCEINLINE ID3D11Device* INL_GetD3D11Device() const noexcept { return m_pD3D11Device; }
 	__FORCEINLINE ID3D11DeviceContext* INL_GetD3D11Context() const noexcept { return m_pImmediateContext; }

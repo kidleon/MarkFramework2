@@ -68,7 +68,7 @@ void D3D11InputLayoutCache::Register(UINT32 VertexFormat, ID3D11InputLayout* pIn
 	);
 }
 
-ID3D11InputLayout* D3D11InputLayoutCache::Find(UINT32 VertexFormat) noexcept
+ID3D11InputLayout* D3D11InputLayoutCache::Find_RS(UINT32 VertexFormat) noexcept
 {
 	if (!m_pHashTable)
 		return nullptr;

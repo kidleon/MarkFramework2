@@ -15,7 +15,7 @@ public:
 	void Shutdown();
 
 	void Register(D3D11ShaderProgram* pShaderProgram) noexcept;
-	D3D11ShaderProgram* Find(SHADER_TYPE ShaderType, NameHash ShaderName, UINT32 ShaderDefinesHash) noexcept;
+	D3D11ShaderProgram* Find_RS(SHADER_TYPE ShaderType, NameHash ShaderName, UINT32 ShaderDefinesHash) noexcept;
 
 	static inline D3D11ShaderProgramCache* Get() noexcept { return s_pInstance; }
 

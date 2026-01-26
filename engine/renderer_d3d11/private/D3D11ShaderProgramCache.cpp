@@ -129,7 +129,7 @@ void D3D11ShaderProgramCache::Register(D3D11ShaderProgram* pShaderProgram) noexc
 	}
 }
 
-D3D11ShaderProgram* D3D11ShaderProgramCache::Find(SHADER_TYPE ShaderType, NameHash ShaderName, UINT32 ShaderDefinesHash) noexcept
+D3D11ShaderProgram* D3D11ShaderProgramCache::Find_RS(SHADER_TYPE ShaderType, NameHash ShaderName, UINT32 ShaderDefinesHash) noexcept
 {
 	HASH_TABLE* pHashTable = nullptr;
 

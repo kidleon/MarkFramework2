@@ -190,6 +190,8 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 			D3D11ShaderProgram* pSetPS = nullptr;
 			D3D11PrimitiveBuffer* pSetPB = nullptr;
 			ID3D11RasterizerState* pSetRS = nullptr;
+			ID3D11BlendState* pSetBS = nullptr;
+			ID3D11DepthStencilState* pSetDSS = nullptr;
 
 			UINT32 SetInputVertexFormat = 0;
 			ID3D11InputLayout* pSetIL = nullptr;
@@ -218,7 +220,7 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 					{
 						SetInputVertexFormat = InputVertexFormat;
 
-						pSetIL = D3D11InputLayoutCache::Get()->Find(SetInputVertexFormat);
+						pSetIL = D3D11InputLayoutCache::Get()->Find_RS(SetInputVertexFormat);
 						pDeviceContext->IASetInputLayout(pSetIL);
 					}
 				}
@@ -255,6 +257,28 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 				{
 					pSetRS = pCmd->RenderPipeline.pRasterizerState;
 					pDeviceContext->RSSetState(pSetRS);
+				}
+
+				if (pSetBS != pCmd->RenderPipeline.pBlendState)
+				{
+					pSetBS = pCmd->RenderPipeline.pBlendState;
+					const FLOAT4& BlendFactor = pCmd->DynamicRenderPipeline.BlendFactor;
+					UINT32 SampleMask = pCmd->DynamicRenderPipeline.SampleMask;
+					pDeviceContext->OMSetBlendState(
+						pSetBS,
+						BlendFactor.v,
+						SampleMask
+					);
+				}
+
+				if (pSetDSS != pCmd->RenderPipeline.pDepthStencilState)
+				{
+					pSetDSS = pCmd->RenderPipeline.pDepthStencilState;
+					UINT32 StencilRef = pCmd->DynamicRenderPipeline.StencilRef;
+					pDeviceContext->OMSetDepthStencilState(
+						pSetDSS,
+						StencilRef
+					);
 				}
 
 				if (!pCmd->pPrimitiveBuffer)

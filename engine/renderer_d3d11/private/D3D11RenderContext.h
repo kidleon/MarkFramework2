@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include "D3D11RenderFrame.h"
+#include "D3D11RenderSortIndexer.h"
+#include "THashMap.h"
 
 
 class D3D11SurfaceMaterial;
@@ -49,4 +51,5 @@ private:
 	int32 m_LastFrameIndex = -1;
 	int32 m_CurrentFrameIndex = -1;
 
+	RENDER_SORT_INDEXER m_RenderSortIndexer[(int)RENDER_QUEUE_TYPE::EMAX];
 };

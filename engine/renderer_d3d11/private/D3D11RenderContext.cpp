@@ -45,6 +45,7 @@ long D3D11RenderContext::RefCnt()
 void D3D11RenderContext::BeginFrame() noexcept
 {
 	m_CurrentFrameIndex = (m_LastFrameIndex + 1) % MAX_RENDER_FRAME;
+	
 }
 
 void D3D11RenderContext::EndFrame() noexcept
@@ -118,12 +119,15 @@ void D3D11RenderContext::BeginRenderCamera(IRenderCamera* pRenderCamera) noexcep
 	m_pCurRQs->PrepareRQ(static_cast<D3D11RenderCamera*>(pRenderCamera));
 	m_pCurRenderCamera = static_cast<D3D11RenderCamera*>(pRenderCamera);
 	m_pCurRenderCamera->AddRef();
+
+	for (int i = 0; i < (int)RENDER_QUEUE_TYPE::EMAX; ++i)
+		m_RenderSortIndexer[i].Reset();
 }
 
 void D3D11RenderContext::EndRenderCamera() noexcept
 {
 	m_pCurRQs = nullptr;
-
+	
 	CHECK_RELEASE(m_pCurPrimitiveBuffer);
 	CHECK_RELEASE(m_pCurSurfaceMaterial);
 	CHECK_RELEASE(m_pCurRenderCamera);
@@ -211,11 +215,20 @@ void D3D11RenderContext::DrawPrimitive(const LOCAL_TRANSFORM& Transform, int32 P
 		pDrawCommand->RenderPipeline.pVertexShader = m_pCurSurfaceMaterial->INL_GetVertexShader(p);
 		pDrawCommand->RenderPipeline.pPixelShader = m_pCurSurfaceMaterial->INL_GetPixelShader(p);
 		pDrawCommand->RenderPipeline.pRasterizerState = m_pCurSurfaceMaterial->INL_GetRasterizerState(p);
+		pDrawCommand->RenderPipeline.pBlendState = m_pCurSurfaceMaterial->INL_GetBlendState(p);
+		pDrawCommand->RenderPipeline.pDepthStencilState = m_pCurSurfaceMaterial->INL_GetDepthStencilState(p);
 		pDrawCommand->RenderPipeline.Color = m_pCurSurfaceMaterial->INL_GetColor(p);
 
+		pDrawCommand->DynamicRenderPipeline.BlendFactor = m_pCurSurfaceMaterial->INL_GetBlendFactor(p);
+		pDrawCommand->DynamicRenderPipeline.SampleMask = m_pCurSurfaceMaterial->INL_GetSampleMask(p);
+		pDrawCommand->DynamicRenderPipeline.StencilRef = m_pCurSurfaceMaterial->INL_GetStencilRef(p);
+
+		// 정렬 키 설정
 		pDrawCommand->SortKey.Value = 0;
 
 		pDrawCommand->SortKey.Pass = p;
+
+		// 인덱스 설정등을 한다...................
 
 		pDrawCommand->SortKey.VertexShaderIndex = pDrawCommand->RenderPipeline.pVertexShader ?
 			pDrawCommand->RenderPipeline.pVertexShader->INL_GetShaderIndex() % MAX_VERTEX_SHADER_INDEX : 0;

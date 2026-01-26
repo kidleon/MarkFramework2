@@ -23,7 +23,7 @@ public:
 
 private:
 	TArray<D3D11_DRAW_COMMAND*, TA_POOL> m_OpaqueCmdList;
-
+	
 	LINK_NODE m_LinkNode;
 
 };

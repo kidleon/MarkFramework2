@@ -19,12 +19,12 @@ struct D3D11_DRAW_COMMAND
 			uint64 Value;
 			struct
 			{
-				uint64 Pass : 4; // 16
-				uint64 VertexShaderIndex : 12; // 4096
-				uint64 PixelShaderIndex : 12; // 4096
-				uint64 RenderStateHash : 14; // 16384
-				uint64 Depth : 14; // 16384
-				uint64 Reserved : 8;
+				uint64 Pass : SORT_PASS_BIT; // 16
+				uint64 VertexShaderIndex : SORT_VERTEX_SHADER_BIT; // 4096
+				uint64 PixelShaderIndex : SORT_PIXEL_SHADER_BIT; // 4096
+				uint64 TextureID : SORT_TEXTURE_ID_BIT; // 32768
+				uint64 StateIndex : SORT_STATE_INDEX_BIT; // 4096
+				uint64 Depth : SORT_DEPTH_BIT; // 512
 			};
 		};
 	};

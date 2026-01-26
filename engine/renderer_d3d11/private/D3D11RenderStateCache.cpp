@@ -19,6 +19,37 @@ static inline D3D11RasterizerState* CreateRasterizerState(
 	return pRS;
 }
 
+static inline D3D11BlendState* CreateBlendState(
+	const RS_BLEND_STATE& BlendState
+)
+{
+	ID3D11BlendState* pD3D11_BS = nullptr;
+	if (!D3D11RenderDevice::Get().CreateBlendState(BlendState, &pD3D11_BS))
+	{
+		SYS_LOG_E("CreateBlendState - Failed to create default blend state.");
+		return nullptr;
+	}
+
+	D3D11BlendState* pBS = D3D11_NEW(D3D11BlendState)(pD3D11_BS);
+	return pBS;
+}
+
+static inline D3D11DepthStencilState* CreateDepthStencilState(
+	const RS_DEPTH_STENCIL_STATE& DepthStencilState
+)
+{
+	ID3D11DepthStencilState* pD3D11_DSS = nullptr;
+	if (!D3D11RenderDevice::Get().CreateDepthStencilState(DepthStencilState, &pD3D11_DSS))
+	{
+		SYS_LOG_E("CreateDepthStencilState - Failed to create default depth stencil state.");
+		return nullptr;
+	}
+
+	D3D11DepthStencilState* pDSS = D3D11_NEW(D3D11DepthStencilState)(pD3D11_DSS);
+	return pDSS;
+}
+
+
 D3D11RenderStateCache* D3D11RenderStateCache::s_pInstance = nullptr;
 
 D3D11RenderStateCache::D3D11RenderStateCache()
@@ -86,8 +117,16 @@ void D3D11RenderStateCache::Init()
 	}
 
 	// Pre-create common blend states
-
-	
+	{
+		RS_BLEND_STATE DefaultState;
+		uint64 Hash = fnv64_c(&DefaultState, sizeof(RS_BLEND_STATE));
+		D3D11BlendState* pBS = CreateBlendState(DefaultState);
+		insert_hash_node(
+			m_pBlendStateCache,
+			(int64)Hash,
+			pBS->INL_GetHashNode()
+		);
+	}
 }
 
 void D3D11RenderStateCache::Shutdown()
@@ -127,10 +166,10 @@ void D3D11RenderStateCache::Shutdown()
 			{
 				HASH_NODE* pNextNode = pNode->next;
 
-				ID3D11BlendState* pCacheData = reinterpret_cast<ID3D11BlendState*>(pNode->data);
+				D3D11BlendState* pCacheData = reinterpret_cast<D3D11BlendState*>(pNode->data);
 				if (pCacheData)
 				{
-					D3D11_DELETE(pCacheData, ID3D11BlendState);
+					D3D11_DELETE(pCacheData, D3D11BlendState);
 					pCacheData = nullptr;
 				}
 				pNode = pNextNode;
@@ -140,6 +179,30 @@ void D3D11RenderStateCache::Shutdown()
 
 		delete_hash_table(m_pBlendStateCache);
 		m_pBlendStateCache = nullptr;
+	}
+
+	if (m_pDepthStencilStateCache)
+	{
+		for (size_t b = 0; b < m_pDepthStencilStateCache->bucket_size; ++b)
+		{
+			HASH_NODE* pNode = m_pDepthStencilStateCache->buckets[b];
+			while (pNode)
+			{
+				HASH_NODE* pNextNode = pNode->next;
+
+				D3D11DepthStencilState* pCacheData = reinterpret_cast<D3D11DepthStencilState*>(pNode->data);
+				if (pCacheData)
+				{
+					D3D11_DELETE(pCacheData, D3D11DepthStencilState);
+					pCacheData = nullptr;
+				}
+				pNode = pNextNode;
+			}
+			m_pDepthStencilStateCache->buckets[b] = nullptr;
+		}
+
+		delete_hash_table(m_pDepthStencilStateCache);
+		m_pDepthStencilStateCache = nullptr;
 	}
 }
 
@@ -168,18 +231,64 @@ ID3D11RasterizerState* D3D11RenderStateCache::Register(const RS_RASTERIZER_STATE
 	return pRS->INL_GetD3D11RasterizerState();
 }
 
-void D3D11RenderStateCache::Register(const RS_BLEND_STATE& BlendState) noexcept
+ID3D11BlendState* D3D11RenderStateCache::Register(const RS_BLEND_STATE& BlendState) noexcept
 {
+	uint64 Hash = fnv64_c(&BlendState, sizeof(RS_BLEND_STATE));
+
+	D3D11BlendState* pBS = (D3D11BlendState*)query_hash_node(
+		m_pBlendStateCache,
+		(int64)Hash
+	);
+
+	if (pBS)
+	{
+		return pBS->INL_GetD3D11BlendState();
+	}
+
+	pBS = CreateBlendState(BlendState);
+
+	insert_hash_node(
+		m_pBlendStateCache,
+		(int64)Hash,
+		pBS->INL_GetHashNode()
+	);
+
+	return pBS->INL_GetD3D11BlendState();
 }
 
-ID3D11RasterizerState* D3D11RenderStateCache::Find(const RS_RASTERIZER_STATE& RasterizerState) noexcept
+ID3D11DepthStencilState* D3D11RenderStateCache::Register(const RS_DEPTH_STENCIL_STATE& DepthStencilState) noexcept
+{
+	uint64 Hash = fnv64_c(&DepthStencilState, sizeof(RS_DEPTH_STENCIL_STATE));
+
+	D3D11DepthStencilState* pDSS = (D3D11DepthStencilState*)query_hash_node(
+		m_pDepthStencilStateCache,
+		(int64)Hash
+	);
+
+	if (pDSS)
+	{
+		return pDSS->INL_GetD3D11DepthStencilState();
+	}
+
+	pDSS = CreateDepthStencilState(DepthStencilState);
+
+	insert_hash_node(
+
+		m_pDepthStencilStateCache,
+		(int64)Hash,
+		pDSS->INL_GetHashNode()
+	);
+
+	return pDSS->INL_GetD3D11DepthStencilState();
+}
+
+ID3D11RasterizerState* D3D11RenderStateCache::Find_RS(const RS_RASTERIZER_STATE& RasterizerState) noexcept
 {
 	uint64 Hash = fnv64_c(&RasterizerState, sizeof(RS_RASTERIZER_STATE));
-
-	return Find(Hash);
+	return Find_RS(Hash);
 }
 
-ID3D11RasterizerState* D3D11RenderStateCache::Find(uint64 Hash) noexcept
+ID3D11RasterizerState* D3D11RenderStateCache::Find_RS(uint64 Hash) noexcept
 {
 	D3D11RasterizerState* pRS = (D3D11RasterizerState*)query_hash_node(
 		m_pRasterizerStateCache,
@@ -191,7 +300,38 @@ ID3D11RasterizerState* D3D11RenderStateCache::Find(uint64 Hash) noexcept
 	return pRS->INL_GetD3D11RasterizerState();
 }
 
-ID3D11BlendState* D3D11RenderStateCache::Find(const RS_BLEND_STATE& BlendState) noexcept
+ID3D11BlendState* D3D11RenderStateCache::Find_BS(const RS_BLEND_STATE& BlendState) noexcept
 {
-	return nullptr;
+	uint64 Hash = fnv64_c(&BlendState, sizeof(RS_BLEND_STATE));
+	return Find_BS(Hash);
+}
+
+ID3D11BlendState* D3D11RenderStateCache::Find_BS(uint64 Hash) noexcept
+{
+	D3D11BlendState* pBS = (D3D11BlendState*)query_hash_node(
+		m_pBlendStateCache,
+		(int64)Hash
+	);
+
+	if (!pBS) return nullptr; // 찾지 못함
+
+	return pBS->INL_GetD3D11BlendState();
+}
+
+ID3D11DepthStencilState* D3D11RenderStateCache::Find_DSS(const RS_DEPTH_STENCIL_STATE& DepthStencilState) noexcept
+{
+	uint64 Hash = fnv64_c(&DepthStencilState, sizeof(RS_DEPTH_STENCIL_STATE));
+	return Find_DSS(Hash);
+}
+
+ID3D11DepthStencilState* D3D11RenderStateCache::Find_DSS(uint64 Hash) noexcept
+{
+	D3D11DepthStencilState* pDSS = (D3D11DepthStencilState*)query_hash_node(
+		m_pDepthStencilStateCache,
+		(int64)Hash
+	);
+
+	if (!pDSS) return nullptr; // 찾지 못함
+
+	return pDSS->INL_GetD3D11DepthStencilState();
 }

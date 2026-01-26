@@ -360,7 +360,7 @@ BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DES
 
 	uint32 ShaderDefinesHash = fnv1(Desc.szShaderDefines, MAX_SHADER_DEFINE * MAX_SHADER_DEFINE_LENGTH, 0);
 
-	D3D11ShaderProgram* pSP = m_pShaderProgramCache->Find(Desc.ShaderType, Desc.ShaderName, ShaderDefinesHash);
+	D3D11ShaderProgram* pSP = m_pShaderProgramCache->Find_RS(Desc.ShaderType, Desc.ShaderName, ShaderDefinesHash);
 	if (pSP)
 	{
 		(*ppOut) = pSP;
@@ -424,7 +424,7 @@ BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DES
 	if (Desc.ShaderType == SHADER_TYPE::VERTEX)
 	{
 		// 입력 레이아웃 생성
-		ID3D11InputLayout* pIL = D3D11InputLayoutCache::Get()->Find(CompileResult.VertexFormat);
+		ID3D11InputLayout* pIL = D3D11InputLayoutCache::Get()->Find_RS(CompileResult.VertexFormat);
 		if (!pIL)
 		{
 			D3D11_INPUTLAYOUT_DESC InputLayoutDesc = {};

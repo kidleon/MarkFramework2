@@ -13,6 +13,17 @@ struct D3D11_SURFACE_RENDER_PASS
 	ID3D11RasterizerState* pRasterizerState;
 	UINT64 RasterizerStateHash;
 
+	ID3D11BlendState* pBlendState;
+	UINT64 BlendStateHash;
+
+	FLOAT4 BlendFactor;
+
+	ID3D11DepthStencilState* pDepthStencilState;
+	UINT64 DepthStencilStateHash;
+
+	UINT32 SampleMask;
+	UINT32 StencilRef;
+
 	FLOAT4 Color;
 };
 

@@ -38,6 +38,21 @@ public:
 	virtual void SetRasterizerState(int32 Pass, const RS_RASTERIZER_STATE& RasterizerState) final;
 	virtual void SetRasterizerState(const RS_RASTERIZER_STATE& RasterizerState) final;
 
+	virtual void SetBlendState(int32 Pass, const RS_BLEND_STATE& BlendState) final;
+	virtual void SetBlendState(const RS_BLEND_STATE& BlendState) final;
+
+	virtual void SetBlendFactor(int32 Pass, const FLOAT4& BlendFactor) final;
+	virtual void SetBlendFactor(const FLOAT4& BlendFactor) final;
+
+	virtual void SetSampleMask(int32 Pass, UINT32 SampleMask) final;
+	virtual void SetSampleMask(UINT32 SampleMask) final;
+
+	virtual void SetDepthStencilState(int32 Pass, const RS_DEPTH_STENCIL_STATE& DepthStencilState) final;
+	virtual void SetDepthStencilState(const RS_DEPTH_STENCIL_STATE& DepthStencilState) final;
+
+	virtual void SetStencilRef(int32 Pass, UINT8 StencilRef) final;
+	virtual void SetStencilRef(UINT8 StencilRef) final;
+
 	virtual void SetColor(int32 Pass, const FLOAT4& Color) final;
 	virtual void SetColor(const FLOAT4& Color) final;
 
@@ -68,6 +83,31 @@ public:
 	__FORCEINLINE ID3D11RasterizerState* INL_GetRasterizerState(int32 Pass) noexcept
 	{
 		return m_pMaterialBlock->RenderPasses[Pass].pRasterizerState;
+	}
+
+	__FORCEINLINE ID3D11BlendState* INL_GetBlendState(int32 Pass) noexcept
+	{
+		return m_pMaterialBlock->RenderPasses[Pass].pBlendState;
+	}
+
+	__FORCEINLINE ID3D11DepthStencilState* INL_GetDepthStencilState(int32 Pass) noexcept
+	{
+		return m_pMaterialBlock->RenderPasses[Pass].pDepthStencilState;
+	}
+
+	__FORCEINLINE const FLOAT4& INL_GetBlendFactor(int32 Pass) const noexcept
+	{
+		return m_pMaterialBlock->RenderPasses[Pass].BlendFactor;
+	}
+
+	__FORCEINLINE UINT32 INL_GetSampleMask(int32 Pass) const noexcept
+	{
+		return m_pMaterialBlock->RenderPasses[Pass].SampleMask;
+	}
+
+	__FORCEINLINE UINT8 INL_GetStencilRef(int32 Pass) const noexcept
+	{
+		return m_pMaterialBlock->RenderPasses[Pass].StencilRef;
 	}
 
 	__FORCEINLINE const FLOAT4& INL_GetColor(int32 Pass) const noexcept
