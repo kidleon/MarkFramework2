@@ -14,6 +14,9 @@ class D3D11RenderContext final : public IRenderContext
 public:
 	D3D11RenderContext() = default;
 
+	void Init();
+	void Destroy();
+
 	// IUNKNOWN interface
 	long AddRef() final;
 	long Release() final;
@@ -42,6 +45,7 @@ private:
 	D3D11RenderCamera* m_pCurRenderCamera = nullptr;
 	D3D11SurfaceMaterial* m_pCurSurfaceMaterial = nullptr;
 	D3D11PrimitiveBuffer* m_pCurPrimitiveBuffer = nullptr;
+	RENDER_SORT_INDEXER* m_pCurRenderSortIndexer = nullptr;
 
 	D3D11_RENDER_QUEUE_GROUP* m_pCurRQs = nullptr;
 	D3D11_RENDER_FRAME m_RenderFrames[MAX_RENDER_FRAME];
@@ -51,5 +55,6 @@ private:
 	int32 m_LastFrameIndex = -1;
 	int32 m_CurrentFrameIndex = -1;
 
+	HANDLE m_StackPool = nullptr;
 	RENDER_SORT_INDEXER m_RenderSortIndexer[(int)RENDER_QUEUE_TYPE::EMAX];
 };

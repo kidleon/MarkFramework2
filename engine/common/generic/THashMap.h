@@ -118,7 +118,7 @@ namespace mark
 			if (contains(key)) // If the key already exists, we do not insert it again.
 				return;
 
-			__HashMap_Node<_Tk, _Tval>* pHashNode = static_cast<__HashMap_Node<_Tk, _Tval>*>(_Alloc::alloc(sizeof(__HashMap_Node<_Tk, _Tval>)));
+			__HashMap_Node<_Tk, _Tval>* pHashNode = static_cast<__HashMap_Node<_Tk, _Tval>*>(_Alloc::alloc(sizeof(__HashMap_Node<_Tk, _Tval>), , __FILE__, __LINE__, __FUNCTION__));
 
 			HASH hash = 0;
 			if constexpr (HashType == HASH_TYPE::FNV)
@@ -163,7 +163,7 @@ namespace mark
 			if (contains(key)) // If the key already exists, we do not insert it again.
 				return;
 
-			__HashMap_Node<_Tk, _Tval>* pHashNode = static_cast<__HashMap_Node<_Tk, _Tval>*>(_Alloc::alloc(sizeof(__HashMap_Node<_Tk, _Tval>)));
+			__HashMap_Node<_Tk, _Tval>* pHashNode = static_cast<__HashMap_Node<_Tk, _Tval>*>(_Alloc::alloc(sizeof(__HashMap_Node<_Tk, _Tval>), __FILE__, __LINE__, __FUNCTION__));
 
 			HASH hash = 0;
 			if constexpr (HashType == HASH_TYPE::FNV)

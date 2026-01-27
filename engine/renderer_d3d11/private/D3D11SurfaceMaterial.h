@@ -115,6 +115,21 @@ public:
 		return m_pMaterialBlock->RenderPasses[Pass].Color;
 	}
 
+	__FORCEINLINE UINT16 INL_GetRasterizerStateIndex(int32 Pass) const noexcept
+	{
+		return m_pMaterialBlock->RenderPasses[Pass].RasterizerStateIndex;
+	}
+
+	__FORCEINLINE UINT16 INL_GetBlendStateIndex(int32 Pass) const noexcept
+	{
+		return m_pMaterialBlock->RenderPasses[Pass].BlendStateIndex;
+	}
+
+	__FORCEINLINE UINT16 INL_GetDepthStencilStateIndex(int32 Pass) const noexcept
+	{
+		return m_pMaterialBlock->RenderPasses[Pass].DepthStencilStateIndex;
+	}
+
 private:
 	D3D11SurfaceMaterial() = delete;
 	virtual ~D3D11SurfaceMaterial() noexcept;

@@ -4,9 +4,10 @@
 class D3D11RasterizerState
 {
 public:
-	explicit D3D11RasterizerState(ID3D11RasterizerState* pRasterizerState);
+	explicit D3D11RasterizerState(UINT64 Index, ID3D11RasterizerState* pRasterizerState);
 	~D3D11RasterizerState() noexcept;
 
+	__FORCEINLINE UINT64 INL_GetIndex() const noexcept { return m_Index; }
 	__FORCEINLINE ID3D11RasterizerState* INL_GetD3D11RasterizerState() const noexcept { return m_pD3D11RasterizerState; }
 	__FORCEINLINE HASH_NODE* INL_GetHashNode() noexcept { return &m_HashNode; }
 
@@ -17,6 +18,7 @@ private:
 
 private:
 	ID3D11RasterizerState* m_pD3D11RasterizerState;
+	UINT64 m_Index;
 	HASH_NODE m_HashNode;
 };
 
@@ -25,9 +27,10 @@ private:
 class D3D11BlendState
 {
 public:
-	explicit D3D11BlendState(ID3D11BlendState* pBlendState);
+	explicit D3D11BlendState(UINT64 Index, ID3D11BlendState* pBlendState);
 	~D3D11BlendState() noexcept;
 
+	__FORCEINLINE UINT64 INL_GetIndex() const noexcept { return m_Index; }
 	__FORCEINLINE ID3D11BlendState* INL_GetD3D11BlendState() const noexcept { return m_pD3D11BlendState; }
 	__FORCEINLINE HASH_NODE* INL_GetHashNode() noexcept { return &m_HashNode; }
 
@@ -38,6 +41,7 @@ private:
 
 private:
 	ID3D11BlendState* m_pD3D11BlendState;
+	UINT64 m_Index;
 	HASH_NODE m_HashNode;
 
 };
@@ -46,10 +50,11 @@ private:
 //------------------------------------------------------------------------------
 class D3D11DepthStencilState
 {
-	public:
-	explicit D3D11DepthStencilState(ID3D11DepthStencilState* pDepthStencilState);
+public:
+	explicit D3D11DepthStencilState(UINT64 Index, ID3D11DepthStencilState* pDepthStencilState);
 	~D3D11DepthStencilState() noexcept;
 
+	__FORCEINLINE UINT64 INL_GetIndex() const noexcept { return m_Index; }
 	__FORCEINLINE ID3D11DepthStencilState* INL_GetD3D11DepthStencilState() const noexcept { return m_pD3D11DepthStencilState; }
 	__FORCEINLINE HASH_NODE* INL_GetHashNode() noexcept { return &m_HashNode; }
 
@@ -60,6 +65,7 @@ private:
 
 private:
 	ID3D11DepthStencilState* m_pD3D11DepthStencilState;
+	UINT64 m_Index;
 	HASH_NODE m_HashNode;
 
 };
