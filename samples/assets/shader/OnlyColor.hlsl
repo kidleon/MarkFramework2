@@ -3,13 +3,11 @@ cbuffer CAMERA_DATA : register(b0)
     matrix View;
     matrix InvView;
     matrix Projection;
-    matrix ViewProjection;
 }
 
 cbuffer OBJECT_DATA : register(b1)
 {
     matrix World;
-    matrix WorldViewProjection;
 }
 
 //--------------------------------------------------------------------------------------
@@ -27,9 +25,16 @@ struct PS_INPUT
 PS_INPUT VS_MAIN(VS_INPUT input)
 {
     PS_INPUT output = (PS_INPUT)0;
-    output.Pos = mul(float4(input.Pos, 1.0f), WorldViewProjection);
+    
+    //matrix ViewProjection = mul(View, Projection);
+    //matrix WorldViewProjection = mul(World, ViewProjection);
+    
+    //output.Pos = mul(float4(input.Pos, 1.0f), WorldViewProjection);
+	//output.Pos = float4(0.0, 0.0, 0.5, 1.0);
+	output.Pos = float4(input.Pos.x, input.Pos.y, 0.5, 1.0);
     output.Color = float4(1.0f, 0.0f, 0.0f, 1.0f); // Solid red color
     
+	
     return output;
 }
 

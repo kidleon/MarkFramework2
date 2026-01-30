@@ -26,7 +26,7 @@ void D3D11RenderContext::Init()
 		m_RenderFrames[i].Reset();
 	}
 
-	for (int i = 0; i < (int)RENDER_QUEUE_TYPE::EMAX; ++i)
+	for (int i = 0; i < MAX_RENDER_FRAME; ++i)
 	{
 		m_RenderSortIndexer[i].Init();
 	}
@@ -39,8 +39,14 @@ void D3D11RenderContext::Init()
 
 void D3D11RenderContext::Destroy()
 {
+	for (int i = 0; i < MAX_RENDER_FRAME; ++i)
+	{
+		m_RenderSortIndexer[i].Destroy();
+	}
+
 	if (m_StackPool)
 	{
+		stackpool_reset(m_StackPool);
 		stackpool_destroy(m_StackPool);
 		m_StackPool = nullptr;
 	}
@@ -48,11 +54,6 @@ void D3D11RenderContext::Destroy()
 	for (int32 i = 0; i < MAX_RENDER_FRAME; ++i)
 	{
 		m_RenderFrames[i].Reset();
-	}
-
-	for (int i = 0; i < (int)RENDER_QUEUE_TYPE::EMAX; ++i)
-	{
-		m_RenderSortIndexer[i].Destroy();
 	}
 }
 
@@ -81,6 +82,7 @@ void D3D11RenderContext::BeginFrame() noexcept
 {
 	m_CurrentFrameIndex = (m_LastFrameIndex + 1) % MAX_RENDER_FRAME;
 	m_pCurRenderSortIndexer = &m_RenderSortIndexer[m_CurrentFrameIndex];
+	m_pCurRenderSortIndexer->Reset();
 
 	stackpool_reset(m_StackPool);
 }
@@ -244,7 +246,7 @@ void D3D11RenderContext::DrawPrimitive(const LOCAL_TRANSFORM& Transform, int32 P
 			&m_ViewProjMatrix
 		);
 
-		pDrawCommand->ObjectConstant.WorldViewProjection = mat4_transpose(&WorldViewProjTM);
+		//pDrawCommand->ObjectConstant.WorldViewProjection = mat4_transpose(&WorldViewProjTM);
 
 		pDrawCommand->RenderPipeline.pVertexShader = m_pCurSurfaceMaterial->INL_GetVertexShader(p);
 		pDrawCommand->RenderPipeline.pPixelShader = m_pCurSurfaceMaterial->INL_GetPixelShader(p);

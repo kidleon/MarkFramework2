@@ -2556,6 +2556,69 @@ inline void mat4_rotation_quat(QUAT* q, MATRIX4* out)
 	out->m33 = 1.0f;
 }
 
+inline MATRIX4 mat4_lookat_lh(FLOAT3* eye, FLOAT3* dir, FLOAT3* up)
+{
+	MATRIX4 r;
+	mat4_lookat_lh(eye, dir, up, &r);
+	return r;
+}
+
+inline void mat4_lookat_lh(FLOAT3* eye, FLOAT3* dir, FLOAT3* up, MATRIX4* out)
+{
+	FLOAT3 ndir = *dir;
+	vec3_normalize(&ndir);
+
+	FLOAT3 nup = *up;
+	vec3_normalize(&nup);
+
+	// right = up × dir
+	FLOAT3 right;
+	vec3_cross(&nup, &ndir, &right);
+
+	// dir과 up이 거의 평행한지 확인
+	FLOAT3 rightLen = vec3_length(&right);
+	if (rightLen.x < 1e-6f) 
+	{
+		// 폴백: 임의의 직교 벡터 선택
+		if (fabsf(ndir.y) < 0.999f) 
+		{
+			FLOAT3 worldUp = { 0.0f, 1.0f, 0.0f };
+			vec3_cross(&worldUp, &ndir, &right);
+		}
+		else 
+		{
+			FLOAT3 worldRight = { 1.0f, 0.0f, 0.0f };
+			vec3_cross(&ndir, &worldRight, &right);
+		}
+	}
+	vec3_normalize(&right);
+
+	// up = dir × right (재직교화)
+	vec3_cross(&ndir, &right, &nup);
+	vec3_normalize(&nup);
+
+	// 행렬 설정 (기존 코드와 동일)
+	out->m00 = right.x;
+	out->m10 = right.y;
+	out->m20 = right.z;
+	out->m30 = -vec3_dot_f(&right, eye);
+
+	out->m01 = nup.x;
+	out->m11 = nup.y;
+	out->m21 = nup.z;
+	out->m31 = -vec3_dot_f(&nup, eye);
+
+	out->m02 = ndir.x;
+	out->m12 = ndir.y;
+	out->m22 = ndir.z;
+	out->m32 = -vec3_dot_f(&ndir, eye);
+
+	out->m03 = 0.0f;
+	out->m13 = 0.0f;
+	out->m23 = 0.0f;
+	out->m33 = 1.0f;
+}
+
 inline MATRIX4 mat4_lookto_lh(FLOAT3* eye, FLOAT3* to, FLOAT3* up)
 {
 	MATRIX4 r;
@@ -2645,12 +2708,25 @@ inline MATRIX4 mat4_perspective_lh(float fov, float aspect, float nearZ, float f
 inline void mat4_perspective_lh(float fov, float aspect, float nearZ, float farZ, MATRIX4* out)
 {
 	mat4_ident(out);
+
+	float yScale = 1.0f / tanf(fov * 0.5f);
+	float xScale = yScale / aspect;
+	float zRange = farZ / (farZ - nearZ);
+
+	out->m[0] = xScale;  // [0,0]
+	out->m[5] = yScale;  // [1,1]
+	out->m[10] = zRange;  // [2,2]
+	out->m[11] = 1.0f;    // [2,3]
+	out->m[14] = -nearZ * zRange;  // [3,2]
+
+	/*
 	out->m00 = 1.0f / (aspect * tanf(fov * 0.5f));
 	out->m11 = 1.0f / tanf(fov * 0.5f);
 	out->m22 = farZ / (farZ - nearZ);
 	out->m23 = 1.0f;
 	out->m32 = (farZ * nearZ) / (nearZ - farZ);
 	out->m33 = 0.0f;
+	*/
 }
 
 inline MATRIX4 mat4_perspective_rh(float fov, float aspect, float nearZ, float farZ)

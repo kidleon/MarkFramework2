@@ -56,5 +56,5 @@ private:
 	int32 m_CurrentFrameIndex = -1;
 
 	HANDLE m_StackPool = nullptr;
-	RENDER_SORT_INDEXER m_RenderSortIndexer[(int)RENDER_QUEUE_TYPE::EMAX];
+	RENDER_SORT_INDEXER m_RenderSortIndexer[MAX_RENDER_FRAME];
 };

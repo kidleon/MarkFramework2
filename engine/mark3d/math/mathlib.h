@@ -420,6 +420,8 @@ inline MATRIX4 mat4_rotation_axis(FLOAT3 axis, float angle);
 inline void mat4_rotation_axis(FLOAT3 axis, float angle, MATRIX4* out);
 inline MATRIX4 mat4_rotation_quat(QUAT* q);
 inline void mat4_rotation_quat(QUAT* q, MATRIX4* out);
+inline MATRIX4 mat4_lookat_lh(FLOAT3* eye, FLOAT3* dir, FLOAT3* up);
+inline void mat4_lookat_lh(FLOAT3* eye, FLOAT3* dir, FLOAT3* up, MATRIX4* out);
 inline MATRIX4 mat4_lookto_lh(FLOAT3* eye, FLOAT3* to, FLOAT3* up);
 inline void mat4_lookto_lh(FLOAT3* eye, FLOAT3* to, FLOAT3* up, MATRIX4* out);
 inline MATRIX4 mat4_lookto_rh(FLOAT3* eye, FLOAT3* to, FLOAT3* up);

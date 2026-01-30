@@ -885,8 +885,6 @@ struct MARKENGINE_API RS_BLEND_TARGET
 		uint64 data; // 전체 데이터를 하나의 64비트 정수로 접근
 	};
 
-
-
 	constexpr RS_BLEND_TARGET()
 		: BlendEnable(FALSE)
 		, SrcBlend(BLEND_FACTOR::ONE)
@@ -983,6 +981,16 @@ struct MARKENGINE_API RS_BLEND_STATE
 	}
 };
 
+inline RS_BLEND_STATE GetBS_Default()
+{
+	RS_BLEND_STATE bs;
+	bs.NumBlendTargets = 1;
+	bs.AlphaToCoverageEnable = FALSE;
+	bs.IndependentBlendEnable = FALSE;
+	bs.BlendTarget[0] = RS_BLEND_TARGET::NO_BLEND;
+	return bs;
+}
+
 /**
 * @brief 스텐실 연산 설명 구조체
 */
@@ -1068,9 +1076,9 @@ struct MARKENGINE_API RS_DEPTH_STENCIL_STATE
 	RS_STENCIL_OP BackFace;
 
 	constexpr RS_DEPTH_STENCIL_STATE()
-		: DepthEnable(TRUE)
-		, DepthWriteEnable(TRUE)
-		, DepthFunc(COMPARISON_FUNC::LESS)
+		: DepthEnable(FALSE)
+		, DepthWriteEnable(FALSE)
+		, DepthFunc(COMPARISON_FUNC::ALWAYS)
 		, DepthWriteMask(DEPTH_WRITE_MASK::ALL)
 		, PADDING_DEPTH(0)
 		, StencilEnable(FALSE)
@@ -1132,6 +1140,16 @@ struct MARKENGINE_API RS_DEPTH_STENCIL_STATE
 		return !(*this == other);
 	}
 };
+
+inline RS_DEPTH_STENCIL_STATE GetDSS_Default()
+{
+	return RS_DEPTH_STENCIL_STATE::DEFAULT;
+}
+
+inline RS_DEPTH_STENCIL_STATE GetDSS_DepthReadOnly()
+{
+	return RS_DEPTH_STENCIL_STATE::DEPTH_READ_ONLY;
+}
 
 /**
 * @brief 래스터라이저 상태 구조체

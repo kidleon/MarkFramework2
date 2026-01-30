@@ -274,6 +274,12 @@ typedef long double LONG_DOUBLE;
 #	define MEM_SIZE unsigned int
 #endif // DEFAULT_MEMORY_ALIGNMENT
 
+#if defined(_M_X64) || defined(__aarch64__) || defined(_M_ARM64) || defined(_M_IX86) || defined(__i386__) || defined(__arm__)
+#	define __LITTLE_ENDIAN__
+#elif defined(_PPC_) || defined(__ppc__) || defined(__powerpc__) || defined(__PPC64__) || defined(__powerpc64__)
+#	define __BIG_ENDIAN__
+#endif // PROCESSOR ARCHITECTURE
+
 #define DEFAULT_MEMORY_BLOCK_ALIGNMENT 16 // 기본 16바이트 정렬
 #define MAX_FILE_LENGTH 264 // 최대 파일 경로 길이
 
