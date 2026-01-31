@@ -17,11 +17,11 @@ struct RENDER_SORT_INDEXER
 	uint32 GetVertexShaderIndex(HANDLE StackPool, UINT64 key);
 	uint32 GetPixelShaderIndex(HANDLE StackPool, UINT64 key);
 	uint32 GetTextureIndex(HANDLE StackPool, UINT64 key);
-	uint32 GetStateIndex(
-		HANDLE StackPool, 
-		UINT16 BlendStateIndex,
-		UINT16 RasterizeStateIndex,
-		UINT16 DepthStencilStateIndex
+	uint32 GetRenderStateIndex(
+		HANDLE StackPool,
+		UINT64 BlendStateKey,
+		UINT64 RasterizeStateKey,
+		UINT64 DepthStencilStateKey
 	);
 };
 

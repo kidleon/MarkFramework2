@@ -78,16 +78,8 @@ public:
 		return m_Primitives[PrimitiveIndex];
 	}
 
-	__FORCEINLINE ID3D11Buffer* INL_GetD3D11VertexBuffer() const noexcept
-	{
-		return m_pD3D11VertexBuffer;
-	}
-
-	__FORCEINLINE ID3D11Buffer* INL_GetD3D11IndexBuffer() const noexcept
-	{
-		return m_pD3D11IndexBuffer;
-	}
-
+	__FORCEINLINE ID3D11Buffer* INL_GetD3D11VertexBuffer() const noexcept { return m_pD3D11VertexBuffer; }
+	__FORCEINLINE ID3D11Buffer* INL_GetD3D11IndexBuffer() const noexcept { return m_pD3D11IndexBuffer; }
 	__FORCEINLINE BOOL INL_IsDirtyVertexBuffer() const noexcept { return m_DirtyVertexBuffer; }
 	__FORCEINLINE BOOL INL_IsDirtyIndexBuffer() const noexcept { return m_DirtyIndexBuffer; }
 

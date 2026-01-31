@@ -2,20 +2,48 @@
 #include "D3D11RenderFrame.h"
 #include "D3D11RenderCamera.h"
 #include "D3D11RenderQueue.h"
-#include "D3D11ResourceCommandPool.h"
+#include "stack_pool.h"
 
+
+void D3D11_RENDER_FRAME::Init()
+{
+	IndexerStackPool = stackpool_create(1048 * 1024, FALSE); // 1MB
+	CommandStackPool = stackpool_create(2096 * 1024, FALSE); // 2MB
+	init_linked_list(&ResourceCommandQueue);
+	RenderSortIndexer.Init();
+}
+
+void D3D11_RENDER_FRAME::Destroy()
+{
+	if (IndexerStackPool)
+	{
+		stackpool_destroy(IndexerStackPool);
+		IndexerStackPool = nullptr;
+	}
+
+	if (CommandStackPool)
+	{
+		stackpool_destroy(CommandStackPool);
+		CommandStackPool = nullptr;
+	}
+
+	RenderSortIndexer.Destroy();
+}
 
 void D3D11_RENDER_FRAME::Reset()
 {
 	for (size_t i = 0; i < NumRQs; ++i)
-	{
 		RQs[i].Reset();
-	}
 	NumRQs = 0;
 
-	for(size_t i = 0; i < ResourceCommands.size(); ++i)
-		D3D11ResourceCommandPool::Get()->Release(ResourceCommands[i]);
-	ResourceCommands.clear();
+	ResourceCommandQueue.head = nullptr;
+	ResourceCommandQueue.tail = nullptr;
+	ResourceCommandQueue.size = 0;
+
+	stackpool_reset(IndexerStackPool);
+	stackpool_reset(CommandStackPool);
+
+	RenderSortIndexer.Reset();
 }
 
 void D3D11_RENDER_FRAME::SortByCameraOrder()

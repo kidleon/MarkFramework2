@@ -7,8 +7,6 @@
 #include "D3D11ConstantBufferAllocator.h"
 #include "D3D11BlobAllocator.h"
 #include "D3D11RenderContext.h"
-#include "D3D11ResourceCommandPool.h"
-#include "D3D11RenderCommandPool.h"
 #include "D3D11RenderCommandExecutor.h"
 #include "D3D11PrimitiveBuffer.h"
 #include "D3D11ShaderProgram.h"
@@ -112,12 +110,6 @@ BOOL D3D11RenderSystem::Init(
 	m_pSurfaceMaterialBlockPool = D3D11_NEW(D3D11SurfaceMaterialBlockPool)();
 	m_pSurfaceMaterialBlockPool->Init(512);
 
-	m_pResourceCommandPool = D3D11_NEW(D3D11ResourceCommandPool)();
-	m_pResourceCommandPool->Init(64);
-
-	m_pRenderCommandPool = D3D11_NEW(D3D11RenderCommandPool)();
-	m_pRenderCommandPool->Init(64);
-
 	m_pRenderCommandExecutor = D3D11_NEW(D3D11RenderCommandExecutor)(m_pRenderDevice);
 
 	return TRUE;
@@ -129,18 +121,6 @@ void D3D11RenderSystem::Shutdown()
 	{
 		D3D11_DELETE(m_pRenderCommandExecutor, D3D11RenderCommandExecutor);
 		m_pRenderCommandExecutor = nullptr;
-	}
-
-	if (m_pRenderCommandPool)
-	{
-		D3D11_DELETE(m_pRenderCommandPool, D3D11RenderCommandPool);
-		m_pRenderCommandPool = nullptr;
-	}
-
-	if (m_pResourceCommandPool)
-	{
-		D3D11_DELETE(m_pResourceCommandPool, D3D11ResourceCommandPool);
-		m_pResourceCommandPool = nullptr;
 	}
 
 	if (m_pSurfaceMaterialBlockPool)

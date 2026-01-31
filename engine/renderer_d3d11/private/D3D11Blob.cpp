@@ -2,8 +2,8 @@
 #include "D3D11Blob.h"
 
 
-D3D11_BLOB::D3D11_BLOB(void* pBuffer, size_t size)
-	: m_pBuffer(pBuffer)
+D3D11_BLOB::D3D11_BLOB(void* pAlignedBuffer, size_t size)
+	: m_pBuffer(pAlignedBuffer)
 	, m_BufferSize(size)
 {
 	m_LinkNode.data = this;

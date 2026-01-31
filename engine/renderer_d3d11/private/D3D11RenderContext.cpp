@@ -5,9 +5,7 @@
 #include "D3D11RenderCamera.h"
 #include "D3D11RenderCommandExecutor.h"
 #include "D3D11RenderCommand.h"
-#include "D3D11RenderCommandPool.h"
 #include "D3D11ResourceCommand.h"
-#include "D3D11ResourceCommandPool.h"
 #include "D3D11RenderFrame.h"
 #include "D3D11SurfaceMaterial.h"
 #include "D3D11PrimitiveBuffer.h"
@@ -22,39 +20,13 @@ D3D11RenderContext::~D3D11RenderContext() noexcept
 void D3D11RenderContext::Init()
 {
 	for (int32 i = 0; i < MAX_RENDER_FRAME; ++i)
-	{
-		m_RenderFrames[i].Reset();
-	}
-
-	for (int i = 0; i < MAX_RENDER_FRAME; ++i)
-	{
-		m_RenderSortIndexer[i].Init();
-	}
-
-	m_StackPool = stackpool_create(
-		2048 * 1024,
-		FALSE
-	);
+		m_RenderFrames[i].Init();
 }
 
 void D3D11RenderContext::Destroy()
 {
-	for (int i = 0; i < MAX_RENDER_FRAME; ++i)
-	{
-		m_RenderSortIndexer[i].Destroy();
-	}
-
-	if (m_StackPool)
-	{
-		stackpool_reset(m_StackPool);
-		stackpool_destroy(m_StackPool);
-		m_StackPool = nullptr;
-	}
-
 	for (int32 i = 0; i < MAX_RENDER_FRAME; ++i)
-	{
-		m_RenderFrames[i].Reset();
-	}
+		m_RenderFrames[i].Destroy();
 }
 
 long D3D11RenderContext::AddRef()
@@ -81,10 +53,7 @@ long D3D11RenderContext::RefCnt()
 void D3D11RenderContext::BeginFrame() noexcept
 {
 	m_CurrentFrameIndex = (m_LastFrameIndex + 1) % MAX_RENDER_FRAME;
-	m_pCurRenderSortIndexer = &m_RenderSortIndexer[m_CurrentFrameIndex];
-	m_pCurRenderSortIndexer->Reset();
-
-	stackpool_reset(m_StackPool);
+	m_RenderFrames[m_CurrentFrameIndex].Reset();
 }
 
 void D3D11RenderContext::EndFrame() noexcept
@@ -95,7 +64,7 @@ void D3D11RenderContext::EndFrame() noexcept
 	m_CurrentFrameIndex = -1;
 }
 
-__FORCEINLINE int32 FindRQ(
+static inline int32 FindRQ(
 	const D3D11_RENDER_QUEUE_GROUP* pRQs,
 	size_t NumRQs,
 	IRenderCamera* pRenderCamera
@@ -130,11 +99,6 @@ void D3D11RenderContext::BeginRenderCamera(IRenderCamera* pRenderCamera) noexcep
 
 	D3D11RenderCamera* pD3D11RenderCamera = static_cast<D3D11RenderCamera*>(pRenderCamera);
 	pD3D11RenderCamera->ComputeCamera(); // 카메라 행렬 계산
-
-	m_ViewProjMatrix = mat4_mul(
-		&MATRIX4(pD3D11RenderCamera->INL_GetViewMatrix()),
-		&MATRIX4(pD3D11RenderCamera->INL_GetProjectionMatrix())
-	);
 
 	// 있으면 해당 렌더 큐를 사용, 없으면 새로 생성
 	if (-1 != find_index)
@@ -192,13 +156,21 @@ void D3D11RenderContext::SetPrimitiveBuffer(IPrimitiveBuffer* pPrimitiveBuffer)
 		if (m_pCurPrimitiveBuffer->INL_IsDirtyVertexBuffer() || 
 			m_pCurPrimitiveBuffer->INL_IsDirtyIndexBuffer())
 		{
-			D3D11_RESOURCE_COMMAND* pResCmd = D3D11ResourceCommandPool::Get()->Acquire();
+			D3D11_RESOURCE_COMMAND* pResCmd = (D3D11_RESOURCE_COMMAND*)stackpool_alloc(
+				m_RenderFrames[m_CurrentFrameIndex].CommandStackPool, 
+				sizeof(D3D11_RESOURCE_COMMAND)
+			);
 
+			memset(pResCmd, 0, sizeof(D3D11_RESOURCE_COMMAND));
+			pResCmd->LinkNode.data = pResCmd;
 			pResCmd->CommandFunc = D3D11_RESOURCE_COMMAND::COMMAND_FUNC::UPDATE_PRIMITIVE_BUFFER;
 			pResCmd->pPrimitiveBuffer = m_pCurPrimitiveBuffer;
 			m_pCurPrimitiveBuffer->AddRef();
 
-			m_RenderFrames[m_CurrentFrameIndex].ResourceCommands.push_back(pResCmd);
+			linked_list_push_back(
+				&m_RenderFrames[m_CurrentFrameIndex].ResourceCommandQueue,
+				&pResCmd->LinkNode
+			);
 		}
 	}
 }
@@ -219,33 +191,39 @@ void D3D11RenderContext::DrawPrimitive(const LOCAL_TRANSFORM& Transform, int32 P
 		Transform.TM.m32
 	};
 
-	MATRIX4 InvWorldTM;
-	mat4_inverse((MATRIX4*)&Transform.TM, &InvWorldTM);
-
 	FLOAT3 CameraPos = m_pCurRenderCamera->INL_GetEyePos();
 	FLOAT DepthFarZ = m_pCurRenderCamera->INL_GetDepthFarZ();
 
-	FLOAT3 CameraDist = vec3_sub(&CameraPos, &WorldPos);
-	FLOAT3 DistLen = vec3_length(&CameraDist);
+	FLOAT3 CameraDist = vec3_sub(CameraPos, WorldPos);
+	FLOAT3 DistLen = vec3_length(CameraDist);
 	FLOAT DepthValueF = (DistLen.x / DepthFarZ) * ((1 << 8) - 1); // 0 ~ 255
 	UINT16 DepthValue = static_cast<UINT16>(DepthValueF);
 
+	const MATRIX4& ViewProjMatrix = m_pCurRenderCamera->INL_GetViewProjectionMatrix();
+
 	for (int32 p = 0; p < NumPass; ++p)
 	{
-		D3D11_DRAW_COMMAND* pDrawCommand = D3D11RenderCommandPool::Get()->Acquire();
+		D3D11_DRAW_COMMAND* pDrawCommand = (D3D11_DRAW_COMMAND*)stackpool_alloc(
+			m_RenderFrames[m_CurrentFrameIndex].CommandStackPool, 
+			sizeof(D3D11_DRAW_COMMAND)
+		);
+
+		if (!pDrawCommand)
+		{
+			SYS_LOG_E("D3D11RenderContext::DrawPrimitive: Failed to allocate draw command.");
+			continue;
+		}
+
+		memset(pDrawCommand, 0, sizeof(D3D11_DRAW_COMMAND));
 
 		m_pCurPrimitiveBuffer->AddRef();
 		pDrawCommand->pPrimitiveBuffer = m_pCurPrimitiveBuffer;
 		pDrawCommand->DrawPrimitiveIndex = PrimitiveIndex;
 
-		pDrawCommand->ObjectConstant.World = mat4_transpose((MATRIX4*)&Transform.TM);
+		pDrawCommand->ObjectConstant.World = mat4_transpose(Transform.TM);
 
 		// 월드-뷰-투영 행렬 계산
-		MATRIX4 WorldViewProjTM = mat4_mul(
-			(MATRIX4*)&Transform.TM,
-			&m_ViewProjMatrix
-		);
-
+		//MATRIX4 WorldViewProjTM = mat4_mul((MATRIX4*)&Transform.TM, (MATRIX4*)&ViewProjMatrix);
 		//pDrawCommand->ObjectConstant.WorldViewProjection = mat4_transpose(&WorldViewProjTM);
 
 		pDrawCommand->RenderPipeline.pVertexShader = m_pCurSurfaceMaterial->INL_GetVertexShader(p);
@@ -266,25 +244,32 @@ void D3D11RenderContext::DrawPrimitive(const LOCAL_TRANSFORM& Transform, int32 P
 
 		// 인덱스 설정등을 한다...................
 		UINT64 VS_Index = reinterpret_cast<UINT64>(pDrawCommand->RenderPipeline.pVertexShader);
-		pDrawCommand->SortKey.VertexShaderIndex = m_pCurRenderSortIndexer->GetVertexShaderIndex(m_StackPool, VS_Index);
+		pDrawCommand->SortKey.VertexShaderIndex = m_RenderFrames[m_CurrentFrameIndex].RenderSortIndexer.GetVertexShaderIndex(
+			m_RenderFrames[m_CurrentFrameIndex].IndexerStackPool, 
+			VS_Index
+		);
 
 		UINT64 PS_Index = reinterpret_cast<UINT64>(pDrawCommand->RenderPipeline.pPixelShader);
-		pDrawCommand->SortKey.PixelShaderIndex = m_pCurRenderSortIndexer->GetPixelShaderIndex(m_StackPool, PS_Index);
+		pDrawCommand->SortKey.PixelShaderIndex = m_RenderFrames[m_CurrentFrameIndex].RenderSortIndexer.GetPixelShaderIndex(
+			m_RenderFrames[m_CurrentFrameIndex].IndexerStackPool, 
+			PS_Index
+		);
 
 		UINT64 TextureID = 0; // TODO: 텍스처 ID 해시 계산
 
-		UINT16 BlendStateIndex = m_pCurSurfaceMaterial->INL_GetBlendStateIndex(p);
-		UINT16 RasterizerStateIndex = m_pCurSurfaceMaterial->INL_GetRasterizerStateIndex(p);
-		UINT16 DepthStencilStateIndex = m_pCurSurfaceMaterial->INL_GetDepthStencilStateIndex(p);
+		UINT64 BlendStateHash = m_pCurSurfaceMaterial->INL_GetBlendStateHash(p);
+		UINT64 RasterizerStateHash = m_pCurSurfaceMaterial->INL_GetRasterizerStateHash(p);
+		UINT64 DepthStencilStateHash = m_pCurSurfaceMaterial->INL_GetDepthStencilStateHash(p);
 
-		pDrawCommand->SortKey.StateIndex = m_pCurRenderSortIndexer->GetStateIndex(
-			m_StackPool,
-			BlendStateIndex,
-			RasterizerStateIndex,
-			DepthStencilStateIndex
+		pDrawCommand->SortKey.StateIndex = m_RenderFrames[m_CurrentFrameIndex].RenderSortIndexer.GetRenderStateIndex(
+			m_RenderFrames[m_CurrentFrameIndex].IndexerStackPool,
+			BlendStateHash,
+			RasterizerStateHash,
+			DepthStencilStateHash
 		);
 			
 		pDrawCommand->SortKey.Depth = DepthValue;
+
 
 		// 일단 임시로 불투명 렌더 큐에 추가
 		D3D11_RENDER_QUEUE* pRQ = m_pCurRQs->INL_GetOpaqueRQ();

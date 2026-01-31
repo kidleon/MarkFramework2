@@ -112,17 +112,17 @@ void D3D11RenderCamera::SetView(
 	m_View.EyePos = EyePos;
 	m_View.EyeDir = EyeDir;
 	m_View.EyeUp = EyeUp;
-	m_View.EyeRight = vec3_cross(&m_View.EyeDir, &m_View.EyeUp);
-	m_View.EyeUp = vec3_cross(&m_View.EyeRight, &m_View.EyeDir);
+	m_View.EyeRight = vec3_cross(m_View.EyeDir, m_View.EyeUp);
+	m_View.EyeUp = vec3_cross(m_View.EyeRight, m_View.EyeDir);
 }
 
 void D3D11RenderCamera::LookAt(const FLOAT3& EyePos, const FLOAT3& Target) noexcept
 {
 	m_View.EyePos = EyePos;
-	vec3_sub((FLOAT3*)&Target, &m_View.EyePos, &m_View.EyeDir);
-	vec3_normalize(&m_View.EyeDir);
-	vec3_cross(&m_View.EyeDir, (FLOAT3*)&FLOAT3_UNIT_X, &m_View.EyeUp);
-	vec3_cross(&m_View.EyeDir, &m_View.EyeUp, &m_View.EyeRight);
+	vec3_sub(Target, m_View.EyePos, m_View.EyeDir);
+	vec3_normalize(m_View.EyeDir);
+	vec3_cross(m_View.EyeDir, (FLOAT3&)FLOAT3_UNIT_X, m_View.EyeUp);
+	vec3_cross(m_View.EyeDir, m_View.EyeUp, m_View.EyeRight);
 }
 
 void D3D11RenderCamera::SetCameraOrder(INT8 Order) noexcept
@@ -134,10 +134,10 @@ void D3D11RenderCamera::ComputeCamera() noexcept
 {
 	// 뷰 행렬 계산
 	mat4_lookat_lh(
-		&m_View.EyePos,
-		&m_View.EyeDir,
-		&m_View.EyeUp,
-		&m_ViewMatrix
+		m_View.EyePos,
+		m_View.EyeDir,
+		m_View.EyeUp,
+		m_ViewMatrix
 	);
 
 	// 투영 행렬 계산
@@ -148,7 +148,7 @@ void D3D11RenderCamera::ComputeCamera() noexcept
 			m_Perspective.Aspect,
 			m_Perspective.NearZ,
 			m_Perspective.FarZ,
-			&m_ProjectionMatrix
+			m_ProjectionMatrix
 		);
 	}
 	else if (m_CameraMode == CAMERA_MODE::ORTHO)
@@ -158,8 +158,10 @@ void D3D11RenderCamera::ComputeCamera() noexcept
 			m_Ortho.ViewHeight,
 			m_Ortho.NearZ,
 			m_Ortho.FarZ,
-			&m_ProjectionMatrix
+			m_ProjectionMatrix
 		);
 	}
 
+	mat4_mul(m_ViewMatrix, m_ProjectionMatrix, m_ViewProjectionMatrix);
+	mat4_inverse(m_ViewMatrix, m_InverseViewMatrix);
 }

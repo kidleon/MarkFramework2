@@ -181,13 +181,11 @@ void D3D11SurfaceMaterial::SetRasterizerState(int32 Pass, const RS_RASTERIZER_ST
 		{
 			m_pMaterialBlock->RenderPasses[Pass].RasterizerStateHash = 0;
 			m_pMaterialBlock->RenderPasses[Pass].pRasterizerState = nullptr;
-			m_pMaterialBlock->RenderPasses[Pass].RasterizerStateIndex = 0;
 		}
 		else
 		{
 			m_pMaterialBlock->RenderPasses[Pass].RasterizerStateHash = Hash;
 			m_pMaterialBlock->RenderPasses[Pass].pRasterizerState = pRS->INL_GetD3D11RasterizerState();
-			m_pMaterialBlock->RenderPasses[Pass].RasterizerStateIndex = (UINT16)pRS->INL_GetIndex();
 		}
 	}
 }
@@ -214,13 +212,11 @@ void D3D11SurfaceMaterial::SetBlendState(int32 Pass, const RS_BLEND_STATE& Blend
 	{
 		m_pMaterialBlock->RenderPasses[Pass].BlendStateHash = 0;
 		m_pMaterialBlock->RenderPasses[Pass].pBlendState = nullptr;
-		m_pMaterialBlock->RenderPasses[Pass].BlendStateIndex = 0;
 	}
 	else
 	{
 		m_pMaterialBlock->RenderPasses[Pass].BlendStateHash = Hash;
 		m_pMaterialBlock->RenderPasses[Pass].pBlendState = pBS->INL_GetD3D11BlendState();
-		m_pMaterialBlock->RenderPasses[Pass].BlendStateIndex = (UINT16)pBS->INL_GetIndex();
 	}
 }
 void D3D11SurfaceMaterial::SetBlendState(const RS_BLEND_STATE& BlendState)
@@ -275,13 +271,11 @@ void D3D11SurfaceMaterial::SetDepthStencilState(int32 Pass, const RS_DEPTH_STENC
 	{
 		m_pMaterialBlock->RenderPasses[Pass].DepthStencilStateHash = 0;
 		m_pMaterialBlock->RenderPasses[Pass].pDepthStencilState = nullptr;
-		m_pMaterialBlock->RenderPasses[Pass].DepthStencilStateIndex = 0;
 	}
 	else
 	{
 		m_pMaterialBlock->RenderPasses[Pass].DepthStencilStateHash = Hash;
 		m_pMaterialBlock->RenderPasses[Pass].pDepthStencilState = pDSS->INL_GetD3D11DepthStencilState();
-		m_pMaterialBlock->RenderPasses[Pass].DepthStencilStateIndex = (UINT16)pDSS->INL_GetIndex();
 	}
 }
 

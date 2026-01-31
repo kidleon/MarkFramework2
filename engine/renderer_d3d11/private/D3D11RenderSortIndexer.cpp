@@ -42,6 +42,8 @@ void RENDER_SORT_INDEXER::Init()
 
 void RENDER_SORT_INDEXER::Destroy()
 {
+	Reset();
+
 	if (pVertexShaderIndexTable)
 	{
 		delete_hash_table(pVertexShaderIndexTable);
@@ -200,18 +202,32 @@ uint32 RENDER_SORT_INDEXER::GetTextureIndex(HANDLE StackPool, UINT64 key)
 	}
 }
 
-uint32 RENDER_SORT_INDEXER::GetStateIndex(
+
+struct STATE_KEYS
+{
+	UINT64 BlendStateKey;
+	UINT64 RasterizeStateKey;
+	UINT64 DepthStencilStateKey;
+};
+
+uint32 RENDER_SORT_INDEXER::GetRenderStateIndex(
 	HANDLE StackPool,
-	UINT16 BlendStateIndex,
-	UINT16 RasterizeStateIndex,
-	UINT16 DepthStencilStateIndex
+	UINT64 BlendStateKey,
+	UINT64 RasterizeStateKey,
+	UINT64 DepthStencilStateKey
 )
 {
-	UINT64 key = MakeStateKey(BlendStateIndex, RasterizeStateIndex, DepthStencilStateIndex);
+	STATE_KEYS StateKeys = {
+		BlendStateKey,
+		RasterizeStateKey,
+		DepthStencilStateKey
+	};
+
+	UINT64 Key = fnv64_c(&StateKeys, sizeof(STATE_KEYS));
 
 	void* pData = query_hash_node(
 		pStateIndexTable,
-		static_cast<int64>(key)
+		static_cast<int64>(Key)
 	);
 
 	if (!pData)
@@ -221,14 +237,14 @@ uint32 RENDER_SORT_INDEXER::GetStateIndex(
 			sizeof(RENDER_SORT_INDEX_ELEMENT)
 		);
 
-		pNewElement->Key = key;
+		pNewElement->Key = Key;
 		pNewElement->Index = static_cast<UINT32>(pStateIndexTable->node_count);
-		pNewElement->HashNode.key = static_cast<int64>(key);
+		pNewElement->HashNode.key = static_cast<int64>(Key);
 		pNewElement->HashNode.data = pNewElement;
 
 		int result =  insert_hash_node(
 			pStateIndexTable,
-			static_cast<int64>(key),
+			static_cast<int64>(Key),
 			&pNewElement->HashNode
 		);
 

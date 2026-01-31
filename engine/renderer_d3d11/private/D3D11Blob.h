@@ -4,7 +4,7 @@
 class D3D11_BLOB : public IUNKNOWN
 {
 public:
-	D3D11_BLOB(void* pBuffer, size_t size);
+	D3D11_BLOB(void* pAlignedBuffer, size_t size);
 	
 	// IUNKNOWN interface
 	virtual long AddRef() final;

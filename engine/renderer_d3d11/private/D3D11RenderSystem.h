@@ -60,8 +60,6 @@ private:
 	D3D11ShaderProgramCache* m_pShaderProgramCache = nullptr;
 	D3D11SurfaceMaterialBlockPool* m_pSurfaceMaterialBlockPool = nullptr;
 	D3D11RenderStateCache* m_pRenderStateCache = nullptr;
-	D3D11ResourceCommandPool* m_pResourceCommandPool = nullptr;
-	D3D11RenderCommandPool* m_pRenderCommandPool = nullptr;
 	D3D11RenderCommandExecutor* m_pRenderCommandExecutor = nullptr;
 	D3D11InputLayoutCache* m_pInputLayoutCache = nullptr;
 

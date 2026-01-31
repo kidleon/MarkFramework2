@@ -107,6 +107,8 @@ public:
 	__INLINE BOOL INL_HasRenderQueue() const noexcept { return m_CameraFlags & HAS_RENDER_QUEUE; }
 	__INLINE const MATRIX4& INL_GetViewMatrix() const noexcept { return m_ViewMatrix; }
 	__INLINE const MATRIX4& INL_GetProjectionMatrix() const noexcept { return m_ProjectionMatrix; }
+	__INLINE const MATRIX4& INL_GetViewProjectionMatrix() const noexcept { return m_ViewProjectionMatrix; }
+	__INLINE const MATRIX4& INL_GetInverseViewMatrix() const noexcept { return m_InverseViewMatrix; }
 	__INLINE const D3D11_VIEWPORT INL_GetViewport() const noexcept { return m_Viewport; }
 	__INLINE D3D11RenderTarget* INL_GetRenderTarget() const noexcept { return m_pRenderTarget; }
 
@@ -142,7 +144,9 @@ private:
 	UINT32 m_CameraFlags = 0;
 
 	MATRIX4 m_ViewMatrix = MATRIX4_IDENT;
+	MATRIX4 m_InverseViewMatrix = MATRIX4_IDENT;
 	MATRIX4 m_ProjectionMatrix = MATRIX4_IDENT;
+	MATRIX4 m_ViewProjectionMatrix = MATRIX4_IDENT;
 
 	D3D11_VIEWPORT m_Viewport = {};
 

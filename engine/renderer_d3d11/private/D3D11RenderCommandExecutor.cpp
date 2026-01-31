@@ -20,6 +20,8 @@ D3D11RenderCommandExecutor* D3D11RenderCommandExecutor::s_pInstance = nullptr;
 
 D3D11RenderCommandExecutor::D3D11RenderCommandExecutor(D3D11RenderDevice* pRenderDevice)
 	: m_pRenderDevice(pRenderDevice)
+	, m_RenderStats{}
+	, m_PipelineStateState{}
 {
 	if (!s_pInstance)
 		s_pInstance = this;
@@ -41,6 +43,10 @@ D3D11RenderCommandExecutor::~D3D11RenderCommandExecutor() noexcept
 			pRenderFrame = m_RenderFrameQueue.front();
 		}
 	}
+
+	CHECK_RELEASE(m_PipelineStateState.pSetVS);
+	CHECK_RELEASE(m_PipelineStateState.pSetPS);
+	CHECK_RELEASE(m_PipelineStateState.pSetPB);
 	
 	if (s_pInstance == this)
 		s_pInstance = nullptr;
@@ -69,35 +75,26 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 
 	D3D11ConstantBufferAllocator::Get()->ResetTemp();
 
+	// 렌더 통계 초기화
+	memset(&m_RenderStats, 0, sizeof(RenderStats));
+
 	D3D11_RENDER_FRAME* pRenderFrame = m_RenderFrameQueue.front();
 	m_RenderFrameQueue.pop_front();
 
 	// 리소스 커맨드 처리
-	for(size_t i = 0; i < pRenderFrame->ResourceCommands.size(); ++i)
-	{
-		D3D11_RESOURCE_COMMAND* pResCmd = pRenderFrame->ResourceCommands[i];
-		if (!pResCmd)
-			continue;
-
-		switch (pResCmd->CommandFunc)
-		{
-			case D3D11_RESOURCE_COMMAND::COMMAND_FUNC::UPDATE_PRIMITIVE_BUFFER: // 프리미티브 버퍼 업데이트
-			{
-				D3D11PrimitiveBuffer* pPB = pResCmd->pPrimitiveBuffer;
-				if (pPB)
-				{
-					pPB->UploadToGPU_VB(pDeviceContext);
-					pPB->UploadToGPU_IB(pDeviceContext);
-				}
-			} break;
-		default:
-			break;
-		}
-	}
+	ExcuteResourceCommands(pDeviceContext, pRenderFrame);
 
 	for (size_t i = 0; i < pRenderFrame->NumRQs; ++i)
 	{
 		D3D11_RENDER_QUEUE_GROUP* pRQGroup = &pRenderFrame->RQs[i];
+
+		// 파이프라인 상태 초기화
+		CHECK_RELEASE(m_PipelineStateState.pSetVS);
+		CHECK_RELEASE(m_PipelineStateState.pSetPS);
+		CHECK_RELEASE(m_PipelineStateState.pSetPB);
+		m_PipelineStateState.pSetRS = nullptr;
+		m_PipelineStateState.pSetBS = nullptr;
+		m_PipelineStateState.pSetDSS = nullptr;
 
 		// 렌더 카메라 설정
 		const D3D11RenderCamera* pCamera = pRQGroup->INL_GetRenderCamera();
@@ -106,9 +103,9 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 
 		// 카메라 상수 버퍼 설정
 		D3D11_CAMERA_CONSTANT CameraCB = {};
-		CameraCB.ViewMatrix = mat4_transpose((MATRIX4*)&pCamera->INL_GetViewMatrix());
-		CameraCB.InvViewMatrix = mat4_transpose(&mat4_inverse(&CameraCB.ViewMatrix));
-		CameraCB.ProjectionMatrix = mat4_transpose((MATRIX4*)&pCamera->INL_GetProjectionMatrix());
+		CameraCB.ViewMatrix = mat4_transpose(pCamera->INL_GetViewMatrix());
+		CameraCB.InvViewMatrix = mat4_transpose(mat4_inverse(CameraCB.ViewMatrix));
+		CameraCB.ProjectionMatrix = mat4_transpose(pCamera->INL_GetProjectionMatrix());
 
 		const D3D11RenderCamera::VIEW_DESC& ViewDesc = pCamera->INL_GetViewDesc();
 		//CameraCB.CameraPosition = { ViewDesc.EyePos.x, ViewDesc.EyePos.y, ViewDesc.EyePos.z, 1.0f };
@@ -186,16 +183,10 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 			D3D11_RENDER_QUEUE* pRQ = pRQGroup->INL_GetOpaqueRQ();
 			pRQ->Sort();
 
-			D3D11ShaderProgram* pSetVS = nullptr;
-			D3D11ShaderProgram* pSetPS = nullptr;
-			D3D11PrimitiveBuffer* pSetPB = nullptr;
-			ID3D11RasterizerState* pSetRS = nullptr;
-			ID3D11BlendState* pSetBS = nullptr;
-			ID3D11DepthStencilState* pSetDSS = nullptr;
-
 			UINT32 SetInputVertexFormat = 0;
 			ID3D11InputLayout* pSetIL = nullptr;
 
+			// 드로우 커맨드 실행
 			size_t NumCommands = pRQ->INL_GetNumCommands();
 			for (size_t c = 0; c < NumCommands; ++c)
 			{
@@ -205,17 +196,17 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 				// 셰이더 프로그램 바인딩
 
 				// 버텍스 셰이더
-				if (pSetVS != pCmd->RenderPipeline.pVertexShader)
+				if (m_PipelineStateState.pSetVS != pCmd->RenderPipeline.pVertexShader)
 				{
-					CHECK_RELEASE(pSetVS);
+					CHECK_RELEASE(m_PipelineStateState.pSetVS);
 
-					pSetVS = pCmd->RenderPipeline.pVertexShader;
-					pSetVS->AddRef();
+					m_PipelineStateState.pSetVS = pCmd->RenderPipeline.pVertexShader;
+					m_PipelineStateState.pSetVS->AddRef();
 
-					ID3D11VertexShader* pVS = pSetVS ? pSetVS->INL_GetVertexShader() : nullptr;
+					ID3D11VertexShader* pVS = m_PipelineStateState.pSetVS ? m_PipelineStateState.pSetVS->INL_GetVertexShader() : nullptr;
 					pDeviceContext->VSSetShader(pVS, nullptr, 0);
 
-					UINT32 InputVertexFormat = pSetVS->INL_GetInputVertexFormat();
+					UINT32 InputVertexFormat = m_PipelineStateState.pSetVS->INL_GetInputVertexFormat();
 					if (SetInputVertexFormat != InputVertexFormat)
 					{
 						SetInputVertexFormat = InputVertexFormat;
@@ -226,14 +217,14 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 				}
 
 				// 픽셀 셰이더
-				if (pSetPS != pCmd->RenderPipeline.pPixelShader)
+				if (m_PipelineStateState.pSetPS != pCmd->RenderPipeline.pPixelShader)
 				{
-					CHECK_RELEASE(pSetPS);
+					CHECK_RELEASE(m_PipelineStateState.pSetPS);
 
-					pSetPS = pCmd->RenderPipeline.pPixelShader;
-					pSetPS->AddRef();
+					m_PipelineStateState.pSetPS = pCmd->RenderPipeline.pPixelShader;
+					m_PipelineStateState.pSetPS->AddRef();
 
-					ID3D11PixelShader* pPS = pSetPS ? pSetPS->INL_GetPixelShader() : nullptr;
+					ID3D11PixelShader* pPS = m_PipelineStateState.pSetPS ? m_PipelineStateState.pSetPS->INL_GetPixelShader() : nullptr;
 					pDeviceContext->PSSetShader(pPS, nullptr, 0);
 				}
 
@@ -253,30 +244,32 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 				pDeviceContext->PSSetConstantBuffers(1, 1, &pObjCBBuffer);
 
 				// 렌더 스테이트 설정
-				if (pSetRS != pCmd->RenderPipeline.pRasterizerState)
+				if (m_PipelineStateState.pSetRS != pCmd->RenderPipeline.pRasterizerState)
 				{
-					pSetRS = pCmd->RenderPipeline.pRasterizerState;
-					pDeviceContext->RSSetState(pSetRS);
+					m_PipelineStateState.pSetRS = pCmd->RenderPipeline.pRasterizerState;
+					pDeviceContext->RSSetState(m_PipelineStateState.pSetRS);
 				}
 
-				if (pSetBS != pCmd->RenderPipeline.pBlendState)
+				if (m_PipelineStateState.pSetBS != pCmd->RenderPipeline.pBlendState)
 				{
-					pSetBS = pCmd->RenderPipeline.pBlendState;
+					m_PipelineStateState.pSetBS = pCmd->RenderPipeline.pBlendState;
 					const FLOAT4& BlendFactor = pCmd->DynamicRenderPipeline.BlendFactor;
 					UINT32 SampleMask = pCmd->DynamicRenderPipeline.SampleMask;
+
 					pDeviceContext->OMSetBlendState(
-						pSetBS,
+						m_PipelineStateState.pSetBS,
 						BlendFactor.v,
 						SampleMask
 					);
 				}
 
-				if (pSetDSS != pCmd->RenderPipeline.pDepthStencilState)
+				if (m_PipelineStateState.pSetDSS != pCmd->RenderPipeline.pDepthStencilState)
 				{
-					pSetDSS = pCmd->RenderPipeline.pDepthStencilState;
+					m_PipelineStateState.pSetDSS = pCmd->RenderPipeline.pDepthStencilState;
 					UINT32 StencilRef = pCmd->DynamicRenderPipeline.StencilRef;
+
 					pDeviceContext->OMSetDepthStencilState(
-						pSetDSS,
+						m_PipelineStateState.pSetDSS,
 						StencilRef
 					);
 				}
@@ -288,25 +281,24 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 				}
 
 				// 프리미티브 버퍼 바인딩
-				if (pSetPB != pCmd->pPrimitiveBuffer)
+				if (m_PipelineStateState.pSetPB != pCmd->pPrimitiveBuffer)
 				{
-					CHECK_RELEASE(pSetPB);
+					CHECK_RELEASE(m_PipelineStateState.pSetPB);
 
-					pSetPB = pCmd->pPrimitiveBuffer;
-					if (pSetPB)
-						pSetPB->AddRef();
+					m_PipelineStateState.pSetPB = pCmd->pPrimitiveBuffer;
+					if (m_PipelineStateState.pSetPB)
+						m_PipelineStateState.pSetPB->AddRef();
 				}
 
-				const D3D11PrimitiveBuffer::PRIMITIVE_DESC& PrimitiveDesc = pSetPB->INL_GetPrimitiveDesc(pCmd->DrawPrimitiveIndex);
-
+				const D3D11PrimitiveBuffer::PRIMITIVE_DESC& PrimitiveDesc = m_PipelineStateState.pSetPB->INL_GetPrimitiveDesc(pCmd->DrawPrimitiveIndex);
 				if (!PrimitiveDesc.VertexCount || !PrimitiveDesc.IndexCount)
 				{
 					SYS_LOG_W("D3D11RenderCommandExecutor::Execute - PrimitiveDesc has zero VertexCount or IndexCount.");
 					continue;
 				}
 
-				ID3D11Buffer* pVB = pSetPB->INL_GetD3D11VertexBuffer();
-				ID3D11Buffer* pIB = pSetPB->INL_GetD3D11IndexBuffer();
+				ID3D11Buffer* pVB = m_PipelineStateState.pSetPB->INL_GetD3D11VertexBuffer();
+				ID3D11Buffer* pIB = m_PipelineStateState.pSetPB->INL_GetD3D11IndexBuffer();
 
 				UINT32 VertexOffset = PrimitiveDesc.VertexOffset;
 				UINT32 IndexOffset = PrimitiveDesc.IndexOffset;
@@ -334,11 +326,19 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 					0,
 					0
 				);
-			}
 
-			CHECK_RELEASE(pSetPB);
-			CHECK_RELEASE(pSetVS);
-			CHECK_RELEASE(pSetPS);
+				// 렌더 통계 갱신
+				m_RenderStats.NumDrawCalls += 1;
+				if (PrimitiveDesc.PrimitiveType == PRIMITIVE_TYPE::TRIANGLE_LIST)
+				{
+					m_RenderStats.NumTriangles += (PrimitiveDesc.IndexCount / 3);
+				}
+				else if (PrimitiveDesc.PrimitiveType == PRIMITIVE_TYPE::TRIANGLE_STRIP)
+				{
+					m_RenderStats.NumTriangles += (PrimitiveDesc.IndexCount - 2);
+				}
+
+			}
 		}
 	}
 
@@ -350,5 +350,37 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 	}
 	
 	ResetFrame(pRenderFrame);
+}
+
+void D3D11RenderCommandExecutor::ExcuteResourceCommands(
+	ID3D11DeviceContext* pDeviceContext,
+	D3D11_RENDER_FRAME* pRenderFrame
+) noexcept
+{
+	if (!pRenderFrame) return;
+
+	LINK_NODE* pNode = linked_list_pop_front(&pRenderFrame->ResourceCommandQueue);
+	while (pNode)
+	{
+		D3D11_RESOURCE_COMMAND* pResCmd = (D3D11_RESOURCE_COMMAND*)pNode->data;
+
+		switch (pResCmd->CommandFunc)
+		{
+			case D3D11_RESOURCE_COMMAND::COMMAND_FUNC::UPDATE_PRIMITIVE_BUFFER: // 프리미티브 버퍼 GPU 업로드
+			{
+				D3D11PrimitiveBuffer* pPB = pResCmd->pPrimitiveBuffer;
+				if (pPB)
+				{
+					pPB->UploadToGPU_VB(pDeviceContext);
+					pPB->UploadToGPU_IB(pDeviceContext);
+				}
+			} break;
+			default:
+				break;
+		}
+
+		pResCmd->Reset();
+		pNode = linked_list_pop_front(&pRenderFrame->ResourceCommandQueue);
+	}
 }
 

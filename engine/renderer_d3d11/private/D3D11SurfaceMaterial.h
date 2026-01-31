@@ -115,19 +115,19 @@ public:
 		return m_pMaterialBlock->RenderPasses[Pass].Color;
 	}
 
-	__FORCEINLINE UINT16 INL_GetRasterizerStateIndex(int32 Pass) const noexcept
+	__FORCEINLINE UINT64 INL_GetRasterizerStateHash(int32 Pass) const noexcept
 	{
-		return m_pMaterialBlock->RenderPasses[Pass].RasterizerStateIndex;
+		return m_pMaterialBlock->RenderPasses[Pass].RasterizerStateHash;
 	}
 
-	__FORCEINLINE UINT16 INL_GetBlendStateIndex(int32 Pass) const noexcept
+	__FORCEINLINE UINT64 INL_GetBlendStateHash(int32 Pass) const noexcept
 	{
-		return m_pMaterialBlock->RenderPasses[Pass].BlendStateIndex;
+		return m_pMaterialBlock->RenderPasses[Pass].BlendStateHash;
 	}
 
-	__FORCEINLINE UINT16 INL_GetDepthStencilStateIndex(int32 Pass) const noexcept
+	__FORCEINLINE UINT64 INL_GetDepthStencilStateHash(int32 Pass) const noexcept
 	{
-		return m_pMaterialBlock->RenderPasses[Pass].DepthStencilStateIndex;
+		return m_pMaterialBlock->RenderPasses[Pass].DepthStencilStateHash;
 	}
 
 private:

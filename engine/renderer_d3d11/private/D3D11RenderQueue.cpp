@@ -3,7 +3,6 @@
 #include "D3D11RenderCamera.h"
 #include "D3D11RenderQueuePool.h"
 #include "D3D11RenderCommand.h"
-#include "D3D11RenderCommandPool.h"
 #include "TAlgorithm.h"
 
 
@@ -23,13 +22,7 @@ D3D11_RENDER_QUEUE::~D3D11_RENDER_QUEUE() noexcept
 void D3D11_RENDER_QUEUE::Reset()
 {
 	for (D3D11_DRAW_COMMAND* pCmd : m_OpaqueCmdList)
-	{
-		if (pCmd)
-		{
-			D3D11RenderCommandPool::Get()->Release(pCmd);
-		}
-	}
-
+		pCmd->Reset();
 	m_OpaqueCmdList.clear();
 }
 

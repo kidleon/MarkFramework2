@@ -6,10 +6,6 @@
 
 static constexpr size_t MAX_STATE_INDEX = 0xFFFFu - 1;
 
-static UINT64 m_RasterizerStateIndexCounter = 1;
-static UINT64 m_BlendStateIndexCounter = 1;
-static UINT64 m_DepthStencilStateIndexCounter = 1;
-
 static inline D3D11RasterizerState* CreateRasterizerState(
 	const RS_RASTERIZER_STATE& RasterizerState
 )
@@ -21,13 +17,7 @@ static inline D3D11RasterizerState* CreateRasterizerState(
 		return nullptr;
 	}
 
-	if (m_RasterizerStateIndexCounter >= MAX_STATE_INDEX)
-	{
-		SYS_LOG_W("Rasterizer State Index Counter has reached its maximum limit. Resetting to 1.");
-		m_RasterizerStateIndexCounter = 1;
-	}
-
-	D3D11RasterizerState* pRS = D3D11_NEW(D3D11RasterizerState)(m_RasterizerStateIndexCounter++, pD3D11_RS);
+	D3D11RasterizerState* pRS = D3D11_NEW(D3D11RasterizerState)(pD3D11_RS);
 	return pRS;
 }
 
@@ -42,13 +32,7 @@ static inline D3D11BlendState* CreateBlendState(
 		return nullptr;
 	}
 
-	if (m_BlendStateIndexCounter >= MAX_STATE_INDEX)
-	{
-		SYS_LOG_W("Blend State Index Counter has reached its maximum limit. Resetting to 1.");
-		m_BlendStateIndexCounter = 1;
-	}
-
-	D3D11BlendState* pBS = D3D11_NEW(D3D11BlendState)(m_BlendStateIndexCounter++, pD3D11_BS);
+	D3D11BlendState* pBS = D3D11_NEW(D3D11BlendState)(pD3D11_BS);
 	return pBS;
 }
 
@@ -63,13 +47,7 @@ static inline D3D11DepthStencilState* CreateDepthStencilState(
 		return nullptr;
 	}
 
-	if (m_DepthStencilStateIndexCounter >= MAX_STATE_INDEX)
-	{
-		SYS_LOG_W("Depth Stencil State Index Counter has reached its maximum limit. Resetting to 1.");
-		m_DepthStencilStateIndexCounter = 1;
-	}
-
-	D3D11DepthStencilState* pDSS = D3D11_NEW(D3D11DepthStencilState)(m_DepthStencilStateIndexCounter++, pD3D11_DSS);
+	D3D11DepthStencilState* pDSS = D3D11_NEW(D3D11DepthStencilState)(pD3D11_DSS);
 	return pDSS;
 }
 
@@ -96,6 +74,7 @@ void D3D11RenderStateCache::Init()
 {
 	m_pRasterizerStateCache = create_hash_table(32); // Initialize rasterizer state cache
 	m_pBlendStateCache = create_hash_table(32); // Initialize blend state cache
+	m_pDepthStencilStateCache = create_hash_table(32); // Initialize depth-stencil state cache
 
 	// Pre-create common rasterizer states
 	{
@@ -242,9 +221,7 @@ D3D11RasterizerState* D3D11RenderStateCache::Register(const RS_RASTERIZER_STATE&
 	);
 
 	if (pRS)
-	{
 		return pRS;
-	}
 
 	pRS = CreateRasterizerState(RasterizerState);
 
@@ -267,9 +244,7 @@ D3D11BlendState* D3D11RenderStateCache::Register(const RS_BLEND_STATE& BlendStat
 	);
 
 	if (pBS)
-	{
 		return pBS;
-	}
 
 	pBS = CreateBlendState(BlendState);
 
@@ -292,14 +267,11 @@ D3D11DepthStencilState* D3D11RenderStateCache::Register(const RS_DEPTH_STENCIL_S
 	);
 
 	if (pDSS)
-	{
 		return pDSS;
-	}
 
 	pDSS = CreateDepthStencilState(DepthStencilState);
 
 	insert_hash_node(
-
 		m_pDepthStencilStateCache,
 		(int64)Hash,
 		pDSS->INL_GetHashNode()
@@ -320,9 +292,6 @@ D3D11RasterizerState* D3D11RenderStateCache::Find_RS(uint64 Hash) noexcept
 		m_pRasterizerStateCache,
 		(int64)Hash
 	);
-
-	if (!pRS) return nullptr; // 찾지 못함
-
 	return pRS;
 }
 
@@ -338,9 +307,6 @@ D3D11BlendState* D3D11RenderStateCache::Find_BS(uint64 Hash) noexcept
 		m_pBlendStateCache,
 		(int64)Hash
 	);
-
-	if (!pBS) return nullptr; // 찾지 못함
-
 	return pBS;
 }
 
@@ -356,8 +322,6 @@ D3D11DepthStencilState* D3D11RenderStateCache::Find_DSS(uint64 Hash) noexcept
 		m_pDepthStencilStateCache,
 		(int64)Hash
 	);
-
-	if (!pDSS) return nullptr; // 찾지 못함
-
 	return pDSS;
 }
+

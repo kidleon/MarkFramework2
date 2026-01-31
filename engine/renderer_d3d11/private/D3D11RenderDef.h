@@ -572,5 +572,6 @@ static constexpr uint64 SORT_STATE_INDEX_BIT = 12; // 4096
 static constexpr uint64 SORT_DEPTH_BIT = 9; // 512
 
 
+
 #endif // __D3D11_RENDER_DEF_H__
 
