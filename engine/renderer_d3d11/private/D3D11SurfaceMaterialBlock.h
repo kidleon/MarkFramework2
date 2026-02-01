@@ -1,7 +1,6 @@
 ﻿#pragma once
+#include "D3D11ShaderProgram.h"
 
-
-class D3D11ShaderProgram;
 
 constexpr size_t MAX_RENDER_PASS_NAME = 64;
 struct D3D11_SURFACE_RENDER_PASS
@@ -24,6 +23,24 @@ struct D3D11_SURFACE_RENDER_PASS
 	UINT32 StencilRef;
 
 	FLOAT4 Color;
+
+	void Reset()
+	{
+		fstrcpy(PassName, "NoNamePass");
+		CHECK_RELEASE(pVertexShader);
+		CHECK_RELEASE(pPixelShader);
+
+		pRasterizerState = nullptr;
+		RasterizerStateHash = 0;
+		pBlendState = nullptr;
+		BlendStateHash = 0;
+		BlendFactor = FLOAT4{ 1.0f, 1.0f, 1.0f, 1.0f };
+		pDepthStencilState = nullptr;
+		DepthStencilStateHash = 0;
+		SampleMask = 0xFFFFFFFF;
+		StencilRef = 0;
+		Color = FLOAT4{ 1.0f, 1.0f, 1.0f, 1.0f };
+	}
 };
 
 struct D3D11_SURFACE_MATERIAL_BLOCK
@@ -32,4 +49,13 @@ struct D3D11_SURFACE_MATERIAL_BLOCK
 	size_t NumPasses;
 
 	LINK_NODE LinkNode;
+
+	void Reset()
+	{
+		NumPasses = 0;
+		for (size_t i = 0; i < MAX_RENDER_PASS; ++i)
+		{
+			RenderPasses[i].Reset();
+		}
+	}
 };

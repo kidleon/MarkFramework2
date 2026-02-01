@@ -311,6 +311,8 @@ BOOL D3D11RenderSystem::CreateSurfaceMaterial(ISurfaceMaterial** ppOut)
 		return FALSE;
 	}
 
+	pBlock->Reset();
+
 	D3D11SurfaceMaterial* pSurfaceMaterial = D3D11_POOL_NEW(D3D11SurfaceMaterial)(
 		D3D11_COMMON::GetUID(),
 		pBlock

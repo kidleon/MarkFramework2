@@ -107,7 +107,7 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 		CameraCB.InvViewMatrix = mat4_transpose(mat4_inverse(CameraCB.ViewMatrix));
 		CameraCB.ProjectionMatrix = mat4_transpose(pCamera->INL_GetProjectionMatrix());
 
-		const D3D11RenderCamera::VIEW_DESC& ViewDesc = pCamera->INL_GetViewDesc();
+		//const D3D11RenderCamera::VIEW_DESC& ViewDesc = pCamera->INL_GetViewDesc();
 		//CameraCB.CameraPosition = { ViewDesc.EyePos.x, ViewDesc.EyePos.y, ViewDesc.EyePos.z, 1.0f };
 
 		// 임시 상수 버퍼 할당
