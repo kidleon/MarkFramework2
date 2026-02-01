@@ -126,6 +126,8 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	m_pSurfaceMaterial->SetVertexShader(m_pShaderProgram_VS);
 	m_pSurfaceMaterial->SetPixelShader(m_pShaderProgram_PS);
 
+	m_pSurfaceMaterial->SetColor(FLOAT4{ 0.0f, 1.0f, 0.0f, 1.0f });
+
 	RS_RASTERIZER_STATE RasterizerState = GetRS_TwoSide();
 	RasterizerState.SetFrontCounterClockwise(false);
 	m_pSurfaceMaterial->SetRasterizerState(RasterizerState);
@@ -160,7 +162,7 @@ void D3D11Application::OnUpdate()
 	Transform.Position = FLOAT4{ 0.0f, 0.0f, 0.0f, 1.0f };
 	Transform.Rotation = QUAT{ 0.0f, 0.0f, 0.0f, 1.0f };
 	Transform.Scale = FLOAT4{ 1.0f, 1.0f, 1.0f, 0.0f };
-	compute_transform(&Transform);
+	compute_transform(Transform);
 
 	pRenderContext->DrawPrimitive(Transform, 0);
 

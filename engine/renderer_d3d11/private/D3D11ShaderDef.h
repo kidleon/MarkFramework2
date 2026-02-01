@@ -13,4 +13,6 @@ struct alignas(16) D3D11_CAMERA_CONSTANT
 struct alignas(16) D3D11_OBJECT_CONSTANT
 {
 	MATRIX4 World;
+	MATRIX4 WorldViewProj;
+	FLOAT4 Color;
 };

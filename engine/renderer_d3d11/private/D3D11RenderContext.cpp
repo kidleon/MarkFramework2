@@ -221,9 +221,8 @@ void D3D11RenderContext::DrawPrimitive(const LOCAL_TRANSFORM& Transform, int32 P
 		pDrawCommand->DrawPrimitiveIndex = PrimitiveIndex;
 
 		pDrawCommand->ObjectConstant.World = mat4_transpose(Transform.TM);
-
-		// 월드-뷰-투영 행렬 계산
-		//MATRIX4 WorldViewProjTM = mat4_mul((MATRIX4*)&Transform.TM, (MATRIX4*)&ViewProjMatrix);
+		pDrawCommand->ObjectConstant.WorldViewProj = mat4_transpose(mat4_mul(Transform.TM, ViewProjMatrix)); // 월드-뷰-투영 행렬 계산
+		pDrawCommand->ObjectConstant.Color = m_pCurSurfaceMaterial->INL_GetColor(p);
 		//pDrawCommand->ObjectConstant.WorldViewProjection = mat4_transpose(&WorldViewProjTM);
 
 		pDrawCommand->RenderPipeline.pVertexShader = m_pCurSurfaceMaterial->INL_GetVertexShader(p);
