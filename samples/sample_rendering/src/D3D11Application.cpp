@@ -128,15 +128,15 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 
 	m_pSurfaceMaterial->SetColor(FLOAT4{ 0.0f, 1.0f, 0.0f, 1.0f });
 
-	RS_RASTERIZER_STATE RasterizerState = GetRS_TwoSide();
+	RS_RASTERIZER_STATE RasterizerState = RS_RASTERIZER_STATE::DEFAULT;
 	RasterizerState.SetFrontCounterClockwise(false);
 	m_pSurfaceMaterial->SetRasterizerState(RasterizerState);
-	//m_pSurfaceMaterial->SetSampleMask(0xFFFFFFFF);
+	m_pSurfaceMaterial->SetSampleMask(0xFFFFFFFF);
 
-	RS_DEPTH_STENCIL_STATE DepthStencilState = GetDSS_Default();
+	RS_DEPTH_STENCIL_STATE DepthStencilState = RS_DEPTH_STENCIL_STATE::DEFAULT;
 	m_pSurfaceMaterial->SetDepthStencilState(DepthStencilState);
 
-	RS_BLEND_STATE BlendState = GetBS_Default();
+	RS_BLEND_STATE BlendState = RS_BLEND_STATE::DEFAULT;
 	m_pSurfaceMaterial->SetBlendState(BlendState);
 
 	return TRUE;

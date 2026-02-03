@@ -188,6 +188,8 @@ RS_BLEND_TARGET RS_BLEND_TARGET::COLOR_ONLY = CreateColorOnly();
 RS_BLEND_TARGET RS_BLEND_TARGET::DEPTH_ONLY = CreateDepthOnly();
 RS_BLEND_TARGET RS_BLEND_TARGET::ALPHA_BLEND_ADD = CreateAlphaBlendAddAlpha();
 
+RS_BLEND_STATE RS_BLEND_STATE::DEFAULT = GetBS_Default();
+
 
 //--------------------------------------------------------------------------
 static constexpr RS_DEPTH_STENCIL_STATE CreateDefault()
@@ -347,3 +349,7 @@ RS_DEPTH_STENCIL_STATE RS_DEPTH_STENCIL_STATE::STENCIL_TWO_SIDED = CreateStencil
 RS_DEPTH_STENCIL_STATE RS_DEPTH_STENCIL_STATE::STENCIL_MASK = CreateStencilMask();
 
 //--------------------------------------------------------------------------
+RS_RASTERIZER_STATE RS_RASTERIZER_STATE::DEFAULT = GetRS_Default();
+RS_RASTERIZER_STATE RS_RASTERIZER_STATE::TWO_SIDE = GetRS_TwoSide();
+RS_RASTERIZER_STATE RS_RASTERIZER_STATE::WIREFRAME = GetRS_Wireframe();
+RS_RASTERIZER_STATE RS_RASTERIZER_STATE::TWO_SIDE_WIREFRAME = GetRS_WireframeTwoSide();

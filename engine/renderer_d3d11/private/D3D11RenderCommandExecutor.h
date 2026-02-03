@@ -9,6 +9,7 @@ class D3D11RenderQueue;
 class D3D11ShaderProgram;
 class D3D11PrimitiveBuffer;
 struct D3D11_RENDER_FRAME;
+struct D3D11_DRAW_COMMAND;
 
 class D3D11RenderCommandExecutor
 {
@@ -20,7 +21,7 @@ class D3D11RenderCommandExecutor
 		size_t NumTriangles;
 	};
 
-	struct PipelineStateState
+	struct PipelineState
 	{
 		D3D11ShaderProgram* pSetVS;
 		D3D11ShaderProgram* pSetPS;
@@ -28,6 +29,7 @@ class D3D11RenderCommandExecutor
 		ID3D11RasterizerState* pSetRS;
 		ID3D11BlendState* pSetBS;
 		ID3D11DepthStencilState* pSetDSS;
+		uint32 SetInputVertexFormat;
 	};
 	
 public:
@@ -41,6 +43,11 @@ public:
 
 private:
 	void ResetFrame(D3D11_RENDER_FRAME* pRenderFrame);
+	void ApplyPipelineState(
+		ID3D11DeviceContext* pDeviceContext,
+		D3D11_DRAW_COMMAND* pCmd
+	) noexcept;
+
 	void ExcuteResourceCommands(
 		ID3D11DeviceContext* pDeviceContext,
 		D3D11_RENDER_FRAME* pRenderFrame
@@ -51,7 +58,7 @@ private:
 	TQueue<D3D11_RENDER_FRAME*, TA_POOL> m_RenderFrameQueue;
 
 	RenderStats m_RenderStats;
-	PipelineStateState m_PipelineStateState;
+	PipelineState m_PipelineState;
 };
 
 

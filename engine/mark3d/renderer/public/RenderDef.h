@@ -965,6 +965,8 @@ struct MARKENGINE_API RS_BLEND_TARGET
 */
 struct MARKENGINE_API RS_BLEND_STATE
 {
+	static RS_BLEND_STATE DEFAULT; // 기본 블렌드 상태
+
 	INT32 NumBlendTargets; // 블렌드 타겟 수
 	BOOL AlphaToCoverageEnable; // 알파 투 커버리지 활성화 여부 
 	BOOL IndependentBlendEnable; // 독립적 블렌드 활성화 여부 (MRT용..)
@@ -1156,6 +1158,11 @@ inline RS_DEPTH_STENCIL_STATE GetDSS_DepthReadOnly()
 */
 struct MARKENGINE_API RS_RASTERIZER_STATE
 {
+	static RS_RASTERIZER_STATE DEFAULT; // 기본 래스터라이저 상태
+	static RS_RASTERIZER_STATE TWO_SIDE; // 양면 렌더링 모드
+	static RS_RASTERIZER_STATE WIREFRAME; // 와이어프레임 모드
+	static RS_RASTERIZER_STATE TWO_SIDE_WIREFRAME; // 양면 와이어프레임 모드
+
 	// 기본 래스터화 설정
 	FILL_MODE FillMode;
 	CULL_MODE CullMode;
@@ -1183,7 +1190,7 @@ struct MARKENGINE_API RS_RASTERIZER_STATE
 
 	constexpr RS_RASTERIZER_STATE()
 		: FillMode(FILL_MODE::SOLID)
-		, CullMode(CULL_MODE::CCW)
+		, CullMode(CULL_MODE::NONE)
 		, ConservativeRaster(CONSERVATIVE_RASTER_MODE::OFF)
 		, Flags(FLAG_DEFAULT)
 		, DepthBias(0)

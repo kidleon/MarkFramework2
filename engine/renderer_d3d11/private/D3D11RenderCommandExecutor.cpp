@@ -21,7 +21,7 @@ D3D11RenderCommandExecutor* D3D11RenderCommandExecutor::s_pInstance = nullptr;
 D3D11RenderCommandExecutor::D3D11RenderCommandExecutor(D3D11RenderDevice* pRenderDevice)
 	: m_pRenderDevice(pRenderDevice)
 	, m_RenderStats{}
-	, m_PipelineStateState{}
+	, m_PipelineState{}
 {
 	if (!s_pInstance)
 		s_pInstance = this;
@@ -44,9 +44,9 @@ D3D11RenderCommandExecutor::~D3D11RenderCommandExecutor() noexcept
 		}
 	}
 
-	CHECK_RELEASE(m_PipelineStateState.pSetVS);
-	CHECK_RELEASE(m_PipelineStateState.pSetPS);
-	CHECK_RELEASE(m_PipelineStateState.pSetPB);
+	CHECK_RELEASE(m_PipelineState.pSetVS);
+	CHECK_RELEASE(m_PipelineState.pSetPS);
+	CHECK_RELEASE(m_PipelineState.pSetPB);
 	
 	if (s_pInstance == this)
 		s_pInstance = nullptr;
@@ -89,12 +89,12 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 		D3D11_RENDER_QUEUE_GROUP* pRQGroup = &pRenderFrame->RQs[i];
 
 		// 파이프라인 상태 초기화
-		CHECK_RELEASE(m_PipelineStateState.pSetVS);
-		CHECK_RELEASE(m_PipelineStateState.pSetPS);
-		CHECK_RELEASE(m_PipelineStateState.pSetPB);
-		m_PipelineStateState.pSetRS = nullptr;
-		m_PipelineStateState.pSetBS = nullptr;
-		m_PipelineStateState.pSetDSS = nullptr;
+		CHECK_RELEASE(m_PipelineState.pSetVS);
+		CHECK_RELEASE(m_PipelineState.pSetPS);
+		CHECK_RELEASE(m_PipelineState.pSetPB);
+		m_PipelineState.pSetRS = nullptr;
+		m_PipelineState.pSetBS = nullptr;
+		m_PipelineState.pSetDSS = nullptr;
 
 		// 렌더 카메라 설정
 		const D3D11RenderCamera* pCamera = pRQGroup->INL_GetRenderCamera();
@@ -194,45 +194,17 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 				if (!pCmd) continue;
 
 				// 셰이더 프로그램 바인딩
-
-				// 버텍스 셰이더
-				if (m_PipelineStateState.pSetVS != pCmd->RenderPipeline.pVertexShader)
+				if (!pCmd->pPrimitiveBuffer)
 				{
-					CHECK_RELEASE(m_PipelineStateState.pSetVS);
-
-					m_PipelineStateState.pSetVS = pCmd->RenderPipeline.pVertexShader;
-					m_PipelineStateState.pSetVS->AddRef();
-
-					ID3D11VertexShader* pVS = m_PipelineStateState.pSetVS ? m_PipelineStateState.pSetVS->INL_GetVertexShader() : nullptr;
-					pDeviceContext->VSSetShader(pVS, nullptr, 0);
-
-					UINT32 InputVertexFormat = m_PipelineStateState.pSetVS->INL_GetInputVertexFormat();
-					if (SetInputVertexFormat != InputVertexFormat)
-					{
-						SetInputVertexFormat = InputVertexFormat;
-
-						pSetIL = D3D11InputLayoutCache::Get()->Find_RS(SetInputVertexFormat);
-						pDeviceContext->IASetInputLayout(pSetIL);
-					}
-				}
-
-				// 픽셀 셰이더
-				if (m_PipelineStateState.pSetPS != pCmd->RenderPipeline.pPixelShader)
-				{
-					CHECK_RELEASE(m_PipelineStateState.pSetPS);
-
-					m_PipelineStateState.pSetPS = pCmd->RenderPipeline.pPixelShader;
-					m_PipelineStateState.pSetPS->AddRef();
-
-					ID3D11PixelShader* pPS = m_PipelineStateState.pSetPS ? m_PipelineStateState.pSetPS->INL_GetPixelShader() : nullptr;
-					pDeviceContext->PSSetShader(pPS, nullptr, 0);
+					SYS_LOG_W("D3D11RenderCommandExecutor::Execute - pCmd->pPrimitiveBuffer is nullptr.");
+					continue;
 				}
 
 				D3D11ConstantBuffer* pObjCB = D3D11ConstantBufferAllocator::Get()->AcquireTemp(sizeof(D3D11_OBJECT_CONSTANT));
 				if (!pObjCB)
 				{
 					SYS_LOG_E("D3D11RenderCommandExecutor::Execute - D3D11ConstantBufferAllocator::AcquireTemp failed.");
-					continue;
+					return;
 				}
 
 				D3D11_OBJECT_CONSTANT ObjCB = {};
@@ -243,62 +215,27 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 				pDeviceContext->VSSetConstantBuffers(1, 1, &pObjCBBuffer);
 				pDeviceContext->PSSetConstantBuffers(1, 1, &pObjCBBuffer);
 
-				// 렌더 스테이트 설정
-				if (m_PipelineStateState.pSetRS != pCmd->RenderPipeline.pRasterizerState)
-				{
-					m_PipelineStateState.pSetRS = pCmd->RenderPipeline.pRasterizerState;
-					pDeviceContext->RSSetState(m_PipelineStateState.pSetRS);
-				}
-
-				if (m_PipelineStateState.pSetBS != pCmd->RenderPipeline.pBlendState)
-				{
-					m_PipelineStateState.pSetBS = pCmd->RenderPipeline.pBlendState;
-					const FLOAT4& BlendFactor = pCmd->DynamicRenderPipeline.BlendFactor;
-					UINT32 SampleMask = pCmd->DynamicRenderPipeline.SampleMask;
-
-					pDeviceContext->OMSetBlendState(
-						m_PipelineStateState.pSetBS,
-						BlendFactor.v,
-						SampleMask
-					);
-				}
-
-				if (m_PipelineStateState.pSetDSS != pCmd->RenderPipeline.pDepthStencilState)
-				{
-					m_PipelineStateState.pSetDSS = pCmd->RenderPipeline.pDepthStencilState;
-					UINT32 StencilRef = pCmd->DynamicRenderPipeline.StencilRef;
-
-					pDeviceContext->OMSetDepthStencilState(
-						m_PipelineStateState.pSetDSS,
-						StencilRef
-					);
-				}
-
-				if (!pCmd->pPrimitiveBuffer)
-				{
-					SYS_LOG_W("D3D11RenderCommandExecutor::Execute - pCmd->pPrimitiveBuffer is nullptr.");
-					continue;
-				}
+				ApplyPipelineState(pDeviceContext, pCmd);
 
 				// 프리미티브 버퍼 바인딩
-				if (m_PipelineStateState.pSetPB != pCmd->pPrimitiveBuffer)
+				if (m_PipelineState.pSetPB != pCmd->pPrimitiveBuffer)
 				{
-					CHECK_RELEASE(m_PipelineStateState.pSetPB);
+					CHECK_RELEASE(m_PipelineState.pSetPB);
 
-					m_PipelineStateState.pSetPB = pCmd->pPrimitiveBuffer;
-					if (m_PipelineStateState.pSetPB)
-						m_PipelineStateState.pSetPB->AddRef();
+					m_PipelineState.pSetPB = pCmd->pPrimitiveBuffer;
+					if (m_PipelineState.pSetPB)
+						m_PipelineState.pSetPB->AddRef();
 				}
 
-				const D3D11PrimitiveBuffer::PRIMITIVE_DESC& PrimitiveDesc = m_PipelineStateState.pSetPB->INL_GetPrimitiveDesc(pCmd->DrawPrimitiveIndex);
+				const D3D11PrimitiveBuffer::PRIMITIVE_DESC& PrimitiveDesc = m_PipelineState.pSetPB->INL_GetPrimitiveDesc(pCmd->DrawPrimitiveIndex);
 				if (!PrimitiveDesc.VertexCount || !PrimitiveDesc.IndexCount)
 				{
 					SYS_LOG_W("D3D11RenderCommandExecutor::Execute - PrimitiveDesc has zero VertexCount or IndexCount.");
 					continue;
 				}
 
-				ID3D11Buffer* pVB = m_PipelineStateState.pSetPB->INL_GetD3D11VertexBuffer();
-				ID3D11Buffer* pIB = m_PipelineStateState.pSetPB->INL_GetD3D11IndexBuffer();
+				ID3D11Buffer* pVB = m_PipelineState.pSetPB->INL_GetD3D11VertexBuffer();
+				ID3D11Buffer* pIB = m_PipelineState.pSetPB->INL_GetD3D11IndexBuffer();
 
 				UINT32 VertexOffset = PrimitiveDesc.VertexOffset;
 				UINT32 IndexOffset = PrimitiveDesc.IndexOffset;
@@ -381,6 +318,78 @@ void D3D11RenderCommandExecutor::ExcuteResourceCommands(
 
 		pResCmd->Reset();
 		pNode = linked_list_pop_front(&pRenderFrame->ResourceCommandQueue);
+	}
+}
+
+void D3D11RenderCommandExecutor::ApplyPipelineState(
+	ID3D11DeviceContext* pDeviceContext,
+	D3D11_DRAW_COMMAND* pCmd
+) noexcept
+{
+	// 버텍스 셰이더
+	if (m_PipelineState.pSetVS != pCmd->RenderPipeline.pVertexShader)
+	{
+		CHECK_RELEASE(m_PipelineState.pSetVS);
+
+		m_PipelineState.pSetVS = pCmd->RenderPipeline.pVertexShader;
+		m_PipelineState.pSetVS->AddRef();
+
+		ID3D11VertexShader* pVS = m_PipelineState.pSetVS ? m_PipelineState.pSetVS->INL_GetVertexShader() : nullptr;
+		pDeviceContext->VSSetShader(pVS, nullptr, 0);
+
+		UINT32 InputVertexFormat = m_PipelineState.pSetVS->INL_GetInputVertexFormat();
+		if (m_PipelineState.SetInputVertexFormat != InputVertexFormat)
+		{
+			m_PipelineState.SetInputVertexFormat = InputVertexFormat;
+
+			ID3D11InputLayout* pSetIL = D3D11InputLayoutCache::Get()->Find_RS(m_PipelineState.SetInputVertexFormat);
+			pDeviceContext->IASetInputLayout(pSetIL);
+		}
+	}
+
+	// 픽셀 셰이더
+	if (m_PipelineState.pSetPS != pCmd->RenderPipeline.pPixelShader)
+	{
+		CHECK_RELEASE(m_PipelineState.pSetPS);
+
+		m_PipelineState.pSetPS = pCmd->RenderPipeline.pPixelShader;
+		m_PipelineState.pSetPS->AddRef();
+
+		ID3D11PixelShader* pPS = m_PipelineState.pSetPS ? m_PipelineState.pSetPS->INL_GetPixelShader() : nullptr;
+		pDeviceContext->PSSetShader(pPS, nullptr, 0);
+	}
+
+	
+
+	// 렌더 스테이트 설정
+	if (m_PipelineState.pSetRS != pCmd->RenderPipeline.pRasterizerState)
+	{
+		m_PipelineState.pSetRS = pCmd->RenderPipeline.pRasterizerState;
+		pDeviceContext->RSSetState(m_PipelineState.pSetRS);
+	}
+
+	if (m_PipelineState.pSetBS != pCmd->RenderPipeline.pBlendState)
+	{
+		m_PipelineState.pSetBS = pCmd->RenderPipeline.pBlendState;
+		const FLOAT4& BlendFactor = pCmd->DynamicRenderPipeline.BlendFactor;
+		UINT32 SampleMask = pCmd->DynamicRenderPipeline.SampleMask;
+
+		pDeviceContext->OMSetBlendState(
+			m_PipelineState.pSetBS,
+			BlendFactor.v,
+			SampleMask
+		);
+	}
+
+	if (m_PipelineState.pSetDSS != pCmd->RenderPipeline.pDepthStencilState)
+	{
+		m_PipelineState.pSetDSS = pCmd->RenderPipeline.pDepthStencilState;
+		UINT32 StencilRef = pCmd->DynamicRenderPipeline.StencilRef;
+
+		pDeviceContext->OMSetDepthStencilState(
+			m_PipelineState.pSetDSS,
+			StencilRef
+		);
 	}
 }
 
