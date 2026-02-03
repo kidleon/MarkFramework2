@@ -95,6 +95,7 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 		m_PipelineState.pSetRS = nullptr;
 		m_PipelineState.pSetBS = nullptr;
 		m_PipelineState.pSetDSS = nullptr;
+		m_PipelineState.SetInputVertexFormat = 0;
 
 		// 렌더 카메라 설정
 		const D3D11RenderCamera* pCamera = pRQGroup->INL_GetRenderCamera();
@@ -106,9 +107,6 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 		CameraCB.ViewMatrix = mat4_transpose(pCamera->INL_GetViewMatrix());
 		CameraCB.InvViewMatrix = mat4_transpose(mat4_inverse(CameraCB.ViewMatrix));
 		CameraCB.ProjectionMatrix = mat4_transpose(pCamera->INL_GetProjectionMatrix());
-
-		//const D3D11RenderCamera::VIEW_DESC& ViewDesc = pCamera->INL_GetViewDesc();
-		//CameraCB.CameraPosition = { ViewDesc.EyePos.x, ViewDesc.EyePos.y, ViewDesc.EyePos.z, 1.0f };
 
 		// 임시 상수 버퍼 할당
 		D3D11ConstantBuffer* pCB = D3D11ConstantBufferAllocator::Get()->AcquireTemp(sizeof(D3D11_CAMERA_CONSTANT));
@@ -183,9 +181,6 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 			D3D11_RENDER_QUEUE* pRQ = pRQGroup->INL_GetOpaqueRQ();
 			pRQ->Sort();
 
-			UINT32 SetInputVertexFormat = 0;
-			ID3D11InputLayout* pSetIL = nullptr;
-
 			// 드로우 커맨드 실행
 			size_t NumCommands = pRQ->INL_GetNumCommands();
 			for (size_t c = 0; c < NumCommands; ++c)
@@ -200,6 +195,7 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 					continue;
 				}
 
+				// 오브젝트 별 상수 버퍼 설정
 				D3D11ConstantBuffer* pObjCB = D3D11ConstantBufferAllocator::Get()->AcquireTemp(sizeof(D3D11_OBJECT_CONSTANT));
 				if (!pObjCB)
 				{
@@ -211,10 +207,10 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 				pObjCB->UploadToGPU(pDeviceContext, &pCmd->ObjectConstant, sizeof(D3D11_OBJECT_CONSTANT));
 
 				ID3D11Buffer* pObjCBBuffer = pObjCB->INL_GetD3D11Buffer();
-
 				pDeviceContext->VSSetConstantBuffers(1, 1, &pObjCBBuffer);
 				pDeviceContext->PSSetConstantBuffers(1, 1, &pObjCBBuffer);
 
+				// 파이프라인 상태 적용
 				ApplyPipelineState(pDeviceContext, pCmd);
 
 				// 프리미티브 버퍼 바인딩
@@ -274,7 +270,6 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 				{
 					m_RenderStats.NumTriangles += (PrimitiveDesc.IndexCount - 2);
 				}
-
 			}
 		}
 	}
@@ -332,18 +327,22 @@ void D3D11RenderCommandExecutor::ApplyPipelineState(
 		CHECK_RELEASE(m_PipelineState.pSetVS);
 
 		m_PipelineState.pSetVS = pCmd->RenderPipeline.pVertexShader;
-		m_PipelineState.pSetVS->AddRef();
-
+			
 		ID3D11VertexShader* pVS = m_PipelineState.pSetVS ? m_PipelineState.pSetVS->INL_GetVertexShader() : nullptr;
 		pDeviceContext->VSSetShader(pVS, nullptr, 0);
 
-		UINT32 InputVertexFormat = m_PipelineState.pSetVS->INL_GetInputVertexFormat();
-		if (m_PipelineState.SetInputVertexFormat != InputVertexFormat)
+		if (pVS)
 		{
-			m_PipelineState.SetInputVertexFormat = InputVertexFormat;
+			m_PipelineState.pSetVS->AddRef();
 
-			ID3D11InputLayout* pSetIL = D3D11InputLayoutCache::Get()->Find_RS(m_PipelineState.SetInputVertexFormat);
-			pDeviceContext->IASetInputLayout(pSetIL);
+			UINT32 InputVertexFormat = m_PipelineState.pSetVS->INL_GetInputVertexFormat();
+			if (m_PipelineState.SetInputVertexFormat != InputVertexFormat)
+			{
+				m_PipelineState.SetInputVertexFormat = InputVertexFormat;
+
+				ID3D11InputLayout* pSetIL = D3D11InputLayoutCache::Get()->Find_RS(m_PipelineState.SetInputVertexFormat);
+				pDeviceContext->IASetInputLayout(pSetIL);
+			}
 		}
 	}
 
@@ -353,13 +352,12 @@ void D3D11RenderCommandExecutor::ApplyPipelineState(
 		CHECK_RELEASE(m_PipelineState.pSetPS);
 
 		m_PipelineState.pSetPS = pCmd->RenderPipeline.pPixelShader;
-		m_PipelineState.pSetPS->AddRef();
-
 		ID3D11PixelShader* pPS = m_PipelineState.pSetPS ? m_PipelineState.pSetPS->INL_GetPixelShader() : nullptr;
 		pDeviceContext->PSSetShader(pPS, nullptr, 0);
-	}
 
-	
+		if (pPS)
+			m_PipelineState.pSetPS->AddRef();
+	}
 
 	// 렌더 스테이트 설정
 	if (m_PipelineState.pSetRS != pCmd->RenderPipeline.pRasterizerState)

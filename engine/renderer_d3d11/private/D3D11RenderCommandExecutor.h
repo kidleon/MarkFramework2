@@ -43,6 +43,7 @@ public:
 
 private:
 	void ResetFrame(D3D11_RENDER_FRAME* pRenderFrame);
+
 	void ApplyPipelineState(
 		ID3D11DeviceContext* pDeviceContext,
 		D3D11_DRAW_COMMAND* pCmd
