@@ -1,4 +1,5 @@
-﻿#ifndef __MESH_DATA_H__
+﻿/*
+#ifndef __MESH_DATA_H__
 #define __MESH_DATA_H__
 
 
@@ -190,6 +191,6 @@ private:
 	uint16* m_pIndices16 = nullptr;
 
 };
-
+*/
 
 #endif // __MESH_DATA_H__

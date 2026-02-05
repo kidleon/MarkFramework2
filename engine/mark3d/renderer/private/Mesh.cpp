@@ -1,4 +1,5 @@
-﻿#include "pch.h"
+﻿/*
+#include "pch.h"
 
 #include "Mesh.h"
 #include "TArray.h"
@@ -567,3 +568,4 @@ size_t Mesh::GetIndexCount(int32 PrimitiveIndex) const noexcept
 {
 	return m_Primitives[PrimitiveIndex].IndexCount;
 }
+*/
