@@ -1610,6 +1610,36 @@ struct IRenderContext : public IUNKNOWN
 };
 
 
+struct IModel : public IAsset
+{
+	virtual int32 AddMesh(
+		NameHash Name,
+		size_t NumVertex,
+		size_t NumIndex
+	) noexcept = 0;
+
+	virtual void ClearMesh() noexcept = 0;
+
+	virtual void UpdateMesh(
+		int32 MeshIndex,
+		uint32 VertexFormat,
+		void* pVertex,
+		size_t VertexSize,
+		void* pIndex,
+		size_t IndexStride,
+		size_t IndexSize
+	) noexcept = 0;
+
+	virtual int32 SetSurfaceMaterial(
+		int32 MeshIndex,
+		ISurfaceMaterial* pSurfaceMaterial
+	) noexcept = 0;
+
+	virtual size_t GetNumMesh() const noexcept = 0;
+	virtual size_t GetNumSurfaceMaterial() const noexcept = 0;
+};
+
+
 /**
 * @brief 렌더링 시스템 인터페이스
 */
