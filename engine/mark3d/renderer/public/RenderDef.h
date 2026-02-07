@@ -1482,6 +1482,10 @@ struct IPrimitiveBuffer : public IAsset
 		const void* pIndexData,
 		size_t IndexSize
 	) = 0;
+
+	virtual size_t GetTotalVertexBufferSize() const noexcept = 0;
+
+	virtual size_t GetTotalIndexBufferSize() const noexcept = 0;
 };
 
 /**
@@ -1533,23 +1537,6 @@ struct IRenderContext : public IUNKNOWN
 	virtual void DrawPrimitive(const LOCAL_TRANSFORM& Transform, int32 PrimitiveIndex) = 0;
 
 };
-
-/**
-* @brief 기본 모델 인터페이스
-*/
-struct IModel : public IAsset
-{
-	virtual int32 AddMesh(NameHash Name, uint32 VertexFormat, size_t NumVertex, size_t NumIndex) noexcept = 0;
-	virtual void ClearMesh() noexcept = 0;
-
-	virtual void UpdateVertex(int32 MeshIndex, void* pVertexData, size_t VertexSize) noexcept = 0;
-	virtual void UpdateIndex(int32 MeshIndex, void* pIndexData, size_t IndexSize) noexcept = 0;
-	virtual int32 SetSurfaceMaterial(int32 MeshIndex, ISurfaceMaterial* pSurfaceMaterial) noexcept = 0;
-
-	virtual int32 FindMeshIndexByName(NameHash Name) const noexcept = 0;
-
-};
-
 
 /**
 * @brief 렌더링 시스템 인터페이스

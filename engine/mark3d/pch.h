@@ -9,12 +9,14 @@
 #include "hash_table.h"
 #include "CoreDef.h"
 #include "Log.h"
-#include "RenderDef.h"
 #include "TArray.h"
 #include "TList.h"
 #include "THashMap.h"
 #include "mathlib.h"
 #include "CoreHeap.h"
+#include "RenderDef.h"
+#include "SceneDef.h"
+#include "GeomDef.h"
 
 using namespace mark;
 

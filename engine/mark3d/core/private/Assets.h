@@ -35,24 +35,6 @@ public:
 	virtual BOOL Load(const char* szRelativePath, ITexture2D** ppOut) final;
 	virtual BOOL LoadAsync(const char* szRelativePath, ITexture2D** ppOut) final;
 
-	virtual BOOL CreateMesh(
-		UINT32 BufferFormat, 
-		size_t MaxVertexCount, 
-		size_t MaxIndexCount, 
-		IMesh** ppOut
-	) final;
-
-	virtual BOOL CreateMesh(
-		const NameHash& Name, 
-		UINT32 BufferFormat,
-		size_t MaxVertexCount, 
-		size_t MaxIndexCount,
-		IMesh** ppOut
-	) final;
-
-	virtual BOOL CreateSurfaceMaterial(ISurfaceMaterial** ppOut) final;
-
-
 protected:
 	virtual ~Assets() noexcept;
 

@@ -24,6 +24,9 @@ do
 		"renderer/**.h",
 		"renderer/**.inl",
 		"renderer/**.cpp",
+		"main/**.h",
+		"main/**.inl",
+		"main/**.cpp",
 		"../common/*.h",
 		"../common/generic/*.h",
 		"../common/generic/*.cpp"
@@ -39,7 +42,9 @@ do
 		"core/public",
 		"core/private",
 		"renderer/public",
-		"renderer/private"
+		"renderer/private",
+		"main/public",
+		"main/private"
 	}
 	
 	externalincludedirs {

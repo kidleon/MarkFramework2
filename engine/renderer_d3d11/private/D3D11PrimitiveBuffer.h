@@ -68,6 +68,10 @@ public:
 		size_t IndexSize
 	) final;
 
+	virtual size_t GetTotalVertexBufferSize() const noexcept final;
+
+	virtual size_t GetTotalIndexBufferSize() const noexcept final;
+
 	void UploadToGPU_VB(ID3D11DeviceContext* pDeviceContext);
 	void UploadToGPU_IB(ID3D11DeviceContext* pDeviceContext);
 

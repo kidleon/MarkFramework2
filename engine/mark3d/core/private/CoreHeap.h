@@ -125,7 +125,9 @@ struct TCoreAllocator
 	}
 };
 
-
+using TA_POOL = TCoreAllocator<ALLOC_TYPE::POOL>;
+using TA_SYSCALL = TCoreAllocator<ALLOC_TYPE::SYSCALL>;
+using TA_TEMP = TCoreAllocator<ALLOC_TYPE::TEMP>;
 
 
 	

@@ -153,6 +153,25 @@ BOOL linked_list_empty(
 	return (linked_list->size == 0);
 }
 
+BOOL linked_list_exists(
+    struct LINKED_LIST* linked_list,
+    struct LINK_NODE* node
+)
+{
+    if (!linked_list || !node)
+        return FALSE;
+
+    struct LINK_NODE* current = linked_list->head;
+    while (current)
+    {
+        if (current == node)
+            return TRUE;
+        current = current->next;
+    }
+
+	return FALSE;
+}
+
 void linked_list_sort(
     struct LINKED_LIST* linked_list,
     int (*comp)(void*, void*)

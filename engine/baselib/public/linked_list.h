@@ -106,6 +106,18 @@ MARK_BASELIB_C_API BOOL linked_list_empty(
 );
 
 /**
+* linked_list_exists
+* @brief linked_list에 해당 노드가 존재하는지 확인 합니다.
+* @param linked_list 작업 linked_list 포인터
+* @param node 확인할 노드
+* @return 존재할경우 TRUE, 아니면 FALSE
+*/
+MARK_BASELIB_C_API BOOL linked_list_exists(
+	struct LINKED_LIST* linked_list,
+	struct LINK_NODE* node
+);
+
+/**
 * linked_list_sort
 * @brief 노드를 함수 포인터(comp)를 이용하여 정렬 합니다.
 * @param linked_list 작업 linked_list 포인터

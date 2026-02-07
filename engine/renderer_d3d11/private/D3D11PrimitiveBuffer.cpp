@@ -214,6 +214,16 @@ BOOL D3D11PrimitiveBuffer::UpdateIndex(
 	return TRUE;
 }
 
+size_t D3D11PrimitiveBuffer::GetTotalVertexBufferSize() const noexcept
+{
+	return m_VertexBufferSize;
+}
+
+size_t D3D11PrimitiveBuffer::GetTotalIndexBufferSize() const noexcept
+{
+	return m_IndexBufferSize;
+}
+
 void D3D11PrimitiveBuffer::UploadToGPU_VB(ID3D11DeviceContext* pDeviceContext)
 {
 	if (!m_DirtyVertexBuffer)

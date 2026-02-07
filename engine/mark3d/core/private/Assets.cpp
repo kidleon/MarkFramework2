@@ -8,7 +8,6 @@
 
 #include "TextAsset.h"
 #include "BinaryAsset.h"
-#include "Mesh.h"
 
 #include "TextAssetLoader.h"
 #include "BinaryAssetLoader.h"
@@ -268,43 +267,5 @@ BOOL Assets::Load(const char* szRelativePath, ITexture2D** ppOut)
 
 BOOL Assets::LoadAsync(const char* szRelativePath, ITexture2D** ppOut)
 {
-	return TRUE;
-}
-
-BOOL Assets::CreateMesh(UINT32 BufferFormat, size_t MaxVertexCount, size_t MaxIndexCount, IMesh** ppOut)
-{
-	if (!ppOut) return FALSE;
-
-	Mesh* pMesh = CORE_POOL_NEW(Mesh)(BufferFormat, MaxVertexCount, MaxIndexCount);
-	*ppOut = pMesh;
-
-	return TRUE;
-}
-
-BOOL Assets::CreateMesh(const NameHash& Name, UINT32 BufferFormat, size_t MaxVertexCount, size_t MaxIndexCount, IMesh** ppOut)
-{
-	if (!ppOut) return FALSE;
-
-	Mesh* pMesh = CORE_POOL_NEW(Mesh)(BufferFormat, MaxVertexCount, MaxIndexCount);
-	*ppOut = pMesh;
-
-	return TRUE;
-}
-
-BOOL Assets::CreateSurfaceMaterial(ISurfaceMaterial** ppOut)
-{
-	/*
-	if (!ppOut || !(*ppOut)) return FALSE;
-
-	D3D11_SURFACE_MATERIAL_BLOCK* pBlock = D3D11SurfaceMaterialBlockPool::Alloc();
-	if (!pBlock)
-	{
-		if (ppOut) *ppOut = nullptr;
-		return FALSE;
-	}
-
-	D3D11SurfaceMaterial* pMaterial = MARK_POOL_NEW(D3D11SurfaceMaterial)(pBlock);
-	*ppOut = pMaterial;
-	*/
 	return TRUE;
 }
