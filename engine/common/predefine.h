@@ -307,7 +307,16 @@ struct __IUnknown
 	virtual long RefCnt() = 0;
 };
 
+struct __IPrivateUnknown : public __IUnknown
+{
+private:
+	virtual long AddRef() = 0;
+	virtual long Release() = 0;
+	virtual long RefCnt() = 0;
+};
+
 typedef __IUnknown IUNKNOWN;
+typedef __IPrivateUnknown IPRIVATE_UNKNOWN;
 
 enum class ALLOC_TYPE : unsigned
 {

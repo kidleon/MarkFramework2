@@ -6,7 +6,7 @@ struct IScene;
 struct ISceneNode;
 struct ISceneObject;
 
-struct IWorld
+struct IWorld : public IUNKNOWN
 {
 	virtual size_t GetNumScene() const noexcept = 0;
 	virtual IScene* GetScene(size_t Index) noexcept = 0;
@@ -25,7 +25,7 @@ struct IScene : public IUNKNOWN
 };
 
 //------------------------------------------------------------------------------
-struct ISceneNode : public IUNKNOWN
+struct ISceneNode : public IPRIVATE_UNKNOWN
 {
 	virtual IScene* GetScene() noexcept = 0;
 

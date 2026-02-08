@@ -24,6 +24,8 @@ void Mark3DImpl::Shutdown()
 
 BOOL Mark3DImpl::CreateWorld(const char* szWorldName, IWorld** ppOut)
 {
+	CHECK_RELEASE(m_pWorld);
+
     // Implementation here
 	return TRUE;
 }
@@ -48,6 +50,15 @@ BOOL Mark3DImpl::CreateSceneNode(IScene* pScene, const char* szNodeName, ISceneN
 	(*ppOut) = pSceneNode;
 
 	return TRUE;
+}
+
+void Mark3DImpl::ReleaseSceneNode(ISceneNode* pNode)
+{
+	if (!pNode)
+		return;
+
+	SceneNode* pSceneNode = static_cast<SceneNode*>(pNode);
+	m_pSceneNodePool->Release(pSceneNode);
 }
 
 BOOL Mark3DImpl::CreateModel(NameHash ModelName, size_t MaxVertex, size_t MaxIndex, IModel** ppOut)

@@ -7,12 +7,7 @@
 class SceneNode final : public ISceneNode
 {
 public:
-	SceneNode();
-
-	// IUNKNOWN interface
-	virtual long AddRef() final;
-	virtual long Release() final;
-	virtual long RefCnt() final;
+	friend class SceneNodePool;
 
 	// ISceneNode interface
 	virtual IScene* GetScene() noexcept final;
@@ -44,9 +39,15 @@ public:
 	void Reset(BOOL Recursive);
 
 private:
+	SceneNode();
 	SceneNode(const SceneNode& Other) = delete;
 	SceneNode(SceneNode&& Other) noexcept = delete;
 	virtual ~SceneNode() noexcept;
+
+	// IUNKNOWN interface
+	virtual long AddRef() final;
+	virtual long Release() final;
+	virtual long RefCnt() final;
 
 	void RemoveChildNode(SceneNode* pChild);
 

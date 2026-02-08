@@ -37,12 +37,7 @@ long SceneNode::AddRef()
 long SceneNode::Release()
 {
 	long NewRefCnt = interlock_decrement_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL);
-	if (NewRefCnt == 1)
-	{
-		SceneNodePool::GetInstance()->Release(this);
-		return 1;
-	}
-
+	
 	if (NewRefCnt == 0)
 	{
 		CORE_DELETE(this, SceneNode);

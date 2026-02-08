@@ -48,6 +48,14 @@ struct IMark3D : public IUNKNOWN
 	*/
 	virtual BOOL CreateSceneNode(IScene* pScene, const char* szNodeName, ISceneNode** ppOut) = 0;
 
+	/**
+	* @brief SceneNode 객체를 해제합니다.
+	* @param pNode 해제할 ISceneNode 포인터
+	* @return 없음.
+	* @note SceneNode Pool에서 관리하는 SceneNode 객체만 해제할 수 있습니다.
+	*/
+	virtual void ReleaseSceneNode(ISceneNode* pNode) = 0;
+
 
 	//----------------------------------------------------------------------
 	// SceneObject's APIs
