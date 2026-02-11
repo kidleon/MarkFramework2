@@ -16,6 +16,39 @@ struct ISceneObject : public IAsset
 	virtual BOOL IsEnabled() const noexcept = 0;
 };
 
+struct IMesh : public IAsset
+{
+	virtual size_t GetNumMesh() const noexcept = 0;
+
+	virtual FLOAT3* GetPositions(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumPositions(int32 MeshIndex) const noexcept = 0;
+
+	virtual FLOAT3* GetNormals(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumNormals(int32 MeshIndex) const noexcept = 0;
+
+	virtual FLOAT2* GetTexCoords(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumTexCoords(int32 MeshIndex) const noexcept = 0;
+
+	virtual FLOAT4* GetColor(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumColor(int32 MeshIndex) const noexcept = 0;
+
+	virtual FLOAT3* GetTangent(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumTangent(int32 MeshIndex) const noexcept = 0;
+
+	virtual FLOAT3* GetBinormal(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumBinormal(int32 MeshIndex) const noexcept = 0;
+
+	virtual FLOAT4* GetBlendWeight(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumBlendWeight(int32 MeshIndex) const noexcept = 0;
+
+	virtual UINT4* GetBlendIndices(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumBlendIndices(int32 MeshIndex) const noexcept = 0;
+
+	virtual uint32* GetIndices(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumIndices(int32 MeshIndex) const noexcept = 0;
+
+};
+
 /**
 * @brief 기본 모델 인터페이스
 */

@@ -34,6 +34,8 @@ public:
 	virtual BOOL LoadAsync(const char* szRelativePath, ITexture1D** ppOut) final;
 	virtual BOOL Load(const char* szRelativePath, ITexture2D** ppOut) final;
 	virtual BOOL LoadAsync(const char* szRelativePath, ITexture2D** ppOut) final;
+	virtual BOOL Load(const char* szRelativePath, IMesh** ppOut) final;
+	virtual BOOL LoadAsync(const char* szRelativePath, IMesh** ppOut) final;
 
 protected:
 	virtual ~Assets() noexcept;

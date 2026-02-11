@@ -15,6 +15,7 @@
 #include "mathlib.h"
 #include "CoreHeap.h"
 #include "RenderDef.h"
+#include "AssetDef.h"
 #include "SceneDef.h"
 #include "GeomDef.h"
 
