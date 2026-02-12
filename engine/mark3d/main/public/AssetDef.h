@@ -169,79 +169,88 @@ interface IAssets : public IUNKNOWN
 	*/
 	virtual BOOL Load(const char* szRelativePath, ITextAsset * *ppOut) = 0;
 
-/**
-* @brief 비동기 텍스트 자산 로드
-* @param szRelativePath 자산의 상대 경로
-* @param ppOut 로드된 ITextAsset 포인터를 받을 변수의 주소
-* @return 로드 성공 시 TRUE, 실패 시 FALSE
-*/
-virtual BOOL LoadAsync(const char* szRelativePath, ITextAsset** ppOut) = 0;
+	/**
+	* @brief 비동기 텍스트 자산 로드
+	* @param szRelativePath 자산의 상대 경로
+	* @param ppOut 로드된 ITextAsset 포인터를 받을 변수의 주소
+	* @return 로드 성공 시 TRUE, 실패 시 FALSE
+	*/
+	virtual BOOL LoadAsync(const char* szRelativePath, ITextAsset** ppOut) = 0;
 
-/**
-* @brief 바이너리 자산 로드
-* @param szRelativePath 자산의 상대 경로
-* @param ppOut 로드된 IBinaryAsset 포인터를 받을 변수의 주소
-* @return 로드 성공 시 TRUE, 실패 시 FALSE
-*/
-virtual BOOL Load(const char* szRelativePath, IBinaryAsset** ppOut) = 0;
+	/**
+	* @brief 바이너리 자산 로드
+	* @param szRelativePath 자산의 상대 경로
+	* @param ppOut 로드된 IBinaryAsset 포인터를 받을 변수의 주소
+	* @return 로드 성공 시 TRUE, 실패 시 FALSE
+	*/
+	virtual BOOL Load(const char* szRelativePath, IBinaryAsset** ppOut) = 0;
 
-/**
-* @brief 비동기 바이너리 자산 로드
-* @param szRelativePath 자산의 상대 경로
-* @param ppOut 로드된 IBinaryAsset 포인터를 받을 변수의 주소
-* @return 로드 성공 시 TRUE, 실패 시 FALSE
-*/
-virtual BOOL LoadAsync(const char* szRelativePath, IBinaryAsset** ppOut) = 0;
+	/**
+	* @brief 비동기 바이너리 자산 로드
+	* @param szRelativePath 자산의 상대 경로
+	* @param ppOut 로드된 IBinaryAsset 포인터를 받을 변수의 주소
+	* @return 로드 성공 시 TRUE, 실패 시 FALSE
+	*/
+	virtual BOOL LoadAsync(const char* szRelativePath, IBinaryAsset** ppOut) = 0;
 
-/**
-* @brief 1D 텍스처 자산 로드
-* @param szRelativePath 자산의 상대 경로
-* @param ppOut 로드된 ITexture1D 포인터를 받을 변수의 주소
-* @return 로드 성공 시 TRUE, 실패 시 FALSE
-*/
-virtual BOOL Load(const char* szRelativePath, ITexture1D** ppOut) = 0;
+	/**
+	* @brief 메쉬 자산 로드
+	* @param szRelativePath 자산의 상대 경로
+	* @param ppOut 로드된 IMesh 포인터를 받을 변수의 주소
+	* @return 로드 성공 시 TRUE, 실패 시 FALSE
+	*/
+	virtual BOOL Load(const char* szRelativePath, IModelAsset** ppOut) = 0;
 
-/**
-* @brief 비동기 1D 텍스처 자산 로드
-* @param szRelativePath 자산의 상대 경로
-* @param ppOut 로드된 ITexture1D 포인터를 받을 변수의 주소
-* @return 로드 성공 시 TRUE, 실패 시 FALSE
-*/
-virtual BOOL LoadAsync(const char* szRelativePath, ITexture1D** ppOut) = 0;
-
-/**
-* @brief 2D 텍스처 자산 로드
-* @param szRelativePath 자산의 상대 경로
-* @param ppOut 로드된 ITexture1D 포인터를 받을 변수의 주소
-* @return 로드 성공 시 TRUE, 실패 시 FALSE
-*/
-virtual BOOL Load(const char* szRelativePath, ITexture2D** ppOut) = 0;
-
-/**
-* @brief 비동기 2D 텍스처 자산 로드
-* @param szRelativePath 자산의 상대 경로
-* @param ppOut 로드된 ITexture1D 포인터를 받을 변수의 주소
-* @return 로드 성공 시 TRUE, 실패 시 FALSE
-*/
-virtual BOOL LoadAsync(const char* szRelativePath, ITexture2D** ppOut) = 0;
-
-/**
-* @brief 메쉬 자산 로드
-* @param szRelativePath 자산의 상대 경로
-* @param ppOut 로드된 IMesh 포인터를 받을 변수의 주소
-* @return 로드 성공 시 TRUE, 실패 시 FALSE
-*/
-virtual BOOL Load(const char* szRelativePath, IMesh** ppOut) = 0;
-
-/**
-* @brief 비동기 메쉬 자산 로드
-* @param szRelativePath 자산의 상대 경로
-* @param ppOut 로드된 IMesh 포인터를 받을 변수의 주소
-* @return 로드 성공 시 TRUE, 실패 시 FALSE
-*/
-virtual BOOL LoadAsync(const char* szRelativePath, IMesh** ppOut) = 0;
+	/**
+	* @brief 비동기 메쉬 자산 로드
+	* @param szRelativePath 자산의 상대 경로
+	* @param ppOut 로드된 IMesh 포인터를 받을 변수의 주소
+	* @return 로드 성공 시 TRUE, 실패 시 FALSE
+	*/
+	virtual BOOL LoadAsync(const char* szRelativePath, IModelAsset** ppOut) = 0;
 };
 
 
+enum class MODEL_ATTRIB : uint32
+{
+	MESH = 0x00000001,
+	MATERIAL = 0x00000002,
+	ANIMATION = 0x00000004,
+};
+
+struct IModelAsset : public IAsset
+{
+	virtual uint32 HasAttribute() const noexcept = 0;
+
+	virtual size_t GetNumMesh() const noexcept = 0;
+
+	virtual FLOAT3* GetPositions(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumPositions(int32 MeshIndex) const noexcept = 0;
+
+	virtual FLOAT3* GetNormals(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumNormals(int32 MeshIndex) const noexcept = 0;
+
+	virtual FLOAT2* GetTexCoords(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumTexCoords(int32 MeshIndex) const noexcept = 0;
+
+	virtual FLOAT4* GetColor(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumColor(int32 MeshIndex) const noexcept = 0;
+
+	virtual FLOAT3* GetTangent(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumTangent(int32 MeshIndex) const noexcept = 0;
+
+	virtual FLOAT3* GetBinormal(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumBinormal(int32 MeshIndex) const noexcept = 0;
+
+	virtual FLOAT4* GetBlendWeight(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumBlendWeight(int32 MeshIndex) const noexcept = 0;
+
+	virtual UINT4* GetBlendIndices(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumBlendIndices(int32 MeshIndex) const noexcept = 0;
+
+	virtual uint32* GetIndices(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumIndices(int32 MeshIndex) const noexcept = 0;
+
+};
 
 #endif // __ASSET_DEF_H__

@@ -190,12 +190,13 @@ BOOL Assets::LoadAsync(const char* szRelativePath, IBinaryAsset** ppOut)
 	return TRUE;
 }
 
+/*
 BOOL Assets::Load(const char* szRelativePath, ITexture1D** ppOut)
 {
 	if (!szRelativePath || !ppOut) return FALSE;
 
 #if defined(__MARK3D_RENDERSYSTEM_D3D11__)
-	/*
+	
 	IDataStream* pDataStream = m_pFileSystem->OpenFile(szRelativePath, TRUE);
 	if (!pDataStream)
 	{
@@ -248,7 +249,6 @@ BOOL Assets::Load(const char* szRelativePath, ITexture1D** ppOut)
 	pTexture1D->SetTexture1DProxy(pTexture1DProxy);
 	
 	(*ppOut) = pTexture1D;
-	*/
 
 #endif // __MARK3D_RENDERSYSTEM_D3D11__
 
@@ -266,6 +266,18 @@ BOOL Assets::Load(const char* szRelativePath, ITexture2D** ppOut)
 }
 
 BOOL Assets::LoadAsync(const char* szRelativePath, ITexture2D** ppOut)
+{
+	return TRUE;
+}
+*/
+
+BOOL Assets::Load(const char* szRelativePath, IModelAsset** ppOut)
+{
+
+	return TRUE;
+}
+
+BOOL Assets::LoadAsync(const char* szRelativePath, IModelAsset** ppOut)
 {
 	return TRUE;
 }
