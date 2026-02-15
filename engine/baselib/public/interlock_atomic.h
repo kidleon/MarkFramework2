@@ -1,4 +1,4 @@
-﻿#ifndef __INTERLOCK_ATOMIC_H__
+﻿f#ifndef __INTERLOCK_ATOMIC_H__
 #define __INTERLOCK_ATOMIC_H__
 
 

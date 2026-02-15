@@ -1,5 +1,7 @@
-#ifndef UFBX_UFBX_C_INCLUDED
+﻿#ifndef UFBX_UFBX_C_INCLUDED
 #define UFBX_UFBX_C_INCLUDED
+
+#include "pch.h"
 
 #if defined(UFBX_HEADER_PATH)
 	#include UFBX_HEADER_PATH

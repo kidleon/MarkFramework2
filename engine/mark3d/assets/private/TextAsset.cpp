@@ -50,7 +50,7 @@ UINT64 TextAsset::GetID() const noexcept
 
 ASSET_TYPE TextAsset::GetAssetType() const noexcept
 {
-	return ASSET_TYPE::TEXT;
+	return ASSET_TYPE::TEXT_ASSET;
 }
 
 LOAD_STAT TextAsset::GetLoadStat() const noexcept

@@ -5,6 +5,7 @@
 #include "strings.h"
 #include "idgen.h"
 #include "Log.h"
+#include "temp_pool.h"
 
 #include "TextAsset.h"
 #include "BinaryAsset.h"
@@ -63,6 +64,8 @@ BOOL Assets::Init(const char* szRootPath)
 	m_hIDGen = idgen_create(MIN_ID_COUNT, MAX_ID_COUNT);
 	Assets::ID_GEN_HANDLE = m_hIDGen;
 
+	m_hSyncLoadTempPool = temppool_create(1024 * 8192, FALSE);
+
 	m_Initialized = TRUE;
 
 	return TRUE;
@@ -76,6 +79,12 @@ void Assets::Shutdown()
 	{
 		threadpool_destroy(m_hThreadPool);
 		m_hThreadPool = nullptr;
+	}
+
+	if (m_hSyncLoadTempPool)
+	{
+		temppool_destroy(m_hSyncLoadTempPool);
+		m_hSyncLoadTempPool = nullptr;
 	}
 
 	if (m_hIDGen)

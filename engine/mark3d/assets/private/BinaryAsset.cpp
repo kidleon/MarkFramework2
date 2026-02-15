@@ -53,7 +53,7 @@ UINT64 BinaryAsset::GetID() const noexcept
 
 ASSET_TYPE BinaryAsset::GetAssetType() const noexcept
 {
-	return ASSET_TYPE::BINARY;
+	return ASSET_TYPE::BINARY_ASSET;
 }
 
 LOAD_STAT BinaryAsset::GetLoadStat() const noexcept

@@ -183,6 +183,13 @@ inline size_t CalculateTextureSize(COLOR_FORMAT format, size_t width, size_t hei
 	return width * height * pixelSize;
 }
 
+enum class INDEX_FORMAT : uint32
+{
+	UINT16 = 0,
+	UINT32,
+	MAX
+};
+
 enum class PRIMITIVE_TYPE : uint32
 {
 	UNKNOWN = 0,

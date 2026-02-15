@@ -8,8 +8,9 @@
 enum class ASSET_TYPE : unsigned
 {
 	UNKNOWN = 0,
-	TEXT,
-	BINARY,
+	TEXT_ASSET,
+	BINARY_ASSET,
+	MODEL_ASSET,
 	CBUFFER,
 	PRIMITIVE_BUFFER,
 	SHADER_PROGRAM,
@@ -149,12 +150,52 @@ virtual BOOL ConvertUTF16(char16_t* pBuffer, size_t BufferSize, size_t* pResultS
 virtual BOOL ConvertWCHAR(wchar_t* pBuffer, size_t BufferSize, size_t* pResultSize) const noexcept = 0;
 };
 
-interface ITextAsset;
-interface IBinaryAsset;
-interface ITexture1D;
-interface ITexture2D;
-interface IMesh;
-interface ISurfaceMaterial;
+
+enum class MODEL_ATTRIB : uint32
+{
+	MESH = 0x00000001,
+	MATERIAL = 0x00000002,
+	ANIMATION = 0x00000004,
+};
+
+struct IModelAsset : public IAsset
+{
+	virtual size_t GetNumMesh() const noexcept = 0;
+	virtual size_t GetNumSubMesh(int32 MeshIndex) noexcept = 0;
+
+	virtual FLOAT3* GetPositions(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumPositions(int32 MeshIndex) const noexcept = 0;
+
+	virtual FLOAT3* GetNormals(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumNormals(int32 MeshIndex) const noexcept = 0;
+
+	virtual FLOAT2* GetTexCoords(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumTexCoords(int32 MeshIndex) const noexcept = 0;
+
+	virtual FLOAT4* GetColor(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumColor(int32 MeshIndex) const noexcept = 0;
+
+	virtual FLOAT3* GetTangent(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumTangent(int32 MeshIndex) const noexcept = 0;
+
+	virtual FLOAT3* GetBinormal(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumBinormal(int32 MeshIndex) const noexcept = 0;
+
+	/*
+	virtual FLOAT4* GetBlendWeight(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumBlendWeight(int32 MeshIndex) const noexcept = 0;
+
+	virtual UINT4* GetBlendIndices(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumBlendIndices(int32 MeshIndex) const noexcept = 0;
+	*/
+
+	virtual uint32* GetIndices(int32 MeshIndex, int32 SubMeshIndex) noexcept = 0;
+	virtual size_t GetNumIndices(int32 MeshIndex, int32 SubMeshIndex) const noexcept = 0;
+
+};
+
+
+
 
 /**
 * @brief 자산 관리자 인터페이스
@@ -210,47 +251,5 @@ interface IAssets : public IUNKNOWN
 	virtual BOOL LoadAsync(const char* szRelativePath, IModelAsset** ppOut) = 0;
 };
 
-
-enum class MODEL_ATTRIB : uint32
-{
-	MESH = 0x00000001,
-	MATERIAL = 0x00000002,
-	ANIMATION = 0x00000004,
-};
-
-struct IModelAsset : public IAsset
-{
-	virtual uint32 HasAttribute() const noexcept = 0;
-
-	virtual size_t GetNumMesh() const noexcept = 0;
-
-	virtual FLOAT3* GetPositions(int32 MeshIndex) noexcept = 0;
-	virtual size_t GetNumPositions(int32 MeshIndex) const noexcept = 0;
-
-	virtual FLOAT3* GetNormals(int32 MeshIndex) noexcept = 0;
-	virtual size_t GetNumNormals(int32 MeshIndex) const noexcept = 0;
-
-	virtual FLOAT2* GetTexCoords(int32 MeshIndex) noexcept = 0;
-	virtual size_t GetNumTexCoords(int32 MeshIndex) const noexcept = 0;
-
-	virtual FLOAT4* GetColor(int32 MeshIndex) noexcept = 0;
-	virtual size_t GetNumColor(int32 MeshIndex) const noexcept = 0;
-
-	virtual FLOAT3* GetTangent(int32 MeshIndex) noexcept = 0;
-	virtual size_t GetNumTangent(int32 MeshIndex) const noexcept = 0;
-
-	virtual FLOAT3* GetBinormal(int32 MeshIndex) noexcept = 0;
-	virtual size_t GetNumBinormal(int32 MeshIndex) const noexcept = 0;
-
-	virtual FLOAT4* GetBlendWeight(int32 MeshIndex) noexcept = 0;
-	virtual size_t GetNumBlendWeight(int32 MeshIndex) const noexcept = 0;
-
-	virtual UINT4* GetBlendIndices(int32 MeshIndex) noexcept = 0;
-	virtual size_t GetNumBlendIndices(int32 MeshIndex) const noexcept = 0;
-
-	virtual uint32* GetIndices(int32 MeshIndex) noexcept = 0;
-	virtual size_t GetNumIndices(int32 MeshIndex) const noexcept = 0;
-
-};
 
 #endif // __ASSET_DEF_H__

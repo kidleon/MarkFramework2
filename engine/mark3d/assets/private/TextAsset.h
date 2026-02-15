@@ -1,12 +1,12 @@
-﻿#ifndef __BINARYASSET_H__
-#define __BINARYASSET_H__
+﻿#ifndef __TEXTASSET_H__
+#define __TEXTASSET_H__
 
 
-class BinaryAsset : public IBinaryAsset
+class TextAsset : public ITextAsset
 {
 public:
-	BinaryAsset(UINT64 ID);
-	virtual ~BinaryAsset() noexcept;
+	TextAsset(UINT64 ID);
+	virtual ~TextAsset() noexcept;
 
 	// IUNKNOWN interface
 	virtual long AddRef() final;
@@ -18,12 +18,17 @@ public:
 	virtual ASSET_TYPE GetAssetType() const noexcept final;
 	virtual LOAD_STAT GetLoadStat() const noexcept final;
 
-	// IBinaryAsset interface
-	virtual const char* GetData() const noexcept override;
-	virtual size_t GetSize() const noexcept override;
-	virtual uint32 ComputeCRC32() noexcept override;
-	virtual uint64 ComputeCRC64() noexcept override;
+	// ITextAsset interface
+	virtual const char* GetData() const noexcept final;
+	virtual size_t GetSize() const noexcept final;
 
+	virtual BOOL IsUTF8() const noexcept final;
+	virtual ENCODING_TYPE GetEncodingType() const noexcept final;
+
+	virtual BOOL ConvertUTF32(char32_t* pBuffer, size_t BufferSize, size_t* pResultSize) const noexcept final;
+	virtual BOOL ConvertUTF16(char16_t* pBuffer, size_t BufferSize, size_t* pResultSize) const noexcept final;
+	virtual BOOL ConvertWCHAR(wchar_t* pBuffer, size_t BufferSize, size_t* pResultSize) const noexcept final;
+ 
 	// Private inline methods
 	__FORCEINLINE UINT64 INL_GetID() const noexcept
 	{
@@ -32,7 +37,7 @@ public:
 
 	__FORCEINLINE ASSET_TYPE INL_GetAssetType() const noexcept
 	{
-		return ASSET_TYPE::BINARY;
+		return ASSET_TYPE::TEXT_ASSET;
 	}
 
 	__FORCEINLINE LOAD_STAT INL_GetLoadStat() const noexcept
@@ -71,10 +76,8 @@ private:
 
 	char* m_pData;
 	size_t m_Size;
-	uint64 m_CRC64Cache;
-	uint32 m_CRC32Cache;
 
 };
 
 
-#endif // __BINARYASSET_H__
+#endif // __TEXTASSET_H__

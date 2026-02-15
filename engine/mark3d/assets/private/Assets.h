@@ -49,6 +49,7 @@ private:
 	IFileSystem* m_pFileSystem;
 	HANDLE m_hThreadPool;
 	HANDLE m_hIDGen;
+	HANDLE m_hSyncLoadTempPool; // 동기 로드 시 임시로 사용할 메모리 풀 핸들
 	BOOL m_Initialized;
 
 };

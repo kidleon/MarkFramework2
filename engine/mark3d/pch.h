@@ -7,6 +7,7 @@
 #include "unicode.h"
 #include "linked_list.h"
 #include "hash_table.h"
+#include "strings.h"
 #include "CoreDef.h"
 #include "Log.h"
 #include "TArray.h"
@@ -14,8 +15,8 @@
 #include "THashMap.h"
 #include "mathlib.h"
 #include "CoreHeap.h"
-#include "RenderDef.h"
 #include "AssetDef.h"
+#include "RenderDef.h"
 #include "SceneDef.h"
 #include "GeomDef.h"
 
