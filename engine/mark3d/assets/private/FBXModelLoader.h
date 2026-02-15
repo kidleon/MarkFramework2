@@ -1,14 +1,14 @@
 ﻿#ifndef __FBX_MODEL_LOADER_H__
 #define __FBX_MODEL_LOADER_H__
 
-interface IModelAsset;
+class ModelAsset;
 interface IFileSystem;
 
 extern BOOL LoadModelFromFBX(
 	HANDLE hTempPool,
 	IFileSystem* pFileSystem,
 	const char* szRelativePath,
-	IModelAsset* pModelAsset
+	ModelAsset* pModelAsset
 );
 
 extern void AsyncLoadModelFromFBX(void* pArg);

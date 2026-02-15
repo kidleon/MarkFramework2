@@ -20,8 +20,9 @@
 #include "fnv.h"
 
 #include "Log.h"
-#include "CoreDef.h"
 #include "mathlib.h"
+#include "AssetDef.h"
+#include "CoreDef.h"
 
 #include "D3D11RenderDef.h"
 #include "D3D11PrivateHeap.h"

@@ -81,24 +81,35 @@ void D3D11RenderStateCache::Init()
 		RS_RASTERIZER_STATE DefaultState = GetRS_Default();
 		uint64 Hash = fnv64_c(&DefaultState, sizeof(RS_RASTERIZER_STATE));
 		D3D11RasterizerState* pRS = CreateRasterizerState(DefaultState);
-		insert_hash_node(
+		int result = insert_hash_node(
 			m_pRasterizerStateCache,
 			(int64)Hash,
 			pRS->INL_GetHashNode()
 		);
+
+		if (-1 == result)
+		{
+			D3D11_DELETE(pRS, D3D11RasterizerState);
+		}
 	}
 	
 	{
 		RS_RASTERIZER_STATE WireframeState = GetRS_Wireframe();
 		uint64 Hash = fnv64_c(&WireframeState, sizeof(RS_RASTERIZER_STATE));
 		D3D11RasterizerState* pRS = CreateRasterizerState(WireframeState);
-		insert_hash_node(
+		int result = insert_hash_node(
 			m_pRasterizerStateCache,
 			(int64)Hash,
 			pRS->INL_GetHashNode()
 		);
+
+		if (-1 == result)
+		{
+			D3D11_DELETE(pRS, D3D11RasterizerState);
+		}
 	}
 
+	/*
 	{
 		RS_RASTERIZER_STATE WireframeTwoSideState = GetRS_WireframeTwoSide();
 		uint64 Hash = fnv64_c(&WireframeTwoSideState, sizeof(RS_RASTERIZER_STATE));
@@ -109,6 +120,7 @@ void D3D11RenderStateCache::Init()
 			pRS->INL_GetHashNode()
 		);
 	}
+	
 
 	{
 		RS_RASTERIZER_STATE TwoSideState = GetRS_TwoSide();
@@ -120,17 +132,23 @@ void D3D11RenderStateCache::Init()
 			pRS->INL_GetHashNode()
 		);
 	}
+	*/
 
 	// Pre-create common blend states
 	{
 		RS_BLEND_STATE DefaultState;
 		uint64 Hash = fnv64_c(&DefaultState, sizeof(RS_BLEND_STATE));
 		D3D11BlendState* pBS = CreateBlendState(DefaultState);
-		insert_hash_node(
+		int result = insert_hash_node(
 			m_pBlendStateCache,
 			(int64)Hash,
 			pBS->INL_GetHashNode()
 		);
+
+		if (-1 == result)
+		{
+			D3D11_DELETE(pBS, D3D11BlendState);
+		}
 	}
 }
 

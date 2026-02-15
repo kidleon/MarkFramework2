@@ -102,6 +102,8 @@ void D3D11SurfaceMaterialBlockPool::Release(D3D11_SURFACE_MATERIAL_BLOCK* pBlock
 		CHECK_RELEASE(pBlock->RenderPasses[p].pPixelShader);
 	}
 
+
+
 	// Remove from used list
 	linked_list_remove_node(&m_UsedList, &pBlock->LinkNode);
 

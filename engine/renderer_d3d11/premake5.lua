@@ -33,6 +33,7 @@ do
 		"../mark3d/math",
 		"../mark3d/core/public",
 		"../mark3d/renderer/public",
+		"../mark3d/assets/public",
 		"public",
 		"private"
 	}

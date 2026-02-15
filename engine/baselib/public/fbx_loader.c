@@ -1,28 +1,25 @@
 ﻿#include "pch.h"
 #include "fbx_loader.h"
+
+#include "strings.h"
+#define UFBX_REAL_IS_FLOAT
 #include "ufbx.h"
 
 
-struct face_group_t
-{
-	int32 material_id;
-	uint32* indices;
-	size_t num_indices;
-};
-
-inline int32 find_face_group(struct face_group_t* groups, size_t num_groups, int32 material_id)
-{
-	for (size_t i = 0; i < num_groups; ++i)
-	{
-		if (groups[i].material_id == material_id)
-			return (int32)i;
-	}
-	return -1;
-}
-
 struct FBX_SCENE* fbx_load(void* data, size_t size)
 {
-	ufbx_scene* scene = load_fbx_from_memory(data, size);
+	ufbx_load_opts load_opts;
+	memset(&load_opts, 0, sizeof(ufbx_load_opts));
+
+	load_opts.obj_axes = ufbx_axes_left_handed_y_up;
+	load_opts.obj_unit_meters = 1.0f;
+	load_opts.normalize_tangents = true;
+	load_opts.normalize_normals = true;
+
+	ufbx_error error;
+	memset(&error, 0, sizeof(ufbx_error));
+	
+	ufbx_scene* scene = ufbx_load_memory(data, size, &load_opts, &error);
 	if (!scene)
 		return NULL;
 
@@ -183,7 +180,6 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 
 			if (0 < mesh->material_parts.count)
 			{
-				struct face_group_t* face_groups = (struct face_group_t*)malloc(sizeof(struct face_group_t) * mesh->material_parts.count);
 				struct FBX_SUBMESH* submeshes = (struct FBX_SUBMESH*)malloc(sizeof(struct FBX_SUBMESH) * mesh->material_parts.count);
 
 				for (size_t m = 0; m < mesh->material_parts.count; ++m)
@@ -193,7 +189,7 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 					ufbx_material* material = mesh->materials.data[part->index];
 
 					submeshes[m].material_id = (int32)material->element_id;
-					submeshes[m].num_indices = part->num_triangles * 3;
+					submeshes[m].num_indices = (int32)part->num_triangles * 3;
 					submeshes[m].indices = (uint32*)malloc(sizeof(uint32) * part->num_triangles * 3);
 
 					int32 num_indices = 0;
@@ -212,7 +208,7 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 						for (size_t tri = 0; tri < num_tris; ++tri)
 						{
 							uint32_t tri_indices[3];
-							ufbx_triangulate_face(tri_indices, 3, mesh, face, tri);
+							ufbx_triangulate_face(tri_indices, 3, mesh, face);
 
 							uint32 idx0 = tri_indices[0];
 							uint32 idx1 = tri_indices[1];
@@ -280,16 +276,110 @@ lb_error:
 
 	if (scene)
 	{
-		ufbx_free(scene);
+		ufbx_free_scene(scene);
 		return NULL;
 	}
 
 	return NULL;
-
-
 }
 
 void fbx_unload(struct FBX_SCENE* scene)
 {
+	if (!scene)
+		return;
 
+	if (scene->materials)
+	{
+		free(scene->materials);
+		scene->materials = NULL;
+	}
+
+	if (scene->model)
+	{
+		for (size_t i = 0; i < scene->model->num_meshes; ++i)
+		{
+			struct FBX_MESH* mesh = &scene->model->meshes[i];
+
+			if (mesh->positions)
+				free(mesh->positions);
+
+			if (mesh->normals)
+				free(mesh->normals);
+
+			if (mesh->uvs)
+				free(mesh->uvs);
+
+			if (mesh->colors)
+				free(mesh->colors);
+
+			if (mesh->tangents)
+				free(mesh->tangents);
+
+			if (mesh->binormal)
+				free(mesh->binormal);
+
+			if (mesh->submeshes)
+			{
+				for (size_t s = 0; s < mesh->num_submesh; ++s)
+				{
+					struct FBX_SUBMESH* submesh = &mesh->submeshes[s];
+					if (submesh->indices)
+						free(submesh->indices);
+				}
+				free(mesh->submeshes);
+			}
+		}
+
+		free(scene->model);
+		scene->model = NULL;
+	}
+
+	free(scene);
 }
+
+/*
+/// Skin Weight와 Bone Index 추출
+void extract_skin_data(ufbx_mesh* mesh, size_t vertex_index, float out_weights[4], int out_indices[4])
+{
+	// 초기화
+	for (int i = 0; i < 4; i++)
+	{
+		out_weights[i] = 0.0f;
+		out_indices[i] = 0;
+	}
+
+	// 스킨 데이터가 있는지 확인
+	if (mesh->skin_deformers.count > 0)
+	{
+		ufbx_skin_deformer* skin = mesh->skin_deformers.data[0];
+
+		// 해당 버텍스의 스킨 가중치 가져오기
+		ufbx_skin_vertex skin_vertex = skin->vertices.data[vertex_index];
+
+		// 최대 4개의 가중치만 사용
+		size_t num_weights = skin_vertex.num_weights < 4 ? skin_vertex.num_weights : 4;
+
+		for (size_t i = 0; i < num_weights; i++)
+		{
+			ufbx_skin_weight weight = skin->weights.data[skin_vertex.weight_begin + i];
+			out_weights[i] = (float)weight.weight;
+			out_indices[i] = (int)weight.cluster_index;
+		}
+
+		// 가중치 정규화 (합이 1.0이 되도록)
+		float total_weight = 0.0f;
+		for (int i = 0; i < 4; i++)
+		{
+			total_weight += out_weights[i];
+		}
+
+		if (total_weight > 0.0f)
+		{
+			for (int i = 0; i < 4; i++)
+			{
+				out_weights[i] /= total_weight;
+			}
+		}
+	}
+}
+*/

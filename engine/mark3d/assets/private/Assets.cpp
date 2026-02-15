@@ -9,10 +9,13 @@
 
 #include "TextAsset.h"
 #include "BinaryAsset.h"
+#include "ModelAsset.h"
 
 #include "TextAssetLoader.h"
 #include "BinaryAssetLoader.h"
+#include "FBXModelLoader.h"
 #include "AsyncAssetOp.h"
+
 
 
 constexpr static UINT32 MIN_ID_COUNT = 1;
@@ -282,7 +285,26 @@ BOOL Assets::LoadAsync(const char* szRelativePath, ITexture2D** ppOut)
 
 BOOL Assets::Load(const char* szRelativePath, IModelAsset** ppOut)
 {
+	if (!szRelativePath || !(*ppOut)) return FALSE;
 
+	ModelAsset* pModelAsset = CORE_NEW(ModelAsset)(idgen_getid(m_hIDGen));
+
+	BOOL result = LoadModelFromFBX(
+		m_hSyncLoadTempPool,
+		m_pFileSystem,
+		szRelativePath,
+		pModelAsset
+	);
+
+	if (!result)
+	{
+		pModelAsset->Release();
+		*ppOut = nullptr;
+		return FALSE;
+	}
+
+	*ppOut = pModelAsset;
+	
 	return TRUE;
 }
 
