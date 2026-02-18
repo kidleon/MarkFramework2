@@ -31,11 +31,6 @@ public:
 	virtual long Release() final;
 	virtual long RefCnt() final;
 
-	// IAsset interface
-	virtual UINT64 GetID() const noexcept final;
-	virtual ASSET_TYPE GetAssetType() const noexcept final;
-	virtual LOAD_STAT GetLoadStat() const noexcept final;
-
 	// IRenderTarget interface
 	virtual UINT32 GetColorWidth() const noexcept final;
 	virtual UINT32 GetColorHeight() const noexcept final;
@@ -69,9 +64,6 @@ private:
 #if defined(__TARGET_OS_WINDOWS)
 	unsigned PADDING_OR_RESERVED = 0;
 #endif // defined(__TARGET_OS_WINDOWS)
-
-	UINT32 m_ID = 0;
-	LOAD_STAT m_LoadStat = LOAD_STAT::NOT_LOADED;
 
 	UINT32 m_ColorWidth = 0;
 	UINT32 m_ColorHeight = 0;

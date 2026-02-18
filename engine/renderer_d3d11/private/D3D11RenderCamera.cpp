@@ -14,8 +14,6 @@ D3D11RenderCamera::D3D11RenderCamera(
 	, m_Ortho{ 1280.0f, 720.0f, 0.01f, 500.0f }
 	, m_View{ {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 0.0f} }
 {
-	m_ID = D3D11_COMMON::GetUID();
-	m_LoadStat = LOAD_STAT::LOADED;
 }
 
 D3D11RenderCamera::~D3D11RenderCamera() noexcept
@@ -42,21 +40,6 @@ long D3D11RenderCamera::Release()
 long D3D11RenderCamera::RefCnt()
 {
 	return m_RefCnt;
-}
-
-UINT64 D3D11RenderCamera::GetID() const noexcept
-{
-	return m_ID;
-}
-
-ASSET_TYPE D3D11RenderCamera::GetAssetType() const noexcept
-{
-	return ASSET_TYPE::RENDER_CAMERA;
-}
-
-LOAD_STAT D3D11RenderCamera::GetLoadStat() const noexcept
-{
-	return m_LoadStat;
 }
 
 void D3D11RenderCamera::SetClearTarget(

@@ -5,10 +5,8 @@
 #include "D3D11RenderState.h"
 
 
-D3D11SurfaceMaterial::D3D11SurfaceMaterial(UINT64 ID, D3D11_SURFACE_MATERIAL_BLOCK* pMaterialBlock)
-	: m_ID(ID)
-	, m_LoadStat(LOAD_STAT::LOADED)
-	, m_pMaterialBlock(pMaterialBlock)
+D3D11SurfaceMaterial::D3D11SurfaceMaterial(D3D11_SURFACE_MATERIAL_BLOCK* pMaterialBlock)
+	: m_pMaterialBlock(pMaterialBlock)
 {
 }
 
@@ -40,21 +38,6 @@ long D3D11SurfaceMaterial::Release()
 long D3D11SurfaceMaterial::RefCnt()
 {
 	return m_RefCnt;
-}
-
-UINT64 D3D11SurfaceMaterial::GetID() const noexcept
-{
-	return m_ID;
-}
-
-ASSET_TYPE D3D11SurfaceMaterial::GetAssetType() const noexcept
-{
-	return ASSET_TYPE::SURFACE_MATERIAL;
-}
-
-LOAD_STAT D3D11SurfaceMaterial::GetLoadStat() const noexcept
-{
-	return m_LoadStat;
 }
 
 int32 D3D11SurfaceMaterial::AddPass(const char* szPassName) noexcept

@@ -19,8 +19,6 @@ D3D11PrimitiveBuffer::D3D11PrimitiveBuffer(
 	, m_VertexBufferSize(VertexBufferSize)
 	, m_IndexBufferSize(IndexBufferSize)
 {
-	m_ID = static_cast<UINT64>(D3D11_COMMON::GetUID());
-	m_LoadStat = LOAD_STAT::LOADED;
 }
 
 D3D11PrimitiveBuffer::~D3D11PrimitiveBuffer() noexcept
@@ -60,21 +58,6 @@ long D3D11PrimitiveBuffer::Release()
 long D3D11PrimitiveBuffer::RefCnt()
 {
 	return m_RefCnt;
-}
-
-UINT64 D3D11PrimitiveBuffer::GetID() const noexcept
-{
-	return m_ID;
-}
-
-ASSET_TYPE D3D11PrimitiveBuffer::GetAssetType() const noexcept
-{
-	return ASSET_TYPE::PRIMITIVE_BUFFER;
-}
-
-LOAD_STAT D3D11PrimitiveBuffer::GetLoadStat() const noexcept
-{
-	return m_LoadStat;
 }
 
 BUFFER_USAGE D3D11PrimitiveBuffer::GetUsage() const noexcept

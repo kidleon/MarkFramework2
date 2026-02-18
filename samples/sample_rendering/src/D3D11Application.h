@@ -15,6 +15,8 @@ private:
 	int m_Width = 0;
 	int m_Height = 0;
 
+	IMark3D* m_pMark3D = nullptr;
+
 	IRenderSystem* m_pRenderSystem = nullptr;
 	IRenderCamera* m_pRenderCamera = nullptr;
 	IShaderProgram* m_pShaderProgram_VS = nullptr;

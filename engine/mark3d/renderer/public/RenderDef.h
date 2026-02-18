@@ -559,7 +559,7 @@ enum class RENDER_QUEUE_TYPE : unsigned int
 * @note Height : 화면 높이
 * @note Fullscreen : 전체 화면 모드 여부
 */
-struct MARKENGINE_API ENGINE_CREATE_DESC
+struct MARKENGINE_API RENDERER_CREATE_DESC
 {
 #if defined(__TARGET_OS_WINDOWS)
 	HWND hWnd; // 윈도우 핸들
@@ -669,7 +669,7 @@ struct MARKENGINE_API RENDER_SETTINGS
 /**
 * @brief 상수 버퍼 인터페이스
 */
-struct IConstantBuffer : public IAsset
+struct IConstantBuffer : public IUNKNOWN
 {
 	/**
 	* @brief 데이터 업데이트.
@@ -688,14 +688,14 @@ struct IConstantBuffer : public IAsset
 /**
 * @brief 셰이더 프로그램 인터페이스
 */
-struct IShaderProgram : IAsset
+struct IShaderProgram : IUNKNOWN
 {
 public:
 	virtual SHADER_TYPE GetShaderType() const noexcept = 0;
 
 };
 
-struct ITexture1D : public IAsset
+struct ITexture1D : public IUNKNOWN
 {
 	/**
 	* @brief 텍스처 너비 반환
@@ -718,7 +718,7 @@ struct ITexture1D : public IAsset
 };
 
 
-struct ITexture2D : public IAsset
+struct ITexture2D : public IUNKNOWN
 {
 	/**
 	* @brief 텍스처 너비 반환
@@ -749,7 +749,7 @@ struct ITexture2D : public IAsset
 /**
 * @brief 렌더 타겟 인터페이스
 */
-struct IRenderTarget : public IAsset
+struct IRenderTarget : public IUNKNOWN
 {
 	virtual UINT32 GetColorWidth() const noexcept = 0;
 	virtual UINT32 GetColorHeight() const noexcept = 0;
@@ -1398,7 +1398,7 @@ inline RS_RASTERIZER_STATE GetRS_WireframeTwoSide()
 /**
 * @brief 서피스 메테리얼 인터페이스
 */
-struct ISurfaceMaterial : public IAsset
+struct ISurfaceMaterial : public IUNKNOWN
 {
 public:
 	virtual int32 AddPass(const char* szPassName) noexcept = 0;
@@ -1462,7 +1462,7 @@ public:
 /**
 * @brief 프리미티브 버퍼 인터페이스
 */
-struct IPrimitiveBuffer : public IAsset
+struct IPrimitiveBuffer : public IUNKNOWN
 {
 	virtual BUFFER_USAGE GetUsage() const noexcept = 0;
 
@@ -1498,7 +1498,7 @@ struct IPrimitiveBuffer : public IAsset
 /**
 * @brief 렌더 카메라 인터페이스
 */
-struct IRenderCamera : public IAsset
+struct IRenderCamera : public IUNKNOWN
 {
 	virtual void SetClearTarget(UINT32 ClearBuffers,
 								const FLOAT4 & ClearColor,

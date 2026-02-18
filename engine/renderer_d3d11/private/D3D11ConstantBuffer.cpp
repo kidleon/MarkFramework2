@@ -9,8 +9,6 @@ D3D11ConstantBuffer::D3D11ConstantBuffer(ID3D11Buffer* pBuffer, void* pAlignedBu
 	, m_pBufferDataRef(nullptr)
 	, m_LinkNode{}
 {
-	m_ID = static_cast<UINT32>(D3D11_COMMON::GetUID());
-	m_LoadStat = LOAD_STAT::LOADED;
 	m_LinkNode.data = this;
 }
 
@@ -44,21 +42,6 @@ long D3D11ConstantBuffer::Release()
 long D3D11ConstantBuffer::RefCnt()
 {
 	return m_RefCnt;
-}
-
-UINT64 D3D11ConstantBuffer::GetID() const noexcept
-{
-	return m_ID;
-}
-
-ASSET_TYPE D3D11ConstantBuffer::GetAssetType() const noexcept
-{
-	return ASSET_TYPE::CBUFFER;
-}
-
-LOAD_STAT D3D11ConstantBuffer::GetLoadStat() const noexcept
-{
-	return m_LoadStat;
 }
 
 void D3D11ConstantBuffer::UpdateData(void* pData, size_t DataSize)

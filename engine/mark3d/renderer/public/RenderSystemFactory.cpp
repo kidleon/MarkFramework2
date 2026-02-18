@@ -6,7 +6,7 @@ HMODULE g_hModule = nullptr;
 #endif // defined(__TARGET_OS_WINDOWS)
 
 BOOL __stdcall CreateAndInitRenderModule(
-	const ENGINE_CREATE_DESC& CreateDesc,
+	const RENDERER_CREATE_DESC& CreateDesc,
 	IRenderSystem** ppRenderSystem
 )
 {

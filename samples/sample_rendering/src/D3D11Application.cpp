@@ -14,7 +14,30 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	m_Width = width;
 	m_Height = height;
 
-	ENGINE_CREATE_DESC CreateDesc = {};
+	MARK3D_CREATE_DESC CreateDesc = {};
+	CreateDesc.hWnd = hWnd;
+	CreateDesc.ScreenWidth = width;
+	CreateDesc.ScreenHeight = height;
+	CreateDesc.Fullscreen = FALSE;
+	CreateDesc.RenderAPI = RENDER_API::D3D11;
+
+	IMark3D* pMark3D = nullptr;
+	if (!CreateAndInitEngineModule(CreateDesc, &pMark3D))
+	{
+		return FALSE;
+	}
+
+	m_pMark3D = pMark3D;
+
+	if (!m_pMark3D->GetRenderSystemInterface(&m_pRenderSystem))
+	{
+		m_pMark3D->Release();
+
+		return FALSE;
+	}
+
+	/*
+	RENDERER_CREATE_DESC CreateDesc = {};
 	CreateDesc.hWnd = hWnd;
 	CreateDesc.ScreenWidth = width;
 	CreateDesc.ScreenHeight = height;
@@ -26,6 +49,8 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 		// 실패 처리
 		return FALSE;
 	}
+	*/
+	
 
 	RENDERCAMERA_CREATE_DESC CameraDesc = {};
 	CameraDesc.CameraMode = CAMERA_MODE::PERSPECTIVE;
@@ -181,5 +206,7 @@ void D3D11Application::OnDestroy()
 	CHECK_RELEASE(m_pShaderProgram_PS);
 	CHECK_RELEASE(m_pRenderCamera);
 	CHECK_RELEASE(m_pRenderSystem);
+	CHECK_RELEASE(m_pMark3D);
+
 	CleanupRenderModule();
 }

@@ -79,6 +79,8 @@ do
 				"{COPY} %{prj.location}../engine/mark3d/core/public/*.h %{inc_output_dir}",
 				"{COPY} %{prj.location}../engine/mark3d/math/*.h %{inc_output_dir}",
 				"{COPY} %{prj.location}../engine/mark3d/math/*.inl %{inc_output_dir}",
+				"{COPY} %{prj.location}../engine/mark3d/main/public/*.h %{inc_output_dir}",
+				"{COPY} %{prj.location}../engine/mark3d/assets/public/*.h %{inc_output_dir}",
 				"{COPY} %{prj.location}../engine/common/predefine.h %{inc_output_dir}",
 				"{COPY} %{prj.location}../output/%{prj.name}/bin/*.dll %{sdk_bin_dir}",
 				"{COPY} %{prj.location}../output/%{prj.name}/bin/*.lib %{sdk_lib_dir}",
@@ -88,7 +90,7 @@ do
 				"{COPY} %{prj.location}../output/%{prj.name}/bin/*.dll %{sample_output_dir}",
 			}
 			
-			defines { "__MARK3D_RENDERSYSTEM_D3D11__" }
+			-- defines { "__MARK3D_RENDERSYSTEM_D3D11__" }
 			
 			files {
 				"**.cpp",

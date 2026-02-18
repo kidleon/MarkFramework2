@@ -55,11 +55,6 @@ public:
 	virtual long Release() final;
 	virtual long RefCnt() final;
 
-	// IAsset interface
-	virtual UINT64 GetID() const noexcept final;
-	virtual ASSET_TYPE GetAssetType() const noexcept final;
-	virtual LOAD_STAT GetLoadStat() const noexcept final;
-
 	// IRenderCamera interface
 	void SetClearTarget(
 		UINT32 ClearBuffers,
@@ -132,8 +127,6 @@ private:
 	unsigned PADDING_OR_RESERVED = 0;
 #endif // defined(__TARGET_OS_WINDOWS)
 
-	UINT64 m_ID = 0;
-	LOAD_STAT m_LoadStat = LOAD_STAT::NOT_LOADED;
 	INT32 m_CameraOrder = 0;
 
 	CLEAR_TARGET_DESC m_ClearTarget;

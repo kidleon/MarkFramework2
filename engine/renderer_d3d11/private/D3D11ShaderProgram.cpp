@@ -3,76 +3,64 @@
 
 
 D3D11ShaderProgram::D3D11ShaderProgram(
-	UINT64 ID,
 	UINT32 Index,
 	NameHash ShaderName,
 	UINT32 ShaderDefinesHash,
 	UINT32 InputVertexFormat,
 	ID3D11VertexShader* pVertexShader
 )
-	: m_ID(ID)
-	, m_ShaderIndex(Index)
+	: m_ShaderIndex(Index)
 	, m_ShaderName(ShaderName)
 	, m_ShaderDefinesHash(ShaderDefinesHash)
 	, m_ShaderType(SHADER_TYPE::VERTEX)
 	, m_pVertexShader(pVertexShader)
 	, m_InputVertexFormat(InputVertexFormat)
 {
-	m_LoadStat = LOAD_STAT::LOADED;
 	m_HashNode.data = this;
 }
 
 D3D11ShaderProgram::D3D11ShaderProgram(
-	UINT64 ID,
 	UINT32 Index,
 	NameHash ShaderName,
 	UINT32 ShaderDefinesHash,
 	ID3D11PixelShader* pPixelShader
 )
-	: m_ID(ID)
-	, m_ShaderIndex(Index)
+	: m_ShaderIndex(Index)
 	, m_ShaderName(ShaderName)
 	, m_ShaderDefinesHash(ShaderDefinesHash)
 	, m_ShaderType(SHADER_TYPE::PIXEL)
 	, m_pPixelShader(pPixelShader)
 {
-	m_LoadStat = LOAD_STAT::LOADED;
 	m_HashNode.data = this;
 }
 
 D3D11ShaderProgram::D3D11ShaderProgram(
-	UINT64 ID,
 	UINT32 Index,
 	NameHash ShaderName,
 	UINT32 ShaderDefinesHash,
 	ID3D11GeometryShader* pGeometryShader
 )
-	: m_ID(ID)
-	, m_ShaderIndex(Index)
+	: m_ShaderIndex(Index)
 	, m_ShaderName(ShaderName)
 	, m_ShaderDefinesHash(ShaderDefinesHash)
 	, m_ShaderType(SHADER_TYPE::UNKNOWN)
 	, m_pGeometryShader(pGeometryShader)
 {
-	m_LoadStat = LOAD_STAT::LOADED;
 	m_HashNode.data = this;
 }
 
 D3D11ShaderProgram::D3D11ShaderProgram(
-	UINT64 ID,
 	UINT32 Index,
 	NameHash ShaderName,
 	UINT32 ShaderDefinesHash,
 	ID3D11ComputeShader* pComputeShader
 )
-	: m_ID(ID)
-	, m_ShaderIndex(Index)
+	: m_ShaderIndex(Index)
 	, m_ShaderName(ShaderName)
 	, m_ShaderDefinesHash(ShaderDefinesHash)
 	, m_ShaderType(SHADER_TYPE::COMPUTE)
 	, m_pComputeShader(pComputeShader)
 {
-	m_LoadStat = LOAD_STAT::LOADED;
 	m_HashNode.data = this;
 }
 
@@ -116,21 +104,6 @@ long D3D11ShaderProgram::Release()
 long D3D11ShaderProgram::RefCnt()
 {
 	return m_RefCnt;
-}
-
-UINT64 D3D11ShaderProgram::GetID() const noexcept
-{
-	return m_ID;
-}
-
-ASSET_TYPE D3D11ShaderProgram::GetAssetType() const noexcept
-{
-	return ASSET_TYPE::SHADER_PROGRAM;
-}
-
-LOAD_STAT D3D11ShaderProgram::GetLoadStat() const noexcept
-{
-	return m_LoadStat;
 }
 
 SHADER_TYPE D3D11ShaderProgram::GetShaderType() const noexcept

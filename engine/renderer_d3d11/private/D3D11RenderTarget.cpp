@@ -78,21 +78,6 @@ long D3D11RenderTarget::RefCnt()
 	return m_RefCnt;
 }
 
-UINT64 D3D11RenderTarget::GetID() const noexcept
-{
-	return m_ID;
-}
-
-ASSET_TYPE D3D11RenderTarget::GetAssetType() const noexcept
-{
-	return ASSET_TYPE::RENDER_TARGET;
-}
-
-LOAD_STAT D3D11RenderTarget::GetLoadStat() const noexcept
-{
-	return m_LoadStat;
-}
-
 UINT32 D3D11RenderTarget::GetColorWidth() const noexcept
 {
 	return INL_GetColorWidth();

@@ -21,7 +21,6 @@
 
 #include "Log.h"
 #include "mathlib.h"
-#include "AssetDef.h"
 #include "CoreDef.h"
 
 #include "D3D11RenderDef.h"

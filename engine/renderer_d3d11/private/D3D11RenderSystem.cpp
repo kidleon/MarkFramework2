@@ -313,10 +313,7 @@ BOOL D3D11RenderSystem::CreateSurfaceMaterial(ISurfaceMaterial** ppOut)
 
 	pBlock->Reset();
 
-	D3D11SurfaceMaterial* pSurfaceMaterial = D3D11_POOL_NEW(D3D11SurfaceMaterial)(
-		D3D11_COMMON::GetUID(),
-		pBlock
-	);
+	D3D11SurfaceMaterial* pSurfaceMaterial = D3D11_POOL_NEW(D3D11SurfaceMaterial)(pBlock);
 
 	*ppOut = pSurfaceMaterial;
 
@@ -457,7 +454,6 @@ BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DES
 		}
 
 		D3D11ShaderProgram* pShaderProgram = D3D11_POOL_NEW(D3D11ShaderProgram)(
-			D3D11_COMMON::GetUID(),
 			(UINT32)s_ShaderProgramIndex_VS,
 			Desc.ShaderName,
 			ShaderDefinesHash,
@@ -499,7 +495,6 @@ BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DES
 		}
 
 		D3D11ShaderProgram* pShaderProgram = D3D11_POOL_NEW(D3D11ShaderProgram)(
-			D3D11_COMMON::GetUID(),
 			(UINT32)s_ShaderProgramIndex_PS,
 			Desc.ShaderName,
 			ShaderDefinesHash,

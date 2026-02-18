@@ -12,11 +12,6 @@ public:
 	virtual long Release() final;
 	virtual long RefCnt() final;
 
-	// IAsset interface
-	virtual UINT64 GetID() const noexcept final;
-	virtual ASSET_TYPE GetAssetType() const noexcept final;
-	virtual LOAD_STAT GetLoadStat() const noexcept final;
-
 	// IConstantBuffer 인터페이스 구현
 	virtual void UpdateData(void* pData, size_t DataSize) final;
 
@@ -35,9 +30,6 @@ private:
 #if defined(__TARGET_OS_WINDOWS)
 	unsigned PADDING_OR_RESERVED = 0;
 #endif // defined(__TARGET_OS_WINDOWS)
-
-	UINT32 m_ID = 0;
-	LOAD_STAT m_LoadStat = LOAD_STAT::NOT_LOADED;
 
 	ID3D11Buffer* m_pD3D11Buffer;
 	size_t m_BufferSize;

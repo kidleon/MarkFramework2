@@ -16,7 +16,6 @@ struct ISceneObject : public IAsset
 	virtual BOOL IsEnabled() const noexcept = 0;
 };
 
-
 /**
 * @brief 기본 모델 인터페이스
 */

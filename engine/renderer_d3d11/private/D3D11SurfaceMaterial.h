@@ -7,17 +7,12 @@
 class D3D11SurfaceMaterial final : public ISurfaceMaterial
 {
 public:
-	explicit D3D11SurfaceMaterial(UINT64 ID, D3D11_SURFACE_MATERIAL_BLOCK* pMaterialBlock);
+	explicit D3D11SurfaceMaterial(D3D11_SURFACE_MATERIAL_BLOCK* pMaterialBlock);
 
 	// IUNKNOWN interface
 	virtual long AddRef() final;
 	virtual long Release() final;
 	virtual long RefCnt() final;
-
-	// IAsset interface
-	virtual UINT64 GetID() const noexcept final;
-	virtual ASSET_TYPE GetAssetType() const noexcept final;
-	virtual LOAD_STAT GetLoadStat() const noexcept final;
 
 	// ISurfaceMaterial interface
 	virtual int32 AddPass(const char* szPassName) noexcept final;
@@ -139,9 +134,6 @@ private:
 #if defined(__TARGET_OS_WINDOWS)
 	unsigned PADDING_OR_RESERVED = 0;
 #endif // defined(__TARGET_OS_WINDOWS)
-
-	UINT64 m_ID = 0;
-	LOAD_STAT m_LoadStat = LOAD_STAT::NOT_LOADED;
 
 	D3D11_SURFACE_MATERIAL_BLOCK* m_pMaterialBlock = nullptr;
 
