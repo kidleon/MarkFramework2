@@ -108,6 +108,10 @@ void Mark3DImpl::Shutdown()
 	CHECK_RELEASE(m_pWorld);
 	CORE_DELETE(m_pSceneNodePool, SceneNodePool);
 	CHECK_RELEASE(m_pAssets);
+
+	CHECK_RELEASE(m_pRenderSystem);
+
+	CleanupRenderModule();
 }
 
 BOOL Mark3DImpl::GetAssetsInterface(IAssets** ppOut)

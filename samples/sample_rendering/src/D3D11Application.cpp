@@ -21,6 +21,12 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	CreateDesc.Fullscreen = FALSE;
 	CreateDesc.RenderAPI = RENDER_API::D3D11;
 
+	char szCurrentDir[MAX_FILE_LENGTH];
+	GetCurrentDirectoryA(MAX_FILE_LENGTH, szCurrentDir);
+	fstrcat(szCurrentDir, "\\..\\");
+	fstrlcpy(CreateDesc.szRootPath, szCurrentDir, 255);
+
+
 	IMark3D* pMark3D = nullptr;
 	if (!CreateAndInitEngineModule(CreateDesc, &pMark3D))
 	{
@@ -29,12 +35,14 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 
 	m_pMark3D = pMark3D;
 
+	/*
 	if (!m_pMark3D->GetRenderSystemInterface(&m_pRenderSystem))
 	{
 		m_pMark3D->Release();
 
 		return FALSE;
 	}
+	*/
 
 	/*
 	RENDERER_CREATE_DESC CreateDesc = {};
@@ -51,7 +59,7 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	}
 	*/
 	
-
+	/*
 	RENDERCAMERA_CREATE_DESC CameraDesc = {};
 	CameraDesc.CameraMode = CAMERA_MODE::PERSPECTIVE;
 	CameraDesc.FOVY = 3.14159265f / 4.0f;
@@ -142,6 +150,7 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 
 		free(pShaderSource);
 		pDataStream->Release();
+		
 	}
 
 	pFileSystem->Release();
@@ -163,6 +172,8 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 
 	RS_BLEND_STATE BlendState = RS_BLEND_STATE::DEFAULT;
 	m_pSurfaceMaterial->SetBlendState(BlendState);
+	*/
+
 
 	return TRUE;
 }
@@ -172,6 +183,7 @@ void D3D11Application::OnUpdate()
 	if (!m_pRenderSystem || !m_pRenderCamera)
 		return;
 
+	/*
 	IRenderContext* pRenderContext = nullptr;
 	if (!m_pRenderSystem->GetOrCreateRenderContext(&pRenderContext))
 		return;
@@ -196,16 +208,19 @@ void D3D11Application::OnUpdate()
 	pRenderContext->Release();
 	
 	m_pRenderSystem->Update();
+	*/
 }
 
 void D3D11Application::OnDestroy()
 {
+	/*
 	CHECK_RELEASE(m_pPrimitiveBuffer);
 	CHECK_RELEASE(m_pSurfaceMaterial);
 	CHECK_RELEASE(m_pShaderProgram_VS);
 	CHECK_RELEASE(m_pShaderProgram_PS);
 	CHECK_RELEASE(m_pRenderCamera);
 	CHECK_RELEASE(m_pRenderSystem);
+	*/
 	CHECK_RELEASE(m_pMark3D);
 
 	CleanupRenderModule();
