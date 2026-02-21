@@ -122,7 +122,7 @@ BOOL CoreHeap_Init(
 		return FALSE;
 
 	g_CoreHeap.hTempHeap = hTempHeap;
-	g_CoreHeap.hMemRecorder = memrec_init(pfnMemoryReporter);
+	g_CoreHeap.hMemRecorder = memrec_init(64, pfnMemoryReporter);
 
 	return TRUE;
 }

@@ -83,7 +83,7 @@ size_t D3D11_HEAP_BLOCK_COUNT_TABLE[MAX_HEAP_SIZE_IDX] =
 struct D3D11_HEAP
 {
 	HANDLE hPoolHeap[MAX_HEAP_SIZE_IDX];
-	HANDLE hTempHeap;
+	//HANDLE hTempHeap;
 
 	HANDLE hMemRecorder;
 
@@ -117,12 +117,14 @@ BOOL D3D11Heap_Init(
 	)
 )
 {
+	/*
 	HANDLE hTempHeap = temppool_create(TempSize, FALSE);
 	if (!hTempHeap)
 		return FALSE;
+		*/
 
-	g_D3D11Heap.hTempHeap = hTempHeap;
-	g_D3D11Heap.hMemRecorder = memrec_init(pfnMemoryReporter);
+	//g_D3D11Heap.hTempHeap = hTempHeap;
+	g_D3D11Heap.hMemRecorder = memrec_init(256, pfnMemoryReporter);
 	
 	return TRUE;
 }
@@ -138,11 +140,13 @@ void D3D11Heap_Shutdown()
 		}
 	}
 
+	/*
 	if (g_D3D11Heap.hTempHeap)
 	{
 		temppool_destroy(g_D3D11Heap.hTempHeap);
 		g_D3D11Heap.hTempHeap = nullptr;
 	}
+	*/
 
 	if (g_D3D11Heap.hMemRecorder)
 	{
@@ -388,6 +392,7 @@ void D3D11Heap_PoolFree(void* ptr)
 	paged_object_pool_free(g_D3D11Heap.hPoolHeap[heap_idx], ptr);
 }
 
+/*
 void* D3D11Heap_TempAlloc(size_t size)
 {
 	void* pTempHeap = temppool_alloc(g_D3D11Heap.hTempHeap, size);
@@ -413,3 +418,5 @@ void D3D11Heap_TempReset()
 
 	temppool_clear(g_D3D11Heap.hTempHeap);
 }
+
+*/

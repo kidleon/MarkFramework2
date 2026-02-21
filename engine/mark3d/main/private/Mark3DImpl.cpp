@@ -51,6 +51,8 @@ long Mark3DImpl::RefCnt()
 
 BOOL Mark3DImpl::Initialize(const MARK3D_CREATE_DESC& CreateDesc)
 {
+	//log_init(LOG_LEVEL_DEBUG, LOG_TYPE_SYSTEM, LOG_OUTPUT_CONSOLE | LOG_OUTPUT_OUTPUT_DEBUG_STRING);
+
 	m_pAssets = CORE_NEW(Assets);
 	if (!m_pAssets->Init(CreateDesc.szRootPath))
 	{
@@ -110,6 +112,8 @@ void Mark3DImpl::Shutdown()
 	CHECK_RELEASE(m_pAssets);
 
 	CHECK_RELEASE(m_pRenderSystem);
+
+	//log_shutdown();
 
 	CleanupRenderModule();
 }

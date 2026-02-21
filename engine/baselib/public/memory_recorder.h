@@ -8,6 +8,7 @@
 * @return 메모리 할당 기록기 핸들
 */
 MARK_BASELIB_C_API HANDLE memrec_init(
+	size_t buffer_size,
 	void (*pfnMemoryReporter)(
 		const char* type,
 		const char* file,

@@ -31,8 +31,8 @@ extern "C"
 	void* D3D11Heap_PoolRealloc(void* ptr, size_t oldSize, size_t newSize, const char* file, int line, const char* func);
 	void D3D11Heap_PoolFree(void* ptr);
 
-	void* D3D11Heap_TempAlloc(size_t size);
-	void D3D11Heap_TempReset();
+	//void* D3D11Heap_TempAlloc(size_t size);
+	//void D3D11Heap_TempReset();
 }
 
 #define D3D11_SYS_ALLOC(size) D3D11Heap_SysAlloc(size, __FILE__, __LINE__, __FUNCTION__)
@@ -45,8 +45,6 @@ extern "C"
 #define D3D11_POOL_ALLOC(size) D3D11Heap_PoolAlloc(size, __FILE__, __LINE__, __FUNCTION__)
 #define D3D11_POOL_FREE(ptr) D3D11Heap_PoolFree(ptr)
 
-#define D3D11_TEMP_ALLOC(size) D3D11Heap_TempAlloc(size)
-#define D3D11_TEMP_RESET() D3D11Heap_TempReset()
 
 #define D3D11_NEW(type) new (D3D11_SYS_ALLOC(sizeof(type))) type
 #define D3D11_DELETE(ptr, type) {type* p = ptr; if(p) { (p)->~type(); D3D11_SYS_FREE(p); p = nullptr; } }

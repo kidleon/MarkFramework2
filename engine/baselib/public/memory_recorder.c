@@ -43,6 +43,7 @@ struct memory_block_t
 };
 
 HANDLE memrec_init(
+	size_t buffer_size,
 	void (*pfnMemoryReporter)(
 		const char* type,
 		const char* file,
@@ -72,8 +73,8 @@ HANDLE memrec_init(
 		return NULL;
 	}
 
-	recorder->sysalloc_table = create_hash_table(2048);
-	recorder->poolalloc_table = create_hash_table(2048);
+	recorder->sysalloc_table = create_hash_table(buffer_size);
+	recorder->poolalloc_table = create_hash_table(buffer_size);
 
 	init_spin_lock(&recorder->sys_lock);
 	init_spin_lock(&recorder->pool_lock);
