@@ -405,7 +405,7 @@ namespace mark
 
 		inline void erase(iterator it)
 		{
-			size_t index = ((uintptr_t)_data - (uintptr_t)it->val) / sizeof(_T);
+			size_t index = ((uintptr_t)_data - (uintptr_t)it.val) / sizeof(_T);
 			erase(index);
 		}
 

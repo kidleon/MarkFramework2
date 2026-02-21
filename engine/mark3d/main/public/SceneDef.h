@@ -8,17 +8,34 @@ struct ISceneObject;
 
 struct IWorld : public IUNKNOWN
 {
+	virtual int32 AddScene(const char* szSceneName, IScene* pNewScene) noexcept = 0;
+
+	virtual void RemoveScene(IScene* pScene) noexcept = 0;
+	virtual void RemoveSceneByIndex(size_t Index) noexcept = 0;
+	virtual void RemoveSceneByName(const char* szSceneName) noexcept = 0;
+	virtual void RemoveAllScene() noexcept = 0;
+
 	virtual size_t GetNumScene() const noexcept = 0;
-	virtual IScene* GetScene(size_t Index) noexcept = 0;
+	virtual IScene* GetSceneByIndex(size_t Index) noexcept = 0;
+	virtual IScene* GetSceneByName(const char* szSceneName) noexcept = 0;
+	
 };
 
 //------------------------------------------------------------------------------
 struct IScene : public IUNKNOWN
 {
-	virtual IWorld* GetWorld() noexcept = 0;
+	virtual void SetName(const char* szName) noexcept = 0;
+	virtual const char* GetName() const noexcept = 0;
 	
 	virtual void SetActive(BOOL Active) noexcept = 0;
 	virtual BOOL IsActive() const noexcept = 0;
+
+	virtual void SetWorld(IWorld* pWorld) noexcept = 0;
+	virtual IWorld* GetWorld() noexcept = 0;
+
+	virtual void AddSceneNode(ISceneNode* pSceneNode) noexcept = 0;
+	virtual void AddSceneNode(ISceneNode* pParentNode, ISceneNode* pSceneNode) noexcept = 0;
+	virtual void RemoveSceneNode(ISceneNode* pSceneNode) noexcept = 0;
 
 	virtual ISceneNode* GetRootSceneNode() noexcept = 0;
 

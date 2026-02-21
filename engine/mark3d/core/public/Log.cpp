@@ -41,6 +41,9 @@ void log_shutdown()
 
 	if (log_impl->output & LOG_OUTPUT_CONSOLE)
 		destroy_console();
+
+	crt_free(log_impl);
+	log_impl = NULL;
 }
 
 void log_info(

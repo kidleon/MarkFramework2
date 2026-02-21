@@ -45,7 +45,6 @@ extern "C"
 #define D3D11_POOL_ALLOC(size) D3D11Heap_PoolAlloc(size, __FILE__, __LINE__, __FUNCTION__)
 #define D3D11_POOL_FREE(ptr) D3D11Heap_PoolFree(ptr)
 
-
 #define D3D11_NEW(type) new (D3D11_SYS_ALLOC(sizeof(type))) type
 #define D3D11_DELETE(ptr, type) {type* p = ptr; if(p) { (p)->~type(); D3D11_SYS_FREE(p); p = nullptr; } }
 #define D3D11_POOL_NEW(type) new (D3D11_POOL_ALLOC(sizeof(type))) type
