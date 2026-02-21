@@ -7,6 +7,7 @@
 interface IRenderSystem;
 class SceneNodePool;
 class Assets;
+class World;
 
 class Mark3DImpl final : public IMark3D
 {
@@ -43,7 +44,7 @@ private:
 #endif // defined(__TARGET_OS_WINDOWS)
 
 	SceneNodePool* m_pSceneNodePool = nullptr;
-	IWorld* m_pWorld = nullptr;
+	World* m_pWorld = nullptr;
 
 	Assets* m_pAssets = nullptr;
 	IRenderSystem* m_pRenderSystem = nullptr;

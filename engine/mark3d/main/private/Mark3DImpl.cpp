@@ -4,6 +4,8 @@
 #include "SceneNode.h"
 #include "Assets.h"
 #include "RenderSystemFactory.h"
+#include "World.h"
+#include "Scene.h"
 
 
 BOOL __stdcall CreateAndInitEngineModule(const MARK3D_CREATE_DESC& CreateDesc, IMark3D** ppMark3D)
@@ -144,13 +146,26 @@ BOOL Mark3DImpl::CreateWorld(const char* szWorldName, IWorld** ppOut)
 {
 	CHECK_RELEASE(m_pWorld);
 
-    // Implementation here
+	m_pWorld = CORE_NEW(World);
+	if (szWorldName)
+		m_pWorld->INL_SetName(szWorldName);
+
+	(*ppOut) = m_pWorld;
+
 	return TRUE;
 }
 
 BOOL Mark3DImpl::CreateScene(IWorld* pWorld, const char* szSceneName, IScene** ppOut)
 {
-    // Implementation here
+	if(!pWorld || !ppOut)
+		return FALSE;
+
+	World* pWorldImpl = static_cast<World*>(pWorld);
+
+	Scene* pScene = CORE_NEW(Scene)(szSceneName, pWorld);
+	(*ppOut) = pScene;
+
+
 	return TRUE;
 }
 

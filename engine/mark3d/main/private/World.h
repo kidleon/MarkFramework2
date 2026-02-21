@@ -1,4 +1,4 @@
-#ifndef __WORLD_IMPL_H__
+﻿#ifndef __WORLD_IMPL_H__
 #define __WORLD_IMPL_H__
 
 
@@ -6,6 +6,8 @@ class Scene;
 
 class World final : public IWorld
 {
+	constexpr static size_t MAX_WORLD_NAME_LENGTH = 64;
+
 public:
 	// IUNKNOWN interface
 	virtual long AddRef() final;
@@ -13,7 +15,7 @@ public:
 	virtual long RefCnt() final;
 
 	// IWorld interface
-	virtual int32 AddScene(const char* szSceneName, IScene* pNewScene) noexcept final;
+	virtual int32 AddScene(IScene* pNewScene) noexcept final;
 
 	virtual void RemoveScene(IScene* pScene) noexcept final;
 	virtual void RemoveSceneByIndex(size_t Index) noexcept final;
@@ -23,6 +25,9 @@ public:
 	virtual size_t GetNumScene() const noexcept final;
 	virtual IScene* GetSceneByIndex(size_t Index) noexcept final;
 	virtual IScene* GetSceneByName(const char* szSceneName) noexcept final;
+
+	__FORCEINLINE void INL_SetName(const char* szName) noexcept { fstrlcpy(m_szName, szName, MAX_WORLD_NAME_LENGTH - 1); }
+	__FORCEINLINE const char* INL_GetName() const noexcept { return m_szName; }
 
 private:
 	virtual ~World() noexcept;
@@ -34,6 +39,8 @@ private:
 #endif // defined(__TARGET_OS_WINDOWS)
 
 	TArray<Scene*, TA_POOL> m_SceneList;
+
+	char m_szName[MAX_WORLD_NAME_LENGTH] = { 0 };
 
 };
 

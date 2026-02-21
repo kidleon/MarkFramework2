@@ -55,6 +55,11 @@ IScene* SceneNode::GetScene() noexcept
 	return m_pScene;
 }
 
+uint64 SceneNode::GetInstanceID() const noexcept
+{
+	return m_InstanceID;
+}
+
 void SceneNode::SetName(const char* szName) noexcept
 {
 	m_Name = NameHash(szName);

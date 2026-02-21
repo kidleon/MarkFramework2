@@ -1,4 +1,4 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "World.h"
 #include "Scene.h"
 
@@ -29,16 +29,18 @@ long World::RefCnt()
 	return m_RefCnt;
 }
 
-int32 World::AddScene(const char* szSceneName, IScene* pNewScene) noexcept
+int32 World::AddScene(IScene* pNewScene) noexcept
 {
-	if (!szSceneName || !pNewScene)
+	if (!pNewScene)
 		return -1;
+
+	Scene* pSceneImpl = static_cast<Scene*>(pNewScene);
 
 	for (size_t i = 0; i < m_SceneList.size(); i++)
 	{
 		Scene* pScene = m_SceneList[i];
 
-		if (fstrcmp(pScene->INL_GetName(), szSceneName) == 0)
+		if (fstrcmp(pScene->INL_GetName(), pSceneImpl->INL_GetName()) == 0)
 		{
 			SYS_LOG_E("Scene with name '%s' already exists in the world.", szSceneName);
 			return -1;
@@ -46,9 +48,6 @@ int32 World::AddScene(const char* szSceneName, IScene* pNewScene) noexcept
 	}
 
 	Scene* pNewSceneImpl = static_cast<Scene*>(pNewScene);
-	pNewSceneImpl->SetName(szSceneName);
-	pNewSceneImpl->SetWorld(this);
-
 	m_SceneList.push_back(pNewSceneImpl);
 
 	return static_cast<int32>(m_SceneList.size() - 1);
@@ -60,7 +59,6 @@ void World::RemoveScene(IScene* pScene) noexcept
 		return;
 
 	Scene* pSceneImpl = static_cast<Scene*>(pScene);
-	pSceneImpl->SetWorld(nullptr);
 
 	auto it = m_SceneList.find([pSceneImpl](Scene* scene) { return scene == pSceneImpl; });
 	if (it != m_SceneList.end())
@@ -73,7 +71,6 @@ void World::RemoveSceneByIndex(size_t Index) noexcept
 		return;
 
 	Scene* pScene = m_SceneList[Index];
-	pScene->SetWorld(nullptr);
 
 	m_SceneList.erase(Index);
 }
@@ -88,7 +85,6 @@ void World::RemoveSceneByName(const char* szSceneName) noexcept
 		Scene* pScene = m_SceneList[i];
 		if (fstrcmp(pScene->INL_GetName(), szSceneName) == 0)
 		{
-			pScene->SetWorld(nullptr);
 			m_SceneList.erase(i);
 			return;
 		}
@@ -103,7 +99,6 @@ void World::RemoveAllScene() noexcept
 	for (size_t i = 0; i < m_SceneList.size(); i++)
 	{
 		Scene* pScene = m_SceneList[i];
-		pScene->SetWorld(nullptr);
 		pScene->Release();
 	}
 	m_SceneList.clear();

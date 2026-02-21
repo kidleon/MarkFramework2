@@ -1,7 +1,14 @@
-#include "pch.h"
+﻿#include "pch.h"
 #include "Scene.h"
 #include "World.h"
+#include "SceneNode.h"
 
+
+Scene::Scene(const char* szName, IWorld* pWorld)
+	: m_pWorld(pWorld)
+{
+	fstrlcpy(m_szName, szName, MAX_SCENE_NAME_LENGTH - 1);
+}
 
 Scene::~Scene() noexcept
 {
@@ -28,24 +35,9 @@ long Scene::RefCnt()
 	return m_RefCnt;
 }
 
-ISceneNode* Scene::GetRootSceneNode() noexcept
-{
-	return m_pRootSceneNode;
-}
-
-void Scene::SetWorld(IWorld* pWorld) noexcept
-{
-	m_pWorld = pWorld;
-}
-
 IWorld* Scene::GetWorld() noexcept
 {
 	return m_pWorld;
-}
-
-void Scene::SetName(const char* szName) noexcept
-{
-	fstrlcpy(m_szName, szName, MAX_SCENE_NAME_LENGTH - 1);
 }
 
 const char* Scene::GetName() const noexcept
@@ -63,3 +55,22 @@ BOOL Scene::IsActive() const noexcept
 	return m_Active;
 }
 
+void Scene::AddSceneNode(ISceneNode* pSceneNode) noexcept
+{
+
+}
+
+void Scene::AddSceneNode(ISceneNode* pParentNode, ISceneNode* pSceneNode) noexcept
+{
+
+}
+
+void Scene::RemoveSceneNode(ISceneNode* pSceneNode) noexcept
+{
+
+}
+
+ISceneNode* Scene::GetRootSceneNode() noexcept
+{
+	return m_pRootSceneNode;
+}
