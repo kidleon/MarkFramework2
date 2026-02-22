@@ -13,6 +13,7 @@
 #include "TArray.h"
 #include "TList.h"
 #include "THashMap.h"
+#include "THashSet.h"
 #include "mathlib.h"
 #include "CoreHeap.h"
 #include "AssetDef.h"

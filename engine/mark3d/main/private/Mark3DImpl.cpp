@@ -7,9 +7,32 @@
 #include "World.h"
 #include "Scene.h"
 
+void CoreMemoryReporter(
+	const char* type,
+	const char* file,
+	int line,
+	const char* func,
+	size_t size
+)
+{
+	char szTemp[512] = { '\0' };
+	sprintf(szTemp, "Memory Report: Type = %s, Size = %zu bytes, Location = %s(%d) %s\n",
+		type,
+		size,
+		file,
+		line,
+		func
+	);
+	OutputDebugStringA(szTemp);
+}
 
 BOOL __stdcall CreateAndInitEngineModule(const MARK3D_CREATE_DESC& CreateDesc, IMark3D** ppMark3D)
 {
+	CoreHeap_Init(
+		1024 * 1024 * 10, // 10MB의 임시 메모리 풀 크기
+		CoreMemoryReporter
+	);
+
 	Mark3DImpl* pImpl = CORE_NEW(Mark3DImpl);
 
 	if (!pImpl->Initialize(CreateDesc))
@@ -115,9 +138,11 @@ void Mark3DImpl::Shutdown()
 
 	CHECK_RELEASE(m_pRenderSystem);
 
-	//log_shutdown();
+	log_shutdown();
 
 	CleanupRenderModule();
+
+	CoreHeap_Shutdown();
 }
 
 BOOL Mark3DImpl::GetAssetsInterface(IAssets** ppOut)
@@ -146,10 +171,7 @@ BOOL Mark3DImpl::CreateWorld(const char* szWorldName, IWorld** ppOut)
 {
 	CHECK_RELEASE(m_pWorld);
 
-	m_pWorld = CORE_NEW(World);
-	if (szWorldName)
-		m_pWorld->INL_SetName(szWorldName);
-
+	m_pWorld = CORE_NEW(World)(szWorldName);
 	(*ppOut) = m_pWorld;
 
 	return TRUE;
@@ -163,8 +185,10 @@ BOOL Mark3DImpl::CreateScene(IWorld* pWorld, const char* szSceneName, IScene** p
 	World* pWorldImpl = static_cast<World*>(pWorld);
 
 	Scene* pScene = CORE_NEW(Scene)(szSceneName, pWorld);
-	(*ppOut) = pScene;
 
+	pWorld->AddScene(pScene);
+
+	(*ppOut) = pScene;
 
 	return TRUE;
 }
@@ -191,11 +215,38 @@ void Mark3DImpl::ReleaseSceneNode(ISceneNode* pNode)
 		return;
 
 	SceneNode* pSceneNode = static_cast<SceneNode*>(pNode);
-	m_pSceneNodePool->Release(pSceneNode);
+
+	TArray<SceneNode*, TA_TEMP> SceneNodeList;
+
+	pSceneNode->GetSceneNodeList(SceneNodeList);
+
+	for (size_t i = 0; i < SceneNodeList.size(); i++)
+	{
+		SceneNode* pChildNode = SceneNodeList[i];
+		m_pSceneNodePool->Release(pSceneNode);
+	}
+}
+
+IWorld* Mark3DImpl::GetWorld() noexcept
+{
+	if (m_pWorld)
+		m_pWorld->AddRef();
+
+	return m_pWorld;
 }
 
 BOOL Mark3DImpl::CreateModel(NameHash ModelName, size_t MaxVertex, size_t MaxIndex, IModel** ppOut)
 {
 	// Implementation here
 	return TRUE;
+}
+
+void Mark3DImpl::UpdateCPU()
+{
+	CoreHeap_TempReset();
+
+	if (m_pWorld)
+	{
+		m_pWorld->UpdateSceneTransform();
+	}
 }

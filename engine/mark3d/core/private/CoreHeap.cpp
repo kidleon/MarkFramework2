@@ -146,6 +146,7 @@ void CoreHeap_Shutdown()
 
 	if (g_CoreHeap.hMemRecorder)
 	{
+		memrec_report_leaks(g_CoreHeap.hMemRecorder);
 		memrec_shutdown(g_CoreHeap.hMemRecorder);
 		g_CoreHeap.hMemRecorder = nullptr;
 	}

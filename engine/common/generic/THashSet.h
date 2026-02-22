@@ -104,7 +104,7 @@ namespace mark
 		{
 			if (contains(val)) return;
 
-			__HashSet_Node<_Tval>* pHashNode = static_cast<__HashSet_Node<_Tval>*>(_Alloc::alloc(sizeof(__HashSet_Node<_Tval>)));
+			__HashSet_Node<_Tval>* pHashNode = static_cast<__HashSet_Node<_Tval>*>(_Alloc::alloc(sizeof(__HashSet_Node<_Tval>), __FILE__, __LINE__, __FUNCTION__));
 
 			HASH hash;
 
@@ -136,7 +136,7 @@ namespace mark
 			pHashNode->chain_next = _pChainBlocks;
 			if (pHashNode->chain_next)
 			{
-				pHashNode->chain_text->chain_prev = pHashNode;
+				pHashNode->chain_next->chain_prev = pHashNode;
 			}
 
 			_pChainBlocks = pHashNode;

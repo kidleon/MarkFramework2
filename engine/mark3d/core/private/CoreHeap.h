@@ -94,7 +94,9 @@ struct TCoreAllocator
 			void* pNewPtr = CoreHeap_TempAlloc(newSize);
 			if (!pNewPtr)
 				return nullptr;
-			memcpy(pNewPtr, ptr, newSize);
+
+			if (ptr)
+				memcpy(pNewPtr, ptr, newSize);
 
 			return pNewPtr;
 		}

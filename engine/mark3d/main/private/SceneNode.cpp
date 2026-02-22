@@ -25,7 +25,7 @@ SceneNode::SceneNode()
 
 SceneNode::~SceneNode() noexcept
 {
-	Reset(FALSE);
+	Reset();
 }
 
 long SceneNode::AddRef()
@@ -77,7 +77,7 @@ const LOCAL_TRANSFORM& SceneNode::GetLocalTransform() const noexcept
 
 const MATRIX4& SceneNode::GetWorldTM() const noexcept
 {
-	return m_WorldTransform.TM;
+	return m_WorldTransform;
 }
 
 void SceneNode::SetActive(BOOL Active) noexcept
@@ -148,13 +148,14 @@ ISceneObject* SceneNode::GetSceneObjectAtIndex(int32 Index) noexcept
 	return m_pSceneObjects[Index];
 }
 
-void SceneNode::Reset(BOOL Recursive)
+void SceneNode::Reset()
 {
 	for(size_t i = 0; i < m_NumSceneObjects; ++i)
 	{
 		CHECK_RELEASE(m_pSceneObjects[i]);
 	}
 
+	/*
 	if (Recursive)
 	{
 		LINK_NODE* pChildNode = linked_list_pop_front(&m_ChildNodeList);
@@ -165,8 +166,10 @@ void SceneNode::Reset(BOOL Recursive)
 			pChildNode = linked_list_pop_front(&m_ChildNodeList);
 		}
 	}
+	*/
 	
 	m_Active = FALSE;
+	m_InstanceID = 0;
 	m_LayerMask = 0x00;
 	m_LinkedChildNode = FALSE;
 	m_pParentNode = nullptr;
@@ -178,7 +181,7 @@ void SceneNode::Reset(BOOL Recursive)
 	m_LocalTransform.Rotation = { 0.0f, 0.0f, 0.0f, 1.0f };
 	m_LocalTransform.Scale = { 1.0f, 1.0f, 1.0f };
 	m_LocalTransform.TM = mat4_ident();
-	m_WorldTransform = m_LocalTransform;
+	m_WorldTransform = m_LocalTransform.TM;
 }
 
 void SceneNode::RemoveChildNode(SceneNode* pChild)
@@ -187,4 +190,40 @@ void SceneNode::RemoveChildNode(SceneNode* pChild)
 		return;
 
 	linked_list_remove_node(&m_ChildNodeList, pChild->INL_GetLinkNode());
+}
+
+void SceneNode::GetSceneNodeList(TArray<SceneNode*, TA_TEMP>& OutList)
+{
+	LINK_NODE* pChildNode = m_ChildNodeList.head;
+	while (pChildNode)
+	{
+		SceneNode* pSceneNode = (SceneNode*)pChildNode->data;
+		pSceneNode->GetSceneNodeList(OutList);
+		pChildNode = pChildNode->next;
+	}
+
+	OutList.push_back(this);
+}
+
+void SceneNode::ComputeTransform(SceneNode* pParentNode)
+{
+	compute_transform(m_LocalTransform);
+
+	if (pParentNode)
+	{
+		const MATRIX4& ParentWorldTM = pParentNode->INL_GetWorldTM();
+		m_WorldTransform = mat4_mul(ParentWorldTM, m_LocalTransform.TM);
+	}
+	else
+	{
+		m_WorldTransform = m_LocalTransform.TM;
+	}
+
+	LINK_NODE* pChildNode = m_ChildNodeList.head;
+	while (pChildNode)
+	{
+		SceneNode* pSceneNode = (SceneNode*)pChildNode->data;
+		pSceneNode->ComputeTransform(this);
+		pChildNode = pChildNode->next;
+	}
 }

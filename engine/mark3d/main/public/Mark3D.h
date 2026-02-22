@@ -39,6 +39,12 @@ struct IMark3D : public IUNKNOWN
 	*/
 	virtual void Shutdown() = 0;
 
+	/**
+	* @brief CPU에서 업데이트가 필요한 작업을 수행합니다. 예를 들어, 씬 그래프 업데이트, 애니메이션 업데이트 등이 있을 수 있습니다. 반드시 메인쓰레드에서 호출되어야 합니다.
+	* @return 없음
+	*/
+	virtual void UpdateCPU() = 0;
+
 	//----------------------------------------------------------------------
 	// Asset's APIs
 
@@ -93,6 +99,12 @@ struct IMark3D : public IUNKNOWN
 	*/
 	virtual void ReleaseSceneNode(ISceneNode* pNode) = 0;
 
+	/**
+	* @brief 현재 World 객체를 반환합니다. AddRef가 호출 되므로 반환된 IWorld 포인터는 사용 후 Release 해야 합니다.
+	* @return IWorld 포인터
+	*/
+	virtual IWorld* GetWorld() noexcept = 0;
+
 
 	//----------------------------------------------------------------------
 	// SceneObject's APIs
@@ -106,6 +118,8 @@ struct IMark3D : public IUNKNOWN
 	* @return 성공시 TRUE, 실패시 FALSE
 	*/
 	virtual BOOL CreateModel(NameHash ModelName, size_t MaxVertex, size_t MaxIndex, IModel** ppOut) = 0;
+
+	
 
 };
 

@@ -3,6 +3,12 @@
 #include "Scene.h"
 
 
+World::World(const char* szWorldName)
+{
+	if (szWorldName)
+		fstrlcpy(m_szName, szWorldName, MAX_WORLD_NAME_LENGTH - 1);
+}
+
 World::~World() noexcept
 {
 	RemoveAllScene();
@@ -131,4 +137,16 @@ IScene* World::GetSceneByName(const char* szSceneName) noexcept
 	}
 
 	return nullptr;
+}
+
+void World::UpdateSceneTransform() noexcept
+{
+	for (size_t i = 0; i < m_SceneList.size(); i++)
+	{
+		Scene* pScene = m_SceneList[i];
+		if (pScene->INL_IsActive())
+		{
+			pScene->UpdateTransform();
+		}
+	}
 }

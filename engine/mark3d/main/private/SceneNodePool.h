@@ -27,6 +27,7 @@ private:
 private:
 	LINKED_LIST m_FreeList = {};
 	LINKED_LIST m_UsedList = {};
+	UINT64 m_NextInstanceID = 1; // 0은 유효한 인스턴스 ID로 사용하지 않음
 
 };
 

@@ -56,6 +56,7 @@ SceneNode* SceneNodePool::Acquire()
 
 	SceneNode* pSceneNode = (SceneNode*)pNode->data;
 	pSceneNode->AddRef();
+	pSceneNode->INL_SetInstanceID(m_NextInstanceID++);
 
 	linked_list_push_back(&m_UsedList, pNode);
 
@@ -67,13 +68,13 @@ void SceneNodePool::Release(SceneNode* pNode)
 	if (!pNode)
 		return;
 
+	pNode->Reset();
+	pNode->Release();
+
 	LINK_NODE* pLinkNode = pNode->INL_GetPoolLinkNode();
 	linked_list_remove_node(&m_UsedList, pLinkNode);
 
 	linked_list_push_back(&m_FreeList, pLinkNode);
-
-	pNode->Reset(FALSE);
-	pNode->Release();
 }
 
 void SceneNodePool::ExpandPool(size_t Count)

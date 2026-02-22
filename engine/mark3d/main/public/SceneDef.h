@@ -35,8 +35,6 @@ struct IScene : public IUNKNOWN
 	virtual void AddSceneNode(ISceneNode* pParentNode, ISceneNode* pSceneNode) noexcept = 0;
 	virtual void RemoveSceneNode(ISceneNode* pSceneNode) noexcept = 0;
 
-	virtual ISceneNode* GetRootSceneNode() noexcept = 0;
-
 };
 
 //------------------------------------------------------------------------------

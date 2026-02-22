@@ -2963,3 +2963,4 @@ inline void compute_transform(LOCAL_TRANSFORM& tf)
 	mat4_trans((FLOAT3&)tf.Position, t);
 	mat4_mul(sr, t, tf.TM);
 }
+

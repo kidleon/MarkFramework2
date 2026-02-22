@@ -20,6 +20,7 @@ public:
 	// IMark3D interface
 	virtual BOOL Initialize(const MARK3D_CREATE_DESC& CreateDesc) final;
 	virtual void Shutdown() final;
+	virtual void UpdateCPU() final;
 
 	// Asset's APIs
 	virtual BOOL GetAssetsInterface(IAssets** ppOut) final;
@@ -30,6 +31,8 @@ public:
 	virtual BOOL CreateScene(IWorld* pWorld, const char* szSceneName, IScene** ppOut) final;
 	virtual BOOL CreateSceneNode(IScene* pScene, const char* szNodeName, ISceneNode** ppOut) final;
 	virtual void ReleaseSceneNode(ISceneNode* pNode) final;
+
+	virtual IWorld* GetWorld() noexcept final;
 
 	// SceneObject's APIs
 	virtual BOOL CreateModel(NameHash ModelName, size_t MaxVertex, size_t MaxIndex, IModel** ppOut) final;

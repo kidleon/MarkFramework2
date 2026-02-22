@@ -37,9 +37,16 @@ public:
 	__FORCEINLINE const NameHash INL_GetName() const noexcept { return m_Name; }
 	__FORCEINLINE void INL_SetInstanceID(uint64 ID) noexcept { m_InstanceID = ID; }
 	__FORCEINLINE uint64 INL_GetInstanceID() const noexcept { return m_InstanceID; }
+	__FORCEINLINE SceneNode* INL_GetParentNode() noexcept { return m_pParentNode; }
+	__FORCEINLINE const MATRIX4& INL_GetWorldTM() const noexcept { return m_WorldTransform; }
+
 
 	void SetParent(ISceneNode* pParent) noexcept;
-	void Reset(BOOL Recursive);
+	void RemoveChildNode(SceneNode* pChild);
+	void GetSceneNodeList(TArray<SceneNode*, TA_TEMP>& OutList);
+	void Reset();
+
+	void ComputeTransform(SceneNode* pParentNode);
 
 private:
 	SceneNode();
@@ -51,8 +58,6 @@ private:
 	virtual long AddRef() final;
 	virtual long Release() final;
 	virtual long RefCnt() final;
-
-	void RemoveChildNode(SceneNode* pChild);
 
 private:
 	volatile long m_RefCnt = 1;
@@ -66,7 +71,7 @@ private:
 	UINT32 m_LayerMask;
 	BOOL m_LinkedChildNode;
 	LOCAL_TRANSFORM m_LocalTransform;
-	LOCAL_TRANSFORM m_WorldTransform;
+	MATRIX4 m_WorldTransform;
 
 	SceneNode* m_pParentNode;
 	LINKED_LIST m_ChildNodeList;

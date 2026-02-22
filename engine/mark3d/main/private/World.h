@@ -9,6 +9,8 @@ class World final : public IWorld
 	constexpr static size_t MAX_WORLD_NAME_LENGTH = 64;
 
 public:
+	World(const char* szWorldName);
+
 	// IUNKNOWN interface
 	virtual long AddRef() final;
 	virtual long Release() final;
@@ -26,10 +28,12 @@ public:
 	virtual IScene* GetSceneByIndex(size_t Index) noexcept final;
 	virtual IScene* GetSceneByName(const char* szSceneName) noexcept final;
 
-	__FORCEINLINE void INL_SetName(const char* szName) noexcept { fstrlcpy(m_szName, szName, MAX_WORLD_NAME_LENGTH - 1); }
 	__FORCEINLINE const char* INL_GetName() const noexcept { return m_szName; }
 
+	void UpdateSceneTransform() noexcept;
+
 private:
+	World() = delete;
 	virtual ~World() noexcept;
 
 private:
