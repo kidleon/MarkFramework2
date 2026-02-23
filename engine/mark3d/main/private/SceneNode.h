@@ -40,7 +40,6 @@ public:
 	__FORCEINLINE SceneNode* INL_GetParentNode() noexcept { return m_pParentNode; }
 	__FORCEINLINE const MATRIX4& INL_GetWorldTM() const noexcept { return m_WorldTransform; }
 
-
 	void SetParent(ISceneNode* pParent) noexcept;
 	void RemoveChildNode(SceneNode* pChild);
 	void GetSceneNodeList(TArray<SceneNode*, TA_TEMP>& OutList);
