@@ -149,6 +149,8 @@ enum class MODEL_ATTRIB : uint32
 
 struct IModelAsset : public IAsset
 {
+	virtual UINT32 GetModelAttrib() const noexcept = 0;
+
 	virtual size_t GetNumMesh() const noexcept = 0;
 	virtual size_t GetNumSubMesh(int32 MeshIndex) noexcept = 0;
 
@@ -170,15 +172,8 @@ struct IModelAsset : public IAsset
 	virtual FLOAT3* GetBinormal(int32 MeshIndex) noexcept = 0;
 	virtual size_t GetNumBinormal(int32 MeshIndex) const noexcept = 0;
 
-	/*
-	virtual FLOAT4* GetBlendWeight(int32 MeshIndex) noexcept = 0;
-	virtual size_t GetNumBlendWeight(int32 MeshIndex) const noexcept = 0;
-
-	virtual UINT4* GetBlendIndices(int32 MeshIndex) noexcept = 0;
-	virtual size_t GetNumBlendIndices(int32 MeshIndex) const noexcept = 0;
-	*/
-
 	virtual uint32* GetIndices(int32 MeshIndex, int32 SubMeshIndex) noexcept = 0;
+	virtual size_t GetNumIndices(int32 MeshIndex) const noexcept = 0;
 	virtual size_t GetNumIndices(int32 MeshIndex, int32 SubMeshIndex) const noexcept = 0;
 
 };

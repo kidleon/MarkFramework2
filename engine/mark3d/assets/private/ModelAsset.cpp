@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "ModelAsset.h"
+#include "fbx_loader.h"
 
 
 ModelAsset::ModelAsset(UINT64 ID)
@@ -10,36 +11,6 @@ ModelAsset::ModelAsset(UINT64 ID)
 
 ModelAsset::~ModelAsset() noexcept
 {
-	for (size_t i = 0; i < m_Meshes.size(); i++)
-	{
-		if (m_Meshes[i]->pPositions)
-			CORE_SYS_FREE(m_Meshes[i]->pPositions);
-
-		if (m_Meshes[i]->pNormals)
-			CORE_SYS_FREE(m_Meshes[i]->pNormals);
-
-		if (m_Meshes[i]->pTexCoords)
-			CORE_SYS_FREE(m_Meshes[i]->pTexCoords);
-
-		if (m_Meshes[i]->pColors)
-			CORE_SYS_FREE(m_Meshes[i]->pColors);
-
-		if (m_Meshes[i]->pTangents)
-			CORE_SYS_FREE(m_Meshes[i]->pTangents);
-
-		if (m_Meshes[i]->pBinormals)
-			CORE_SYS_FREE(m_Meshes[i]->pBinormals);
-
-		for (size_t j = 0; j < m_Meshes[i]->NumSubMesh; j++)
-		{
-			if (m_Meshes[i]->pSubMeshes[j].pIndices)
-				CORE_SYS_FREE(m_Meshes[i]->pSubMeshes[j].pIndices);
-		}
-
-		if (m_Meshes[i]->pSubMeshes)
-			CORE_SYS_FREE(m_Meshes[i]->pSubMeshes);
-	}
-
 	m_Meshes.clear();
 }
 
@@ -79,6 +50,11 @@ LOAD_STAT ModelAsset::GetLoadStat() const noexcept
 	return m_LoadStat;
 }
 
+UINT32 ModelAsset::GetModelAttrib() const noexcept
+{
+	return m_ModelAttrib;
+}
+
 size_t ModelAsset::GetNumMesh() const noexcept
 {
 	return m_Meshes.size();
@@ -88,77 +64,77 @@ size_t ModelAsset::GetNumSubMesh(int32 MeshIndex) noexcept
 {
 	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
 		return 0;
-	return m_Meshes[MeshIndex]->NumSubMesh;
+	return m_Meshes[MeshIndex].NumSubMesh;
 }
 
 FLOAT3* ModelAsset::GetPositions(int32 MeshIndex) noexcept
 {
 	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
 		return nullptr;
-	return m_Meshes[MeshIndex]->pPositions;
+	return m_Meshes[MeshIndex].pPositions;
 }
 
 size_t ModelAsset::GetNumPositions(int32 MeshIndex) const noexcept
 {
 	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
 		return 0;
-	return m_Meshes[MeshIndex]->NumPositions;
+	return m_Meshes[MeshIndex].NumPositions;
 }
 
 FLOAT3* ModelAsset::GetNormals(int32 MeshIndex) noexcept
 {
 	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
 		return nullptr;
-	return m_Meshes[MeshIndex]->pNormals;
+	return m_Meshes[MeshIndex].pNormals;
 }
 
 size_t ModelAsset::GetNumNormals(int32 MeshIndex) const noexcept
 {
 	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
 		return 0;
-	return m_Meshes[MeshIndex]->NumNormals;
+	return m_Meshes[MeshIndex].NumNormals;
 }
 
 FLOAT2* ModelAsset::GetTexCoords(int32 MeshIndex) noexcept
 {
 	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
 		return nullptr;
-	return m_Meshes[MeshIndex]->pTexCoords;
+	return m_Meshes[MeshIndex].pTexCoords;
 }
 
 size_t ModelAsset::GetNumTexCoords(int32 MeshIndex) const noexcept
 {
 	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
 		return 0;
-	return m_Meshes[MeshIndex]->NumTexCoords;
+	return m_Meshes[MeshIndex].NumTexCoords;
 }
 
 FLOAT4* ModelAsset::GetColor(int32 MeshIndex) noexcept
 {
 	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
 		return nullptr;
-	return m_Meshes[MeshIndex]->pColors;
+	return m_Meshes[MeshIndex].pColors;
 }
 
 size_t ModelAsset::GetNumColor(int32 MeshIndex) const noexcept
 {
 	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
 		return 0;
-	return m_Meshes[MeshIndex]->NumColors;
+	return m_Meshes[MeshIndex].NumColors;
 }
 
 FLOAT3* ModelAsset::GetTangent(int32 MeshIndex) noexcept
 {
 	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
 		return nullptr;
-	return m_Meshes[MeshIndex]->pTangents;
+	return m_Meshes[MeshIndex].pTangents;
 }
 
 size_t ModelAsset::GetNumTangent(int32 MeshIndex) const noexcept
 {
 	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
 		return 0;
-	return m_Meshes[MeshIndex]->NumTangents;
+	return m_Meshes[MeshIndex].NumTangents;
 }
 
 FLOAT3* ModelAsset::GetBinormal(int32 MeshIndex) noexcept
@@ -166,7 +142,7 @@ FLOAT3* ModelAsset::GetBinormal(int32 MeshIndex) noexcept
 	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
 		return nullptr;
 
-	return m_Meshes[MeshIndex]->pBinormals;
+	return m_Meshes[MeshIndex].pBinormals;
 }
 
 size_t ModelAsset::GetNumBinormal(int32 MeshIndex) const noexcept
@@ -174,7 +150,7 @@ size_t ModelAsset::GetNumBinormal(int32 MeshIndex) const noexcept
 	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
 		return 0;
 
-	return m_Meshes[MeshIndex]->NumBinormals;
+	return m_Meshes[MeshIndex].NumBinormals;
 }
 
 uint32* ModelAsset::GetIndices(int32 MeshIndex, int32 SubMeshIndex) noexcept
@@ -182,10 +158,22 @@ uint32* ModelAsset::GetIndices(int32 MeshIndex, int32 SubMeshIndex) noexcept
 	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
 		return nullptr;
 
-	if (SubMeshIndex < 0 || static_cast<size_t>(SubMeshIndex) >= m_Meshes[MeshIndex]->NumSubMesh)
+	if (SubMeshIndex < 0 || static_cast<size_t>(SubMeshIndex) >= m_Meshes[MeshIndex].NumSubMesh)
 		return nullptr;
 
-	return m_Meshes[MeshIndex]->pSubMeshes[SubMeshIndex].pIndices;
+	return m_Meshes[MeshIndex].pSubMeshes[SubMeshIndex].pIndices;
+}
+
+size_t ModelAsset::GetNumIndices(int32 MeshIndex) const noexcept
+{
+	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
+		return 0;
+
+	size_t TotalIndices = 0;
+	for (size_t i = 0; i < m_Meshes[MeshIndex].NumSubMesh; i++)
+		TotalIndices += m_Meshes[MeshIndex].pSubMeshes[i].NumIndices;
+
+	return TotalIndices;
 }
 
 size_t ModelAsset::GetNumIndices(int32 MeshIndex, int32 SubMeshIndex) const noexcept
@@ -193,33 +181,34 @@ size_t ModelAsset::GetNumIndices(int32 MeshIndex, int32 SubMeshIndex) const noex
 	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
 		return 0;
 
-	if (SubMeshIndex < 0 || static_cast<size_t>(SubMeshIndex) >= m_Meshes[MeshIndex]->NumSubMesh)
+	if (SubMeshIndex < 0 || static_cast<size_t>(SubMeshIndex) >= m_Meshes[MeshIndex].NumSubMesh)
 		return 0;
 
-	return m_Meshes[MeshIndex]->pSubMeshes[SubMeshIndex].NumIndices;
+	return m_Meshes[MeshIndex].pSubMeshes[SubMeshIndex].NumIndices;
 }
 
-void ModelAsset::AddMesh(const char* szName, uint32 VertexFormat, size_t NumVertices, size_t NumSubMeshes) noexcept 
+
+BOOL ModelAsset::LoadFromFBX(const FBX_SCENE* fbx_scene) noexcept
 {
-	Mesh* pNewMesh = CORE_NEW(Mesh);
+	if (!fbx_scene)		
+		return FALSE;
 
-	fstrlcpy(pNewMesh->szName, szName, sizeof(pNewMesh->szName) - 1);
+	m_ModelAttrib = 0;
+	m_Materials.clear();
+	m_Meshes.clear();
 
-	if (NumSubMeshes > 0)
+	if (fbx_scene->num_materials)
 	{
-		pNewMesh->pSubMeshes = static_cast<Mesh::SubMesh*>(CORE_SYS_ALLOC(sizeof(Mesh::SubMesh) * NumSubMeshes));
-		for (size_t i = 0; i < NumSubMeshes; i++)
+		m_ModelAttrib |= static_cast<uint32>(MODEL_ATTRIB::MATERIAL);
+	}
+
+	if (fbx_scene->model)
+	{
+		if (fbx_scene->model->num_meshes)
 		{
-			pNewMesh->pSubMeshes[i].pIndices = nullptr;
-			pNewMesh->pSubMeshes[i].NumIndices = 0;
+			m_ModelAttrib |= static_cast<uint32>(MODEL_ATTRIB::MESH);
 		}
 	}
-	else
-	{
-		pNewMesh->pSubMeshes = nullptr;
-	}
 
-	pNewMesh->NumSubMesh = NumSubMeshes;
-
-	m_Meshes.push_back(pNewMesh);
+	return TRUE;
 }

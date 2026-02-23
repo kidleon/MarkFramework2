@@ -300,6 +300,9 @@ lb_error:
 				}
 			}
 
+			if (fbx_scene->model->meshes)
+				free(fbx_scene->model->meshes);
+
 			free(fbx_scene->model);
 		}
 
@@ -361,11 +364,14 @@ void fbx_unload(struct FBX_SCENE* scene)
 					if (submesh->indices)
 						free(submesh->indices);
 				}
+
 				free(mesh->submeshes);
 			}
 		}
 
-		free(scene->model->meshes);
+		if (scene->model->meshes)
+			free(scene->model->meshes);
+
 		free(scene->model);
 		scene->model = NULL;
 	}
