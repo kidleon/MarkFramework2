@@ -2,13 +2,15 @@
 #define __FBX_LOADER_H__
 
 
+#define MAX_TEXTURE_FILENAME 256
+
 struct FBX_MATERIAL
 {
 	int32 id;
-	char diffuse[256];
-	char normal[256];
-	char specular[256];
-	char emissive[256];
+	char diffuse[MAX_TEXTURE_FILENAME];
+	char normal[MAX_TEXTURE_FILENAME];
+	char specular[MAX_TEXTURE_FILENAME];
+	char emissive[MAX_TEXTURE_FILENAME];
 	float color[4];
 };
 

@@ -9,6 +9,8 @@ interface IModelAsset;
 
 class Assets final : public IAssets
 {
+	friend class Mark3DImpl;
+
 public:
 	static HANDLE ID_GEN_HANDLE;
 
@@ -17,11 +19,6 @@ public:
 
 	BOOL Init(const char* szRootPath);
 	void Shutdown();
-
-	// IUNKNOWN interface
-	virtual long AddRef() final;
-	virtual long Release() final;
-	virtual long RefCnt() final;
 
 	// IAssets interface
 	virtual BOOL Load(const char* szRelativePath, ITextAsset** ppOut) final;
@@ -39,6 +36,11 @@ public:
 
 protected:
 	virtual ~Assets() noexcept;
+
+	// IUNKNOWN interface
+	virtual long AddRef() final;
+	virtual long Release() final;
+	virtual long RefCnt() final;
 
 private:
 	volatile long m_RefCnt = 1;

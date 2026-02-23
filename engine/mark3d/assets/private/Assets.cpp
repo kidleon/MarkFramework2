@@ -285,7 +285,7 @@ BOOL Assets::LoadAsync(const char* szRelativePath, ITexture2D** ppOut)
 
 BOOL Assets::Load(const char* szRelativePath, IModelAsset** ppOut)
 {
-	if (!szRelativePath || !(*ppOut)) return FALSE;
+	if (!szRelativePath || !ppOut) return FALSE;
 
 	ModelAsset* pModelAsset = CORE_NEW(ModelAsset)(idgen_getid(m_hIDGen));
 

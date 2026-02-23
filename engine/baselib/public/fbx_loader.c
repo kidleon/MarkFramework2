@@ -2,7 +2,6 @@
 #include "fbx_loader.h"
 
 #include "strings.h"
-#define UFBX_REAL_IS_FLOAT
 #include "ufbx.h"
 
 
@@ -31,7 +30,8 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 
 	if (0 < scene->materials.count)
 	{
-		fbx_scene->num_materials = scene->materials.count;
+		size_t mat_count = scene->materials.count;
+		fbx_scene->num_materials = mat_count;
 		fbx_scene->materials = (struct FBX_MATERIAL*)malloc(sizeof(struct FBX_MATERIAL) * fbx_scene->num_materials);
 
 		if (!fbx_scene->materials)
@@ -43,28 +43,28 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 			struct FBX_MATERIAL* fbx_material = &fbx_scene->materials[i];
 
 			fbx_material->id = (int32)material->element_id;
-			fbx_material->color[0] = material->fbx.diffuse_color.value_vec4.x;
-			fbx_material->color[1] = material->fbx.diffuse_color.value_vec4.y;
-			fbx_material->color[2] = material->fbx.diffuse_color.value_vec4.z;
-			fbx_material->color[3] = material->fbx.diffuse_color.value_vec4.w;
+			fbx_material->color[0] = (float)material->fbx.diffuse_color.value_vec4.x;
+			fbx_material->color[1] = (float)material->fbx.diffuse_color.value_vec4.y;
+			fbx_material->color[2] = (float)material->fbx.diffuse_color.value_vec4.z;
+			fbx_material->color[3] = (float)material->fbx.diffuse_color.value_vec4.w;
 
 			if (material->fbx.diffuse_color.texture_enabled && material->fbx.diffuse_color.texture)
-				strcpy(fbx_material->diffuse, material->fbx.diffuse_color.texture->filename.data);
+				fstrlcpy(fbx_material->diffuse, material->fbx.diffuse_color.texture->filename.data, MAX_TEXTURE_FILENAME);
 			else
 				fbx_material->diffuse[0] = '\0';
 
 			if (material->fbx.normal_map.texture_enabled && material->fbx.normal_map.texture)
-				strcpy(fbx_material->normal, material->fbx.normal_map.texture->filename.data);
+				fstrlcpy(fbx_material->normal, material->fbx.normal_map.texture->filename.data, MAX_TEXTURE_FILENAME);
 			else
 				fbx_material->normal[0] = '\0';
 
 			if (material->fbx.specular_color.texture_enabled && material->fbx.specular_color.texture)
-				strcpy(fbx_material->specular, material->fbx.specular_color.texture->filename.data);
+				fstrlcpy(fbx_material->specular, material->fbx.specular_color.texture->filename.data, MAX_TEXTURE_FILENAME);
 			else
 				fbx_material->specular[0] = '\0';
 
 			if (material->fbx.emission_color.texture_enabled && material->fbx.emission_color.texture)
-				strcpy(fbx_material->emissive, material->fbx.emission_color.texture->filename.data);
+				fstrlcpy(fbx_material->emissive, material->fbx.emission_color.texture->filename.data, MAX_TEXTURE_FILENAME);
 			else
 				fbx_material->emissive[0] = '\0';
 		}
@@ -72,11 +72,15 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 
 	if (0 < scene->meshes.count)
 	{
-		struct FBX_MESH* meshes = (struct FBX_MESH*)malloc(sizeof(struct FBX_MESH) * scene->meshes.count);
-		if (!meshes)
-			goto lb_error;
+		fbx_scene->model = (struct FBX_MODEL*)malloc(sizeof(struct FBX_MODEL));
+		memset(fbx_scene->model, 0, sizeof(struct FBX_MODEL));
 
-		memset(meshes, 0, sizeof(struct FBX_MESH) * scene->meshes.count);
+		fbx_scene->model->meshes = (struct FBX_MESH*)malloc(sizeof(struct FBX_MESH) * scene->meshes.count);
+		fbx_scene->model->num_meshes = scene->meshes.count;
+
+		memset(fbx_scene->model->meshes, 0, sizeof(struct FBX_MESH) * scene->meshes.count);
+
+		struct FBX_MESH* meshes = fbx_scene->model->meshes;
 
 		for (size_t i = 0; i < scene->meshes.count; ++i)
 		{
@@ -97,9 +101,9 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 				for (size_t v = 0; v < mesh->num_vertices; ++v)
 				{
 					ufbx_vec3 position = ufbx_get_vertex_vec3(&mesh->vertex_position, v);
-					meshes[i].positions[v * 3 + 0] = position.x;
-					meshes[i].positions[v * 3 + 1] = position.y;
-					meshes[i].positions[v * 3 + 2] = position.z;
+					meshes[i].positions[v * 3 + 0] = (float)position.x;
+					meshes[i].positions[v * 3 + 1] = (float)position.y;
+					meshes[i].positions[v * 3 + 2] = (float)position.z;
 				}
 			}
 
@@ -112,9 +116,9 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 				for (size_t v = 0; v < mesh->num_vertices; ++v)
 				{
 					ufbx_vec3 normal = ufbx_get_vertex_vec3(&mesh->vertex_normal, v);
-					meshes[i].normals[v * 3 + 0] = normal.x;
-					meshes[i].normals[v * 3 + 1] = normal.y;
-					meshes[i].normals[v * 3 + 2] = normal.z;
+					meshes[i].normals[v * 3 + 0] = (float)normal.x;
+					meshes[i].normals[v * 3 + 1] = (float)normal.y;
+					meshes[i].normals[v * 3 + 2] = (float)normal.z;
 				}
 			}
 
@@ -127,10 +131,10 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 				for (size_t v = 0; v < mesh->num_vertices; ++v)
 				{
 					ufbx_vec4 color = ufbx_get_vertex_vec4(&mesh->vertex_color, v);
-					meshes[i].colors[v * 4 + 0] = color.x;
-					meshes[i].colors[v * 4 + 1] = color.y;
-					meshes[i].colors[v * 4 + 2] = color.z;
-					meshes[i].colors[v * 4 + 3] = color.w;
+					meshes[i].colors[v * 4 + 0] = (float)color.x;
+					meshes[i].colors[v * 4 + 1] = (float)color.y;
+					meshes[i].colors[v * 4 + 2] = (float)color.z;
+					meshes[i].colors[v * 4 + 3] = (float)color.w;
 				}
 			}
 
@@ -143,8 +147,8 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 				for (size_t v = 0; v < mesh->num_vertices; ++v)
 				{
 					ufbx_vec2 uv = ufbx_get_vertex_vec2(&mesh->vertex_uv, v);
-					meshes[i].uvs[v * 2 + 0] = uv.x;
-					meshes[i].uvs[v * 2 + 1] = uv.y;
+					meshes[i].uvs[v * 2 + 0] = (float)uv.x;
+					meshes[i].uvs[v * 2 + 1] = (float)uv.y;
 				}
 			}
 
@@ -157,9 +161,9 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 				for (size_t v = 0; v < mesh->num_vertices; ++v)
 				{
 					ufbx_vec3 tangent = ufbx_get_vertex_vec3(&mesh->vertex_tangent, v);
-					meshes[i].tangents[v * 3 + 0] = tangent.x;
-					meshes[i].tangents[v * 3 + 1] = tangent.y;
-					meshes[i].tangents[v * 3 + 2] = tangent.z;
+					meshes[i].tangents[v * 3 + 0] = (float)tangent.x;
+					meshes[i].tangents[v * 3 + 1] = (float)tangent.y;
+					meshes[i].tangents[v * 3 + 2] = (float)tangent.z;
 				}
 			}
 
@@ -172,15 +176,16 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 				for (size_t v = 0; v < mesh->num_vertices; ++v)
 				{
 					ufbx_vec3 binormal = ufbx_get_vertex_vec3(&mesh->vertex_bitangent, v);
-					meshes[i].binormal[v * 3 + 0] = binormal.x;
-					meshes[i].binormal[v * 3 + 1] = binormal.y;
-					meshes[i].binormal[v * 3 + 2] = binormal.z;
+					meshes[i].binormal[v * 3 + 0] = (float)binormal.x;
+					meshes[i].binormal[v * 3 + 1] = (float)binormal.y;
+					meshes[i].binormal[v * 3 + 2] = (float)binormal.z;
 				}
 			}
 
 			if (0 < mesh->material_parts.count)
 			{
 				struct FBX_SUBMESH* submeshes = (struct FBX_SUBMESH*)malloc(sizeof(struct FBX_SUBMESH) * mesh->material_parts.count);
+				memset(submeshes, 0, sizeof(struct FBX_SUBMESH) * mesh->material_parts.count);
 
 				for (size_t m = 0; m < mesh->material_parts.count; ++m)
 				{
@@ -229,6 +234,11 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 			}
 		}
 	}
+
+	if (scene)
+		ufbx_free_scene(scene);
+
+	return fbx_scene;
 
 lb_error:
 	if (fbx_scene)
@@ -330,6 +340,7 @@ void fbx_unload(struct FBX_SCENE* scene)
 			}
 		}
 
+		free(scene->model->meshes);
 		free(scene->model);
 		scene->model = NULL;
 	}

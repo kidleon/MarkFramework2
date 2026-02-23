@@ -159,6 +159,8 @@ BOOL Mark3DImpl::GetAssetsInterface(IAssets** ppOut)
 
 BOOL Mark3DImpl::GetRenderSystemInterface(IRenderSystem** ppOut)
 {
+	if (!ppOut) return FALSE;
+
 	(*ppOut) = m_pRenderSystem;
 
 	if (m_pRenderSystem)

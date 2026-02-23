@@ -45,6 +45,14 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	ISceneNode* pSceneNode = nullptr;
 	m_pMark3D->CreateSceneNode(pScene, "MainNode", &pSceneNode);
 	m_pMark3D->ReleaseSceneNode(pSceneNode);
+
+	IAssets* pAssets = nullptr;
+	m_pMark3D->GetAssetsInterface(&pAssets);
+
+	IModelAsset* pModelAsset = nullptr;
+	pAssets->Load("assets/model/ogre/m_ogre00.FBX", &pModelAsset);
+
+	
 	
 
 	/*
