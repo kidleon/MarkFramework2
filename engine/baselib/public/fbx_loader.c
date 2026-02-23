@@ -2,6 +2,7 @@
 #include "fbx_loader.h"
 
 #include "strings.h"
+#include "os_file.h"
 #include "ufbx.h"
 
 
@@ -49,22 +50,46 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 			fbx_material->color[3] = (float)material->fbx.diffuse_color.value_vec4.w;
 
 			if (material->fbx.diffuse_color.texture_enabled && material->fbx.diffuse_color.texture)
-				fstrlcpy(fbx_material->diffuse, material->fbx.diffuse_color.texture->filename.data, MAX_TEXTURE_FILENAME);
+			{
+				get_filename(
+					material->fbx.diffuse_color.texture->filename.data,
+					fbx_material->diffuse,
+					MAX_TEXTURE_FILENAME
+				);
+			}
 			else
 				fbx_material->diffuse[0] = '\0';
 
 			if (material->fbx.normal_map.texture_enabled && material->fbx.normal_map.texture)
-				fstrlcpy(fbx_material->normal, material->fbx.normal_map.texture->filename.data, MAX_TEXTURE_FILENAME);
+			{
+				get_filename(
+					material->fbx.normal_map.texture->filename.data,
+					fbx_material->normal,
+					MAX_TEXTURE_FILENAME
+				);
+			}
 			else
 				fbx_material->normal[0] = '\0';
 
 			if (material->fbx.specular_color.texture_enabled && material->fbx.specular_color.texture)
-				fstrlcpy(fbx_material->specular, material->fbx.specular_color.texture->filename.data, MAX_TEXTURE_FILENAME);
+			{
+				get_filename(
+					material->fbx.specular_color.texture->filename.data,
+					fbx_material->specular,
+					MAX_TEXTURE_FILENAME
+				);
+			}
 			else
 				fbx_material->specular[0] = '\0';
 
 			if (material->fbx.emission_color.texture_enabled && material->fbx.emission_color.texture)
-				fstrlcpy(fbx_material->emissive, material->fbx.emission_color.texture->filename.data, MAX_TEXTURE_FILENAME);
+			{
+				get_filename(
+					material->fbx.emission_color.texture->filename.data,
+					fbx_material->emissive,
+					MAX_TEXTURE_FILENAME
+				);
+			}
 			else
 				fbx_material->emissive[0] = '\0';
 		}

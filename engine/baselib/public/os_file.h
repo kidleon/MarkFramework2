@@ -130,4 +130,18 @@ MARK_BASELIB_C_API BOOL delete_file(
 );
 
 
+/**
+* @brief 파일 전체 경로에서 파일명과 확장자를 포함한 값을 얻어옵니다.
+* @param path 전체 경로
+* @param filename 파일명을 저장할 버퍼
+* @param size 버퍼 크기
+* @return 성공시 TRUE, 실패시 FALSE
+*/
+MARK_BASELIB_C_API BOOL get_filename(
+	const char* path,
+	char* filename,
+	size_t size
+);
+
+
 #endif // __OS_FILE_H__

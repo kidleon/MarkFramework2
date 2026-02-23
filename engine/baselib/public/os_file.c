@@ -268,3 +268,48 @@ BOOL delete_file(
 	return (unlink(filename) == 0) ? TRUE : FALSE;
 #endif // __TARGET_COMPILER_MSC
 }
+
+BOOL get_filename(
+	const char* path,
+	char* buffer,
+	size_t size
+)
+{
+	const char* last_sep;
+	const char* filename;
+	size_t name_len;
+
+	if (!path || !buffer || size == 0) {
+		return FALSE;
+	}
+
+	// '/' 또는 '\' 중 가장 마지막 위치를 찾는다 
+	last_sep = NULL;
+	{
+		const char* p = path;
+		while (*p != '\0') {
+			if (*p == '/' || *p == '\\') {
+				last_sep = p;
+			}
+			p++;
+		}
+	}
+
+	// 구분자 다음 문자부터가 파일명 
+	filename = (last_sep != NULL) ? (last_sep + 1) : path;
+
+	//* 파일명이 비어 있는 경우 ("/path/to/dir/" 같은 형태)
+	if (*filename == '\0') {
+		return FALSE;
+	}
+
+	name_len = strlen(filename);
+
+	if (name_len >= size)
+		return FALSE;
+
+	memcpy(buffer, filename, name_len + 1); // null terminator 포함 복사 
+
+	return TRUE;
+
+}
