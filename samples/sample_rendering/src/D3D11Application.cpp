@@ -52,8 +52,6 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	IModelAsset* pModelAsset = nullptr;
 	pAssets->Load("assets/model/ogre/m_ogre00.FBX", &pModelAsset);
 
-	
-	
 
 	/*
 	if (!m_pMark3D->GetRenderSystemInterface(&m_pRenderSystem))

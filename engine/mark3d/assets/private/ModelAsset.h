@@ -18,12 +18,7 @@ public:
 		FLOAT3* pTangents;
 		FLOAT3* pBinormals;
 		
-		size_t NumPositions;
-		size_t NumNormals;
-		size_t NumTexCoords;
-		size_t NumColors;
-		size_t NumTangents;
-		size_t NumBinormals;
+		size_t NumVertices;
 
 		// SubMesh별 인덱스 데이터
 		struct SubMesh
@@ -36,32 +31,6 @@ public:
 
 		SubMesh* pSubMeshes; // SubMesh 배열
 		size_t NumSubMesh;
-
-		~Mesh() noexcept
-		{
-			if (pPositions)
-				CORE_SYS_FREE(pPositions);
-			if (pNormals)
-				CORE_SYS_FREE(pNormals);
-			if (pTexCoords)
-				CORE_SYS_FREE(pTexCoords);
-			if (pColors)
-				CORE_SYS_FREE(pColors);
-			if (pTangents)
-				CORE_SYS_FREE(pTangents);
-			if (pBinormals)
-				CORE_SYS_FREE(pBinormals);
-			if (pSubMeshes)
-			{
-				for (size_t i = 0; i < NumSubMesh; i++)
-				{
-					if (pSubMeshes[i].pIndices)
-						CORE_SYS_FREE(pSubMeshes[i].pIndices);
-				}
-				CORE_SYS_FREE(pSubMeshes);
-			}
-		}
-
 	};
 
 	struct Material
@@ -93,23 +62,14 @@ public:
 	virtual size_t GetNumMesh() const noexcept final;
 	virtual size_t GetNumSubMesh(int32 MeshIndex) noexcept final;
 
+	virtual size_t GetNumVertices(int32 MeshIndex) const noexcept final;
+
 	virtual FLOAT3* GetPositions(int32 MeshIndex) noexcept final;
-	virtual size_t GetNumPositions(int32 MeshIndex) const noexcept final;
-
 	virtual FLOAT3* GetNormals(int32 MeshIndex) noexcept final;
-	virtual size_t GetNumNormals(int32 MeshIndex) const noexcept final;
-
 	virtual FLOAT2* GetTexCoords(int32 MeshIndex) noexcept final;
-	virtual size_t GetNumTexCoords(int32 MeshIndex) const noexcept final;
-
 	virtual FLOAT4* GetColor(int32 MeshIndex) noexcept final;
-	virtual size_t GetNumColor(int32 MeshIndex) const noexcept final;
-
 	virtual FLOAT3* GetTangent(int32 MeshIndex) noexcept final;
-	virtual size_t GetNumTangent(int32 MeshIndex) const noexcept final;
-
 	virtual FLOAT3* GetBinormal(int32 MeshIndex) noexcept final;
-	virtual size_t GetNumBinormal(int32 MeshIndex) const noexcept final;
 
 	virtual uint32* GetIndices(int32 MeshIndex, int32 SubMeshIndex) noexcept final;
 	virtual size_t GetNumIndices(int32 MeshIndex) const noexcept final;
@@ -133,8 +93,10 @@ private:
 	LOAD_STAT m_LoadStat = LOAD_STAT::NOT_LOADED;
 
 	UINT32 m_ModelAttrib = 0;
-	Mesh* m_pMeshes;
-	Material* m_pMaterials;
+	size_t m_NumMeshes = 0;
+	size_t m_NumMaterials = 0;
+	Mesh* m_pMeshes = nullptr;
+	Material* m_pMaterials = nullptr;
 
 };
 

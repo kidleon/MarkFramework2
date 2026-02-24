@@ -60,6 +60,11 @@ public:
 		interlock_store_l((long*)&m_LoadStat, (long)loadStat, MEMORY_ORDER_RELAXED);
 	}
 
+	__FORCEINLINE void INL_SetLoadStat(LOAD_STAT LoadStat) noexcept
+	{
+		interlock_store_l((long*)&m_LoadStat, (long)LoadStat, MEMORY_ORDER_RELAXED);
+	}
+
 private:
 	volatile long m_RefCnt = 1;
 #if defined(__TARGET_OS_WINDOWS)

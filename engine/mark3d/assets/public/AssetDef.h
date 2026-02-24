@@ -179,6 +179,13 @@ struct IModelAsset : public IAsset
 	virtual size_t GetNumSubMesh(int32 MeshIndex) noexcept = 0;
 
 	/**
+	* @brief 버텍스 개수 반환
+	* @param MeshIndex 메쉬 인덱스
+	* @return 버텍스 위치 개수
+	*/
+	virtual size_t GetNumVertices(int32 MeshIndex) const noexcept = 0;
+
+	/**
 	* @brief 버텍스 위치 배열 반환
 	* @param MeshIndex 메쉬 인덱스
 	* @return 버텍스 위치 배열 포인터
@@ -188,25 +195,11 @@ struct IModelAsset : public IAsset
 	virtual FLOAT3* GetPositions(int32 MeshIndex) noexcept = 0;
 
 	/**
-	* @brief 버텍스 위치 개수 반환
-	* @param MeshIndex 메쉬 인덱스
-	* @return 버텍스 위치 개수
-	*/
-	virtual size_t GetNumPositions(int32 MeshIndex) const noexcept = 0;
-
-	/**
 	* @brief 버텍스 법선 배열 반환
 	* @param MeshIndex 메쉬 인덱스
 	* @return 버텍스 법선 배열 포인터
 	*/
 	virtual FLOAT3* GetNormals(int32 MeshIndex) noexcept = 0;
-
-	/**
-	* @brief 버텍스 법선 개수 반환
-	* @param MeshIndex 메쉬 인덱스
-	* @return 버텍스 법선 개수
-	*/
-	virtual size_t GetNumNormals(int32 MeshIndex) const noexcept = 0;
 
 	/**
 	* @brief 버텍스 텍스처 좌표 배열 반환
@@ -215,21 +208,12 @@ struct IModelAsset : public IAsset
 	*/
 	virtual FLOAT2* GetTexCoords(int32 MeshIndex) noexcept = 0;
 
-	/**
-	* @brief 버텍스 텍스처 좌표 개수 반환
-	* @param MeshIndex 메쉬 인덱스
-	* @return 버텍스 텍스처 좌표 개수
-	*/
-	virtual size_t GetNumTexCoords(int32 MeshIndex) const noexcept = 0;
 
 	virtual FLOAT4* GetColor(int32 MeshIndex) noexcept = 0;
-	virtual size_t GetNumColor(int32 MeshIndex) const noexcept = 0;
 
 	virtual FLOAT3* GetTangent(int32 MeshIndex) noexcept = 0;
-	virtual size_t GetNumTangent(int32 MeshIndex) const noexcept = 0;
 
 	virtual FLOAT3* GetBinormal(int32 MeshIndex) noexcept = 0;
-	virtual size_t GetNumBinormal(int32 MeshIndex) const noexcept = 0;
 
 	virtual uint32* GetIndices(int32 MeshIndex, int32 SubMeshIndex) noexcept = 0;
 	virtual size_t GetNumIndices(int32 MeshIndex) const noexcept = 0;

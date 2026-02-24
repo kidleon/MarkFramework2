@@ -29,7 +29,8 @@ struct FBX_MESH
 	float* uvs;
 	float* colors;
 	float* tangents;
-	float* binormal;
+	float* binormals;
+	size_t num_vertices;
 
 	size_t num_submesh;
 	struct FBX_SUBMESH* submeshes;
@@ -50,9 +51,9 @@ struct FBX_SCENE
 	struct FBX_MODEL* model;
 };
 
-MARK_BASELIB_C_API struct FBX_SCENE* fbx_load(void* data, size_t size);
+MARK_BASELIB_C_API struct FBX_SCENE* fbx_load(HANDLE temp_alloc_handle, void* data, size_t size);
 
-MARK_BASELIB_C_API void fbx_unload(struct FBX_SCENE* scene);
+//MARK_BASELIB_C_API void fbx_unload(struct FBX_SCENE* scene);
 
 
 #endif // __FBX_LOADER_H__

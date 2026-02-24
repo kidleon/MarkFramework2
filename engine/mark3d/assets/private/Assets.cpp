@@ -17,7 +17,6 @@
 #include "AsyncAssetOp.h"
 
 
-
 constexpr static UINT32 MIN_ID_COUNT = 1;
 constexpr static UINT32 MAX_ID_COUNT = 200000;
 constexpr static size_t THREAD_POOL_SIZE = 4;
@@ -67,7 +66,7 @@ BOOL Assets::Init(const char* szRootPath)
 	m_hIDGen = idgen_create(MIN_ID_COUNT, MAX_ID_COUNT);
 	Assets::ID_GEN_HANDLE = m_hIDGen;
 
-	m_hSyncLoadTempPool = temppool_create(1024 * 8192, FALSE);
+	m_hSyncLoadTempPool = temppool_create(1024 * 1024 * 20, FALSE); // 20MB 크기의 동기 로드용 임시 풀 생성
 
 	m_Initialized = TRUE;
 
@@ -185,6 +184,8 @@ BOOL Assets::LoadAsync(const char* szRelativePath, IBinaryAsset** ppOut)
 	BinaryAsset* pBinaryAsset = CORE_NEW(BinaryAsset)(idgen_getid(m_hIDGen));
 	(*ppOut) = pBinaryAsset;
 
+	pBinaryAsset->INL_SetLoadStat(LOAD_STAT::LOADING);
+
 	AsyncAssetOp* pArg = (AsyncAssetOp*)CORE_POOL_ALLOC(sizeof(AsyncAssetOp));
 	fstrlcpy(pArg->szRelativePath, szRelativePath, sizeof(pArg->szRelativePath));
 
@@ -195,7 +196,7 @@ BOOL Assets::LoadAsync(const char* szRelativePath, IBinaryAsset** ppOut)
 
 	threadpool_add_task_arg(
 		m_hThreadPool,
-		AsyncLoadTextAssetFromFileSystem,
+		AsyncLoadBinaryAssetFromFileSystem,
 		(void*)pArg
 	);
 
@@ -288,6 +289,7 @@ BOOL Assets::Load(const char* szRelativePath, IModelAsset** ppOut)
 	if (!szRelativePath || !ppOut) return FALSE;
 
 	ModelAsset* pModelAsset = CORE_NEW(ModelAsset)(idgen_getid(m_hIDGen));
+	pModelAsset->INL_SetLoadStat(LOAD_STAT::LOADING);
 
 	BOOL result = LoadModelFromFBX(
 		m_hSyncLoadTempPool,
@@ -302,6 +304,10 @@ BOOL Assets::Load(const char* szRelativePath, IModelAsset** ppOut)
 		*ppOut = nullptr;
 		return FALSE;
 	}
+
+	temppool_clear(m_hSyncLoadTempPool);
+
+	pModelAsset->INL_SetLoadStat(LOAD_STAT::LOADED);
 
 	*ppOut = pModelAsset;
 	

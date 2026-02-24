@@ -33,7 +33,7 @@ BOOL LoadModelFromFBX(
 
 	pDataStream->Read(pBuffer, streamSize);
 
-	FBX_SCENE* fbx_scene = fbx_load(pBuffer, streamSize);
+	FBX_SCENE* fbx_scene = fbx_load(hTempPool, pBuffer, streamSize);
 	if (!fbx_scene)
 	{
 		SYS_LOG_E("Failed to load FBX scene from file: %s", szRelativePath);
@@ -41,7 +41,9 @@ BOOL LoadModelFromFBX(
 		return FALSE;
 	}
 
-	fbx_unload(fbx_scene);
+	pModelAsset->LoadFromFBX(fbx_scene);
+
+	//fbx_unload(fbx_scene);
 	
 
 	return TRUE;

@@ -11,7 +11,50 @@ ModelAsset::ModelAsset(UINT64 ID)
 
 ModelAsset::~ModelAsset() noexcept
 {
-	m_Meshes.clear();
+	if (m_pMaterials)
+	{
+		CORE_SYS_FREE(m_pMaterials);
+		m_pMaterials = nullptr;
+	}
+
+	if (m_pMeshes)
+	{
+		for (size_t i = 0; i < m_NumMeshes; i++)
+		{
+			Mesh& mesh = m_pMeshes[i];
+
+			if (mesh.pPositions)
+				CORE_SYS_FREE(mesh.pPositions);
+
+			if (mesh.pNormals)
+				CORE_SYS_FREE(mesh.pNormals);
+
+			if (mesh.pTexCoords)
+				CORE_SYS_FREE(mesh.pTexCoords);
+
+			if (mesh.pColors)
+				CORE_SYS_FREE(mesh.pColors);
+
+			if (mesh.pTangents)
+				CORE_SYS_FREE(mesh.pTangents);
+
+			if (mesh.pBinormals)
+				CORE_SYS_FREE(mesh.pBinormals);
+
+			if (mesh.pSubMeshes)
+			{
+				for (size_t j = 0; j < mesh.NumSubMesh; j++)
+				{
+					if (mesh.pSubMeshes[j].pIndices)
+						CORE_SYS_FREE(mesh.pSubMeshes[j].pIndices);
+				}
+				CORE_SYS_FREE(mesh.pSubMeshes);
+			}
+		}
+
+		CORE_SYS_FREE(m_pMeshes);
+		m_pMeshes = nullptr;
+	}
 }
 
 long ModelAsset::AddRef()
@@ -57,134 +100,98 @@ UINT32 ModelAsset::GetModelAttrib() const noexcept
 
 size_t ModelAsset::GetNumMesh() const noexcept
 {
-	return m_Meshes.size();
+	return m_NumMeshes;
 }
 
 size_t ModelAsset::GetNumSubMesh(int32 MeshIndex) noexcept
 {
-	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
+	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_NumMeshes)
 		return 0;
-	return m_Meshes[MeshIndex].NumSubMesh;
+	return m_pMeshes[MeshIndex].NumSubMesh;
+}
+
+size_t ModelAsset::GetNumVertices(int32 MeshIndex) const noexcept
+{
+	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_NumMeshes)
+		return 0;
+	return m_pMeshes[MeshIndex].NumVertices;
 }
 
 FLOAT3* ModelAsset::GetPositions(int32 MeshIndex) noexcept
 {
-	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
+	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_NumMeshes)
 		return nullptr;
-	return m_Meshes[MeshIndex].pPositions;
-}
-
-size_t ModelAsset::GetNumPositions(int32 MeshIndex) const noexcept
-{
-	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
-		return 0;
-	return m_Meshes[MeshIndex].NumPositions;
+	return m_pMeshes[MeshIndex].pPositions;
 }
 
 FLOAT3* ModelAsset::GetNormals(int32 MeshIndex) noexcept
 {
-	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
+	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_NumMeshes)
 		return nullptr;
-	return m_Meshes[MeshIndex].pNormals;
-}
-
-size_t ModelAsset::GetNumNormals(int32 MeshIndex) const noexcept
-{
-	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
-		return 0;
-	return m_Meshes[MeshIndex].NumNormals;
+	return m_pMeshes[MeshIndex].pNormals;
 }
 
 FLOAT2* ModelAsset::GetTexCoords(int32 MeshIndex) noexcept
 {
-	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
+	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_NumMeshes)
 		return nullptr;
-	return m_Meshes[MeshIndex].pTexCoords;
-}
-
-size_t ModelAsset::GetNumTexCoords(int32 MeshIndex) const noexcept
-{
-	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
-		return 0;
-	return m_Meshes[MeshIndex].NumTexCoords;
+	return m_pMeshes[MeshIndex].pTexCoords;
 }
 
 FLOAT4* ModelAsset::GetColor(int32 MeshIndex) noexcept
 {
-	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
+	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_NumMeshes)
 		return nullptr;
-	return m_Meshes[MeshIndex].pColors;
-}
-
-size_t ModelAsset::GetNumColor(int32 MeshIndex) const noexcept
-{
-	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
-		return 0;
-	return m_Meshes[MeshIndex].NumColors;
+	return m_pMeshes[MeshIndex].pColors;
 }
 
 FLOAT3* ModelAsset::GetTangent(int32 MeshIndex) noexcept
 {
-	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
+	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_NumMeshes)
 		return nullptr;
-	return m_Meshes[MeshIndex].pTangents;
-}
-
-size_t ModelAsset::GetNumTangent(int32 MeshIndex) const noexcept
-{
-	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
-		return 0;
-	return m_Meshes[MeshIndex].NumTangents;
+	return m_pMeshes[MeshIndex].pTangents;
 }
 
 FLOAT3* ModelAsset::GetBinormal(int32 MeshIndex) noexcept
 {
-	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
+	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_NumMeshes)
 		return nullptr;
 
-	return m_Meshes[MeshIndex].pBinormals;
-}
-
-size_t ModelAsset::GetNumBinormal(int32 MeshIndex) const noexcept
-{
-	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
-		return 0;
-
-	return m_Meshes[MeshIndex].NumBinormals;
+	return m_pMeshes[MeshIndex].pBinormals;
 }
 
 uint32* ModelAsset::GetIndices(int32 MeshIndex, int32 SubMeshIndex) noexcept
 {
-	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
+	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_NumMeshes)
 		return nullptr;
 
-	if (SubMeshIndex < 0 || static_cast<size_t>(SubMeshIndex) >= m_Meshes[MeshIndex].NumSubMesh)
+	if (SubMeshIndex < 0 || static_cast<size_t>(SubMeshIndex) >= m_pMeshes[MeshIndex].NumSubMesh)
 		return nullptr;
 
-	return m_Meshes[MeshIndex].pSubMeshes[SubMeshIndex].pIndices;
+	return m_pMeshes[MeshIndex].pSubMeshes[SubMeshIndex].pIndices;
 }
 
 size_t ModelAsset::GetNumIndices(int32 MeshIndex) const noexcept
 {
-	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
+	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_NumMeshes)
 		return 0;
 
 	size_t TotalIndices = 0;
-	for (size_t i = 0; i < m_Meshes[MeshIndex].NumSubMesh; i++)
-		TotalIndices += m_Meshes[MeshIndex].pSubMeshes[i].NumIndices;
+	for (size_t i = 0; i < m_pMeshes[MeshIndex].NumSubMesh; i++)
+		TotalIndices += m_pMeshes[MeshIndex].pSubMeshes[i].NumIndices;
 
 	return TotalIndices;
 }
 
 size_t ModelAsset::GetNumIndices(int32 MeshIndex, int32 SubMeshIndex) const noexcept
 {
-	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_Meshes.size())
+	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_NumMeshes)
 		return 0;
 
-	if (SubMeshIndex < 0 || static_cast<size_t>(SubMeshIndex) >= m_Meshes[MeshIndex].NumSubMesh)
+	if (SubMeshIndex < 0 || static_cast<size_t>(SubMeshIndex) >= m_pMeshes[MeshIndex].NumSubMesh)
 		return 0;
 
-	return m_Meshes[MeshIndex].pSubMeshes[SubMeshIndex].NumIndices;
+	return m_pMeshes[MeshIndex].pSubMeshes[SubMeshIndex].NumIndices;
 }
 
 
@@ -194,19 +201,104 @@ BOOL ModelAsset::LoadFromFBX(const FBX_SCENE* fbx_scene) noexcept
 		return FALSE;
 
 	m_ModelAttrib = 0;
-	m_Materials.clear();
-	m_Meshes.clear();
 
 	if (fbx_scene->num_materials)
 	{
 		m_ModelAttrib |= static_cast<uint32>(MODEL_ATTRIB::MATERIAL);
+
+		m_pMaterials = (Material*)CORE_SYS_ALLOC(sizeof(Material) * fbx_scene->num_materials);
+		memset(m_pMaterials, 0, sizeof(Material) * fbx_scene->num_materials);
+
+		for (size_t i = 0; i < fbx_scene->num_materials; i++)
+		{
+			const FBX_MATERIAL& fbx_material = fbx_scene->materials[i];
+
+			Material& material = m_pMaterials[i];
+			material.ID = fbx_material.id;
+			fstrlcpy(material.Diffuse, fbx_material.diffuse, sizeof(material.Diffuse));
+			fstrlcpy(material.Normal, fbx_material.normal, sizeof(material.Normal));
+			fstrlcpy(material.Specular, fbx_material.specular, sizeof(material.Specular));
+			fstrlcpy(material.Emissive, fbx_material.emissive, sizeof(material.Emissive));
+			memcpy(material.Color.v, fbx_material.color, sizeof(float) * 4);
+		}
 	}
 
 	if (fbx_scene->model)
 	{
-		if (fbx_scene->model->num_meshes)
+		if (fbx_scene->model->meshes)
 		{
 			m_ModelAttrib |= static_cast<uint32>(MODEL_ATTRIB::MESH);
+
+			m_pMeshes = (Mesh*)CORE_SYS_ALLOC(sizeof(Mesh) * fbx_scene->model->num_meshes);
+			memset(m_pMeshes, 0, sizeof(Mesh) * fbx_scene->model->num_meshes);
+
+			for (size_t i = 0; i < fbx_scene->model->num_meshes; i++)
+			{
+				const FBX_MESH& fbx_mesh = fbx_scene->model->meshes[i];
+
+				Mesh& mesh = m_pMeshes[i];
+				fstrlcpy(mesh.szName, fbx_mesh.name, sizeof(mesh.szName));
+
+				mesh.NumVertices = fbx_mesh.num_vertices;
+
+				if (fbx_mesh.positions)
+				{
+					mesh.pPositions = (FLOAT3*)CORE_SYS_ALLOC(sizeof(FLOAT3) * mesh.NumVertices);
+					memcpy(mesh.pPositions, fbx_mesh.positions, sizeof(FLOAT3) * mesh.NumVertices);
+				}
+
+				if (fbx_mesh.normals)
+				{
+					mesh.pNormals = (FLOAT3*)CORE_SYS_ALLOC(sizeof(FLOAT3) * mesh.NumVertices);
+					memcpy(mesh.pNormals, fbx_mesh.normals, sizeof(FLOAT3) * mesh.NumVertices);
+				}
+
+				if (fbx_mesh.colors)
+				{
+					mesh.pColors = (FLOAT4*)CORE_SYS_ALLOC(sizeof(FLOAT4) * mesh.NumVertices);
+					memcpy(mesh.pColors, fbx_mesh.colors, sizeof(FLOAT4) * mesh.NumVertices);
+				}
+
+				if (fbx_mesh.uvs)
+				{
+					mesh.pTexCoords = (FLOAT2*)CORE_SYS_ALLOC(sizeof(FLOAT2) * mesh.NumVertices);
+					memcpy(mesh.pTexCoords, fbx_mesh.uvs, sizeof(FLOAT2) * mesh.NumVertices);
+				}
+
+				if (fbx_mesh.tangents)
+				{
+					mesh.pTangents = (FLOAT3*)CORE_SYS_ALLOC(sizeof(FLOAT3) * mesh.NumVertices);
+					memcpy(mesh.pTangents, fbx_mesh.tangents, sizeof(FLOAT3) * mesh.NumVertices);
+				}
+
+				if (fbx_mesh.binormals)
+				{
+					mesh.pBinormals = (FLOAT3*)CORE_SYS_ALLOC(sizeof(FLOAT3) * mesh.NumVertices);
+					memcpy(mesh.pBinormals, fbx_mesh.binormals, sizeof(FLOAT3) * mesh.NumVertices);
+				}
+
+				if (fbx_mesh.num_submesh)
+				{
+					mesh.NumSubMesh = fbx_mesh.num_submesh;
+					mesh.pSubMeshes = (Mesh::SubMesh*)CORE_SYS_ALLOC(sizeof(Mesh::SubMesh) * fbx_mesh.num_submesh);
+					memset(mesh.pSubMeshes, 0, sizeof(Mesh::SubMesh) * fbx_mesh.num_submesh);
+
+					for (size_t j = 0; j < fbx_mesh.num_submesh; j++)
+					{
+						const FBX_MESH::FBX_SUBMESH& fbx_submesh = fbx_mesh.submeshes[j];
+						Mesh::SubMesh& submesh = mesh.pSubMeshes[j];
+						submesh.MaterialID = fbx_submesh.material_id;
+						submesh.NumIndices = fbx_submesh.num_indices;
+						if (fbx_submesh.indices)
+						{
+							submesh.pIndices = (uint32*)CORE_SYS_ALLOC(sizeof(uint32) * submesh.NumIndices);
+							memcpy(submesh.pIndices, fbx_submesh.indices, sizeof(uint32) * submesh.NumIndices);
+						}
+					}
+					
+				}
+
+			}
 		}
 	}
 

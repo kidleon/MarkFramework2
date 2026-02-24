@@ -4,9 +4,10 @@
 #include "strings.h"
 #include "os_file.h"
 #include "ufbx.h"
+#include "temp_pool.h"
 
 
-struct FBX_SCENE* fbx_load(void* data, size_t size)
+struct FBX_SCENE* fbx_load(HANDLE temp_alloc_handle, void* data, size_t size)
 {
 	ufbx_load_opts load_opts;
 	memset(&load_opts, 0, sizeof(ufbx_load_opts));
@@ -23,7 +24,8 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 	if (!scene)
 		return NULL;
 
-	struct FBX_SCENE* fbx_scene = (struct FBX_SCENE*)malloc(sizeof(struct FBX_SCENE));
+	//struct FBX_SCENE* fbx_scene = (struct FBX_SCENE*)malloc(sizeof(struct FBX_SCENE));
+	struct FBX_SCENE* fbx_scene = (struct FBX_SCENE*)temppool_alloc(temp_alloc_handle, sizeof(struct FBX_SCENE));
 	if (!fbx_scene)
 		goto lb_error;
 
@@ -33,7 +35,8 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 	{
 		size_t mat_count = scene->materials.count;
 		fbx_scene->num_materials = mat_count;
-		fbx_scene->materials = (struct FBX_MATERIAL*)malloc(sizeof(struct FBX_MATERIAL) * fbx_scene->num_materials);
+		//fbx_scene->materials = (struct FBX_MATERIAL*)malloc(sizeof(struct FBX_MATERIAL) * fbx_scene->num_materials);
+		fbx_scene->materials = (struct FBX_MATERIAL*)temppool_alloc(temp_alloc_handle, sizeof(struct FBX_MATERIAL) * fbx_scene->num_materials);
 
 		if (!fbx_scene->materials)
 			goto lb_error;
@@ -97,10 +100,12 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 
 	if (0 < scene->meshes.count)
 	{
-		fbx_scene->model = (struct FBX_MODEL*)malloc(sizeof(struct FBX_MODEL));
+		//fbx_scene->model = (struct FBX_MODEL*)malloc(sizeof(struct FBX_MODEL));
+		fbx_scene->model = (struct FBX_MODEL*)temppool_alloc(temp_alloc_handle, sizeof(struct FBX_MODEL));
 		memset(fbx_scene->model, 0, sizeof(struct FBX_MODEL));
 
-		fbx_scene->model->meshes = (struct FBX_MESH*)malloc(sizeof(struct FBX_MESH) * scene->meshes.count);
+		//fbx_scene->model->meshes = (struct FBX_MESH*)malloc(sizeof(struct FBX_MESH) * scene->meshes.count);
+		fbx_scene->model->meshes = (struct FBX_MESH*)temppool_alloc(temp_alloc_handle, sizeof(struct FBX_MESH) * scene->meshes.count);
 		fbx_scene->model->num_meshes = scene->meshes.count;
 
 		memset(fbx_scene->model->meshes, 0, sizeof(struct FBX_MESH) * scene->meshes.count);
@@ -117,9 +122,12 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 			if (!mesh->num_vertices)
 				continue;
 
+			meshes[i].num_vertices = mesh->num_vertices;
+
 			if (mesh->vertex_position.exists)
 			{
-				meshes[i].positions = (float*)malloc(sizeof(float) * 3 * mesh->num_vertices);
+				//meshes[i].positions = (float*)malloc(sizeof(float) * 3 * mesh->num_vertices);
+				meshes[i].positions = (float*)temppool_alloc(temp_alloc_handle, sizeof(float) * 3 * mesh->num_vertices);
 				if (!meshes[i].positions)
 					goto lb_error;
 
@@ -134,7 +142,8 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 
 			if (mesh->vertex_normal.exists)
 			{
-				meshes[i].normals = (float*)malloc(sizeof(float) * 3 * mesh->num_vertices);
+				//meshes[i].normals = (float*)malloc(sizeof(float) * 3 * mesh->num_vertices);
+				meshes[i].normals = (float*)temppool_alloc(temp_alloc_handle, sizeof(float) * 3 * mesh->num_vertices);
 				if (!meshes[i].normals)
 					goto lb_error;
 
@@ -149,7 +158,8 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 
 			if (mesh->vertex_color.exists)
 			{
-				meshes[i].colors = (float*)malloc(sizeof(float) * 4 * mesh->num_vertices);
+				//meshes[i].colors = (float*)malloc(sizeof(float) * 4 * mesh->num_vertices);
+				meshes[i].colors = (float*)temppool_alloc(temp_alloc_handle, sizeof(float) * 4 * mesh->num_vertices);
 				if (!meshes[i].colors)
 					goto lb_error;
 
@@ -165,7 +175,8 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 
 			if (mesh->vertex_uv.exists)
 			{
-				meshes[i].uvs = (float*)malloc(sizeof(float) * 2 * mesh->num_vertices);
+				//meshes[i].uvs = (float*)malloc(sizeof(float) * 2 * mesh->num_vertices);
+				meshes[i].uvs = (float*)temppool_alloc(temp_alloc_handle, sizeof(float) * 2 * mesh->num_vertices);
 				if (!meshes[i].uvs)
 					goto lb_error;
 
@@ -179,7 +190,8 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 
 			if (mesh->vertex_tangent.exists)
 			{
-				meshes[i].tangents = (float*)malloc(sizeof(float) * 3 * mesh->num_vertices);
+				//meshes[i].tangents = (float*)malloc(sizeof(float) * 3 * mesh->num_vertices);
+				meshes[i].tangents = (float*)temppool_alloc(temp_alloc_handle, sizeof(float) * 3 * mesh->num_vertices);
 				if (!meshes[i].tangents)
 					goto lb_error;
 
@@ -194,22 +206,24 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 
 			if (mesh->vertex_bitangent.exists)
 			{
-				meshes[i].binormal = (float*)malloc(sizeof(float) * 3 * mesh->num_vertices);
-				if (!meshes[i].binormal)
+				//meshes[i].binormal = (float*)malloc(sizeof(float) * 3 * mesh->num_vertices);
+				meshes[i].binormals = (float*)temppool_alloc(temp_alloc_handle, sizeof(float) * 3 * mesh->num_vertices);
+				if (!meshes[i].binormals)
 					goto lb_error;
 
 				for (size_t v = 0; v < mesh->num_vertices; ++v)
 				{
-					ufbx_vec3 binormal = ufbx_get_vertex_vec3(&mesh->vertex_bitangent, v);
-					meshes[i].binormal[v * 3 + 0] = (float)binormal.x;
-					meshes[i].binormal[v * 3 + 1] = (float)binormal.y;
-					meshes[i].binormal[v * 3 + 2] = (float)binormal.z;
+					ufbx_vec3 binormals = ufbx_get_vertex_vec3(&mesh->vertex_bitangent, v);
+					meshes[i].binormals[v * 3 + 0] = (float)binormals.x;
+					meshes[i].binormals[v * 3 + 1] = (float)binormals.y;
+					meshes[i].binormals[v * 3 + 2] = (float)binormals.z;
 				}
 			}
 
 			if (0 < mesh->material_parts.count)
 			{
-				struct FBX_SUBMESH* submeshes = (struct FBX_SUBMESH*)malloc(sizeof(struct FBX_SUBMESH) * mesh->material_parts.count);
+				//struct FBX_SUBMESH* submeshes = (struct FBX_SUBMESH*)malloc(sizeof(struct FBX_SUBMESH) * mesh->material_parts.count);
+				struct FBX_SUBMESH* submeshes = (struct FBX_SUBMESH*)temppool_alloc(temp_alloc_handle, sizeof(struct FBX_SUBMESH) * mesh->material_parts.count);
 				memset(submeshes, 0, sizeof(struct FBX_SUBMESH) * mesh->material_parts.count);
 
 				for (size_t m = 0; m < mesh->material_parts.count; ++m)
@@ -220,7 +234,8 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 
 					submeshes[m].material_id = (int32)material->element_id;
 					submeshes[m].num_indices = (int32)part->num_triangles * 3;
-					submeshes[m].indices = (uint32*)malloc(sizeof(uint32) * part->num_triangles * 3);
+					submeshes[m].indices = (uint32*)temppool_alloc(temp_alloc_handle, sizeof(uint32) * part->num_triangles * 3);
+					//submeshes[m].indices = (uint32*)malloc(sizeof(uint32) * part->num_triangles * 3);
 
 					int32 num_indices = 0;
 
@@ -266,6 +281,7 @@ struct FBX_SCENE* fbx_load(void* data, size_t size)
 	return fbx_scene;
 
 lb_error:
+	/*
 	if (fbx_scene)
 	{
 		if (fbx_scene->materials)
@@ -311,6 +327,7 @@ lb_error:
 
 		free(fbx_scene);
 	}
+	*/
 
 	if (scene)
 	{
@@ -321,6 +338,7 @@ lb_error:
 	return NULL;
 }
 
+/*
 void fbx_unload(struct FBX_SCENE* scene)
 {
 	if (!scene)
@@ -378,6 +396,7 @@ void fbx_unload(struct FBX_SCENE* scene)
 
 	free(scene);
 }
+*/
 
 /*
 /// Skin Weight와 Bone Index 추출

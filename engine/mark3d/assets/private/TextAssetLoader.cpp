@@ -75,6 +75,12 @@ void AsyncLoadTextAssetFromFileSystem(void* pArg)
 		pTextAsset
 	);
 
+	if (!result)
+	{
+		SYS_LOG_E("AsyncLoadTextAssetFromFileSystem - Failed to load text asset: %s", pAsyncOp->szRelativePath);
+		
+	}
+
 	pTextAsset->Release(); // 비동기 작업에서 증가시킨 참조 카운트 해제
 
 	CORE_POOL_FREE(pAsyncOp);
