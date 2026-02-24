@@ -147,20 +147,79 @@ enum class MODEL_ATTRIB : uint32
 	ANIMATION = 0x00000004,
 };
 
+/**
+* @brief 모델 자산 인터페이스, 3D 모델 데이터를 다루기 위한 기능 제공
+* @note 모델 자산은 하나 이상의 메쉬로 구성될 수 있으며, 각 메쉬는 여러 서브메쉬로 나뉠 수 있음
+* @note 각 메쉬는 위치, 법선, 텍스처 좌표, 색상, 탄젠트, 바이노멀 등의 버텍스 속성을 가질 수 있으며, 인덱스 버퍼를 통해 서브메쉬를 정의할 수 있음
+* @note 모델 자산은 모델링 소프트웨어에서 익스포트된 데이터를 기반으로 하며, 다양한 파일 형식을 지원할 수 있음 (예: OBJ, FBX, GLTF 등)
+* @note 모델 자산은 애니메이션 데이터를 포함할 수 있으며, 애니메이션은 스켈레탈 애니메이션과 모프 타겟 애니메이션으로 나뉠 수 있음
+* @note 모델 자산은 머티리얼 정보를 포함할 수 있으며, 머티리얼은 텍스처, 셰이더, 렌더링 상태 등의 정보를 가질 수 있음
+* @note 모델 자산은 로딩 시점에 필요한 버텍스 속성만 로드할 수 있으며, GetModelAttrib() 함수를 통해 현재 로드된 속성을 확인할 수 있음
+*/
 struct IModelAsset : public IAsset
 {
+	/**
+	* @brief 모델 속성 반환
+	* @return 모델 속성
+	* @note 반환 값은 MODEL_ATTRIB 열거형 값의 조합임
+	*/
 	virtual UINT32 GetModelAttrib() const noexcept = 0;
 
+	/**
+	* @brief 메쉬 개수 반환
+	* @return 메쉬 개수
+	*/
 	virtual size_t GetNumMesh() const noexcept = 0;
+
+	/**
+	* @brief 서브메쉬 개수 반환
+	* @param MeshIndex 메쉬 인덱스
+	* @return 서브메쉬 개수
+	*/
 	virtual size_t GetNumSubMesh(int32 MeshIndex) noexcept = 0;
 
+	/**
+	* @brief 버텍스 위치 배열 반환
+	* @param MeshIndex 메쉬 인덱스
+	* @return 버텍스 위치 배열 포인터
+	* @note 반환 값은 FLOAT3 배열 포인터임
+	* @note GetNumPositions() 함수를 통해 배열 크기를 확인할 수 있음
+	*/
 	virtual FLOAT3* GetPositions(int32 MeshIndex) noexcept = 0;
+
+	/**
+	* @brief 버텍스 위치 개수 반환
+	* @param MeshIndex 메쉬 인덱스
+	* @return 버텍스 위치 개수
+	*/
 	virtual size_t GetNumPositions(int32 MeshIndex) const noexcept = 0;
 
+	/**
+	* @brief 버텍스 법선 배열 반환
+	* @param MeshIndex 메쉬 인덱스
+	* @return 버텍스 법선 배열 포인터
+	*/
 	virtual FLOAT3* GetNormals(int32 MeshIndex) noexcept = 0;
+
+	/**
+	* @brief 버텍스 법선 개수 반환
+	* @param MeshIndex 메쉬 인덱스
+	* @return 버텍스 법선 개수
+	*/
 	virtual size_t GetNumNormals(int32 MeshIndex) const noexcept = 0;
 
+	/**
+	* @brief 버텍스 텍스처 좌표 배열 반환
+	* @param MeshIndex 메쉬 인덱스
+	* @return 버텍스 텍스처 좌표 배열 포인터
+	*/
 	virtual FLOAT2* GetTexCoords(int32 MeshIndex) noexcept = 0;
+
+	/**
+	* @brief 버텍스 텍스처 좌표 개수 반환
+	* @param MeshIndex 메쉬 인덱스
+	* @return 버텍스 텍스처 좌표 개수
+	*/
 	virtual size_t GetNumTexCoords(int32 MeshIndex) const noexcept = 0;
 
 	virtual FLOAT4* GetColor(int32 MeshIndex) noexcept = 0;
