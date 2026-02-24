@@ -14,6 +14,7 @@
 
 struct threadpool_task_t
 {
+    void (*task_func_temppool_arg)(HANDLE temp_pool_handle, void*);
 	void (*task_func_arg)(void*);
 	void (*task_func)();
 	void* arg;
@@ -42,6 +43,7 @@ struct threadpool_t
 	HANDLE task_available_event;
 	HANDLE shutdown_event;
 	HANDLE all_tasks_done_event;  // 모든 작업 완료 이벤트
+	HANDLE temp_pool_handle; // 작업에 필요한 임시 메모리 풀 핸들
 	volatile LONG shutdown;
 	volatile LONG pending_tasks;  // 대기 중인 작업 수
 	size_t num_thread;
@@ -187,6 +189,7 @@ unsigned __stdcall worker_thread(void* arg)
 {
     struct threadpool_t* pool = (struct threadpool_t*)arg;
 
+
     HANDLE events[2];
     events[0] = pool->task_available_event;
     events[1] = pool->shutdown_event;
@@ -236,7 +239,7 @@ inline BOOL is_valid_threadpool(struct threadpool_t* pool)
 }
 
 // 스레드 풀 생성
-HANDLE threadpool_create(size_t num_threads) 
+HANDLE threadpool_create(size_t num_threads)
 {
     struct threadpool_t* pool = (struct threadpool_t*)crt_malloc(sizeof(struct threadpool_t));
     if (!pool) 

@@ -225,7 +225,7 @@ BOOL ModelAsset::LoadFromFBX(const FBX_SCENE* fbx_scene) noexcept
 
 	if (fbx_scene->model)
 	{
-		if (fbx_scene->model->meshes)
+		if (fbx_scene->model->meshes && 0 < fbx_scene->model->num_meshes)
 		{
 			m_ModelAttrib |= static_cast<uint32>(MODEL_ATTRIB::MESH);
 

@@ -6,6 +6,7 @@
  * @brief Object Pool을 생성합니다. Object Pool은 고정된 사이즈의 객체를 관리하는데 사용됩니다.
  * @param block_size 객체의 크기를 지정합니다.
  * @param block_count 관리할 객체의 개수를 지정합니다.
+ * @param temppool_size Object Pool이 내부적으로 사용할 임시 풀의 크기를 지정합니다. 0으로 설정하면 임시 풀을 사용하지 않습니다.
  * @param thread_safe 멀티 스레드 환경에서 안전하게 동작하도록 설정합니다.
  * @return HANDLE 생성된 Object Pool의 핸들을 반환합니다. 실패시 NULL을 반환합니다.
  */

@@ -75,7 +75,10 @@ public:
 	virtual size_t GetNumIndices(int32 MeshIndex) const noexcept final;
 	virtual size_t GetNumIndices(int32 MeshIndex, int32 SubMeshIndex) const noexcept final;
 
-	__FORCEINLINE void INL_SetLoadStat(LOAD_STAT LoadStat) noexcept { m_LoadStat = LoadStat; }
+	__FORCEINLINE void INL_SetLoadStat(LOAD_STAT LoadStat) noexcept
+	{
+		interlock_store_l((long*)&m_LoadStat, (long)LoadStat, MEMORY_ORDER_RELAXED);
+	}
 
 	BOOL LoadFromFBX(const FBX_SCENE* fbx_scene) noexcept;
 
