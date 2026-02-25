@@ -34,7 +34,7 @@ public:
 	virtual BOOL Load(const char* szRelativePath, IModelAsset** ppOut) final;
 	virtual BOOL LoadAsync(const char* szRelativePath, IModelAsset** ppOut) final;
 
-protected:
+private:
 	virtual ~Assets() noexcept;
 
 	// IUNKNOWN interface

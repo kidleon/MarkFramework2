@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "thread_pool.h"
+#include "temp_pool.h"
 
 #if defined(__TARGET_OS_WINDOWS)
 #include <process.h>
@@ -43,7 +44,7 @@ struct threadpool_t
 	HANDLE task_available_event;
 	HANDLE shutdown_event;
 	HANDLE all_tasks_done_event;  // 모든 작업 완료 이벤트
-	HANDLE temp_pool_handle; // 작업에 필요한 임시 메모리 풀 핸들
+	size_t temp_pool_size; // 작업 함수에 전달할 임시 풀 크기
 	volatile LONG shutdown;
 	volatile LONG pending_tasks;  // 대기 중인 작업 수
 	size_t num_thread;
@@ -189,10 +190,16 @@ unsigned __stdcall worker_thread(void* arg)
 {
     struct threadpool_t* pool = (struct threadpool_t*)arg;
 
-
     HANDLE events[2];
     events[0] = pool->task_available_event;
     events[1] = pool->shutdown_event;
+
+	HANDLE temp_pool_handle = NULL;
+
+    if (pool->temp_pool_size)
+    {
+        temp_pool_handle = temppool_create(pool->temp_pool_size, FALSE);
+    }
 
     for(;;)
     {
@@ -211,6 +218,12 @@ unsigned __stdcall worker_thread(void* arg)
             if (NULL != task->task_func_arg)
                 task->task_func_arg(task->arg);
 
+            if (NULL != task->task_func_temppool_arg)
+            {
+				temppool_clear(temp_pool_handle); // 작업(Task)마다 임시 풀 초기화
+                task->task_func_temppool_arg(temp_pool_handle, task->arg);
+            }
+
             memset(task, 0, sizeof(struct threadpool_task_t));
             pool_release_task(task);
 
@@ -226,6 +239,11 @@ unsigned __stdcall worker_thread(void* arg)
             ResetEvent(pool->task_available_event);
     }
 
+    if (temp_pool_handle)
+    {
+        temppool_destroy(temp_pool_handle);
+    }
+
     return 0;
 }
 
@@ -239,7 +257,7 @@ inline BOOL is_valid_threadpool(struct threadpool_t* pool)
 }
 
 // 스레드 풀 생성
-HANDLE threadpool_create(size_t num_threads)
+HANDLE threadpool_create(size_t num_threads, size_t temp_pool_size)
 {
     struct threadpool_t* pool = (struct threadpool_t*)crt_malloc(sizeof(struct threadpool_t));
     if (!pool) 
@@ -250,6 +268,7 @@ HANDLE threadpool_create(size_t num_threads)
 #endif // _DEBUG
 
     pool->num_thread = num_threads;
+	pool->temp_pool_size = temp_pool_size;
     pool->threads = (HANDLE*)crt_malloc(sizeof(HANDLE) * num_threads);
     pool->shutdown = 0;
     pool->pending_tasks = 0;
@@ -327,6 +346,48 @@ int threadpool_add_task(
 
     return 1;
 }
+
+
+int threadpool_add_task_temppool_arg(
+    HANDLE pool,
+    void (*task_func_temppool_arg)(HANDLE temp_pool_handle, void*),
+    void* arg
+)
+{
+    struct threadpool_t* thread_pool = (struct threadpool_t*)pool;
+
+    if (!is_valid_threadpool(thread_pool))
+        return -1;
+
+    if (thread_pool->shutdown) 
+        return 0;
+
+    struct threadpool_task_t* task = pool_alloc_task();
+    if (!task)
+        return 0;
+
+    task->task_func_temppool_arg = task_func_temppool_arg;
+    task->arg = arg;
+    task->task_func_arg = NULL;
+    task->task_func = NULL;
+    task->next = NULL;
+
+    increment_pending_tasks(thread_pool); // 작업 추가 전 카운터 증가
+
+    if (!queue_push(&thread_pool->task_queue, task))
+    {
+        pool_release_task(task);
+        decrement_pending_tasks(thread_pool);  // 실패 시 카운터 감소
+        return 0;
+    }
+
+    // 작업이 추가되었음을 알림
+    SetEvent(thread_pool->task_available_event);
+
+	return 1;
+
+}
+
 
 // 작업 추가
 int threadpool_add_task_arg(

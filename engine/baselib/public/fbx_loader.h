@@ -14,15 +14,15 @@ struct FBX_MATERIAL
 	float color[4];
 };
 
+struct FBX_SUBMESH
+{
+	uint32* indices;
+	int32 num_indices;
+	int32 material_id;
+};
+
 struct FBX_MESH
 {
-	struct FBX_SUBMESH
-	{
-		uint32* indices;
-		int32 num_indices;
-		int32 material_id;
-	};
-
 	char name[64];
 	float* positions;
 	float* normals;
@@ -34,7 +34,6 @@ struct FBX_MESH
 
 	size_t num_submesh;
 	struct FBX_SUBMESH* submeshes;
-
 };
 
 struct FBX_MODEL

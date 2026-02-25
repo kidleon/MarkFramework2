@@ -111,15 +111,11 @@ struct IMark3D : public IUNKNOWN
 
 	/**
 	* @brief 새로운 Model 객체를 생성합니다.
-	* @param ModelName 생성할 Model 이름 해시
-	* @param MaxVertex Model이 가질 수 있는 최대 버텍스 개수
-	* @param MaxIndex Model이 가질 수 있는 최대 인덱스 개수
+	* @param pModelAsset 생성할 Model의 자산 포인터
 	* @param ppOut 생성된 Model 객체의 포인터를 받을 IModel** 포인터
 	* @return 성공시 TRUE, 실패시 FALSE
 	*/
-	virtual BOOL CreateModel(NameHash ModelName, size_t MaxVertex, size_t MaxIndex, IModel** ppOut) = 0;
-
-	
+	virtual BOOL CreateModel(IModelAsset* pModelAsset, IModel** ppOut) = 0;
 
 };
 

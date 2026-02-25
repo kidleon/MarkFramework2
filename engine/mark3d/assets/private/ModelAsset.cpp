@@ -206,6 +206,7 @@ BOOL ModelAsset::LoadFromFBX(const FBX_SCENE* fbx_scene) noexcept
 	{
 		m_ModelAttrib |= static_cast<uint32>(MODEL_ATTRIB::MATERIAL);
 
+		m_NumMaterials = fbx_scene->num_materials;
 		m_pMaterials = (Material*)CORE_SYS_ALLOC(sizeof(Material) * fbx_scene->num_materials);
 		memset(m_pMaterials, 0, sizeof(Material) * fbx_scene->num_materials);
 
@@ -229,6 +230,7 @@ BOOL ModelAsset::LoadFromFBX(const FBX_SCENE* fbx_scene) noexcept
 		{
 			m_ModelAttrib |= static_cast<uint32>(MODEL_ATTRIB::MESH);
 
+			m_NumMeshes = fbx_scene->model->num_meshes;
 			m_pMeshes = (Mesh*)CORE_SYS_ALLOC(sizeof(Mesh) * fbx_scene->model->num_meshes);
 			memset(m_pMeshes, 0, sizeof(Mesh) * fbx_scene->model->num_meshes);
 
@@ -285,7 +287,7 @@ BOOL ModelAsset::LoadFromFBX(const FBX_SCENE* fbx_scene) noexcept
 
 					for (size_t j = 0; j < fbx_mesh.num_submesh; j++)
 					{
-						const FBX_MESH::FBX_SUBMESH& fbx_submesh = fbx_mesh.submeshes[j];
+						const FBX_SUBMESH& fbx_submesh = fbx_mesh.submeshes[j];
 						Mesh::SubMesh& submesh = mesh.pSubMeshes[j];
 						submesh.MaterialID = fbx_submesh.material_id;
 						submesh.NumIndices = fbx_submesh.num_indices;
@@ -295,9 +297,7 @@ BOOL ModelAsset::LoadFromFBX(const FBX_SCENE* fbx_scene) noexcept
 							memcpy(submesh.pIndices, fbx_submesh.indices, sizeof(uint32) * submesh.NumIndices);
 						}
 					}
-					
 				}
-
 			}
 		}
 	}

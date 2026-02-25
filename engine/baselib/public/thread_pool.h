@@ -5,10 +5,12 @@
 /**
 * @brief 스레드 풀 생성
 * @param num_threads 스레드 풀에 생성할 스레드 수
+* @param temp_pool_size 작업에 필요한 임시 메모리 풀 크기 (바이트 단위)
 * @return 생성된 스레드 풀 핸들, 실패시 NULL
 */
 MARK_BASELIB_C_API HANDLE threadpool_create(
-	size_t num_threads
+	size_t num_threads,
+	size_t temp_pool_size
 );
 
 /**
@@ -27,6 +29,19 @@ MARK_BASELIB_C_API void threadpool_destroy(
 */
 MARK_BASELIB_C_API int threadpool_cancel_all_tasks(
 	HANDLE pool
+);
+
+/**
+* @brief 스레드 풀에 작업 추가 (임시 풀 인자 포함)
+* @param pool 작업을 추가할 스레드 풀 핸들
+* @param task_func_temppool_arg 실행할 작업 함수 포인터 (임시 풀 핸들 인자 포함)
+* @param arg 작업 함수에 전달할 인자 포인터
+* @return 성공시 0, 실패시 음수 오류 코드
+*/
+MARK_BASELIB_C_API int threadpool_add_task_temppool_arg(
+	HANDLE pool,
+	void (*task_func_temppool_arg)(HANDLE temp_pool_handle, void*),
+	void* arg
 );
 
 /**

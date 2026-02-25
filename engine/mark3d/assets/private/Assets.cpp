@@ -61,12 +61,14 @@ BOOL Assets::Init(const char* szRootPath)
 {
 	if (m_Initialized) return TRUE;
 
+	constexpr size_t TEMP_POOL_SIZE = 1024 * 1024 * 20; // 20MB 크기의 임시 풀 생성
+
 	CreateOSFileSystem(szRootPath, &m_pFileSystem);
-	m_hThreadPool = threadpool_create(THREAD_POOL_SIZE);
+	m_hThreadPool = threadpool_create(THREAD_POOL_SIZE, TEMP_POOL_SIZE);
 	m_hIDGen = idgen_create(MIN_ID_COUNT, MAX_ID_COUNT);
 	Assets::ID_GEN_HANDLE = m_hIDGen;
 
-	m_hSyncLoadTempPool = temppool_create(1024 * 1024 * 20, FALSE); // 20MB 크기의 동기 로드용 임시 풀 생성
+	m_hSyncLoadTempPool = temppool_create(TEMP_POOL_SIZE, FALSE); // 20MB 크기의 동기 로드용 임시 풀 생성
 
 	m_Initialized = TRUE;
 
@@ -192,7 +194,7 @@ BOOL Assets::LoadAsync(const char* szRelativePath, IBinaryAsset** ppOut)
 	pArg->pFileSystem = m_pFileSystem;
 	pArg->pAsset = pBinaryAsset;
 
-	pBinaryAsset->AddRef(); // 비동기 작업에서 해제할 것이므로 참조 카운트 증가
+	pBinaryAsset->AddRef(); // 비동기 작업중 해제 할 수 있으므로 참조 카운트 증가
 
 	threadpool_add_task_arg(
 		m_hThreadPool,
@@ -286,7 +288,8 @@ BOOL Assets::LoadAsync(const char* szRelativePath, ITexture2D** ppOut)
 
 BOOL Assets::Load(const char* szRelativePath, IModelAsset** ppOut)
 {
-	if (!szRelativePath || !ppOut) return FALSE;
+	if (!szRelativePath || !ppOut)
+		return FALSE;
 
 	ModelAsset* pModelAsset = CORE_NEW(ModelAsset)(idgen_getid(m_hIDGen));
 	pModelAsset->INL_SetLoadStat(LOAD_STAT::LOADING);
@@ -316,5 +319,27 @@ BOOL Assets::Load(const char* szRelativePath, IModelAsset** ppOut)
 
 BOOL Assets::LoadAsync(const char* szRelativePath, IModelAsset** ppOut)
 {
+	if (!szRelativePath || !ppOut)
+		return FALSE;
+
+	ModelAsset* pModelAsset = CORE_NEW(ModelAsset)(idgen_getid(m_hIDGen));
+	(*ppOut) = pModelAsset;
+
+	pModelAsset->INL_SetLoadStat(LOAD_STAT::LOADING);
+
+	AsyncAssetOp* pArg = (AsyncAssetOp*)CORE_POOL_ALLOC(sizeof(AsyncAssetOp));
+	fstrlcpy(pArg->szRelativePath, szRelativePath, sizeof(pArg->szRelativePath));
+
+	pArg->pFileSystem = m_pFileSystem;
+	pArg->pAsset = pModelAsset;
+
+	pModelAsset->AddRef(); // 비동기 작업중 해제 할 수 있으므로 참조 카운트 증가
+
+	threadpool_add_task_temppool_arg(
+		m_hThreadPool,
+		AsyncLoadModelFromFBX,
+		(void*)pArg
+	);
+
 	return TRUE;
 }

@@ -35,7 +35,8 @@ public:
 	virtual IWorld* GetWorld() noexcept final;
 
 	// SceneObject's APIs
-	virtual BOOL CreateModel(NameHash ModelName, size_t MaxVertex, size_t MaxIndex, IModel** ppOut) final;
+	virtual BOOL CreateModel(IModelAsset* pModelAsset, IModel** ppOut) final;
+	
 
 private:
 	virtual ~Mark3DImpl() noexcept;

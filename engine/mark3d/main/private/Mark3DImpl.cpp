@@ -151,9 +151,6 @@ BOOL Mark3DImpl::GetAssetsInterface(IAssets** ppOut)
 
 	(*ppOut) = m_pAssets;
 
-	if (m_pAssets)
-		m_pAssets->AddRef();
-
 	return TRUE;
 }
 
@@ -237,9 +234,13 @@ IWorld* Mark3DImpl::GetWorld() noexcept
 	return m_pWorld;
 }
 
-BOOL Mark3DImpl::CreateModel(NameHash ModelName, size_t MaxVertex, size_t MaxIndex, IModel** ppOut)
+BOOL Mark3DImpl::CreateModel(IModelAsset* pModelAsset, IModel** ppOut)
 {
-	// Implementation here
+	if (!pModelAsset || !ppOut)
+		return FALSE;
+
+	
+
 	return TRUE;
 }
 

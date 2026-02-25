@@ -208,15 +208,48 @@ struct IModelAsset : public IAsset
 	*/
 	virtual FLOAT2* GetTexCoords(int32 MeshIndex) noexcept = 0;
 
-
+	/**
+	* @brief 버텍스 색상 배열 반환
+	* @param MeshIndex 메쉬 인덱스
+	* @return 버텍스 색상 배열 포인터
+	*/
 	virtual FLOAT4* GetColor(int32 MeshIndex) noexcept = 0;
 
+	/**
+	* @brief 버텍스 탄젠트 배열 반환
+	* @param MeshIndex 메쉬 인덱스
+	* @return 버텍스 탄젠트 배열 포인터
+	*/
 	virtual FLOAT3* GetTangent(int32 MeshIndex) noexcept = 0;
 
+	/**
+	* @brief 버텍스 바이노멀 배열 반환
+	* @param MeshIndex 메쉬 인덱스
+	* @return 버텍스 바이노멀 배열 포인터
+	*/
 	virtual FLOAT3* GetBinormal(int32 MeshIndex) noexcept = 0;
 
+	/**
+	* @brief 인덱스 배열 반환
+	* @param MeshIndex 메쉬 인덱스
+	* @param SubMeshIndex 서브메쉬 인덱스
+	* @return 인덱스 배열 포인터
+	*/
 	virtual uint32* GetIndices(int32 MeshIndex, int32 SubMeshIndex) noexcept = 0;
+
+	/**
+	* @brief 인덱스 개수 반환
+	* @param MeshIndex 메쉬 인덱스
+	* @return 인덱스 개수
+	*/
 	virtual size_t GetNumIndices(int32 MeshIndex) const noexcept = 0;
+
+	/**
+	* @brief 인덱스 개수 반환
+	* @param MeshIndex 메쉬 인덱스
+	* @param SubMeshIndex 서브메쉬 인덱스
+	* @return 인덱스 개수
+	*/
 	virtual size_t GetNumIndices(int32 MeshIndex, int32 SubMeshIndex) const noexcept = 0;
 
 };
@@ -224,7 +257,7 @@ struct IModelAsset : public IAsset
 /**
 * @brief 자산 관리자 인터페이스
 */
-interface IAssets : public IUNKNOWN
+interface IAssets : public IPRIVATE_UNKNOWN
 {
 	/**
 	* @brief 텍스트 자산 로드
