@@ -6,6 +6,9 @@
 #include "RenderSystemFactory.h"
 #include "World.h"
 #include "Scene.h"
+#include "ModelAsset.h"
+#include "Model.h"
+
 
 void CoreMemoryReporter(
 	const char* type,
@@ -239,7 +242,12 @@ BOOL Mark3DImpl::CreateModel(IModelAsset* pModelAsset, IModel** ppOut)
 	if (!pModelAsset || !ppOut)
 		return FALSE;
 
-	
+	ModelAsset* pModelAssetImpl = static_cast<ModelAsset*>(pModelAsset);
+
+	uint32 ModelAttrib = pModelAssetImpl->INL_GetModelAttrib();
+	if (ModelAttrib & (uint32)MODEL_ATTRIB::MESH)
+	{
+	}
 
 	return TRUE;
 }

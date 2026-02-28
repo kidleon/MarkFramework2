@@ -103,6 +103,13 @@ size_t ModelAsset::GetNumMesh() const noexcept
 	return m_NumMeshes;
 }
 
+const char* ModelAsset::GetMeshName(int32 MeshIndex) const noexcept
+{
+	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_NumMeshes)
+		return nullptr;
+	return m_pMeshes[MeshIndex].szName;
+}
+
 size_t ModelAsset::GetNumSubMesh(int32 MeshIndex) noexcept
 {
 	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_NumMeshes)

@@ -60,6 +60,9 @@ public:
 	virtual UINT32 GetModelAttrib() const noexcept final;
 
 	virtual size_t GetNumMesh() const noexcept final;
+
+	virtual const char* GetMeshName(int32 MeshIndex) const noexcept final;
+
 	virtual size_t GetNumSubMesh(int32 MeshIndex) noexcept final;
 
 	virtual size_t GetNumVertices(int32 MeshIndex) const noexcept final;
@@ -79,6 +82,8 @@ public:
 	{
 		interlock_store_l((long*)&m_LoadStat, (long)LoadStat, MEMORY_ORDER_RELAXED);
 	}
+
+	__FORCEINLINE UINT32 INL_GetModelAttrib() const noexcept { return m_ModelAttrib; }
 
 	BOOL LoadFromFBX(const FBX_SCENE* fbx_scene) noexcept;
 

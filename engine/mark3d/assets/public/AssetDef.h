@@ -172,6 +172,13 @@ struct IModelAsset : public IAsset
 	virtual size_t GetNumMesh() const noexcept = 0;
 
 	/**
+	* @brief 메쉬 이름 반환
+	* @param MeshIndex 메쉬 인덱스
+	* @return 메쉬 이름 문자열 포인터
+	*/
+	virtual const char* GetMeshName(int32 MeshIndex) const noexcept = 0;
+
+	/**
 	* @brief 서브메쉬 개수 반환
 	* @param MeshIndex 메쉬 인덱스
 	* @return 서브메쉬 개수

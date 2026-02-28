@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "Model.h"
+#include "ModelAsset.h"
 
 
 Model::Model(UINT64 ID, IPrimitiveBuffer* pPrimitiveBuffer)
@@ -290,4 +291,79 @@ size_t Model::CalulateVertexStride(uint32 VertexFormat) const noexcept
 	if (VertexFormat & (uint32)VERTEX_FORMAT::TEXCOORD4)
 		VertexStride += sizeof(FLOAT4);
 	return VertexStride;
+}
+
+BOOL Model::CreateMesh(IModelAsset* pModelAsset) noexcept
+{
+	if (!pModelAsset)
+	{
+		SYS_LOG_E("Model::CreateMesh - Invalid model asset pointer.");
+		return FALSE;
+	}
+
+	ModelAsset* pModelAssetImpl = static_cast<ModelAsset*>(pModelAsset);
+	
+
+	uint32 ModelAttrib = pModelAssetImpl->INL_GetModelAttrib();
+
+	if (ModelAttrib & (uint32)MODEL_ATTRIB::MESH)
+	{
+		SYS_LOG_E("Model::CreateMesh - Model asset does not contain mesh data.");)
+		return FALSE;
+	}
+	
+	size_t NumMesh = pModelAsset->GetNumMesh();
+	for (size_t i = 0; i < NumMesh; i++)
+	{
+		size_t NumVertex = pModelAsset->GetNumVertices((int32)i);
+		size_t NumIndex = pModelAsset->GetNumIndices((int32)i);
+
+		FLOAT3* pPositions = pModelAsset->GetPositions((int32)i);
+		FLOAT3* pNormals = pModelAsset->GetNormals((int32)i);
+		FLOAT2* pTexCoords = pModelAsset->GetTexCoords((int32)i);
+		FLOAT4* pColors = pModelAsset->GetColor((int32)i);
+		FLOAT3* pTangents = pModelAsset->GetTangent((int32)i);
+		FLOAT3* pBinormals = pModelAsset->GetBinormal((int32)i);
+
+		UINT32 VertexFormat = 0;
+		if (pPositions)
+			VertexFormat |= (uint32)VERTEX_FORMAT::POSITION;
+
+		if (pNormals)
+			VertexFormat |= (uint32)VERTEX_FORMAT::NORMAL;
+
+		if (pTexCoords)
+			VertexFormat |= (uint32)VERTEX_FORMAT::TEXCOORD;
+
+		if (pColors)
+			VertexFormat |= (uint32)VERTEX_FORMAT::COLOR;
+
+		if (pTangents)
+			VertexFormat |= (uint32)VERTEX_FORMAT::TANGENT;
+
+		if (pBinormals)
+			VertexFormat |= (uint32)VERTEX_FORMAT::BINORMAL;
+
+		const char* szMeshName = pModelAsset->GetMeshName((int32)i);
+		int32 MeshIndex = AddMesh(NameHash(szMeshName), PRIMITIVE_TYPE::TRIANGLE_LIST, VertexFormat, sizeof(uint32), NumVertex, NumIndex);
+		if (-1 == MeshIndex)
+		{
+			SYS_LOG_E("Model::CreateMesh - Failed to add mesh.");
+			return;
+		}
+
+		UpdateVertex
+
+
+		UpdateVertex(MeshIndex, pModelAsset->GetPositions((int32)i), NumVertex * sizeof(FLOAT3));
+		UpdateVertex(MeshIndex, pModelAsset->GetNormals((int32)i), NumVertex * sizeof(FLOAT3));
+		UpdateVertex(MeshIndex, pModelAsset->GetTexCoords((int32)i), NumVertex * sizeof(FLOAT2));
+		UpdateVertex(MeshIndex, pModelAsset->GetColor((int32)i), NumVertex * sizeof(FLOAT4));
+		UpdateVertex(MeshIndex, pModelAsset->GetTangent((int32)i), NumVertex * sizeof(FLOAT3));
+		UpdateVertex(MeshIndex, pModelAsset->GetBinormal((int32)i), NumVertex * sizeof(FLOAT3));
+		for (size_t j = 0; j < pModelAsset->GetNumSubMesh((int32)i); j++)
+			UpdateIndex(MeshIndex, pModelAsset->GetIndices((int32)i, (int32)j), pModelAsset->GetNumIndices((int32)i, (int32)j) * sizeof(uint32));
+	}
+
+	return TRUE;
 }

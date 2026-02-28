@@ -46,6 +46,8 @@ public:
 
 	virtual size_t GetNumMesh() const noexcept final;
 
+	BOOL CreateMesh(IModelAsset* pModelAsset) noexcept;
+
 private:
 	Model() = delete;
 	virtual ~Model() noexcept;

@@ -108,6 +108,8 @@ private:
 	size_t m_VertexBufferSize = 0;
 	size_t m_IndexBufferSize = 0;
 	ID3D11Buffer* m_pD3D11VertexBuffer = nullptr;
+
+	ID3D11Buffer* m_pD3D11VertexBuffers[(size_t)VERTEX_FORMAT_INDEX::MAX] = {};
 	ID3D11Buffer* m_pD3D11IndexBuffer = nullptr;
 
 };

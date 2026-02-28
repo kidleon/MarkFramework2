@@ -72,8 +72,8 @@ void D3D11PrimitiveBuffer::ResetPrimitive() noexcept
 
 INT32 D3D11PrimitiveBuffer::AddPrimitive(
 	PRIMITIVE_TYPE PrimitiveType,
+	uint32 VertexFormat,
 	uint32 VertexCount,
-	uint32 VertexStride,
 	uint32 IndexCount,
 	uint32 IndexStride
 ) noexcept
