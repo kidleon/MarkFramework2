@@ -153,8 +153,7 @@ void D3D11RenderContext::SetPrimitiveBuffer(IPrimitiveBuffer* pPrimitiveBuffer)
 		m_pCurPrimitiveBuffer = static_cast<D3D11PrimitiveBuffer*>(pPrimitiveBuffer);
 		m_pCurPrimitiveBuffer->AddRef();
 
-		if (m_pCurPrimitiveBuffer->INL_IsDirtyVertexBuffer() || 
-			m_pCurPrimitiveBuffer->INL_IsDirtyIndexBuffer())
+		if (m_pCurPrimitiveBuffer->INL_IsDirtyBuffer())
 		{
 			D3D11_RESOURCE_COMMAND* pResCmd = (D3D11_RESOURCE_COMMAND*)stackpool_alloc(
 				m_RenderFrames[m_CurrentFrameIndex].CommandStackPool, 

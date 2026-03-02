@@ -246,8 +246,9 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, ID
 				InputElementDesc[i].SemanticIndex = 0;
 				InputElementDesc[i].SemanticName = "POSITION";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
-				AlignedOffset += sizeof(FLOAT3);
+				InputElementDesc[i].InputSlot = i;
+				//InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				//AlignedOffset += sizeof(FLOAT3);
 			} break;
 
 			case VERTEX_FORMAT::NORMAL:
@@ -255,8 +256,9 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, ID
 				InputElementDesc[i].SemanticIndex = 0;
 				InputElementDesc[i].SemanticName = "NORMAL";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
-				AlignedOffset += sizeof(FLOAT3);
+				InputElementDesc[i].InputSlot = i;
+				//InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				//AlignedOffset += sizeof(FLOAT3);
 			} break;
 
 			case VERTEX_FORMAT::TEXCOORD:
@@ -264,8 +266,9 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, ID
 				InputElementDesc[i].SemanticIndex = 0;
 				InputElementDesc[i].SemanticName = "TEXCOORD";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32_FLOAT;
-				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
-				AlignedOffset += sizeof(FLOAT2);
+				InputElementDesc[i].InputSlot = i;
+				//InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				//AlignedOffset += sizeof(FLOAT2);
 				TextureCoordCount++;
 			} break;
 
@@ -274,8 +277,9 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, ID
 				InputElementDesc[i].SemanticIndex = 0;
 				InputElementDesc[i].SemanticName = "COLOR";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
-				AlignedOffset += sizeof(FLOAT4);
+				InputElementDesc[i].InputSlot = i;
+				//InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				//AlignedOffset += sizeof(FLOAT4);
 			} break;
 
 			case VERTEX_FORMAT::TANGENT:
@@ -283,8 +287,9 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, ID
 				InputElementDesc[i].SemanticIndex = 0;
 				InputElementDesc[i].SemanticName = "TANGENT";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
-				AlignedOffset += sizeof(FLOAT3);
+				InputElementDesc[i].InputSlot = i;
+				//InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				//AlignedOffset += sizeof(FLOAT3);
 			} break;
 
 			case VERTEX_FORMAT::BINORMAL:
@@ -292,8 +297,9 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, ID
 				InputElementDesc[i].SemanticIndex = 0;
 				InputElementDesc[i].SemanticName = "BINORMAL";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32_FLOAT;
-				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
-				AlignedOffset += sizeof(FLOAT3);
+				InputElementDesc[i].InputSlot = i;
+				//InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				//AlignedOffset += sizeof(FLOAT3);
 			} break;
 
 			case VERTEX_FORMAT::BONE:
@@ -301,8 +307,9 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, ID
 				InputElementDesc[i].SemanticIndex = 0;
 				InputElementDesc[i].SemanticName = "BONE";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_UINT;
-				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
-				AlignedOffset += sizeof(UINT4);
+				InputElementDesc[i].InputSlot = i;
+				//InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				//AlignedOffset += sizeof(UINT4);
 			} break;
 
 			case VERTEX_FORMAT::WEIGHT:
@@ -310,8 +317,9 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, ID
 				InputElementDesc[i].SemanticIndex = 0;
 				InputElementDesc[i].SemanticName = "WEIGHT";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
-				AlignedOffset += sizeof(FLOAT4);
+				InputElementDesc[i].InputSlot = i;
+				//InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				//AlignedOffset += sizeof(FLOAT4);
 			} break;
 
 			case VERTEX_FORMAT::TEXCOORD1:
@@ -319,8 +327,9 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, ID
 				InputElementDesc[i].SemanticIndex = TextureCoordCount++;
 				InputElementDesc[i].SemanticName = "TEXCOORD1";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
-				AlignedOffset += sizeof(FLOAT4);
+				InputElementDesc[i].InputSlot = i;
+				//InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				//AlignedOffset += sizeof(FLOAT4);
 			} break;
 
 			case VERTEX_FORMAT::TEXCOORD2:
@@ -328,8 +337,9 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, ID
 				InputElementDesc[i].SemanticIndex = TextureCoordCount++;
 				InputElementDesc[i].SemanticName = "TEXCOORD2";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
-				AlignedOffset += sizeof(FLOAT4);
+				InputElementDesc[i].InputSlot = i;
+				//InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				//AlignedOffset += sizeof(FLOAT4);
 			} break;
 
 			case VERTEX_FORMAT::TEXCOORD3:
@@ -337,8 +347,9 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, ID
 				InputElementDesc[i].SemanticIndex = TextureCoordCount++;
 				InputElementDesc[i].SemanticName = "TEXCOORD3";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
-				AlignedOffset += sizeof(FLOAT4);
+				InputElementDesc[i].InputSlot = i;
+				//InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				//AlignedOffset += sizeof(FLOAT4);
 			} break;
 
 			case VERTEX_FORMAT::TEXCOORD4:
@@ -346,8 +357,9 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, ID
 				InputElementDesc[i].SemanticIndex = TextureCoordCount++;
 				InputElementDesc[i].SemanticName = "TEXCOORD4";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
-				AlignedOffset += sizeof(FLOAT4);
+				InputElementDesc[i].InputSlot = i;
+				//InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				//AlignedOffset += sizeof(FLOAT4);
 			} break;
 
 			case VERTEX_FORMAT::TEXCOORD5:
@@ -355,8 +367,9 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, ID
 				InputElementDesc[i].SemanticIndex = TextureCoordCount++;
 				InputElementDesc[i].SemanticName = "TEXCOORD5";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
-				AlignedOffset += sizeof(FLOAT4);
+				InputElementDesc[i].InputSlot = i;
+				//InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				//AlignedOffset += sizeof(FLOAT4);
 			} break;
 
 			case VERTEX_FORMAT::TEXCOORD6:
@@ -364,8 +377,9 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, ID
 				InputElementDesc[i].SemanticIndex = TextureCoordCount++;
 				InputElementDesc[i].SemanticName = "TEXCOORD6";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
-				AlignedOffset += sizeof(FLOAT4);
+				InputElementDesc[i].InputSlot = i;
+				//InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				//AlignedOffset += sizeof(FLOAT4);
 			} break;
 
 			case VERTEX_FORMAT::TEXCOORD7:
@@ -373,8 +387,9 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, ID
 				InputElementDesc[i].SemanticIndex = TextureCoordCount++;
 				InputElementDesc[i].SemanticName = "TEXCOORD7";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
-				AlignedOffset += sizeof(FLOAT4);
+				InputElementDesc[i].InputSlot = i;
+				//InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				//AlignedOffset += sizeof(FLOAT4);
 			} break;
 
 			case VERTEX_FORMAT::TEXCOORD8:
@@ -382,8 +397,9 @@ BOOL D3D11RenderDevice::CreateInputLayout(const D3D11_INPUTLAYOUT_DESC& Desc, ID
 				InputElementDesc[i].SemanticIndex = TextureCoordCount++;
 				InputElementDesc[i].SemanticName = "TEXCOORD8";
 				InputElementDesc[i].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-				InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
-				AlignedOffset += sizeof(FLOAT4);
+				InputElementDesc[i].InputSlot = i;
+				//InputElementDesc[i].AlignedByteOffset = static_cast<UINT>(AlignedOffset);
+				//AlignedOffset += sizeof(FLOAT4);
 			} break;
 		}
 	}

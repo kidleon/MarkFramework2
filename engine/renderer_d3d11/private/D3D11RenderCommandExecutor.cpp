@@ -14,6 +14,7 @@
 #include "D3D11RenderCommand.h"
 #include "D3D11PrimitiveBuffer.h"
 #include "D3D11InputLayoutCache.h"
+#include "D3D11Buffer.h"
 
 
 D3D11RenderCommandExecutor* D3D11RenderCommandExecutor::s_pInstance = nullptr;
@@ -83,6 +84,11 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 
 	// 리소스 커맨드 처리
 	ExcuteResourceCommands(pDeviceContext, pRenderFrame);
+
+	ID3D11Buffer* pVBs[(int)VERTEX_FORMAT_INDEX::MAX] = {};
+	UINT32 VB_Offsets[(int)VERTEX_FORMAT_INDEX::MAX] = {};
+	UINT32 VB_Strides[(int)VERTEX_FORMAT_INDEX::MAX] = {};
+	UINT32 VB_Count = 0;
 
 	for (size_t i = 0; i < pRenderFrame->NumRQs; ++i)
 	{
@@ -230,25 +236,25 @@ void D3D11RenderCommandExecutor::Execute() noexcept
 					continue;
 				}
 
-				ID3D11Buffer* pVB = m_PipelineState.pSetPB->INL_GetD3D11VertexBuffer();
-				ID3D11Buffer* pIB = m_PipelineState.pSetPB->INL_GetD3D11IndexBuffer();
+				m_PipelineState.pSetPB->ComputeBindVBs(pCmd->DrawPrimitiveIndex);
 
-				UINT32 VertexOffset = PrimitiveDesc.VertexOffset;
-				UINT32 IndexOffset = PrimitiveDesc.IndexOffset;
-
-				UINT32 VertexStride = PrimitiveDesc.VertexStride;
-				UINT32 IndexStride = PrimitiveDesc.IndexStride;
+				ID3D11Buffer** pVBs = m_PipelineState.pSetPB->INL_GetBindVBs();
+				UINT32* VB_Strides = m_PipelineState.pSetPB->INL_GetBindVBStrides();
+				UINT32* VB_Offsets = m_PipelineState.pSetPB->INL_GetBindVBOffsets();
+				UINT32 VB_Count = m_PipelineState.pSetPB->INL_GetBindVBCount();
 
 				pDeviceContext->IASetVertexBuffers(
 					0,
-					1,
-					&pVB,
-					&VertexStride,
-					&VertexOffset
+					VB_Count,
+					pVBs,
+					VB_Strides,
+					VB_Offsets
 				);
 
-				DXGI_FORMAT IndexFormat = (IndexStride == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
-				pDeviceContext->IASetIndexBuffer(pIB, IndexFormat, IndexOffset);
+				D3D11Buffer* pIB = m_PipelineState.pSetPB->INL_GetIB();
+
+				UINT32 IndexOffset = PrimitiveDesc.IndexStart * sizeof(UINT32);
+				pDeviceContext->IASetIndexBuffer(pIB->INL_GetD3D11Buffer(), DXGI_FORMAT_R32_UINT, IndexOffset);
 
 				D3D11_PRIMITIVE_TOPOLOGY D3D11PrimitiveTopology = D3D11_IMPL_PRIMITIVE_TOPOLOGY[(UINT32)PrimitiveDesc.PrimitiveType];
 				pDeviceContext->IASetPrimitiveTopology(D3D11PrimitiveTopology);
@@ -301,10 +307,9 @@ void D3D11RenderCommandExecutor::ExcuteResourceCommands(
 			case D3D11_RESOURCE_COMMAND::COMMAND_FUNC::UPDATE_PRIMITIVE_BUFFER: // 프리미티브 버퍼 GPU 업로드
 			{
 				D3D11PrimitiveBuffer* pPB = pResCmd->pPrimitiveBuffer;
-				if (pPB)
+				if (pPB && pPB->INL_IsDirtyBuffer())
 				{
-					pPB->UploadToGPU_VB(pDeviceContext);
-					pPB->UploadToGPU_IB(pDeviceContext);
+					pPB->UploadToGPU(pDeviceContext);
 				}
 			} break;
 			default:

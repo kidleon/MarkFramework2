@@ -40,7 +40,7 @@ long D3D11_BLOB::RefCnt()
 	return m_RefCnt;
 }
 
-void D3D11_BLOB::Update(void* pBuffer, size_t size)
+void D3D11_BLOB::Update(const void* pBuffer, size_t size)
 {
 	if(!pBuffer || size == 0)
 		return;
@@ -51,7 +51,7 @@ void D3D11_BLOB::Update(void* pBuffer, size_t size)
 	memcpy(m_pBuffer, pBuffer, size);
 }
 
-void D3D11_BLOB::Update(void* pBuffer, size_t size, size_t offset)
+void D3D11_BLOB::Update(const void* pBuffer, size_t size, size_t offset)
 {
 	if (!pBuffer || size == 0)
 		return;

@@ -36,7 +36,7 @@ D3D11BlobAllocator::D3D11BlobAllocator()
 		s_pInstance = this;
 }
 
-D3D11BlobAllocator::~D3D11BlobAllocator()
+D3D11BlobAllocator::~D3D11BlobAllocator() noexcept
 {
 	Shutdown();
 

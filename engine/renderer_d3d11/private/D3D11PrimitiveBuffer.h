@@ -2,73 +2,157 @@
 
 
 class D3D11_BLOB;
+class D3D11Buffer;
 
 class D3D11PrimitiveBuffer final : public IPrimitiveBuffer
 {
-	static constexpr size_t MAX_PRIMITIVES = 8;
-
+	static constexpr INT32 MAX_PRIMITIVES = 8;
 
 public:
 	struct PRIMITIVE_DESC
 	{
 		PRIMITIVE_TYPE PrimitiveType;
-		uint32 VertexOffset;
+		uint32 VertexStart;
 		uint32 VertexCount;
-		uint32 VertexStride;
-		uint32 IndexOffset;
+		uint32 IndexStart;
 		uint32 IndexCount;
-		uint32 IndexStride;
 	};
 
 	static PRIMITIVE_DESC INVALID_PRIMITIVE_DESC;
 
 public:
-	D3D11PrimitiveBuffer(
-		BUFFER_USAGE Usage,
-		ID3D11Buffer* pVertexBuffer,
-		ID3D11Buffer* pIndexBuffer,
-		size_t VertexBufferSize,
-		size_t IndexBufferSize
-	) noexcept;
-
 	// IUNKNOWN interface
 	virtual long AddRef() final;
 	virtual long Release() final;
 	virtual long RefCnt() final;
 
 	// IPrimitiveBuffer interface
-	virtual BUFFER_USAGE GetUsage() const noexcept final;
-
 	virtual void ResetPrimitive() noexcept final;
 
 	virtual INT32 AddPrimitive(
 		PRIMITIVE_TYPE PrimitiveType,
 		uint32 VertexCount,
-		uint32 VertexStride,
-		uint32 IndexCount,
-		uint32 IndexStride
+		uint32 IndexCount
 	) noexcept final;
 
 	virtual size_t GetNumPrimitives() const noexcept final;
 
-	virtual BOOL UpdateVertex(
+	virtual BOOL UpdatePosition(
 		int32 PrimitiveIndex,
-		const void* pVertexData,
-		size_t VertexSize
+		const FLOAT3* pPositions,
+		UINT32 PositionCount
+	) final;
+
+	virtual BOOL UpdateNormal(
+		int32 PrimitiveIndex,
+		const FLOAT3* pNormals,
+		UINT32 NormalCount
+	) final;
+
+	virtual BOOL UpdateColor(
+		int32 PrimitiveIndex,
+		const FLOAT4* pColors,
+		UINT32 ColorCount
+	) final;
+
+	virtual BOOL UpdateTexCoord0(
+		int32 PrimitiveIndex,
+		const FLOAT2* pTexCoords,
+		UINT32 TexCoordCount
+	) final;
+
+	virtual BOOL UpdateTangent(
+		int32 PrimitiveIndex,
+		const FLOAT3* pTangents,
+		UINT32 TangentCount
+	) final;
+
+	virtual BOOL UpdateBinormal(
+		int32 PrimitiveIndex,
+		const FLOAT3* pBinormal,
+		UINT32 BinormalCount
+	) final;
+
+	virtual BOOL UpdateBlendIndices(
+		int32 PrimitiveIndex,
+		const UINT4* pBlendIndices,
+		UINT32 BlendIndexCount
+	) final;
+
+	virtual BOOL UpdateBlendWeights(
+		int32 PrimitiveIndex,
+		const FLOAT4* pBlendWeights,
+		UINT32 BlendWeightCount
+	) final;
+
+	virtual BOOL UpdateTexCoord1(
+		int32 PrimitiveIndex,
+		const FLOAT4* pTexCoords,
+		UINT32 TexCoordCount
+	) final;
+
+	virtual BOOL UpdateTexCoord2(
+		int32 PrimitiveIndex,
+		const FLOAT4* pTexCoords,
+		UINT32 TexCoordCount
+	) final;
+
+	virtual BOOL UpdateTexCoord3(
+		int32 PrimitiveIndex,
+		const FLOAT4* pTexCoords,
+		UINT32 TexCoordCount
+	) final;
+
+	virtual BOOL UpdateTexCoord4(
+		int32 PrimitiveIndex,
+		const FLOAT4* pTexCoords,
+		UINT32 TexCoordCount
+	) final;
+
+	virtual BOOL UpdateTexCoord5(
+		int32 PrimitiveIndex,
+		const FLOAT4* pTexCoords,
+		UINT32 TexCoordCount
+	) final;
+
+	virtual BOOL UpdateTexCoord6(
+		int32 PrimitiveIndex,
+		const FLOAT4* pTexCoords,
+		UINT32 TexCoordCount
+	) final;
+
+	virtual BOOL UpdateTexCoord7(
+		int32 PrimitiveIndex,
+		const FLOAT4* pTexCoords,
+		UINT32 TexCoordCount
+	) final;
+
+	virtual BOOL UpdateTexCoord8(
+		int32 PrimitiveIndex,
+		const FLOAT4* pTexCoords,
+		UINT32 TexCoordCount
 	) final;
 
 	virtual BOOL UpdateIndex(
 		int32 PrimitiveIndex,
-		const void* pIndexData,
-		size_t IndexSize
+		const uint32* pIndices,
+		UINT32 IndexCount
 	) final;
 
-	virtual size_t GetTotalVertexBufferSize() const noexcept final;
+	virtual UINT32 GetMaxVertexCount() const noexcept final;
+	virtual UINT32 GetMaxIndexCount() const noexcept final;
 
-	virtual size_t GetTotalIndexBufferSize() const noexcept final;
+	void UploadToGPU(ID3D11DeviceContext* pDeviceContext);
 
-	void UploadToGPU_VB(ID3D11DeviceContext* pDeviceContext);
-	void UploadToGPU_IB(ID3D11DeviceContext* pDeviceContext);
+	BOOL Create(
+		UINT32 VertexFormat,
+		size_t MaxVertexCount,
+		size_t MaxIndexCount,
+		BUFFER_USAGE UsageVB,
+		BUFFER_USAGE UsageIB
+	) noexcept;
+
+	void ComputeBindVBs(int PrimitiveIndex) noexcept;
 
 	__FORCEINLINE const PRIMITIVE_DESC& INL_GetPrimitiveDesc(size_t PrimitiveIndex) const noexcept
 	{
@@ -77,13 +161,26 @@ public:
 		return m_Primitives[PrimitiveIndex];
 	}
 
-	__FORCEINLINE ID3D11Buffer* INL_GetD3D11VertexBuffer() const noexcept { return m_pD3D11VertexBuffer; }
-	__FORCEINLINE ID3D11Buffer* INL_GetD3D11IndexBuffer() const noexcept { return m_pD3D11IndexBuffer; }
-	__FORCEINLINE BOOL INL_IsDirtyVertexBuffer() const noexcept { return m_DirtyVertexBuffer; }
-	__FORCEINLINE BOOL INL_IsDirtyIndexBuffer() const noexcept { return m_DirtyIndexBuffer; }
+	__FORCEINLINE D3D11Buffer* INL_GetVB(VERTEX_FORMAT_INDEX Index) const noexcept { return m_pVBs[(int)Index]; }
+	__FORCEINLINE D3D11Buffer* INL_GetIB() const noexcept { return m_pIB; }
+	__FORCEINLINE UINT32 INL_GetVertexFormat() const noexcept { return m_VertexFormat; }
+
+	__FORCEINLINE BOOL INL_IsDirtyBuffer() const noexcept { return m_DirtyBuffer; }
+
+	__FORCEINLINE ID3D11Buffer** INL_GetBindVBs() noexcept { return m_pBindVBs; }
+	__FORCEINLINE UINT32* INL_GetBindVBStrides() noexcept { return m_BindVB_Strides; }
+	__FORCEINLINE UINT32* INL_GetBindVBOffsets() noexcept { return m_BindVB_Offsets; }
+	__FORCEINLINE UINT32 INL_GetBindVBCount() const noexcept { return m_BindVB_Count; }
 
 private:
 	virtual ~D3D11PrimitiveBuffer() noexcept;
+	BOOL UpdateVertexBuffer(
+		int32 PrimitiveIndex, 
+		int VertexFormatIndex, 
+		const void* pVertexData, 
+		UINT32 VertexCount,
+		UINT32 VertexStride
+	);
 
 private:
 	volatile long m_RefCnt = 1;
@@ -91,25 +188,29 @@ private:
 	unsigned PADDING_OR_RESERVED = 0;
 #endif // defined(__TARGET_OS_WINDOWS)
 
-	BUFFER_USAGE m_Usage = BUFFER_USAGE::DEFAULT;
-
 	PRIMITIVE_DESC m_Primitives[MAX_PRIMITIVES] = {};
-	size_t m_NumPrimitives = 0;
+	UINT32 m_CurrentVertexCount = 0;
+	UINT32 m_CurrentIndexCount = 0;
+	UINT32 m_MaxVertexCount = 0;
+	UINT32 m_MaxIndexCount = 0;
+	INT32 m_NumPrimitives = 0;
+	uint32 m_VertexFormat = 0;
+	BOOL m_DirtyBuffer = FALSE;
+	UINT32 PADDING1 = 0;
 
-	BOOL m_DirtyVertexBuffer = FALSE;
-	BOOL m_DirtyIndexBuffer = FALSE;
+	BOOL m_DirtyVBs[(size_t)VERTEX_FORMAT_INDEX::MAX] = {};
+	BOOL m_DirtyIB = FALSE;
+	UINT32 PADDING2 = 0;
 
-	D3D11_BLOB* m_pVertexBlob = nullptr;
-	D3D11_BLOB* m_pIndexBlob = nullptr;
+	D3D11_BLOB* m_pVBlobs[(size_t)VERTEX_FORMAT_INDEX::MAX] = {};
+	D3D11_BLOB* m_pIBlob = nullptr;
 
-	size_t m_CurrentVertexSize = 0;
-	size_t m_CurrentIndexSize = 0;
+	D3D11Buffer* m_pVBs[(size_t)VERTEX_FORMAT_INDEX::MAX] = {};
+	D3D11Buffer* m_pIB = nullptr;
 
-	size_t m_VertexBufferSize = 0;
-	size_t m_IndexBufferSize = 0;
-	ID3D11Buffer* m_pD3D11VertexBuffer = nullptr;
-
-	ID3D11Buffer* m_pD3D11VertexBuffers[(size_t)VERTEX_FORMAT_INDEX::MAX] = {};
-	ID3D11Buffer* m_pD3D11IndexBuffer = nullptr;
+	ID3D11Buffer* m_pBindVBs[(size_t)VERTEX_FORMAT_INDEX::MAX] = {};
+	UINT32 m_BindVB_Strides[(size_t)VERTEX_FORMAT_INDEX::MAX] = {};
+	UINT32 m_BindVB_Offsets[(size_t)VERTEX_FORMAT_INDEX::MAX] = {};
+	UINT32 m_BindVB_Count = 0;
 
 };

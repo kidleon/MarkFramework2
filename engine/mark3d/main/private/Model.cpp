@@ -53,7 +53,7 @@ LOAD_STAT Model::GetLoadStat() const noexcept
 
 int32 Model::AddMesh(NameHash Name, PRIMITIVE_TYPE PrimitiveType, uint32 VertexFormat, size_t IndexStride, size_t NumVertex, size_t NumIndex) noexcept
 {
-	int32 PrimitiveIndex = m_pPrimitiveBuffer->AddPrimitive(PrimitiveType, (uint32)NumVertex, VertexFormat, (uint32)NumIndex, (uint32)IndexStride);
+	int32 PrimitiveIndex = m_pPrimitiveBuffer->AddPrimitive(PrimitiveType, (uint32)NumVertex, (uint32)NumIndex);
 	if (-1 == PrimitiveIndex)
 	{
 		SYS_LOG_E("Model::AddMesh - Failed to add primitive to primitive buffer.");
@@ -351,8 +351,6 @@ BOOL Model::CreateMesh(IModelAsset* pModelAsset) noexcept
 			SYS_LOG_E("Model::CreateMesh - Failed to add mesh.");
 			return;
 		}
-
-		UpdateVertex
 
 
 		UpdateVertex(MeshIndex, pModelAsset->GetPositions((int32)i), NumVertex * sizeof(FLOAT3));

@@ -34,8 +34,8 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	}
 
 	m_pMark3D = pMark3D;
-
 	
+	/*
 	IWorld* pWorld = nullptr;
 	m_pMark3D->CreateWorld("MainWorld", &pWorld);
 
@@ -52,10 +52,7 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 	IModelAsset* pModelAsset = nullptr;
 	pAssets->Load("assets/model/ogre/m_ogre00.FBX", &pModelAsset);
 	pModelAsset->Release();
-
-
-
-
+	*/
 	/*
 	if (!m_pMark3D->GetRenderSystemInterface(&m_pRenderSystem))
 	{

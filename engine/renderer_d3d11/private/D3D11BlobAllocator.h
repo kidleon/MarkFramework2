@@ -23,7 +23,7 @@ class D3D11BlobAllocator
 
 public:
 	D3D11BlobAllocator();
-	~D3D11BlobAllocator();
+	~D3D11BlobAllocator() noexcept;
 
 	BOOL Init();
 	void Shutdown();

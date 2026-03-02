@@ -11,8 +11,8 @@ public:
 	virtual long Release() final;
 	virtual long RefCnt() final;
 
-	void Update(void* pBuffer, size_t size);
-	void Update(void* pBuffer, size_t size, size_t offset);
+	void Update(const void* pBuffer, size_t size);
+	void Update(const void* pBuffer, size_t size, size_t offset);
 	void Clear() noexcept;
 
 	__FORCEINLINE void* INL_GetPointer() const noexcept { return m_pBuffer; }

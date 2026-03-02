@@ -14,6 +14,7 @@ class D3D11RenderCommandPool;
 class D3D11RenderCommandExecutor;
 class D3D11InputLayoutCache;
 class D3D11RenderStateCache;
+class D3D11BufferPool;
 
 class D3D11RenderSystem final : public IRenderSystem
 {
@@ -62,6 +63,7 @@ private:
 	D3D11RenderStateCache* m_pRenderStateCache = nullptr;
 	D3D11RenderCommandExecutor* m_pRenderCommandExecutor = nullptr;
 	D3D11InputLayoutCache* m_pInputLayoutCache = nullptr;
+	D3D11BufferPool* m_pBufferPool = nullptr;
 
 };
 

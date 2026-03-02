@@ -620,14 +620,11 @@ struct RENDERCAMERA_CREATE_DESC
 
 struct PRIMITIVEBUFFER_CREATE_DESC
 {
-	size_t VertexBufferSize;
-	size_t IndexBufferSize;
-	BUFFER_USAGE Usage;
-	BOOL IsInitialData;
-	void* pInitialVertexData;
-	void* pInitialIndexData;
-	size_t InitialVertexDataSize;
-	size_t InitialIndexDataSize;
+	UINT32 VertexFormat;
+	BUFFER_USAGE UsageVB;
+	BUFFER_USAGE UsageIB;
+	UINT32 MaxVertexCount;
+	UINT32 MaxIndexCount;
 };
 
 
@@ -1464,35 +1461,122 @@ public:
 */
 struct IPrimitiveBuffer : public IUNKNOWN
 {
-	virtual BUFFER_USAGE GetUsage() const noexcept = 0;
-
 	virtual void ResetPrimitive() noexcept = 0;
 
 	virtual INT32 AddPrimitive(
 		PRIMITIVE_TYPE PrimitiveType,
 		uint32 VertexCount,
-		uint32 VertexStride,
-		uint32 IndexCount,
-		uint32 IndexStride
+		uint32 IndexCount
 	) noexcept = 0;
 
 	virtual size_t GetNumPrimitives() const noexcept = 0;
 
-	virtual BOOL UpdateVertex(
+	virtual BOOL UpdatePosition(
 		int32 PrimitiveIndex,
-		const void* pVertexData,
-		size_t VertexSize
+		const FLOAT3* pPositions,
+		UINT32 PositionCount
+	) = 0;
+
+	virtual BOOL UpdateNormal(
+		int32 PrimitiveIndex,
+		const FLOAT3* pNormals,
+		UINT32 NormalCount
+	) = 0;
+
+	virtual BOOL UpdateColor(
+		int32 PrimitiveIndex,
+		const FLOAT4* pColors,
+		UINT32 ColorCount
+	) = 0;
+
+	virtual BOOL UpdateTexCoord0(
+		int32 PrimitiveIndex,
+		const FLOAT2* pTexCoords,
+		UINT32 TexCoordCount
+	) = 0;
+
+	virtual BOOL UpdateTangent(
+		int32 PrimitiveIndex,
+		const FLOAT3* pTangents,
+		UINT32 TangentCount
+	) = 0;
+
+	virtual BOOL UpdateBinormal(
+		int32 PrimitiveIndex,
+		const FLOAT3* pBinormal,
+		UINT32 BinormalCount
+	) = 0;
+
+	virtual BOOL UpdateBlendIndices(
+		int32 PrimitiveIndex,
+		const UINT4* pBlendIndices,
+		UINT32 BlendIndexCount
+	) = 0;
+
+	virtual BOOL UpdateBlendWeights(
+		int32 PrimitiveIndex,
+		const FLOAT4* pBlendWeights,
+		UINT32 BlendWeightCount
+	) = 0;
+
+	virtual BOOL UpdateTexCoord1(
+		int32 PrimitiveIndex,
+		const FLOAT4* pTexCoords,
+		UINT32 TexCoordCount
+	) = 0;
+
+	virtual BOOL UpdateTexCoord2(
+		int32 PrimitiveIndex,
+		const FLOAT4* pTexCoords,
+		UINT32 TexCoordCount
+	) = 0;
+
+	virtual BOOL UpdateTexCoord3(
+		int32 PrimitiveIndex,
+		const FLOAT4* pTexCoords,
+		UINT32 TexCoordCount
+	) = 0;
+
+	virtual BOOL UpdateTexCoord4(
+		int32 PrimitiveIndex,
+		const FLOAT4* pTexCoords,
+		UINT32 TexCoordCount
+	) = 0;
+
+	virtual BOOL UpdateTexCoord5(
+		int32 PrimitiveIndex,
+		const FLOAT4* pTexCoords,
+		UINT32 TexCoordCount
+	) = 0;
+
+	virtual BOOL UpdateTexCoord6(
+		int32 PrimitiveIndex,
+		const FLOAT4* pTexCoords,
+		UINT32 TexCoordCount
+	) = 0;
+
+	virtual BOOL UpdateTexCoord7(
+		int32 PrimitiveIndex,
+		const FLOAT4* pTexCoords,
+		UINT32 TexCoordCount
+	) = 0;
+
+	virtual BOOL UpdateTexCoord8(
+		int32 PrimitiveIndex,
+		const FLOAT4* pTexCoords,
+		UINT32 TexCoordCount
 	) = 0;
 
 	virtual BOOL UpdateIndex(
 		int32 PrimitiveIndex,
-		const void* pIndexData,
-		size_t IndexSize
+		const uint32* pIndices,
+		UINT32 IndexCount
 	) = 0;
 
-	virtual size_t GetTotalVertexBufferSize() const noexcept = 0;
+	virtual UINT32 GetMaxVertexCount() const noexcept = 0;
 
-	virtual size_t GetTotalIndexBufferSize() const noexcept = 0;
+	virtual UINT32 GetMaxIndexCount() const noexcept = 0;
+
 };
 
 /**
