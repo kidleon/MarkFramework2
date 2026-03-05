@@ -35,13 +35,13 @@ BOOL D3D11Application::OnInit(HWND hWnd, int width, int height)
 
 	m_pMark3D = pMark3D;
 	
-	/*
 	IWorld* pWorld = nullptr;
 	m_pMark3D->CreateWorld("MainWorld", &pWorld);
 
 	IScene* pScene = nullptr;
 	m_pMark3D->CreateScene(pWorld, "MainScene", &pScene);
 
+	/*
 	ISceneNode* pSceneNode = nullptr;
 	m_pMark3D->CreateSceneNode(pScene, "MainNode", &pSceneNode);
 	m_pMark3D->ReleaseSceneNode(pSceneNode);
