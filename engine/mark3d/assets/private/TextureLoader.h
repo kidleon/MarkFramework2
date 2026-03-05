@@ -8,6 +8,7 @@ interface ITexture2D;
 
 extern BOOL LoadTextureFromDDS(
 	HANDLE hTempPool,
+	IDDSTextureFactory* pDDSFactory,
 	IFileSystem* pFileSystem,
 	const char* szRelativePath,
 	ITexture2D* pTexture
