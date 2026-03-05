@@ -1,9 +1,10 @@
-﻿#ifndef __DDS_TEXTURE_LOADER_H__
-#define __DDS_TEXTURE_LOADER_H__
+﻿#ifndef __TEXTURE_LOADER_H__
+#define __TEXTURE_LOADER_H__
 
 
 class BinaryAsset;
 interface IFileSystem;
+interface ITexture2D;
 
 extern BOOL LoadTextureFromDDS(
 	HANDLE hTempPool,
@@ -14,4 +15,4 @@ extern BOOL LoadTextureFromDDS(
 
 extern void AsyncLoadTextureFromDDS(HANDLE temppool_handle, void* pArg);
 
-#endif // __DDS_TEXTURE_LOADER_H__
+#endif // __TEXTURE_LOADER_H__

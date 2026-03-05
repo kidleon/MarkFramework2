@@ -1654,6 +1654,17 @@ struct IRenderCamera : public IUNKNOWN
 };
 
 
+struct IDDSTextureFactory : public IUNKNOWN
+{
+	virtual BOOL CreateTextureDDS(
+		const char* szFilePath,
+		const void* pData,
+		size_t DataSize,
+		ITexture2D** ppOut
+	) = 0;
+};
+
+
 /**
 * @brief 렌더 컨텍스트 인터페이스
 */
@@ -1685,8 +1696,9 @@ public:
 	virtual BOOL CreateRenderCamera(const RENDERCAMERA_CREATE_DESC& Desc, IRenderCamera** ppOut) = 0;
 	virtual BOOL CreateSurfaceMaterial(ISurfaceMaterial** ppOut) = 0;
 	virtual BOOL GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DESC& Desc, IShaderProgram** ppOut) = 0;
-
+	virtual BOOL GetOrCreateDDSTextureFactory(IDDSTextureFactory** ppOut) = 0;
 	virtual BOOL GetOrCreateRenderContext(IRenderContext** ppContext) = 0;
+
 
 	virtual void Update() = 0;
 

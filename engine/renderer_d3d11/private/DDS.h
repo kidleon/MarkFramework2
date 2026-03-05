@@ -1,4 +1,4 @@
-//--------------------------------------------------------------------------------------
+﻿//--------------------------------------------------------------------------------------
 // dds.h
 //
 // This header defines constants and structures that are useful when parsing 
@@ -14,6 +14,7 @@
 
 #include <dxgiformat.h>
 #include <d3d11.h>
+#include <mmsyscom.h>
 
 #pragma pack(push,1)
 

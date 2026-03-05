@@ -19,6 +19,7 @@
 #include "D3D11RenderStateCache.h"
 #include "D3D11RenderCommand.h"
 #include "D3D11BufferPool.h"
+#include "D3D11DDSTextureFactory.h"
 
 
 void MemoryReporter(
@@ -483,6 +484,17 @@ BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DES
 
 		return FALSE;
 	}
+
+	return TRUE;
+}
+
+BOOL D3D11RenderSystem::GetOrCreateDDSTextureFactory(IDDSTextureFactory** ppOut)
+{
+	if (m_pDDSTextureFactory == nullptr)
+		m_pDDSTextureFactory = D3D11_NEW(D3D11DDSTextureFactory)(m_pRenderDevice->INL_GetD3D11Device());
+
+	m_pDDSTextureFactory->AddRef();
+	*ppOut = m_pDDSTextureFactory;
 
 	return TRUE;
 }

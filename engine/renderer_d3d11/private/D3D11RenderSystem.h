@@ -15,6 +15,7 @@ class D3D11RenderCommandExecutor;
 class D3D11InputLayoutCache;
 class D3D11RenderStateCache;
 class D3D11BufferPool;
+class D3D11DDSTextureFactory;
 
 class D3D11RenderSystem final : public IRenderSystem
 {
@@ -40,7 +41,7 @@ public:
 	virtual BOOL CreateRenderCamera(const RENDERCAMERA_CREATE_DESC& Desc, IRenderCamera** ppOut) final;
 	virtual BOOL CreateSurfaceMaterial(ISurfaceMaterial** ppOut) final;
 	virtual BOOL GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DESC& Desc, IShaderProgram** ppOut) final;
-
+	virtual BOOL GetOrCreateDDSTextureFactory(IDDSTextureFactory** ppOut) final;
 	virtual BOOL GetOrCreateRenderContext(IRenderContext** ppContext) final;
 
 	virtual void Update() final;
@@ -64,6 +65,7 @@ private:
 	D3D11RenderCommandExecutor* m_pRenderCommandExecutor = nullptr;
 	D3D11InputLayoutCache* m_pInputLayoutCache = nullptr;
 	D3D11BufferPool* m_pBufferPool = nullptr;
+	D3D11DDSTextureFactory* m_pDDSTextureFactory = nullptr;
 
 };
 
