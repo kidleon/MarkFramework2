@@ -29,6 +29,7 @@ public:
 	// IAssets interface
 	virtual BOOL Load(const char* szRelativePath, ITextAsset** ppOut) final;
 	virtual BOOL LoadAsync(const char* szRelativePath, ITextAsset** ppOut) final;
+
 	virtual BOOL Load(const char* szRelativePath, IBinaryAsset** ppOut) final;
 	virtual BOOL LoadAsync(const char* szRelativePath, IBinaryAsset** ppOut) final;
 	
