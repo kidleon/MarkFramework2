@@ -1461,14 +1461,42 @@ public:
 */
 struct IPrimitiveBuffer : public IUNKNOWN
 {
+	/**
+	* @brief 프리미티브 버퍼를 초기화합니다.
+	*/
 	virtual void ResetPrimitive() noexcept = 0;
 
+	/**
+	* @brief 프리미티브를 추가합니다.
+	* @param PrimitiveType 프리미티브 타입
+	* @param VertexCount 정점 개수
+	* @param IndexCount 인덱스 개수
+	* @return 추가된 프리미티브의 인덱스, 실패 시 -1
+	*/
 	virtual INT32 AddPrimitive(
 		PRIMITIVE_TYPE PrimitiveType,
 		uint32 VertexCount,
 		uint32 IndexCount
 	) noexcept = 0;
 
+	/**
+	* @brief 프리미티브를 추가합니다. 하나의 버텍스 데이터에 여러 인덱스 버퍼를 사용하는 경우에 사용합니다. (서브메시)
+	* @param PrimitiveType 프리미티브 타입
+	* @param VertexCount 정점 개수
+	* @param NumIndices 인덱스 갯수 배열의 갯수
+	* @param pIndices 인덱스 갯수 배열
+	*/
+	virtual INT32 AddPrimitive(
+		PRIMITIVE_TYPE PrimitiveType,
+		uint32 VertexCount,
+		uint32 NumIndices,
+		uint32* pIndices
+	) noexcept = 0;
+
+	/**
+	* @brief 프리미티브의 개수를 반환합니다.
+	* @return 프리미티브의 개수
+	*/
 	virtual size_t GetNumPrimitives() const noexcept = 0;
 
 	virtual BOOL UpdatePosition(
@@ -1571,6 +1599,21 @@ struct IPrimitiveBuffer : public IUNKNOWN
 		int32 PrimitiveIndex,
 		const uint32* pIndices,
 		UINT32 IndexCount
+	) = 0;
+
+	/**
+	* @brief 하나의 버텍스 데이터에 여러 인덱스 버퍼를 사용하는 경우에 인덱스 버퍼를 업데이트합니다. (서브메시)
+	* @param PrimitiveIndex 프리미티브 인덱스
+	* @param NumIndices 인덱스 갯수 배열의 갯수
+	* @param ppIndices 인덱스 데이터 배열
+	* @param pIndexCounts 인덱스 갯수 배열
+	* @return 성공 여부
+	*/
+	virtual BOOL UpdateIndex(
+		int32 PrimitiveIndex,
+		UINT32 NumIndices,
+		const uint32** ppIndices,
+		UINT32* pIndexCounts
 	) = 0;
 
 	virtual UINT32 GetMaxVertexCount() const noexcept = 0;

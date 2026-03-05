@@ -1,12 +1,15 @@
 ﻿#include "pch.h"
 #include "ModelAsset.h"
 #include "fbx_loader.h"
+#include "os_file.h"
 
 
-ModelAsset::ModelAsset(UINT64 ID)
+ModelAsset::ModelAsset(UINT64 ID, const char* szRelativePath)
 	: m_ID(ID)
 	, m_LoadStat(LOAD_STAT::NOT_LOADED)
 {
+	if (szRelativePath && fstrlen(szRelativePath))
+		fstrlcpy(m_szRelativePath, szRelativePath, MAX_FILE_LENGTH);
 }
 
 ModelAsset::~ModelAsset() noexcept
@@ -91,6 +94,27 @@ ASSET_TYPE ModelAsset::GetAssetType() const noexcept
 LOAD_STAT ModelAsset::GetLoadStat() const noexcept
 {
 	return m_LoadStat;
+}
+
+BOOL ModelAsset::GetRelativePath(char* szBuffer, size_t BufferLen, BOOL IgnoreFileName) const noexcept
+{
+	if (!szBuffer || BufferLen == 0)
+		return FALSE;
+
+	if (IgnoreFileName)
+	{
+		char FilePath[MAX_FILE_LENGTH] = { 0 };
+		if (!get_path(m_szRelativePath, FilePath, MAX_FILE_LENGTH))
+			return FALSE;
+
+		fstrlcpy(szBuffer, FilePath, BufferLen);
+	}
+	else
+	{
+		fstrlcpy(szBuffer, m_szRelativePath, BufferLen);
+	}
+
+	return TRUE;
 }
 
 UINT32 ModelAsset::GetModelAttrib() const noexcept
@@ -201,6 +225,56 @@ size_t ModelAsset::GetNumIndices(int32 MeshIndex, int32 SubMeshIndex) const noex
 	return m_pMeshes[MeshIndex].pSubMeshes[SubMeshIndex].NumIndices;
 }
 
+size_t ModelAsset::GetNumMaterials() const noexcept
+{
+	return m_NumMaterials;
+}
+
+int32 ModelAsset::GetMaterialID(int32 MeshIndex, int32 SubMeshIndex) const noexcept
+{
+	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_NumMeshes)
+		return -1;
+
+	if (SubMeshIndex < 0 || static_cast<size_t>(SubMeshIndex) >= m_pMeshes[MeshIndex].NumSubMesh)
+		return -1;
+
+	return m_pMeshes[MeshIndex].pSubMeshes[SubMeshIndex].MaterialID;
+}
+
+const char* ModelAsset::GetMaterialDiffuse(int32 MaterialID) const noexcept
+{
+	if (MaterialID < 0 || static_cast<size_t>(MaterialID) >= m_NumMaterials)
+		return nullptr;
+	return m_pMaterials[MaterialID].Diffuse;
+}
+
+const char* ModelAsset::GetMaterialNormal(int32 MaterialID) const noexcept
+{
+	if (MaterialID < 0 || static_cast<size_t>(MaterialID) >= m_NumMaterials)
+		return nullptr;
+	return m_pMaterials[MaterialID].Normal;
+}
+
+const char* ModelAsset::GetMaterialSpecular(int32 MaterialID) const noexcept
+{
+	if (MaterialID < 0 || static_cast<size_t>(MaterialID) >= m_NumMaterials)
+		return nullptr;
+	return m_pMaterials[MaterialID].Specular;
+}
+
+const char* ModelAsset::GetMaterialEmissive(int32 MaterialID) const noexcept
+{
+	if (MaterialID < 0 || static_cast<size_t>(MaterialID) >= m_NumMaterials)
+		return nullptr;
+	return m_pMaterials[MaterialID].Emissive;
+}
+
+FLOAT4 ModelAsset::GetMaterialColor(int32 MaterialID) const noexcept
+{
+	if (MaterialID < 0 || static_cast<size_t>(MaterialID) >= m_NumMaterials)
+		return FLOAT4{0, 0, 0, 0};
+	return m_pMaterials[MaterialID].Color;
+}
 
 BOOL ModelAsset::LoadFromFBX(const FBX_SCENE* fbx_scene) noexcept
 {

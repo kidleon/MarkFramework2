@@ -22,6 +22,12 @@ constexpr static UINT32 MAX_ID_COUNT = 200000;
 constexpr static size_t THREAD_POOL_SIZE = 4;
 
 HANDLE Assets::ID_GEN_HANDLE = nullptr;
+Assets* Assets::s_pInstance = nullptr;
+
+Assets* Assets::Get() noexcept
+{
+	return s_pInstance;
+}
 
 Assets::Assets()
 	: m_pFileSystem(nullptr)
@@ -29,11 +35,16 @@ Assets::Assets()
 	, m_hIDGen(nullptr)
 	, m_Initialized(FALSE)
 {
+	if (!s_pInstance)
+		s_pInstance = this;
 }
 
 Assets::~Assets() noexcept
 {
 	Shutdown();
+
+	if (s_pInstance == this)
+		s_pInstance = nullptr;
 }
 
 long Assets::AddRef()
@@ -111,7 +122,7 @@ BOOL Assets::Load(const char* szRelativePath, ITextAsset** ppOut)
 {
 	if (!szRelativePath || !(*ppOut)) return FALSE; 
 
-	TextAsset* pTextAsset = CORE_NEW(TextAsset)(idgen_getid(m_hIDGen));
+	TextAsset* pTextAsset = CORE_NEW(TextAsset)(idgen_getid(m_hIDGen), szRelativePath);
 
 	BOOL result = LoadTextAssetFromFileSystem(
 		m_pFileSystem,
@@ -135,7 +146,7 @@ BOOL Assets::LoadAsync(const char* szRelativePath, ITextAsset** ppOut)
 {
 	if (!szRelativePath || !(*ppOut)) return FALSE;
 
-	TextAsset* pTextAsset = CORE_NEW(TextAsset)(idgen_getid(m_hIDGen));
+	TextAsset* pTextAsset = CORE_NEW(TextAsset)(idgen_getid(m_hIDGen), szRelativePath);
 	(*ppOut) = pTextAsset;
 
 	AsyncAssetOp* pArg = (AsyncAssetOp*)CORE_POOL_ALLOC(sizeof(AsyncAssetOp));
@@ -159,7 +170,7 @@ BOOL Assets::Load(const char* szRelativePath, IBinaryAsset** ppOut)
 {
 	if (!szRelativePath || !(*ppOut)) return FALSE;
 
-	BinaryAsset* pBinaryAsset = CORE_NEW(BinaryAsset)(idgen_getid(m_hIDGen));
+	BinaryAsset* pBinaryAsset = CORE_NEW(BinaryAsset)(idgen_getid(m_hIDGen), szRelativePath);
 
 	BOOL result = LoadBinaryAssetFromFileSystem(
 		m_pFileSystem,
@@ -183,7 +194,7 @@ BOOL Assets::LoadAsync(const char* szRelativePath, IBinaryAsset** ppOut)
 {
 	if (!szRelativePath || !(*ppOut)) return FALSE;
 
-	BinaryAsset* pBinaryAsset = CORE_NEW(BinaryAsset)(idgen_getid(m_hIDGen));
+	BinaryAsset* pBinaryAsset = CORE_NEW(BinaryAsset)(idgen_getid(m_hIDGen), szRelativePath);
 	(*ppOut) = pBinaryAsset;
 
 	pBinaryAsset->INL_SetLoadStat(LOAD_STAT::LOADING);
@@ -205,11 +216,10 @@ BOOL Assets::LoadAsync(const char* szRelativePath, IBinaryAsset** ppOut)
 	return TRUE;
 }
 
-/*
 BOOL Assets::Load(const char* szRelativePath, ITexture1D** ppOut)
 {
 	if (!szRelativePath || !ppOut) return FALSE;
-
+	/*
 #if defined(__MARK3D_RENDERSYSTEM_D3D11__)
 	
 	IDataStream* pDataStream = m_pFileSystem->OpenFile(szRelativePath, TRUE);
@@ -266,32 +276,37 @@ BOOL Assets::Load(const char* szRelativePath, ITexture1D** ppOut)
 	(*ppOut) = pTexture1D;
 
 #endif // __MARK3D_RENDERSYSTEM_D3D11__
-
+*/
 	return TRUE;
 }
 
 BOOL Assets::LoadAsync(const char* szRelativePath, ITexture1D** ppOut)
 {
+	if (!szRelativePath || !ppOut) return FALSE;
+
 	return TRUE;
 }
 
 BOOL Assets::Load(const char* szRelativePath, ITexture2D** ppOut)
 {
+	if (!szRelativePath || !ppOut) return FALSE;
+
 	return TRUE;
 }
 
 BOOL Assets::LoadAsync(const char* szRelativePath, ITexture2D** ppOut)
 {
+	if (!szRelativePath || !ppOut) return FALSE;
+
 	return TRUE;
 }
-*/
 
 BOOL Assets::Load(const char* szRelativePath, IModelAsset** ppOut)
 {
 	if (!szRelativePath || !ppOut)
 		return FALSE;
 
-	ModelAsset* pModelAsset = CORE_NEW(ModelAsset)(idgen_getid(m_hIDGen));
+	ModelAsset* pModelAsset = CORE_NEW(ModelAsset)(idgen_getid(m_hIDGen), szRelativePath);
 	pModelAsset->INL_SetLoadStat(LOAD_STAT::LOADING);
 
 	BOOL result = LoadModelFromFBX(
@@ -322,7 +337,7 @@ BOOL Assets::LoadAsync(const char* szRelativePath, IModelAsset** ppOut)
 	if (!szRelativePath || !ppOut)
 		return FALSE;
 
-	ModelAsset* pModelAsset = CORE_NEW(ModelAsset)(idgen_getid(m_hIDGen));
+	ModelAsset* pModelAsset = CORE_NEW(ModelAsset)(idgen_getid(m_hIDGen), szRelativePath);
 	(*ppOut) = pModelAsset;
 
 	pModelAsset->INL_SetLoadStat(LOAD_STAT::LOADING);

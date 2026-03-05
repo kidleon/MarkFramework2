@@ -44,7 +44,7 @@ public:
 	};
 
 public:
-	ModelAsset(UINT64 ID);
+	ModelAsset(UINT64 ID, const char* szRelativePath);
 	
 	// IUNKNOWN interface
 	virtual long AddRef() final;
@@ -55,6 +55,11 @@ public:
 	virtual UINT64 GetID() const noexcept final;
 	virtual ASSET_TYPE GetAssetType() const noexcept final;
 	virtual LOAD_STAT GetLoadStat() const noexcept final;
+	virtual BOOL GetRelativePath(
+		char* szBuffer,
+		size_t BufferLen,
+		BOOL IgnoreFileName
+	) const noexcept final;
 
 	// IModelAsset interface
 	virtual UINT32 GetModelAttrib() const noexcept final;
@@ -78,6 +83,14 @@ public:
 	virtual size_t GetNumIndices(int32 MeshIndex) const noexcept final;
 	virtual size_t GetNumIndices(int32 MeshIndex, int32 SubMeshIndex) const noexcept final;
 
+	virtual size_t GetNumMaterials() const noexcept final;
+	virtual int32 GetMaterialID(int32 MeshIndex, int32 SubMeshIndex) const noexcept final;
+	virtual const char* GetMaterialDiffuse(int32 MaterialID) const noexcept final;
+	virtual const char* GetMaterialNormal(int32 MaterialID) const noexcept final;
+	virtual const char* GetMaterialSpecular(int32 MaterialID) const noexcept final;
+	virtual const char* GetMaterialEmissive(int32 MaterialID) const noexcept final;
+	virtual FLOAT4 GetMaterialColor(int32 MaterialID) const noexcept final;
+
 	__FORCEINLINE void INL_SetLoadStat(LOAD_STAT LoadStat) noexcept
 	{
 		interlock_store_l((long*)&m_LoadStat, (long)LoadStat, MEMORY_ORDER_RELAXED);
@@ -93,12 +106,10 @@ private:
 
 private:
 	volatile long m_RefCnt = 1;
-#if defined(__TARGET_OS_WINDOWS)
-	unsigned PADDING_OR_RESERVED = 0;
-#endif // defined(__TARGET_OS_WINDOWS)
-
-	UINT64 m_ID = 0;
 	LOAD_STAT m_LoadStat = LOAD_STAT::NOT_LOADED;
+	UINT64 m_ID = 0;
+	
+	char m_szRelativePath[MAX_FILE_LENGTH] = { 0 };
 
 	UINT32 m_ModelAttrib = 0;
 	size_t m_NumMeshes = 0;

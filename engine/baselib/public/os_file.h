@@ -143,5 +143,31 @@ MARK_BASELIB_C_API BOOL get_filename(
 	size_t size
 );
 
+/**
+* @brief 파일 전체 경로에서 확장자를 얻어옵니다.
+* @param path 전체 경로
+* @param extension 확장자를 저장할 버퍼
+* @param size 버퍼 크기
+* @return 성공시 TRUE, 실패시 FALSE
+*/
+MARK_BASELIB_C_API BOOL get_file_extension(
+	const char* path,
+	char* extension,
+	size_t size
+);
+
+/**
+* @brief 파일 전체 경로에서 파일을 제외한 경로를 얻어옵니다.
+* @param path 전체 경로
+* @param buffer 경로를 저장할 버퍼
+* @param size 버퍼 크기
+* @return 성공시 TRUE, 실패시 FALSE
+*/
+MARK_BASELIB_C_API BOOL get_path(
+	const char* path,
+	char* buffer,
+	size_t size
+);
+
 
 #endif // __OS_FILE_H__

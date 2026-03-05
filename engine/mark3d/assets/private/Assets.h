@@ -6,13 +6,19 @@ interface IFileSystem;
 interface ITextAsset;
 interface IBinaryAsset;
 interface IModelAsset;
+interface ITexture1D;
+interface ITexture2D;
 
 class Assets final : public IAssets
 {
 	friend class Mark3DImpl;
 
+	static Assets* s_pInstance;
+
 public:
 	static HANDLE ID_GEN_HANDLE;
+
+	static Assets* Get() noexcept;
 
 public:
 	Assets();
@@ -25,14 +31,15 @@ public:
 	virtual BOOL LoadAsync(const char* szRelativePath, ITextAsset** ppOut) final;
 	virtual BOOL Load(const char* szRelativePath, IBinaryAsset** ppOut) final;
 	virtual BOOL LoadAsync(const char* szRelativePath, IBinaryAsset** ppOut) final;
-	/*
-	virtual BOOL Load(const char* szRelativePath, ITexture1D** ppOut) final;
-	virtual BOOL LoadAsync(const char* szRelativePath, ITexture1D** ppOut) final;
-	virtual BOOL Load(const char* szRelativePath, ITexture2D** ppOut) final;
-	virtual BOOL LoadAsync(const char* szRelativePath, ITexture2D** ppOut) final;
-	*/
+	
 	virtual BOOL Load(const char* szRelativePath, IModelAsset** ppOut) final;
 	virtual BOOL LoadAsync(const char* szRelativePath, IModelAsset** ppOut) final;
+
+	virtual BOOL Load(const char* szRelativePath, ITexture1D** ppOut) final;
+	virtual BOOL LoadAsync(const char* szRelativePath, ITexture1D** ppOut) final;
+
+	virtual BOOL Load(const char* szRelativePath, ITexture2D** ppOut) final;
+	virtual BOOL LoadAsync(const char* szRelativePath, ITexture2D** ppOut) final;
 
 private:
 	virtual ~Assets() noexcept;

@@ -4,9 +4,10 @@
 #include "crc64.h"
 #include "idgen.h"
 #include "Assets.h"
+#include "os_file.h"
 
 
-BinaryAsset::BinaryAsset(UINT64 ID)
+BinaryAsset::BinaryAsset(UINT64 ID, const char* szRelativePath)
 	: m_pData(nullptr)
 	, m_Size(0)
 	, m_CRC64Cache(0)
@@ -14,6 +15,8 @@ BinaryAsset::BinaryAsset(UINT64 ID)
 	, m_ID(ID)
 	, m_LoadStat(LOAD_STAT::NOT_LOADED)
 {
+	if (szRelativePath && fstrlen(szRelativePath))
+		fstrlcpy(m_szRelativePath, szRelativePath, MAX_FILE_LENGTH);
 }
 
 BinaryAsset::~BinaryAsset() noexcept
@@ -59,6 +62,27 @@ ASSET_TYPE BinaryAsset::GetAssetType() const noexcept
 LOAD_STAT BinaryAsset::GetLoadStat() const noexcept
 {
 	return m_LoadStat;
+}
+
+BOOL BinaryAsset::GetRelativePath(char* szBuffer, size_t BufferLen, BOOL IgnoreFileName) const noexcept
+{
+	if (!szBuffer || BufferLen == 0)
+		return FALSE;
+
+	if (IgnoreFileName)
+	{
+		char FilePath[MAX_FILE_LENGTH] = { 0 };
+		if (!get_path(m_szRelativePath, FilePath, MAX_FILE_LENGTH))
+			return FALSE;
+
+		fstrlcpy(szBuffer, FilePath, BufferLen);
+	}
+	else
+	{
+		fstrlcpy(szBuffer, m_szRelativePath, BufferLen);
+	}
+
+	return TRUE;
 }
 
 const char* BinaryAsset::GetData() const noexcept

@@ -5,7 +5,7 @@
 class TextAsset : public ITextAsset
 {
 public:
-	TextAsset(UINT64 ID);
+	TextAsset(UINT64 ID, const char* szRelativePath);
 	virtual ~TextAsset() noexcept;
 
 	// IUNKNOWN interface
@@ -17,6 +17,11 @@ public:
 	virtual UINT64 GetID() const noexcept final;
 	virtual ASSET_TYPE GetAssetType() const noexcept final;
 	virtual LOAD_STAT GetLoadStat() const noexcept final;
+	virtual BOOL GetRelativePath(
+		char* szBuffer,
+		size_t BufferLen, 
+		BOOL IgnoreFileName
+	) const noexcept final;
 
 	// ITextAsset interface
 	virtual const char* GetData() const noexcept final;
@@ -67,12 +72,11 @@ public:
 
 private:
 	volatile long m_RefCnt = 1;
-#if defined(__TARGET_OS_WINDOWS)
-	unsigned PADDING_OR_RESERVED = 0;
-#endif // defined(__TARGET_OS_WINDOWS)
 
-	UINT64 m_ID;
 	LOAD_STAT m_LoadStat;
+	UINT64 m_ID;
+	
+	char m_szRelativePath[MAX_FILE_LENGTH] = { 0 };
 
 	char* m_pData;
 	size_t m_Size;

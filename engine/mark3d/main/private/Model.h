@@ -8,8 +8,10 @@ using namespace mark;
 
 class Model : public IModel
 {
+	static constexpr size_t MAX_SUBMESH_PER_MESH = 8;
+
 public:
-	Model(UINT64 ID, IPrimitiveBuffer* pPrimitiveBuffer);
+	Model(UINT64 ID, uint32 VertexFormat, IPrimitiveBuffer* pPrimitiveBuffer);
 
 	// IUNKNOWN interface
 	virtual long AddRef() final;
@@ -22,35 +24,37 @@ public:
 	virtual LOAD_STAT GetLoadStat() const noexcept final;
 
 	// IModel interface
-	virtual int32 AddMesh(NameHash Name, PRIMITIVE_TYPE PrimitiveType, uint32 VertexFormat, size_t IndexStride, size_t NumVertex, size_t NumIndex) noexcept final;
-	virtual void ClearMesh() noexcept final;
-
-	virtual void UpdateVertex(int32 MeshIndex, void* pVertexData, size_t VertexSize) noexcept final;
-	virtual void UpdateVertex(NameHash Name, void* pVertexData, size_t VertexSize) noexcept final;
-
-	virtual void UpdateIndex(int32 MeshIndex, void* pIndexData, size_t IndexSize) noexcept final;
-	virtual void UpdateIndex(NameHash Name, void* pIndexData, size_t IndexSize) noexcept final;
-
-	virtual void SetMaterial(int32 MeshIndex, ISurfaceMaterial* pSurfaceMaterial) noexcept final;
-	virtual void SetMaterial(NameHash Name, ISurfaceMaterial* pSurfaceMaterial) noexcept final;
-
-	virtual int32 FindMeshIndexByName(NameHash Name) const noexcept final;
-	virtual ISurfaceMaterial* GetMaterial(int32 MeshIndex) noexcept final;
-	virtual ISurfaceMaterial* GetMaterial(NameHash Name) noexcept final;
-
-	virtual void SetActiveMesh(int32 MeshIndex, BOOL Active) noexcept final;
-	virtual void SetActiveMesh(NameHash Name, BOOL Active) noexcept final;
-
-	virtual BOOL IsActiveMesh(int32 MeshIndex) const noexcept final;
-	virtual BOOL IsActiveMesh(NameHash Name) const noexcept final;
-
 	virtual size_t GetNumMesh() const noexcept final;
+
+	virtual int32 AddMesh(NameHash Name, PRIMITIVE_TYPE PrimitiveType, uint32 NumVertex, uint32 NumIndex) noexcept final;
+	virtual int32 AddMesh(NameHash Name, PRIMITIVE_TYPE PrimitiveType, uint32 NumVertex, uint32 NumIndices, uint32* pNumIndices) noexcept final;
+
+	virtual void SetPosition(int32 MeshIndex, FLOAT3* pPositions, UINT32 NumPosition) noexcept final;
+	virtual void SetNormal(int32 MeshIndex, FLOAT3* pNormals, UINT32 NumNormal) noexcept final;
+	virtual void SetTexCoord(int32 MeshIndex, FLOAT2* pTexCoords, UINT32 NumTexCoord) noexcept final;
+	virtual void SetColor(int32 MeshIndex, FLOAT4* pColors, UINT32 NumColor) noexcept final;
+	virtual void SetTangent(int32 MeshIndex, FLOAT3* pTangents, UINT32 NumTangent) noexcept final;
+	virtual void SetBinormal(int32 MeshIndex, FLOAT3* pBinormals, UINT32 NumBinormal) noexcept final;
+
+	virtual void SetPosition(NameHash Name, FLOAT3* pPositions, UINT32 NumPosition) noexcept final;
+	virtual void SetNormal(NameHash Name, FLOAT3* pNormals, UINT32 NumNormal) noexcept final;
+	virtual void SetTexCoord(NameHash Name, FLOAT2* pTexCoords, UINT32 NumTexCoord) noexcept final;
+	virtual void SetColor(NameHash Name, FLOAT4* pColors, UINT32 NumColor) noexcept final;
+	virtual void SetTangent(NameHash Name, FLOAT3* pTangents, UINT32 NumTangent) noexcept final;
+	virtual void SetBinormal(NameHash Name, FLOAT3* pBinormals, UINT32 NumBinormal) noexcept final;
+
+	virtual void SetIndex(int32 MeshIndex, const uint32* pIndices, UINT32 NumIndex) noexcept final;
+	virtual void SetIndex(NameHash Name, const uint32* pIndices, UINT32 NumIndex) noexcept final;
+
+	virtual void SetIndex(int32 MeshIndex, uint32 NumIndex, const uint32** ppIndices, uint32* pNumIndices) noexcept final;
+	virtual void SetIndex(NameHash Name, uint32 NumIndex, const uint32** ppIndices, uint32* pNumIndices) noexcept final;
 
 	BOOL CreateMesh(IModelAsset* pModelAsset) noexcept;
 
 private:
 	Model() = delete;
 	virtual ~Model() noexcept;
+	int32 FindMeshIndex(NameHash Name) const noexcept;
 
 protected:
 	size_t CalulateVertexStride(uint32 VertexFormat) const noexcept;
@@ -68,20 +72,25 @@ private:
 	{
 		NameHash Name;
 		int PrimitiveIndex;
-		BOOL Active;
-		uint32 VertexFormat;
-		uint32 VertexStride;
-		uint32 IndexStride;
 		uint32 MaxVertex;
 		uint32 MaxIndex;
 		uint32 NumVertex;
 		uint32 NumIndex;
-		ISurfaceMaterial* pSurfaceMaterial;
+
+		struct SubMeshData
+		{
+			uint32 NumIndex;
+		};
+
+		uint32 NumSubMesh;
+		SubMeshData SubMeshes[MAX_SUBMESH_PER_MESH];
 	};
+
 
 	TArray<MeshData, TA_POOL> m_lstMeshData;
 	
 	IPrimitiveBuffer* m_pPrimitiveBuffer = nullptr;
+	uint32 m_VertexFormat = 0;
 
 };
 

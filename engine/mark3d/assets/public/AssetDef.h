@@ -2,6 +2,8 @@
 #define __ASSET_DEF_H__
 
 
+#define MAX_FILE_LENGTH 256
+
 /**
 * @brief 자산 유형 열거형
 */
@@ -47,6 +49,13 @@ struct IAsset : public IUNKNOWN
 	* @return 로드 상태
 	*/
 	virtual LOAD_STAT GetLoadStat() const noexcept = 0;
+
+	/**
+	* @brief 자산 상대 경로 반환
+	* @param IgnoreFileName 파일 이름을 무시할지 여부, TRUE일 경우 파일 이름을 제외한 경로만 반환, FALSE일 경우 전체 상대 경로 반환
+	* @return 자산 상대 경로 문자열 포인터
+	*/
+	virtual BOOL GetRelativePath(char* szBuffer, size_t BufferLen, BOOL IgnoreFileName) const noexcept = 0;
 };
 
 /**
@@ -60,23 +69,23 @@ interface IBinaryAsset : public IAsset
 	*/
 	virtual const char* GetData() const noexcept = 0;
 
-/**
-* @brief 바이너리 데이터 크기 반환
-* @return 바이너리 데이터 크기 (바이트 단위)
-*/
-virtual size_t GetSize() const noexcept = 0;
+	/**
+	* @brief 바이너리 데이터 크기 반환
+	* @return 바이너리 데이터 크기 (바이트 단위)
+	*/
+	virtual size_t GetSize() const noexcept = 0;
 
-/**
-* @brief CRC32 계산
-* @return CRC32 값
-*/
-virtual uint32 ComputeCRC32() noexcept = 0;
+	/**
+	* @brief CRC32 계산
+	* @return CRC32 값
+	*/
+	virtual uint32 ComputeCRC32() noexcept = 0;
 
-/**
-* @brief CRC64 계산
-* @return CRC64 값
-*/
-virtual uint64 ComputeCRC64() noexcept = 0;
+	/**
+	* @brief CRC64 계산
+	* @return CRC64 값
+	*/
+	virtual uint64 ComputeCRC64() noexcept = 0;
 };
 
 
@@ -258,6 +267,55 @@ struct IModelAsset : public IAsset
 	* @return 인덱스 개수
 	*/
 	virtual size_t GetNumIndices(int32 MeshIndex, int32 SubMeshIndex) const noexcept = 0;
+
+	/**
+	* @brief 서브메쉬에 적용된 머티리얼 ID 반환
+	* @param MeshIndex 메쉬 인덱스
+	* @param SubMeshIndex 서브메쉬 인덱스
+	* @return 머티리얼 ID
+	*/
+	virtual int32 GetMaterialID(int32 MeshIndex, int32 SubMeshIndex) const noexcept = 0;
+
+	/**
+	* @brief 머티리얼 개수 반환
+	* @return 머티리얼 개수
+	*/
+	virtual size_t GetNumMaterials() const noexcept = 0;
+
+	/**
+	* @brief 머티리얼 디퓨즈 텍스처 경로 반환
+	* @param MaterialID 머티리얼 ID
+	* @return 디퓨즈 텍스처 경로 문자열 포인터
+	*/
+	virtual const char* GetMaterialDiffuse(int32 MaterialID) const noexcept = 0;
+
+	/**
+	* @brief 머티리얼 노멀 텍스처 경로 반환
+	* @param MaterialID 머티리얼 ID
+	* @return 노멀 텍스처 경로 문자열 포인터
+	*/
+	virtual const char* GetMaterialNormal(int32 MaterialID) const noexcept = 0;
+
+	/**
+	* @brief 머티리얼 스페큘러 텍스처 경로 반환
+	* @param MaterialID 머티리얼 ID
+	* @return 스페큘러 텍스처 경로 문자열 포인터
+	*/
+	virtual const char* GetMaterialSpecular(int32 MaterialID) const noexcept = 0;
+
+	/**
+	* @brief 머티리얼 발광 텍스처 경로 반환
+	* @param MaterialID 머티리얼 ID
+	* @return 발광 텍스처 경로 문자열 포인터
+	*/
+	virtual const char* GetMaterialEmissive(int32 MaterialID) const noexcept = 0;
+	
+	/**
+	* @brief 머티리얼 색상 반환
+	* @param MaterialID 머티리얼 ID
+	* @return 머티리얼 색상
+	*/
+	virtual FLOAT4 GetMaterialColor(int32 MaterialID) const noexcept = 0;
 
 };
 

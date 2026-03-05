@@ -3,14 +3,18 @@
 #include "idgen.h"
 #include "Log.h"
 #include "Assets.h"
+#include "os_file.h"
 
 
-TextAsset::TextAsset(UINT64 ID)
+TextAsset::TextAsset(UINT64 ID, const char* szRelativePath)
 	: m_pData(nullptr)
 	, m_Size(0)
 {
 	m_ID = ID;
 	m_LoadStat = LOAD_STAT::NOT_LOADED;
+
+	if (szRelativePath && fstrlen(szRelativePath))
+		fstrlcpy(m_szRelativePath, szRelativePath, MAX_FILE_LENGTH);
 }
 
 TextAsset::~TextAsset() noexcept
@@ -56,6 +60,27 @@ ASSET_TYPE TextAsset::GetAssetType() const noexcept
 LOAD_STAT TextAsset::GetLoadStat() const noexcept
 {
 	return m_LoadStat;
+}
+
+BOOL TextAsset::GetRelativePath(char* szBuffer, size_t BufferLen, BOOL IgnoreFileName) const noexcept
+{
+	if (!szBuffer || BufferLen == 0)
+		return FALSE;
+
+	if (IgnoreFileName)
+	{
+		char FilePath[MAX_FILE_LENGTH] = { 0 };
+		if (!get_path(m_szRelativePath, FilePath, MAX_FILE_LENGTH))
+			return FALSE;
+
+		fstrlcpy(szBuffer, FilePath, BufferLen);
+	}
+	else
+	{
+		fstrlcpy(szBuffer, m_szRelativePath, BufferLen);
+	}
+
+	return TRUE;
 }
 
 const char* TextAsset::GetData() const noexcept

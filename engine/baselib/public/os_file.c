@@ -313,3 +313,73 @@ BOOL get_filename(
 	return TRUE;
 
 }
+
+BOOL get_file_extension(const char* path, char* extension, size_t size)
+{
+	if (!path || !extension || size == 0)
+		return FALSE;
+
+	const char* dot = NULL;
+	const char* p = path;
+
+	/* 마지막 '.' 위치 탐색 (디렉터리 구분자 이후만 유효) */
+	while (*p) 
+	{
+		if (*p == '.')
+			dot = p;
+		else if (*p == '/' || *p == '\\')
+			dot = NULL; /* 디렉터리 구분자 이후 초기화 */
+		p++;
+	}
+
+	/* '.'이 없거나 파일명 끝에 '.'만 있는 경우 */
+	if (!dot || dot[1] == '\0') {
+		extension[0] = '\0';
+		return FALSE;
+	}
+
+	/* 확장자 복사 ('.' 제외) */
+	const char* ext = dot + 1;
+	size_t len = strlen(ext);
+
+	if (len >= size) {
+		extension[0] = '\0';
+		return FALSE; /* 버퍼 부족 */
+	}
+
+	memcpy(extension, ext, len + 1);
+
+	return TRUE;
+}
+
+BOOL get_path(
+	const char* path,
+	char* buffer,
+	size_t size
+)
+{
+	if (!path || !buffer || size == 0) 
+		return FALSE;
+
+	const char* last_slash = strrchr(path, '/');
+	const char* last_backslash = strrchr(path, '\\');
+
+	const char* last = last_slash;
+	if (last_backslash && (!last || last_backslash > last)) 
+	{
+		last = last_backslash;
+	}
+
+	if (!last) 
+		return FALSE; // 경로 구분자가 없음
+
+	size_t len = (size_t)(last - path);
+
+	if (len + 1 > size)
+		return FALSE; // 버퍼 부족
+
+	memcpy(buffer, path, len);
+	buffer[len] = '\0';
+
+	return TRUE;
+}

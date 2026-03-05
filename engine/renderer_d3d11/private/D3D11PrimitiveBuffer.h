@@ -7,6 +7,7 @@ class D3D11Buffer;
 class D3D11PrimitiveBuffer final : public IPrimitiveBuffer
 {
 	static constexpr INT32 MAX_PRIMITIVES = 8;
+	static constexpr INT32 MAX_SUB_MESH = 8; // 하나의 프리미티브에 최대 4개의 인덱스 버퍼 (서브메시)
 
 public:
 	struct PRIMITIVE_DESC
@@ -16,6 +17,10 @@ public:
 		uint32 VertexCount;
 		uint32 IndexStart;
 		uint32 IndexCount;
+
+		uint32 NumIndices = 0;
+		uint32 IndexStarts[MAX_SUB_MESH] = {};
+		uint32 IndexCounts[MAX_SUB_MESH] = {};
 	};
 
 	static PRIMITIVE_DESC INVALID_PRIMITIVE_DESC;
@@ -33,6 +38,13 @@ public:
 		PRIMITIVE_TYPE PrimitiveType,
 		uint32 VertexCount,
 		uint32 IndexCount
+	) noexcept final;
+
+	virtual INT32 AddPrimitive(
+		PRIMITIVE_TYPE PrimitiveType,
+		uint32 VertexCount,
+		uint32 NumIndices,
+		uint32* pIndices
 	) noexcept final;
 
 	virtual size_t GetNumPrimitives() const noexcept final;
@@ -137,6 +149,13 @@ public:
 		int32 PrimitiveIndex,
 		const uint32* pIndices,
 		UINT32 IndexCount
+	) final;
+
+	virtual BOOL UpdateIndex(
+		int32 PrimitiveIndex,
+		UINT32 NumIndices,
+		const uint32** ppIndices,
+		UINT32* pIndexCounts
 	) final;
 
 	virtual UINT32 GetMaxVertexCount() const noexcept final;
