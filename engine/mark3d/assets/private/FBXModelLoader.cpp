@@ -47,7 +47,6 @@ BOOL LoadModelFromFBX(
 	return TRUE;
 }
 
-
 void AsyncLoadModelFromFBX(HANDLE temppool_handle, void* pArg)
 {
 	if (!temppool_handle || !pArg) return;
