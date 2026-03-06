@@ -25,9 +25,16 @@ public:
 
 	// IModel interface
 	virtual size_t GetNumMesh() const noexcept final;
+	virtual size_t GetNumSubMesh(int32 MeshIndex) const noexcept final;
+	virtual size_t GetNumSubMesh(NameHash Name) const noexcept final;
 
 	virtual int32 AddMesh(NameHash Name, PRIMITIVE_TYPE PrimitiveType, uint32 NumVertex, uint32 NumIndex) noexcept final;
 	virtual int32 AddMesh(NameHash Name, PRIMITIVE_TYPE PrimitiveType, uint32 NumVertex, uint32 NumIndices, uint32* pNumIndices) noexcept final;
+
+	virtual void SetMaterial(int32 MeshIndex, ISurfaceMaterial* pSurfaceMaterial) noexcept final;
+	virtual void SetMaterial(NameHash Name, ISurfaceMaterial* pSurfaceMaterial) noexcept final;
+	virtual void SetMaterial(int32 MeshIndex, int32 SubMeshIndex, ISurfaceMaterial* pSurfaceMaterial) noexcept final;
+	virtual void SetMaterial(NameHash Name, int32 SubMeshIndex, ISurfaceMaterial* pSurfaceMaterial) noexcept final;
 
 	virtual void SetPosition(int32 MeshIndex, FLOAT3* pPositions, UINT32 NumPosition) noexcept final;
 	virtual void SetNormal(int32 MeshIndex, FLOAT3* pNormals, UINT32 NumNormal) noexcept final;
@@ -49,15 +56,14 @@ public:
 	virtual void SetIndex(int32 MeshIndex, uint32 NumIndex, const uint32** ppIndices, uint32* pNumIndices) noexcept final;
 	virtual void SetIndex(NameHash Name, uint32 NumIndex, const uint32** ppIndices, uint32* pNumIndices) noexcept final;
 
-	BOOL CreateMesh(IModelAsset* pModelAsset) noexcept;
+	BOOL LoadMesh(HANDLE hTempHeap, IModelAsset* pModelAsset) noexcept;
+	BOOL LoadMaterial(HANDLE hTempHeap, IModelAsset* pModelAsset) noexcept;
+
 
 private:
 	Model() = delete;
 	virtual ~Model() noexcept;
 	int32 FindMeshIndex(NameHash Name) const noexcept;
-
-protected:
-	size_t CalulateVertexStride(uint32 VertexFormat) const noexcept;
 
 private:
 	long m_RefCnt = 1;
@@ -68,27 +74,27 @@ private:
 	UINT64 m_ID = 0;
 	LOAD_STAT m_LoadStat = LOAD_STAT::LOADED;
 
-	struct MeshData
+	struct MESH_DATA
 	{
 		NameHash Name;
 		int PrimitiveIndex;
 		uint32 MaxVertex;
 		uint32 MaxIndex;
 		uint32 NumVertex;
-		uint32 NumIndex;
 
-		struct SubMeshData
+		struct SUB_MESH
 		{
 			uint32 NumIndex;
+			ISurfaceMaterial* pMaterial;
 		};
 
 		uint32 NumSubMesh;
-		SubMeshData SubMeshes[MAX_SUBMESH_PER_MESH];
+		SUB_MESH SubMeshes[MAX_SUBMESH_PER_MESH];
 	};
 
+	TArray<MESH_DATA, TA_POOL> m_lstMeshData;
+	TArray<ISurfaceMaterial*, TA_POOL> m_lstMaterials;
 
-	TArray<MeshData, TA_POOL> m_lstMeshData;
-	
 	IPrimitiveBuffer* m_pPrimitiveBuffer = nullptr;
 	uint32 m_VertexFormat = 0;
 

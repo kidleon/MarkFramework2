@@ -2,6 +2,8 @@
 #include "Model.h"
 #include "ModelAsset.h"
 #include "Assets.h"
+#include "Mark3DImpl.h"
+#include "temp_pool.h"
 
 
 Model::Model(UINT64 ID, uint32 VertexFormat, IPrimitiveBuffer* pPrimitiveBuffer)
@@ -57,22 +59,54 @@ size_t Model::GetNumMesh() const noexcept
 	return m_lstMeshData.size();
 }
 
+size_t Model::GetNumSubMesh(int32 MeshIndex) const noexcept
+{
+	if (MeshIndex < 0 || MeshIndex >= (int32)m_lstMeshData.size())
+	{
+		SYS_LOG_E("Model::GetNumSubMesh - Mesh index is out of range.");
+		return 0;
+	}
+
+	return m_lstMeshData[MeshIndex].NumSubMesh;
+}
+
+size_t Model::GetNumSubMesh(NameHash Name) const noexcept
+{
+	int32 MeshIndex = FindMeshIndex(Name);
+	if (-1 == MeshIndex)
+	{
+		SYS_LOG_E("Model::GetNumSubMesh - Mesh with the specified name does not exist.");
+		return 0;
+	}
+
+	return m_lstMeshData[MeshIndex].NumSubMesh;
+}
+
 int32 Model::AddMesh(NameHash Name, PRIMITIVE_TYPE PrimitiveType, uint32 NumVertex, uint32 NumIndex) noexcept
 {
-	int32 PrimitiveIndex = m_pPrimitiveBuffer->AddPrimitive(PrimitiveType, (uint32)NumVertex, (uint32)NumIndex);
+	int32 MeshIndex = FindMeshIndex(Name);
+	if (-1 != MeshIndex)
+	{
+		SYS_LOG_E("Model::AddMesh - A mesh with the same name already exists.");
+		return -1;
+	}
+
+	int32 PrimitiveIndex = m_pPrimitiveBuffer->AddPrimitive(PrimitiveType, NumVertex, NumIndex);
 	if (-1 == PrimitiveIndex)
 	{
 		SYS_LOG_E("Model::AddMesh - Failed to add primitive to primitive buffer.");
 		return -1;
 	}
 
-	MeshData NewMeshData = {};
+	MESH_DATA NewMeshData = {};
 	NewMeshData.Name = Name;
 	NewMeshData.PrimitiveIndex = PrimitiveIndex;
-	NewMeshData.MaxVertex = (uint32)NumVertex;
-	NewMeshData.MaxIndex = (uint32)NumIndex;
+	NewMeshData.MaxVertex = NumVertex;
+	NewMeshData.MaxIndex = NumIndex;
 	NewMeshData.NumVertex = 0;
-	NewMeshData.NumIndex = 0;
+	NewMeshData.NumSubMesh = 1;
+	NewMeshData.SubMeshes[0].NumIndex = NumIndex;
+
 	m_lstMeshData.push_back(NewMeshData);
 
 	return (int32)(m_lstMeshData.size() - 1);
@@ -80,6 +114,13 @@ int32 Model::AddMesh(NameHash Name, PRIMITIVE_TYPE PrimitiveType, uint32 NumVert
 
 int32 Model::AddMesh(NameHash Name, PRIMITIVE_TYPE PrimitiveType, uint32 NumVertex, uint32 NumIndices, uint32* pNumIndices) noexcept
 {
+	int32 MeshIndex = FindMeshIndex(Name);
+	if (-1 != MeshIndex)
+	{
+		SYS_LOG_E("Model::AddMesh - A mesh with the same name already exists.");
+		return -1;
+	}
+
 	int32 PrimitiveIndex = m_pPrimitiveBuffer->AddPrimitive(PrimitiveType, NumVertex, NumIndices, pNumIndices);
 	if (-1 == PrimitiveIndex)
 	{
@@ -91,13 +132,12 @@ int32 Model::AddMesh(NameHash Name, PRIMITIVE_TYPE PrimitiveType, uint32 NumVert
 	for (uint32 i = 0; i < NumIndices; i++)
 		TotalIndexCount += pNumIndices[i];
 
-	MeshData NewMeshData = {};
+	MESH_DATA NewMeshData = {};
 	NewMeshData.Name = Name;
 	NewMeshData.PrimitiveIndex = PrimitiveIndex;
-	NewMeshData.MaxVertex = (uint32)NumVertex;
-	NewMeshData.MaxIndex = (uint32)TotalIndexCount;
+	NewMeshData.MaxVertex = NumVertex;
+	NewMeshData.MaxIndex =	TotalIndexCount;
 	NewMeshData.NumVertex = 0;
-	NewMeshData.NumIndex = 0;
 	NewMeshData.NumSubMesh = NumIndices;
 	for (uint32 i = 0; i < NumIndices; i++)
 		NewMeshData.SubMeshes[i].NumIndex = pNumIndices[i];
@@ -109,12 +149,86 @@ int32 Model::AddMesh(NameHash Name, PRIMITIVE_TYPE PrimitiveType, uint32 NumVert
 
 int32 Model::FindMeshIndex(NameHash Name) const noexcept
 {
+	if (Name.empty())
+		return -1;
+
 	for (size_t i = 0; i < m_lstMeshData.size(); i++)
 	{
 		if (m_lstMeshData[i].Name == Name)
 			return (int32)i;
 	}
+
 	return -1;
+}
+
+void Model::SetMaterial(int32 MeshIndex, ISurfaceMaterial* pSurfaceMaterial) noexcept
+{
+	if (MeshIndex < 0 || MeshIndex >= (int32)m_lstMeshData.size())
+	{
+		SYS_LOG_E("Model::SetMaterial - Mesh index is out of range.");
+		return;
+	}
+
+	if (m_lstMeshData[MeshIndex].SubMeshes[0].pMaterial != pSurfaceMaterial)
+	{
+		if (m_lstMeshData[MeshIndex].SubMeshes[0].pMaterial)
+			m_lstMeshData[MeshIndex].SubMeshes[0].pMaterial->Release();
+
+		if (pSurfaceMaterial)
+			pSurfaceMaterial->AddRef();
+
+		m_lstMeshData[MeshIndex].SubMeshes[0].pMaterial = pSurfaceMaterial;
+	}
+}
+
+void Model::SetMaterial(NameHash Name, ISurfaceMaterial* pSurfaceMaterial) noexcept
+{
+	const int32 MeshIndex = FindMeshIndex(Name);
+	if (-1 == MeshIndex)
+	{
+		SYS_LOG_E("Model::SetMaterial - Cannot find mesh by name.");
+		return;
+	}
+
+	return SetMaterial(MeshIndex, pSurfaceMaterial);
+}
+
+void Model::SetMaterial(int32 MeshIndex, int32 SubMeshIndex, ISurfaceMaterial* pSurfaceMaterial) noexcept
+{
+	if (MeshIndex < 0 || MeshIndex >= (int32)m_lstMeshData.size())
+	{
+		SYS_LOG_E("Model::SetMaterial - Mesh index is out of range.");
+		return;
+	}
+
+	if (SubMeshIndex < 0 || SubMeshIndex >= (int32)m_lstMeshData[MeshIndex].NumSubMesh)
+	{
+		SYS_LOG_E("Model::SetMaterial - Sub-mesh index is out of range.");
+		return;
+	}
+
+	if (m_lstMeshData[MeshIndex].SubMeshes[SubMeshIndex].pMaterial != pSurfaceMaterial)
+	{
+		if (m_lstMeshData[MeshIndex].SubMeshes[SubMeshIndex].pMaterial)
+			m_lstMeshData[MeshIndex].SubMeshes[SubMeshIndex].pMaterial->Release();
+
+		if (pSurfaceMaterial)
+			pSurfaceMaterial->AddRef();
+
+		m_lstMeshData[MeshIndex].SubMeshes[SubMeshIndex].pMaterial = pSurfaceMaterial;
+	}
+}
+
+void Model::SetMaterial(NameHash Name, int32 SubMeshIndex, ISurfaceMaterial* pSurfaceMaterial) noexcept
+{
+	const int32 MeshIndex = FindMeshIndex(Name);
+	if (-1 == MeshIndex)
+	{
+		SYS_LOG_E("Model::SetMaterial - Cannot find mesh by name.");
+		return;
+	}
+
+	return SetMaterial(MeshIndex, SubMeshIndex, pSurfaceMaterial);
 }
 
 void Model::SetPosition(int32 MeshIndex, FLOAT3* pPositions, UINT32 NumPosition) noexcept
@@ -125,7 +239,7 @@ void Model::SetPosition(int32 MeshIndex, FLOAT3* pPositions, UINT32 NumPosition)
 
 void Model::SetNormal(int32 MeshIndex, FLOAT3* pNormals, UINT32 NumNormal) noexcept
 {
-	if(m_lstMeshData[MeshIndex].NumVertex != NumNormal)
+	if (m_lstMeshData[MeshIndex].NumVertex != NumNormal)
 	{
 		SYS_LOG_E("Model::SetNormal - The number of normals does not match the number of vertices in the mesh.");
 		return;
@@ -195,10 +309,7 @@ void Model::SetNormal(NameHash Name, FLOAT3* pNormals, UINT32 NumNormal) noexcep
 {
 	const int32 MeshIndex = FindMeshIndex(Name);
 	if (-1 == MeshIndex)
-	{
-		SYS_LOG_E("Model::SetNormal - Cannot find mesh by name.");
 		return;
-	}
 
 	if (m_lstMeshData[MeshIndex].NumVertex != NumNormal)
 	{
@@ -213,10 +324,7 @@ void Model::SetTexCoord(NameHash Name, FLOAT2* pTexCoords, UINT32 NumTexCoord) n
 {
 	const int32 MeshIndex = FindMeshIndex(Name);
 	if (-1 == MeshIndex)
-	{
-		SYS_LOG_E("Model::SetTexCoord - Cannot find mesh by name.");
 		return;
-	}
 
 	if (m_lstMeshData[MeshIndex].NumVertex != NumTexCoord)
 	{
@@ -231,10 +339,7 @@ void Model::SetColor(NameHash Name, FLOAT4* pColors, UINT32 NumColor) noexcept
 {
 	const int32 MeshIndex = FindMeshIndex(Name);
 	if (-1 == MeshIndex)
-	{
-		SYS_LOG_E("Model::SetColor - Cannot find mesh by name.");
 		return;
-	}
 
 	if (m_lstMeshData[MeshIndex].NumVertex != NumColor)
 	{
@@ -249,10 +354,7 @@ void Model::SetTangent(NameHash Name, FLOAT3* pTangents, UINT32 NumTangent) noex
 {
 	const int32 MeshIndex = FindMeshIndex(Name);
 	if (-1 == MeshIndex)
-	{
-		SYS_LOG_E("Model::SetTangent - Cannot find mesh by name.");
 		return;
-	}
 
 	if (m_lstMeshData[MeshIndex].NumVertex != NumTangent)
 	{
@@ -267,10 +369,7 @@ void Model::SetBinormal(NameHash Name, FLOAT3* pBinormals, UINT32 NumBinormal) n
 {
 	const int32 MeshIndex = FindMeshIndex(Name);
 	if (-1 == MeshIndex)
-	{
-		SYS_LOG_E("Model::SetBinormal - Cannot find mesh by name.");
 		return;
-	}
 
 	if (m_lstMeshData[MeshIndex].NumVertex != NumBinormal)
 	{
@@ -283,7 +382,7 @@ void Model::SetBinormal(NameHash Name, FLOAT3* pBinormals, UINT32 NumBinormal) n
 
 void Model::SetIndex(int32 MeshIndex, const uint32* pIndices, UINT32 NumIndex) noexcept
 {
-	m_lstMeshData[MeshIndex].NumIndex = NumIndex;
+	m_lstMeshData[MeshIndex].SubMeshes[0].NumIndex = NumIndex;
 	m_pPrimitiveBuffer->UpdateIndex(m_lstMeshData[MeshIndex].PrimitiveIndex, pIndices, NumIndex);
 }
 
@@ -291,12 +390,9 @@ void Model::SetIndex(NameHash Name, const uint32* pIndices, UINT32 NumIndex) noe
 {
 	const int32 MeshIndex = FindMeshIndex(Name);
 	if (-1 == MeshIndex)
-	{
-		SYS_LOG_E("Model::SetIndex - Cannot find mesh by name.");
 		return;
-	}
 
-	m_lstMeshData[MeshIndex].NumIndex = NumIndex;
+	m_lstMeshData[MeshIndex].SubMeshes[0].NumIndex = NumIndex;
 	m_pPrimitiveBuffer->UpdateIndex(m_lstMeshData[MeshIndex].PrimitiveIndex, pIndices, NumIndex);
 }
 
@@ -341,11 +437,11 @@ void Model::SetIndex(NameHash Name, uint32 NumIndex, const uint32** ppIndices, u
 	m_pPrimitiveBuffer->UpdateIndex(m_lstMeshData[MeshIndex].PrimitiveIndex, NumIndex, ppIndices, pNumIndices);
 }
 
-BOOL Model::CreateMesh(IModelAsset* pModelAsset) noexcept
+BOOL Model::LoadMaterial(HANDLE hTempHeap, IModelAsset* pModelAsset) noexcept
 {
 	if (!pModelAsset)
 	{
-		SYS_LOG_E("Model::CreateMesh - Invalid model asset pointer.");
+		SYS_LOG_E("Model::LoadMaterial - Invalid model asset pointer.");
 		return FALSE;
 	}
 
@@ -354,42 +450,47 @@ BOOL Model::CreateMesh(IModelAsset* pModelAsset) noexcept
 	uint32 ModelAttrib = pModelAssetImpl->INL_GetModelAttrib();
 
 	// Load Material
-	if (ModelAttrib & (uint32)MODEL_ATTRIB::MATERIAL)
+	if (!(ModelAttrib & (uint32)MODEL_ATTRIB::MATERIAL))
 	{
-		SYS_LOG_E("Model::CreateMesh - Model asset does not contain material data.");
+		SYS_LOG_E("Model::LoadMaterial - Model asset does not contain material data.");
 		return FALSE;
 	}
 
-	size_t NumMaterials = pModelAssetImpl->GetNumMaterials();
-	for (size_t i = 0; i < NumMaterials; i++)
+	IRenderSystem* pRenderSystem = nullptr;
+	Mark3DImpl::Get()->GetRenderSystemInterface(&pRenderSystem);
+
+	ISurfaceMaterial** ppSurfaceMaterials = nullptr;
+
+	size_t NumMaterial = pModelAsset->GetNumMaterials();
+	if (!NumMaterial)
 	{
-		const char* szDiffuse = pModelAssetImpl->GetMaterialDiffuse((int32)i);
-		const char* szNormal = pModelAssetImpl->GetMaterialNormal((int32)i);
-		const char* szSpecular = pModelAssetImpl->GetMaterialSpecular((int32)i);
-		const char* szEmissive = pModelAssetImpl->GetMaterialEmissive((int32)i);
-		FLOAT4 Color = pModelAssetImpl->GetMaterialColor((int32)i);
-
-		if (szDiffuse && fstrlen(szDiffuse))
-		{
-			// Load diffuse texture
-
-		}
-
-		if (szNormal && fstrlen(szNormal))
-		{
-			// Load normal texture
-		}
-
-		if (szSpecular && fstrlen(szSpecular))
-		{
-			// Load specular texture
-		}
-
-		if (szEmissive && fstrlen(szEmissive))
-		{
-			// Load emissive texture
-		}
+		SYS_LOG_W("Model::LoadMaterial - No materials found in model asset.");
+		return TRUE;
 	}
+
+	ppSurfaceMaterials = (ISurfaceMaterial**)temppool_alloc(hTempHeap, sizeof(ISurfaceMaterial*) * NumMaterial);
+
+	for (size_t i = 0; i < NumMaterial; i++)
+	{
+		if (!pRenderSystem->CreateSurfaceMaterial(&ppSurfaceMaterials[i]))
+			continue;
+
+		m_lstMaterials.push_back(ppSurfaceMaterials[i]);
+	}
+	return TRUE;
+}
+
+BOOL Model::LoadMesh(HANDLE hTempHeap, IModelAsset* pModelAsset) noexcept
+{
+	if (!pModelAsset)
+	{
+		SYS_LOG_E("Model::LoadMesh - Invalid model asset pointer.");
+		return FALSE;
+	}
+
+	ModelAsset* pModelAssetImpl = static_cast<ModelAsset*>(pModelAsset);
+	
+	uint32 ModelAttrib = pModelAssetImpl->INL_GetModelAttrib();
 
 	// Load Mesh
 	if (ModelAttrib & (uint32)MODEL_ATTRIB::MESH)
@@ -441,7 +542,7 @@ BOOL Model::CreateMesh(IModelAsset* pModelAsset) noexcept
 			if (-1 == MeshIndex)
 			{
 				SYS_LOG_E("Model::CreateMesh - Failed to add mesh.");
-				return FALSE;
+				continue;
 			}
 
 			FLOAT3* pPositions = pModelAsset->GetPositions((int32)i);
@@ -467,6 +568,10 @@ BOOL Model::CreateMesh(IModelAsset* pModelAsset) noexcept
 			FLOAT3* pBinormals = pModelAsset->GetBinormal((int32)i);
 			if (pBinormals)
 				SetBinormal(MeshIndex, pBinormals, (uint32)NumVertex);
+
+			int32 MaterialIndex = pModelAsset->GetMaterialIndex(MeshIndex, 0);
+			if (-1 != MaterialIndex && MaterialIndex < NumMaterials)
+				SetMaterial(MeshIndex, ppSurfaceMaterials[MaterialIndex]);
 		}
 		else
 		{
@@ -487,7 +592,7 @@ BOOL Model::CreateMesh(IModelAsset* pModelAsset) noexcept
 			if (-1 == MeshIndex)
 			{
 				SYS_LOG_E("Model::CreateMesh - Failed to add mesh.");
-				return FALSE;
+				continue;
 			}
 
 			FLOAT3* pPositions = pModelAsset->GetPositions((int32)i);
@@ -522,6 +627,13 @@ BOOL Model::CreateMesh(IModelAsset* pModelAsset) noexcept
 			uint32* pNumIndices = NumIndices;
 
 			SetIndex(MeshIndex, NumIndexArray, ppIndicesData, pNumIndices);
+
+			for (int32 s = 0; s < (int32)NumSubMesh; s++)
+			{
+				int32 MaterialIndex = pModelAsset->GetMaterialIndex(MeshIndex, s);
+				if (-1 != MaterialIndex && MaterialIndex < NumMaterials)
+					SetMaterial(MeshIndex, s, ppSurfaceMaterials[MaterialIndex]);
+			}
 		}
 	}
 

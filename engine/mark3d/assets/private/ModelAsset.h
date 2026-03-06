@@ -23,7 +23,7 @@ public:
 		// SubMesh별 인덱스 데이터
 		struct SubMesh
 		{
-			int32 MaterialID; // SubMesh에 적용된 Material ID
+			int32 MaterialIndex; // Material배열 인덱스
 			uint32 PADDING_OR_RESERVED = 0; // 패딩 또는 예약 필드
 			uint32* pIndices; // 인덱스 데이터
 			size_t NumIndices; // 인덱스 개수
@@ -84,7 +84,7 @@ public:
 	virtual size_t GetNumIndices(int32 MeshIndex, int32 SubMeshIndex) const noexcept final;
 
 	virtual size_t GetNumMaterials() const noexcept final;
-	virtual int32 GetMaterialID(int32 MeshIndex, int32 SubMeshIndex) const noexcept final;
+	virtual int32 GetMaterialIndex(int32 MeshIndex, int32 SubMeshIndex) const noexcept final;
 	virtual const char* GetMaterialDiffuse(int32 MaterialID) const noexcept final;
 	virtual const char* GetMaterialNormal(int32 MaterialID) const noexcept final;
 	virtual const char* GetMaterialSpecular(int32 MaterialID) const noexcept final;
@@ -103,6 +103,8 @@ public:
 private:
 	ModelAsset() = delete;
 	virtual ~ModelAsset() noexcept;
+
+	int32 FindMaterialIndex(int32 MatID) const noexcept;
 
 private:
 	volatile long m_RefCnt = 1;

@@ -11,7 +11,11 @@ class World;
 
 class Mark3DImpl final : public IMark3D
 {
+	static Mark3DImpl* s_pInstance;
+
 public:
+	Mark3DImpl();
+
 	// IUNKNOWN interface
 	virtual long AddRef() final;
 	virtual long Release() final;
@@ -37,6 +41,7 @@ public:
 	// SceneObject's APIs
 	virtual BOOL CreateModel(IModelAsset* pModelAsset, IModel** ppOut) final;
 	
+	static Mark3DImpl* Get() noexcept;
 
 private:
 	virtual ~Mark3DImpl() noexcept;

@@ -269,12 +269,12 @@ struct IModelAsset : public IAsset
 	virtual size_t GetNumIndices(int32 MeshIndex, int32 SubMeshIndex) const noexcept = 0;
 
 	/**
-	* @brief 서브메쉬에 적용된 머티리얼 ID 반환
+	* @brief 서브메쉬에 적용된 머티리얼 Index 반환
 	* @param MeshIndex 메쉬 인덱스
 	* @param SubMeshIndex 서브메쉬 인덱스
-	* @return 머티리얼 ID
+	* @return 머티리얼 Index
 	*/
-	virtual int32 GetMaterialID(int32 MeshIndex, int32 SubMeshIndex) const noexcept = 0;
+	virtual int32 GetMaterialIndex(int32 MeshIndex, int32 SubMeshIndex) const noexcept = 0;
 
 	/**
 	* @brief 머티리얼 개수 반환

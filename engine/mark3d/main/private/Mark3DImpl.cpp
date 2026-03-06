@@ -51,9 +51,20 @@ BOOL __stdcall CreateAndInitEngineModule(const MARK3D_CREATE_DESC& CreateDesc, I
 }
 
 
+Mark3DImpl* Mark3DImpl::s_pInstance = nullptr;
+
+Mark3DImpl::Mark3DImpl()
+{
+	if (!s_pInstance)
+		s_pInstance = this;
+}
+
 Mark3DImpl::~Mark3DImpl() noexcept
 {
 	Shutdown();
+
+	if (s_pInstance == this)
+		s_pInstance = nullptr;
 }
 
 long Mark3DImpl::AddRef()
@@ -153,6 +164,9 @@ BOOL Mark3DImpl::GetAssetsInterface(IAssets** ppOut)
 	if (!ppOut) return FALSE;
 
 	(*ppOut) = m_pAssets;
+
+	if (m_pAssets)
+		m_pAssets->AddRef();
 
 	return TRUE;
 }

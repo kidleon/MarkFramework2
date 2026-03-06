@@ -230,7 +230,7 @@ size_t ModelAsset::GetNumMaterials() const noexcept
 	return m_NumMaterials;
 }
 
-int32 ModelAsset::GetMaterialID(int32 MeshIndex, int32 SubMeshIndex) const noexcept
+int32 ModelAsset::GetMaterialIndex(int32 MeshIndex, int32 SubMeshIndex) const noexcept
 {
 	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_NumMeshes)
 		return -1;
@@ -238,7 +238,7 @@ int32 ModelAsset::GetMaterialID(int32 MeshIndex, int32 SubMeshIndex) const noexc
 	if (SubMeshIndex < 0 || static_cast<size_t>(SubMeshIndex) >= m_pMeshes[MeshIndex].NumSubMesh)
 		return -1;
 
-	return m_pMeshes[MeshIndex].pSubMeshes[SubMeshIndex].MaterialID;
+	return m_pMeshes[MeshIndex].pSubMeshes[SubMeshIndex].MaterialIndex;
 }
 
 const char* ModelAsset::GetMaterialDiffuse(int32 MaterialID) const noexcept
@@ -275,6 +275,18 @@ FLOAT4 ModelAsset::GetMaterialColor(int32 MaterialID) const noexcept
 		return FLOAT4{0, 0, 0, 0};
 	return m_pMaterials[MaterialID].Color;
 }
+
+int32 ModelAsset::FindMaterialIndex(int32 MatID) const noexcept
+{
+	for(size_t i = 0; i < m_NumMaterials; i++)
+	{
+		if (m_pMaterials[i].ID == MatID)
+			return static_cast<int32>(i);
+	}
+
+	return -1;
+}
+
 
 BOOL ModelAsset::LoadFromFBX(const FBX_SCENE* fbx_scene) noexcept
 {
@@ -370,7 +382,7 @@ BOOL ModelAsset::LoadFromFBX(const FBX_SCENE* fbx_scene) noexcept
 					{
 						const FBX_SUBMESH& fbx_submesh = fbx_mesh.submeshes[j];
 						Mesh::SubMesh& submesh = mesh.pSubMeshes[j];
-						submesh.MaterialID = fbx_submesh.material_id;
+						submesh.MaterialIndex = FindMaterialIndex(fbx_submesh.material_id);
 						submesh.NumIndices = fbx_submesh.num_indices;
 						if (fbx_submesh.indices)
 						{
