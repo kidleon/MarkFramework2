@@ -8,6 +8,7 @@
 #include "linked_list.h"
 #include "hash_table.h"
 #include "strings.h"
+#include "os_file.h"
 #include "CoreDef.h"
 #include "Log.h"
 #include "TArray.h"

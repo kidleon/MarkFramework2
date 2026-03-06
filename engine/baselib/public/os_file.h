@@ -169,5 +169,19 @@ MARK_BASELIB_C_API BOOL get_path(
 	size_t size
 );
 
+/**
+* @brief 두 개의 경로를 결합하여 하나의 경로를 만듭니다.
+* @param path1 첫 번째 경로
+* @param path2 두 번째 경로
+* @param buffer 결합된 경로를 저장할 버퍼
+* @param size 버퍼 크기
+* @return 성공시 TRUE, 실패시 FALSE
+*/
+MARK_BASELIB_C_API BOOL combine_path(
+	const char* path1,
+	const char* path2,
+	char* buffer,
+	size_t size
+);
 
 #endif // __OS_FILE_H__

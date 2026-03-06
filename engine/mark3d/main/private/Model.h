@@ -56,14 +56,14 @@ public:
 	virtual void SetIndex(int32 MeshIndex, uint32 NumIndex, const uint32** ppIndices, uint32* pNumIndices) noexcept final;
 	virtual void SetIndex(NameHash Name, uint32 NumIndex, const uint32** ppIndices, uint32* pNumIndices) noexcept final;
 
-	BOOL LoadMesh(HANDLE hTempHeap, IModelAsset* pModelAsset) noexcept;
-	BOOL LoadMaterial(HANDLE hTempHeap, IModelAsset* pModelAsset) noexcept;
-
+	BOOL LoadMesh(IModelAsset* pModelAsset) noexcept;
+	BOOL LoadMaterial(IModelAsset* pModelAsset) noexcept;
 
 private:
 	Model() = delete;
 	virtual ~Model() noexcept;
 	int32 FindMeshIndex(NameHash Name) const noexcept;
+	void OnApplyMaterials() noexcept;
 
 private:
 	long m_RefCnt = 1;
@@ -85,7 +85,7 @@ private:
 		struct SUB_MESH
 		{
 			uint32 NumIndex;
-			ISurfaceMaterial* pMaterial;
+			int32 MaterialIndex;
 		};
 
 		uint32 NumSubMesh;

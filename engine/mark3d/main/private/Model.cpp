@@ -437,7 +437,7 @@ void Model::SetIndex(NameHash Name, uint32 NumIndex, const uint32** ppIndices, u
 	m_pPrimitiveBuffer->UpdateIndex(m_lstMeshData[MeshIndex].PrimitiveIndex, NumIndex, ppIndices, pNumIndices);
 }
 
-BOOL Model::LoadMaterial(HANDLE hTempHeap, IModelAsset* pModelAsset) noexcept
+BOOL Model::LoadMaterial(IModelAsset* pModelAsset) noexcept
 {
 	if (!pModelAsset)
 	{
@@ -455,12 +455,7 @@ BOOL Model::LoadMaterial(HANDLE hTempHeap, IModelAsset* pModelAsset) noexcept
 		SYS_LOG_E("Model::LoadMaterial - Model asset does not contain material data.");
 		return FALSE;
 	}
-
-	IRenderSystem* pRenderSystem = nullptr;
-	Mark3DImpl::Get()->GetRenderSystemInterface(&pRenderSystem);
-
-	ISurfaceMaterial** ppSurfaceMaterials = nullptr;
-
+	
 	size_t NumMaterial = pModelAsset->GetNumMaterials();
 	if (!NumMaterial)
 	{
@@ -468,19 +463,35 @@ BOOL Model::LoadMaterial(HANDLE hTempHeap, IModelAsset* pModelAsset) noexcept
 		return TRUE;
 	}
 
-	ppSurfaceMaterials = (ISurfaceMaterial**)temppool_alloc(hTempHeap, sizeof(ISurfaceMaterial*) * NumMaterial);
+	IAssets* pAssets = nullptr;
+	Mark3DImpl::Get()->GetAssetsInterface(&pAssets);
+
+	IRenderSystem* pRenderSystem = nullptr;
+	Mark3DImpl::Get()->GetRenderSystemInterface(&pRenderSystem);
+
+	char szRelativePath[MAX_PATH] = {};
+	pModelAsset->GetRelativePath(szRelativePath, MAX_PATH, TRUE);
 
 	for (size_t i = 0; i < NumMaterial; i++)
 	{
-		if (!pRenderSystem->CreateSurfaceMaterial(&ppSurfaceMaterials[i]))
+		ISurfaceMaterial* pSurfaceMaterial = nullptr;
+		if (!pRenderSystem->CreateSurfaceMaterial(&pSurfaceMaterial))
 			continue;
 
-		m_lstMaterials.push_back(ppSurfaceMaterials[i]);
+		const char* szDiffuseTexture = pModelAsset->GetMaterialDiffuse(i);
+		if (szDiffuseTexture && fstrlen(szDiffuseTexture))
+		{
+			char szPath[MAX_PATH] = {};
+			combine_path(szRelativePath, szDiffuseTexture, szPath, MAX_PATH);
+		}
+
+		m_lstMaterials.push_back(pSurfaceMaterial);
 	}
+
 	return TRUE;
 }
 
-BOOL Model::LoadMesh(HANDLE hTempHeap, IModelAsset* pModelAsset) noexcept
+BOOL Model::LoadMesh(IModelAsset* pModelAsset) noexcept
 {
 	if (!pModelAsset)
 	{
@@ -569,9 +580,7 @@ BOOL Model::LoadMesh(HANDLE hTempHeap, IModelAsset* pModelAsset) noexcept
 			if (pBinormals)
 				SetBinormal(MeshIndex, pBinormals, (uint32)NumVertex);
 
-			int32 MaterialIndex = pModelAsset->GetMaterialIndex(MeshIndex, 0);
-			if (-1 != MaterialIndex && MaterialIndex < NumMaterials)
-				SetMaterial(MeshIndex, ppSurfaceMaterials[MaterialIndex]);
+			pModelAsset->GetMaterialIndex(MeshIndex, 0);
 		}
 		else
 		{
@@ -628,14 +637,20 @@ BOOL Model::LoadMesh(HANDLE hTempHeap, IModelAsset* pModelAsset) noexcept
 
 			SetIndex(MeshIndex, NumIndexArray, ppIndicesData, pNumIndices);
 
-			for (int32 s = 0; s < (int32)NumSubMesh; s++)
-			{
-				int32 MaterialIndex = pModelAsset->GetMaterialIndex(MeshIndex, s);
-				if (-1 != MaterialIndex && MaterialIndex < NumMaterials)
-					SetMaterial(MeshIndex, s, ppSurfaceMaterials[MaterialIndex]);
-			}
+			
 		}
 	}
 
 	return TRUE;
+}
+
+void Model::OnApplyMaterials() noexcept
+{
+	for (size_t i = 0; i < m_lstMeshData.size(); i++)
+	{
+		for (size_t s = 0; s < m_lstMeshData[i].NumSubMesh; s++)
+		{
+
+		}
+	}
 }

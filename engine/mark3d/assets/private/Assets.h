@@ -8,6 +8,7 @@ interface IBinaryAsset;
 interface IModelAsset;
 interface ITexture1D;
 interface ITexture2D;
+interface IModel;
 
 class Assets final : public IAssets
 {
@@ -41,6 +42,9 @@ public:
 
 	virtual BOOL Load(const char* szRelativePath, ITexture2D** ppOut) final;
 	virtual BOOL LoadAsync(const char* szRelativePath, ITexture2D** ppOut) final;
+
+	virtual BOOL Load(const char* szRelativePath, IModel** ppOut) final;
+	virtual BOOL LoadAsync(const char* szRelativePath, IModel** ppOut) final;
 
 private:
 	virtual ~Assets() noexcept;

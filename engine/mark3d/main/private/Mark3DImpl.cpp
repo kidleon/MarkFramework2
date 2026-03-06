@@ -165,9 +165,6 @@ BOOL Mark3DImpl::GetAssetsInterface(IAssets** ppOut)
 
 	(*ppOut) = m_pAssets;
 
-	if (m_pAssets)
-		m_pAssets->AddRef();
-
 	return TRUE;
 }
 
@@ -177,8 +174,8 @@ BOOL Mark3DImpl::GetRenderSystemInterface(IRenderSystem** ppOut)
 
 	(*ppOut) = m_pRenderSystem;
 
-	if (m_pRenderSystem)
-		m_pRenderSystem->AddRef();
+	//if (m_pRenderSystem)
+		//m_pRenderSystem->AddRef();
 
 	return TRUE;
 }

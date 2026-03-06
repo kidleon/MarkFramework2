@@ -3,6 +3,14 @@
 #include "strings.h"
 
 
+#ifdef _WIN32
+#define PATH_SEP '\\'
+#define PATH_SEP_STR "\\"
+#else
+#define PATH_SEP '/'
+#define PATH_SEP_STR "/"
+#endif
+
 /* 컴파일러별 헤더 및 함수 정의 */
 #if defined(__TARGET_COMPILER_MSC)
 	/* Microsoft Visual C++ */
@@ -380,6 +388,68 @@ BOOL get_path(
 
 	memcpy(buffer, path, len);
 	buffer[len] = '\0';
+
+	return TRUE;
+}
+
+BOOL combine_path(
+	const char* path1,
+	const char* path2,
+	char* buffer,
+	size_t size
+) 
+{
+	size_t len1, len2, total;
+	BOOL need_sep;
+
+	/* 유효성 검사 */
+	if (!buffer || size == 0)
+		return FALSE;
+
+	buffer[0] = '\0';
+
+	/* path1이 NULL이면 path2만 복사 */
+	if (!path1 || path1[0] == '\0') 
+	{
+		if (!path2) return FALSE;
+		if (strlen(path2) >= size) return FALSE;
+		strcpy(buffer, path2);
+		return TRUE;
+	}
+
+	/* path2가 NULL 또는 빈 문자열이면 path1만 복사 */
+	if (!path2 || path2[0] == '\0') 
+	{
+		if (strlen(path1) >= size) return FALSE;
+		strcpy(buffer, path1);
+		return TRUE;
+	}
+
+	/* path2가 절대 경로이면 path2만 복사 */
+	if (path2[0] == '/' || path2[0] == '\\') 
+	{
+		if (strlen(path2) >= size) return FALSE;
+		strcpy(buffer, path2);
+		return TRUE;
+	}
+
+	len1 = strlen(path1);
+	len2 = strlen(path2);
+
+	/* path1 끝에 구분자가 없으면 구분자 추가 필요 */
+	need_sep = (path1[len1 - 1] != '/' && path1[len1 - 1] != '\\');
+
+	/* 전체 길이 계산: len1 + (구분자 여부) + len2 + null terminator */
+	total = len1 + (need_sep ? 1 : 0) + len2 + 1;
+
+	if (total > size)
+		return FALSE;
+
+	/* 결합 수행 */
+	strcpy(buffer, path1);
+	if (need_sep)
+		strcat(buffer, PATH_SEP_STR);
+	strcat(buffer, path2);
 
 	return TRUE;
 }

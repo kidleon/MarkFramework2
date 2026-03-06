@@ -358,3 +358,23 @@ BOOL Assets::LoadAsync(const char* szRelativePath, IModelAsset** ppOut)
 
 	return TRUE;
 }
+
+BOOL Assets::Load(const char* szRelativePath, IModel** ppOut)
+{
+	char szExtension[16] = { 0 };
+	get_file_extension(szRelativePath, szExtension, sizeof(szExtension));
+	fstrlcpy(szExtension, fstrlwr(szExtension), sizeof(szExtension) - 1);
+
+	// fbx
+
+	// model
+
+	
+
+	return TRUE;
+}
+
+BOOL Assets::LoadAsync(const char* szRelativePath, IModel** ppOut)
+{
+	return TRUE;
+}
