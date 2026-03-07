@@ -366,10 +366,34 @@ BOOL Assets::Load(const char* szRelativePath, IModel** ppOut)
 	fstrlcpy(szExtension, fstrlwr(szExtension), sizeof(szExtension) - 1);
 
 	// fbx
+	if(fstrstr(szExtension, "fbx"))
+	{
+		ModelAsset* pModelAsset = CORE_NEW(ModelAsset)(idgen_getid(m_hIDGen), szRelativePath);
+		pModelAsset->INL_SetLoadStat(LOAD_STAT::LOADING);
+		BOOL result = LoadModelFromFBX(
+			m_hSyncLoadTempPool,
+			m_pFileSystem,
+			szRelativePath,
+			pModelAsset
+		);
+
+		if (!result)
+		{
+			pModelAsset->Release();
+			*ppOut = nullptr;
+			return FALSE;
+		}
+
+		temppool_clear(m_hSyncLoadTempPool);
+		pModelAsset->INL_SetLoadStat(LOAD_STAT::LOADED);
+	
+
+
+
+		return TRUE;
+	}
 
 	// model
-
-	
 
 	return TRUE;
 }
