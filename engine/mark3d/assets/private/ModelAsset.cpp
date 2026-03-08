@@ -241,6 +241,42 @@ int32 ModelAsset::GetMaterialIndex(int32 MeshIndex, int32 SubMeshIndex) const no
 	return m_pMeshes[MeshIndex].pSubMeshes[SubMeshIndex].MaterialIndex;
 }
 
+BOOL ModelAsset::HasDiffuseTexture(int32 MaterialID) const noexcept
+{
+	if (MaterialID < 0 || static_cast<size_t>(MaterialID) >= m_NumMaterials)
+		return FALSE;
+	return m_pMaterials[MaterialID].Diffuse[0] != '\0';
+}
+
+BOOL ModelAsset::HasNormalTexture(int32 MaterialID) const noexcept
+{
+	if (MaterialID < 0 || static_cast<size_t>(MaterialID) >= m_NumMaterials)
+		return FALSE;
+	return m_pMaterials[MaterialID].Normal[0] != '\0';
+}
+
+BOOL ModelAsset::HasSpecularTexture(int32 MaterialID) const noexcept
+{
+		if (MaterialID < 0 || static_cast<size_t>(MaterialID) >= m_NumMaterials)
+		return FALSE;
+		return m_pMaterials[MaterialID].Specular[0] != '\0';
+}
+
+BOOL ModelAsset::HasEmissiveTexture(int32 MaterialID) const noexcept
+{
+	if (MaterialID < 0 || static_cast<size_t>(MaterialID) >= m_NumMaterials)
+		return FALSE;
+	return m_pMaterials[MaterialID].Emissive[0] != '\0';
+}
+
+BOOL ModelAsset::HasColor(int32 MaterialID) const noexcept
+{
+	if (MaterialID < 0 || static_cast<size_t>(MaterialID) >= m_NumMaterials)
+		return FALSE;
+	const FLOAT4& Color = m_pMaterials[MaterialID].Color;
+	return !(Color.x == 0 && Color.y == 0 && Color.z == 0 && Color.w == 0);
+}
+
 const char* ModelAsset::GetMaterialDiffuse(int32 MaterialID) const noexcept
 {
 	if (MaterialID < 0 || static_cast<size_t>(MaterialID) >= m_NumMaterials)

@@ -54,6 +54,8 @@ private:
 	virtual long Release() final;
 	virtual long RefCnt() final;
 
+	BOOL IsExistFile(const char* szRelativePath) noexcept;
+
 private:
 	volatile long m_RefCnt = 1;
 #if defined(__TARGET_OS_WINDOWS)
@@ -66,6 +68,7 @@ private:
 	HANDLE m_hSyncLoadTempPool; // 동기 로드 시 임시로 사용할 메모리 풀 핸들
 	BOOL m_Initialized;
 
+	char m_szTexturePath[8][MAX_FILE_LENGTH] = { 0 }; // 텍스처 경로 저장용 배열 (예: Diffuse, Normal, Specular, etc.)
 };
 
 #endif // __ASSETS_H__

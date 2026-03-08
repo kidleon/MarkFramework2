@@ -283,6 +283,41 @@ struct IModelAsset : public IAsset
 	virtual size_t GetNumMaterials() const noexcept = 0;
 
 	/**
+	* @brief 서브메쉬에 적용된 머티리얼이 디퓨즈 텍스처를 가지고 있는지 여부 반환
+	* @param MaterialID 머티리얼 ID
+	* @return 디퓨즈 텍스처 존재 여부
+	*/
+	virtual BOOL HasDiffuseTexture(int32 MaterialID) const noexcept = 0;
+
+	/**
+	* @brief 서브메쉬에 적용된 머티리얼이 노멀 텍스처를 가지고 있는지 여부 반환
+	* @param MaterialID 머티리얼 ID
+	* @return 노멀 텍스처 존재 여부
+	*/
+	virtual BOOL HasNormalTexture(int32 MaterialID) const noexcept = 0;
+
+	/**
+	* @brief 서브메쉬에 적용된 머티리얼이 색상을 가지고 있는지 여부 반환
+	* @param MaterialID 머티리얼 ID
+	* @return 색상 존재 여부
+	*/
+	virtual BOOL HasColor(int32 MaterialID) const noexcept = 0;
+
+	/**
+	* @brief 서브메쉬에 적용된 머티리얼이 스페큘러 텍스처를 가지고 있는지 여부 반환
+	* @param MaterialID 머티리얼 ID
+	* @return 스페큘러 텍스처 존재 여부
+	*/
+	virtual BOOL HasSpecularTexture(int32 MaterialID) const noexcept = 0;
+
+	/**
+	* @brief 서브메쉬에 적용된 머티리얼이 발광 텍스처를 가지고 있는지 여부 반환
+	* @param MaterialID 머티리얼 ID
+	* @return 발광 텍스처 존재 여부
+	*/
+	virtual BOOL HasEmissiveTexture(int32 MaterialID) const noexcept = 0;
+
+	/**
 	* @brief 머티리얼 디퓨즈 텍스처 경로 반환
 	* @param MaterialID 머티리얼 ID
 	* @return 디퓨즈 텍스처 경로 문자열 포인터

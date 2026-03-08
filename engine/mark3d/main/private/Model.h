@@ -8,6 +8,7 @@ using namespace mark;
 
 class Model : public IModel
 {
+public:
 	static constexpr size_t MAX_SUBMESH_PER_MESH = 8;
 
 public:

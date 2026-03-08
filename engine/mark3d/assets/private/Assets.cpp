@@ -83,6 +83,10 @@ BOOL Assets::Init(const char* szRootPath)
 
 	m_Initialized = TRUE;
 
+	fstrlcpy(m_szTexturePath[0], "texture", sizeof(m_szTexturePath[0]));
+	fstrlcpy(m_szTexturePath[1], "common/texture", sizeof(m_szTexturePath[1]));
+	fstrlcpy(m_szTexturePath[2], "model/texture", sizeof(m_szTexturePath[2]));
+
 	return TRUE;
 }
 
@@ -366,7 +370,7 @@ BOOL Assets::Load(const char* szRelativePath, IModel** ppOut)
 	fstrlcpy(szExtension, fstrlwr(szExtension), sizeof(szExtension) - 1);
 
 	// fbx
-	if(fstrstr(szExtension, "fbx"))
+	if (fstrstr(szExtension, "fbx"))
 	{
 		ModelAsset* pModelAsset = CORE_NEW(ModelAsset)(idgen_getid(m_hIDGen), szRelativePath);
 		pModelAsset->INL_SetLoadStat(LOAD_STAT::LOADING);
@@ -386,9 +390,6 @@ BOOL Assets::Load(const char* szRelativePath, IModel** ppOut)
 
 		temppool_clear(m_hSyncLoadTempPool);
 		pModelAsset->INL_SetLoadStat(LOAD_STAT::LOADED);
-	
-
-
 
 		return TRUE;
 	}
@@ -402,3 +403,27 @@ BOOL Assets::LoadAsync(const char* szRelativePath, IModel** ppOut)
 {
 	return TRUE;
 }
+
+/*
+char szLowerPath[MAX_FILE_LENGTH] = { 0 };
+fstrlcpy(szLowerPath, fstrlwr((char*)szRelativePath), sizeof(szLowerPath) - 1);
+
+if (!m_pFileSystem->ExistFile(szLowerPath))
+{
+	char szOnlyPath[MAX_FILE_LENGTH] = { 0 };
+	char szTempPath[MAX_FILE_LENGTH] = { 0 };
+	get_path(szLowerPath, szOnlyPath, sizeof(szOnlyPath));
+
+	combine_path(szOnlyPath, "texture", szTempPath, sizeof(szTempPath));
+	if (!m_pFileSystem->ExistFile(szLowerPath))
+	{
+		combine_path(szOnlyPath, "material", szTempPath, sizeof(szTempPath));
+		if (m_pFileSystem->ExistFile(szTempPath))
+		{
+			SYS_LOG_E("Assets::Load: Model file not found: %s", szRelativePath);
+			(*ppOut) = nullptr;
+			return FALSE;
+		}
+	}
+}
+*/

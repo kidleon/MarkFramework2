@@ -84,6 +84,13 @@ public:
 	virtual size_t GetNumIndices(int32 MeshIndex, int32 SubMeshIndex) const noexcept final;
 
 	virtual size_t GetNumMaterials() const noexcept final;
+	
+	virtual BOOL HasDiffuseTexture(int32 MaterialID) const noexcept final;
+	virtual BOOL HasNormalTexture(int32 MaterialID) const noexcept final;
+	virtual BOOL HasSpecularTexture(int32 MaterialID) const noexcept final;
+	virtual BOOL HasEmissiveTexture(int32 MaterialID) const noexcept final;
+	virtual BOOL HasColor(int32 MaterialID) const noexcept final;
+
 	virtual int32 GetMaterialIndex(int32 MeshIndex, int32 SubMeshIndex) const noexcept final;
 	virtual const char* GetMaterialDiffuse(int32 MaterialID) const noexcept final;
 	virtual const char* GetMaterialNormal(int32 MaterialID) const noexcept final;
