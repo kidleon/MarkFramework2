@@ -223,7 +223,7 @@ BOOL Assets::LoadAsync(const char* szRelativePath, IBinaryAsset** ppOut)
 BOOL Assets::Load(const char* szRelativePath, ITexture1D** ppOut)
 {
 	if (!szRelativePath || !ppOut) return FALSE;
-	/*
+	
 #if defined(__MARK3D_RENDERSYSTEM_D3D11__)
 	
 	IDataStream* pDataStream = m_pFileSystem->OpenFile(szRelativePath, TRUE);
@@ -280,7 +280,7 @@ BOOL Assets::Load(const char* szRelativePath, ITexture1D** ppOut)
 	(*ppOut) = pTexture1D;
 
 #endif // __MARK3D_RENDERSYSTEM_D3D11__
-*/
+
 	return TRUE;
 }
 

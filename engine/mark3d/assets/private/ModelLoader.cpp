@@ -8,6 +8,9 @@
 #include "Mark3DImpl.h"
 
 
+
+BOOL LoadTexture(IAssets* pAssets, IFileSystem* pFileSystem, const char* szRelativePath, ITexture2D** ppOut);
+
 BOOL LoadModelFromFile(
 	HANDLE hTempPool,
 	IFileSystem* pFileSystem,
@@ -185,19 +188,101 @@ BOOL LoadModelFromFile(
 
 	size_t NumMaterials = pModelAsset->GetNumMaterials();
 
+	char szPath[MAX_FILE_LENGTH] = {};
+	get_path(szRelativePath, szPath, MAX_FILE_LENGTH);
+
+	char szFinalPath[MAX_FILE_LENGTH] = {};
+	char szTempPath[MAX_FILE_LENGTH] = {};
+
+	// Current Path: Assets/Models/ModelName/TextureName.png
+	// Material Path : Assets/Models/ModelName/Material/TextureName.png
+	// Common Path : Assets/Models/Common/TextureName.png
 	for (size_t m = 0; m < NumMaterials; m++)
 	{
+		ITexture2D* pDiffuseTexture = nullptr;
+
 		if (pModelAsset->HasDiffuseTexture((int32)m))
 		{
-
+			const char* szDiffuse = pModelAsset->GetMaterialDiffuse((int32)m);
+			if (!LoadTexture(pAssets, pFileSystem, szDiffuse, &pDiffuseTexture))
+			{
+				SYS_LOG_W("LoadModelFromFile - Diffuse texture file not found: %s", szDiffuse);
+				continue;
+			}
 		}
-		const char* szDiffuse = pModelAsset->GetMaterialDiffuse((int32)m);
-		const char* szNormal = pModelAsset->GetMaterialNormal((int32)m);
-		const char* szSpecular = pModelAsset->GetMaterialSpecular((int32)m);
-		const char* szEmissive = pModelAsset->GetMaterialEmissive((int32)m);
-		FLOAT4 Color = pModelAsset->GetMaterialColor((int32)m);
+
+		ITexture2D* pNormalTexture = nullptr;
+
+		if (pModelAsset->HasNormalTexture((int32)m))
+		{
+			const char* szNormal = pModelAsset->GetMaterialNormal((int32)m);
+			if (!LoadTexture(pAssets, pFileSystem, szNormal, &pNormalTexture))
+			{
+				SYS_LOG_W("LoadModelFromFile - Normal texture file not found: %s", szNormal);
+				continue;
+			}
+		}
+
+		ITexture2D* pSpecularTexture = nullptr;
+		
+		if (pModelAsset->HasSpecularTexture((int32)m))
+		{
+			const char* szSpecular = pModelAsset->GetMaterialSpecular((int32)m);
+			if (!LoadTexture(pAssets, pFileSystem, szSpecular, &pSpecularTexture))
+			{
+				SYS_LOG_W("LoadModelFromFile - Specular texture file not found: %s", szSpecular);
+				continue;
+			}
+		}
+
+		ITexture2D* pEmissiveTexture = nullptr;
+
+		if (pModelAsset->HasEmissiveTexture((int32)m))
+		{
+			const char* szEmissive = pModelAsset->GetMaterialEmissive((int32)m);
+			if (!LoadTexture(pAssets, pFileSystem, szEmissive, &pEmissiveTexture))
+			{
+				SYS_LOG_W("LoadModelFromFile - Emissive texture file not found: %s", szEmissive);
+				continue;
+			}
+		}
+
+		// Create Material
+		ISurfaceMaterial* pMaterial = nullptr;
+		pRenderSystem->CreateSurfaceMaterial(&pMaterial);
+
+
 	}
 
 
 	return TRUE;
+}
+
+BOOL LoadTexture(IAssets* pAssets, IFileSystem* pFileSystem, const char* szRelativePath, ITexture2D** ppOut)
+{
+	char szPath[MAX_FILE_LENGTH] = {};
+	get_path(szRelativePath, szPath, MAX_FILE_LENGTH);
+
+	char szFinalPath[MAX_FILE_LENGTH] = {};
+	char szTempPath[MAX_FILE_LENGTH] = {};
+
+	combine_path(szPath, szRelativePath, szFinalPath, MAX_FILE_LENGTH);
+
+	if (!pFileSystem->ExistFile(szFinalPath))
+	{
+		combine_path(szPath, "material", szTempPath, MAX_FILE_LENGTH);
+		combine_path(szTempPath, szRelativePath, szFinalPath, MAX_FILE_LENGTH);
+
+		if (!pFileSystem->ExistFile(szFinalPath))
+		{
+			combine_path("assets/models/common", szRelativePath, szFinalPath, MAX_FILE_LENGTH);
+			if (!pFileSystem->ExistFile(szFinalPath))
+			{
+				SYS_LOG_W("LoadTexture - Texture file not found: %s", szRelativePath);
+				return FALSE;
+			}
+		}
+	}
+
+	return pAssets->Load(szFinalPath, ppOut);
 }

@@ -1437,6 +1437,7 @@ public:
 	virtual const FLOAT4& GetColor(int32 Pass) const noexcept = 0;
 	virtual const FLOAT4& GetColor() const noexcept = 0;
 
+
 	/*
 	virtual void SetConstantBuffer_VS(int32 SlotIndex, const NameHash& Name, IConstantBuffer* pCBuffer) = 0;
 	virtual void SetConstantBuffer_PS(int32 SlotIndex, const NameHash& Name, IConstantBuffer* pCBuffer) = 0;
