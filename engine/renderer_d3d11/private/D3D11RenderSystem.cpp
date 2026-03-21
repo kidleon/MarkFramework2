@@ -19,7 +19,11 @@
 #include "D3D11RenderStateCache.h"
 #include "D3D11RenderCommand.h"
 #include "D3D11BufferPool.h"
-#include "D3D11DDSTextureFactory.h"
+#include "D3D11TextureLoader_DDS.h"
+#include "D3D11Texture1D.h"
+#include "D3D11Texture2D.h"
+//#include "D3D11DDSTextureFactory.h"
+
 
 
 void MemoryReporter(
@@ -287,6 +291,134 @@ BOOL D3D11RenderSystem::CreateSurfaceMaterial(ISurfaceMaterial** ppOut)
 	return TRUE;
 }
 
+BOOL D3D11RenderSystem::CreateTexture1D(const TEXTURE1D_CREATE_DESC& Desc, ITexture1D** ppOut)
+{
+	switch (Desc.FileFormat)
+	{
+		case TEXTURE_FILE_FORMAT::DDS:
+		{
+			ID3D11ShaderResourceView* pSRV = nullptr;
+
+			HRESULT hr = CreateDDSTexture1DFromMemory(
+				m_pRenderDevice->INL_GetD3D11Device(),
+				Desc.pData,
+				Desc.DataSize,
+				&pSRV,
+				false
+			);
+
+			if (FAILED(hr))
+			{
+				SYS_LOG_E("D3D11RenderSystem::CreateTexture1D: Failed to create DDS texture from memory, HRESULT = 0x%X", hr);
+				*(ppOut) = nullptr;
+				return FALSE;
+			}
+
+			D3D11Texture1D* pTex1D = D3D11_POOL_NEW(D3D11Texture1D)(
+				0, // ID (추후 필요할 수도 있으므로 남겨둠)
+				Desc.Format,
+				Desc.Width,
+				Desc.MipLevels,
+				nullptr, // ID3D11Texture1D* (필요하다면 추후에 추가)
+				pSRV
+			);
+
+			(*ppOut) = pTex1D;
+
+			return TRUE;
+		}
+		break;
+
+		case TEXTURE_FILE_FORMAT::PNG:
+		{
+		}
+		break;
+
+		case TEXTURE_FILE_FORMAT::JPEG:
+		{
+		}
+		break;
+
+		case TEXTURE_FILE_FORMAT::BMP:
+		{
+		}
+		break;
+
+		case TEXTURE_FILE_FORMAT::TGA:
+		{
+		}
+		break;
+	}
+	
+
+	*(ppOut) = nullptr;
+	return TRUE;
+}
+
+BOOL D3D11RenderSystem::CreateTexture2D(const TEXTURE2D_CREATE_DESC& Desc, ITexture2D** ppOut)
+{
+	switch (Desc.FileFormat)
+	{
+		case TEXTURE_FILE_FORMAT::DDS:
+		{
+			ID3D11ShaderResourceView* pSRV = nullptr;
+
+			HRESULT hr = CreateDDSTexture2DFromMemory(
+				m_pRenderDevice->INL_GetD3D11Device(),
+				Desc.pData,
+				Desc.DataSize,
+				&pSRV,
+				false
+			);
+
+			if (FAILED(hr))
+			{
+				SYS_LOG_E("D3D11RenderSystem::CreateTexture1D: Failed to create DDS texture from memory, HRESULT = 0x%X", hr);
+				*(ppOut) = nullptr;
+				return FALSE;
+			}
+
+			D3D11Texture2D* pTex2D = D3D11_POOL_NEW(D3D11Texture2D)(
+				0, // ID (추후 필요할 수도 있으므로 남겨둠)
+				Desc.Format,
+				Desc.Width,
+				Desc.Height,
+				Desc.MipLevels,
+				nullptr, // ID3D11Texture2D* (필요하다면 추후에 추가)
+				pSRV
+			);
+
+			(*ppOut) = pTex2D;
+
+			return TRUE;
+		}
+		break;
+
+		case TEXTURE_FILE_FORMAT::PNG:
+		{
+		}
+		break;
+
+		case TEXTURE_FILE_FORMAT::JPEG:
+		{
+		}
+		break;
+
+		case TEXTURE_FILE_FORMAT::BMP:
+		{
+		}
+		break;
+
+		case TEXTURE_FILE_FORMAT::TGA:
+		{
+		}
+		break;
+	}
+		
+	*(ppOut) = nullptr;
+	return TRUE;
+}
+
 __FORCEINLINE int compare_strings(const void* a, const void* b) 
 {
 	return strcmp((const char*)a, (const char*)b);
@@ -488,6 +620,7 @@ BOOL D3D11RenderSystem::GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DES
 	return TRUE;
 }
 
+/*
 BOOL D3D11RenderSystem::GetOrCreateDDSTextureFactory(IDDSTextureFactory** ppOut)
 {
 	if (m_pDDSTextureFactory == nullptr)
@@ -498,6 +631,7 @@ BOOL D3D11RenderSystem::GetOrCreateDDSTextureFactory(IDDSTextureFactory** ppOut)
 
 	return TRUE;
 }
+*/
 
 BOOL D3D11RenderSystem::GetOrCreateRenderContext(IRenderContext** ppContext)
 {

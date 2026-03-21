@@ -54,6 +54,9 @@ public:
 	virtual const FLOAT4& GetColor(int32 Pass) const noexcept final;
 	virtual const FLOAT4& GetColor() const noexcept final;
 
+	virtual void SetTexture1D(int32 Pass, int32 SamplerIndex, ITexture1D* pTexture) final;
+	virtual void SetTexture2D(int32 Pass, int32 SamplerIndex, ITexture2D* pTexture) final;
+
 	__FORCEINLINE int32 INL_GetNumPass() const noexcept
 	{
 		return (int32)m_pMaterialBlock->NumPasses;

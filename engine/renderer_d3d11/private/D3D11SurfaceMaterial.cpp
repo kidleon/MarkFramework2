@@ -321,3 +321,11 @@ const FLOAT4& D3D11SurfaceMaterial::GetColor() const noexcept
 
 	return m_pMaterialBlock->RenderPasses[0].Color;
 }
+
+void D3D11SurfaceMaterial::SetTexture1D(int32 Pass, int32 SamplerIndex, ITexture1D* pTexture)
+{
+}
+
+void D3D11SurfaceMaterial::SetTexture2D(int32 Pass, int32 SamplerIndex, ITexture2D* pTexture)
+{
+}

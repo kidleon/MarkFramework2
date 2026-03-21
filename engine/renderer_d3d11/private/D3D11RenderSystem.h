@@ -40,8 +40,10 @@ public:
 	virtual BOOL CreatePrimitiveBuffer(const PRIMITIVEBUFFER_CREATE_DESC& Desc, IPrimitiveBuffer** ppOut) final;
 	virtual BOOL CreateRenderCamera(const RENDERCAMERA_CREATE_DESC& Desc, IRenderCamera** ppOut) final;
 	virtual BOOL CreateSurfaceMaterial(ISurfaceMaterial** ppOut) final;
+	virtual BOOL CreateTexture1D(const TEXTURE1D_CREATE_DESC& Desc, ITexture1D** ppOut) final;
+	virtual BOOL CreateTexture2D(const TEXTURE2D_CREATE_DESC& Desc, ITexture2D** ppOut) final;
 	virtual BOOL GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DESC& Desc, IShaderProgram** ppOut) final;
-	virtual BOOL GetOrCreateDDSTextureFactory(IDDSTextureFactory** ppOut) final;
+	//virtual BOOL GetOrCreateDDSTextureFactory(IDDSTextureFactory** ppOut) final;
 	virtual BOOL GetOrCreateRenderContext(IRenderContext** ppContext) final;
 
 	virtual void Update() final;

@@ -1,5 +1,7 @@
 ﻿#include "pch.h"
 #include "D3D11DDSTextureFactory.h"
+
+/*
 #include "D3D11TextureLoader_DDS.h"
 
 
@@ -44,7 +46,7 @@ BOOL D3D11DDSTextureFactory::CreateTextureDDS(
 	ITexture2D** ppOut
 )
 {
-	HRESULT hr = CreateDDSTextureFromMemory(
+	HRESULT hr = CreateDDSTexture1DFromMemory(
 		m_pDevice,
 		szFilePath,
 		pData,
@@ -55,3 +57,4 @@ BOOL D3D11DDSTextureFactory::CreateTextureDDS(
 	
 	return SUCCEEDED(hr);
 }
+*/

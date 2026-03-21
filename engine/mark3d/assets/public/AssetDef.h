@@ -2,8 +2,6 @@
 #define __ASSET_DEF_H__
 
 
-#define MAX_FILE_LENGTH 256
-
 /**
 * @brief 자산 유형 열거형
 */
@@ -355,8 +353,48 @@ struct IModelAsset : public IAsset
 };
 
 /**
+* @brief 자산 캐시 인터페이스, 로드된 자산을 캐싱하여 중복 로드를 방지하고 빠른 액세스를 제공
+*/
+interface IAssetCache : public IUNKNOWN
+{
+	/**
+	* @brief 자산 쿼리
+	* @param szRelativePath 자산의 상대 경로
+	* @param AssetType 자산 유형
+	* @param ppOut 쿼리된 자산 포인터를 받을 변수의 주소
+	* @return 쿼리 성공 시 TRUE, 실패 시 FALSE
+	*/
+	virtual BOOL Query(
+		const char* szRelativePath,
+		ASSET_TYPE AssetType,
+		IAsset** ppOut
+	) = 0;
+
+	/**
+	* @brief 자산 삽입
+	* @param szRelativePath 자산의 상대 경로
+	* @param pAsset 삽입할 자산 포인터
+	* @return 삽입 성공 시 TRUE, 실패 시 FALSE
+	*/
+	virtual BOOL Insert(
+		const char* szRelativePath,
+		IAsset* pAsset
+	) = 0;
+
+	/**
+	* @brief 모든 자산 제거
+	* @return 제거 성공 시 TRUE, 실패 시 FALSE
+	*/
+	virtual BOOL Clear() = 0;
+
+};
+
+/**
 * @brief 자산 관리자 인터페이스
 */
+interface ITexture1D;
+interface ITexture2D;
+
 interface IAssets : public IPRIVATE_UNKNOWN
 {
 	/**

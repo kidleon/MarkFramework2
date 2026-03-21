@@ -567,7 +567,7 @@ static DXGI_FORMAT GetDXGIFormat(const DDS_PIXELFORMAT& ddpf)
 
 
 //--------------------------------------------------------------------------------------
-static HRESULT CreateTextureFromDDS(ID3D11Device* pDev, DDS_HEADER* pHeader, __inout_bcount(BitSize) BYTE* pBitData,
+static HRESULT CreateTexture2DFromDDS(ID3D11Device* pDev, DDS_HEADER* pHeader, __inout_bcount(BitSize) BYTE* pBitData,
     UINT BitSize, __out ID3D11ShaderResourceView** ppSRV, bool bSRGB)
 {
     HRESULT hr = S_OK;
@@ -715,9 +715,154 @@ static HRESULT CreateTextureFromDDS(ID3D11Device* pDev, DDS_HEADER* pHeader, __i
 }
 
 //--------------------------------------------------------------------------------------
-HRESULT CreateDDSTextureFromMemory(
+static HRESULT CreateTexture1DFromDDS(ID3D11Device* pDev, DDS_HEADER* pHeader, __inout_bcount(BitSize) BYTE* pBitData,
+    UINT BitSize, __out ID3D11ShaderResourceView** ppSRV, bool bSRGB)
+{
+    HRESULT hr = S_OK;
+
+    UINT iWidth = pHeader->dwWidth;
+    UINT iHeight = pHeader->dwHeight;
+    UINT iMipCount = pHeader->dwMipMapCount;
+    if (0 == iMipCount)
+        iMipCount = 1;
+
+    // Bound miplevels (affects the memory usage below)
+    if (iMipCount > D3D11_REQ_MIP_LEVELS)
+        return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
+
+    D3D11_TEXTURE1D_DESC desc;
+    if ((pHeader->ddspf.dwFlags & DDS_FOURCC)
+        && (MAKEFOURCC('D', 'X', '1', '0') == pHeader->ddspf.dwFourCC))
+    {
+        DDS_HEADER_DXT10* d3d10ext = (DDS_HEADER_DXT10*)((char*)pHeader + sizeof(DDS_HEADER));
+
+        // For now, we only support 2D textures
+        if (d3d10ext->resourceDimension != D3D11_RESOURCE_DIMENSION_TEXTURE2D)
+            return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
+
+        // Bound array sizes (affects the memory usage below)
+        if (d3d10ext->arraySize > D3D11_REQ_TEXTURE2D_ARRAY_AXIS_DIMENSION)
+            return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
+
+        desc.ArraySize = d3d10ext->arraySize;
+        desc.Format = d3d10ext->dxgiFormat;
+    }
+    else
+    {
+        desc.ArraySize = 1;
+        desc.Format = GetDXGIFormat(pHeader->ddspf);
+
+        if (pHeader->dwCubemapFlags != 0
+            || (pHeader->dwHeaderFlags & DDS_HEADER_FLAGS_VOLUME))
+        {
+            // For now only support 2D textures, not cubemaps or volumes
+            return E_FAIL;
+        }
+
+        if (desc.Format == DXGI_FORMAT_UNKNOWN)
+        {
+            D3DFORMAT fmt = GetD3D9Format(pHeader->ddspf);
+
+            // Swizzle some RGB to BGR common formats to be DXGI (1.0) supported
+            switch (fmt)
+            {
+                case D3DFMT_X8R8G8B8:
+                case D3DFMT_A8R8G8B8:
+                {
+                    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+                    if (BitSize >= 3)
+                    {
+                        for (UINT i = 0; i < BitSize; i += 4)
+                        {
+                            BYTE a = pBitData[i];
+                            pBitData[i] = pBitData[i + 2];
+                            pBitData[i + 2] = a;
+                        }
+                    }
+                }
+                break;
+
+                // Need more room to try to swizzle 24bpp formats
+                // Could also try to expand 4bpp or 3:3:2 formats
+
+                default:
+                    return HRESULT_FROM_WIN32(ERROR_NOT_SUPPORTED);
+            }
+        }
+    }
+
+    if (bSRGB)
+        desc.Format = MAKE_SRGB(desc.Format);
+
+    // Create the texture
+    desc.Width = iWidth;
+    desc.MipLevels = iMipCount;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    desc.CPUAccessFlags = 0;
+    desc.MiscFlags = 0;
+
+    D3D11_SUBRESOURCE_DATA* pInitData = new D3D11_SUBRESOURCE_DATA[iMipCount * desc.ArraySize];
+    if (!pInitData)
+        return E_OUTOFMEMORY;
+
+    UINT NumBytes = 0;
+    UINT RowBytes = 0;
+    UINT NumRows = 0;
+    BYTE* pSrcBits = pBitData;
+
+    UINT index = 0;
+    for (UINT j = 0; j < desc.ArraySize; j++)
+    {
+        UINT w = iWidth;
+        UINT h = iHeight;
+        for (UINT i = 0; i < iMipCount; i++)
+        {
+            GetSurfaceInfo(w, h, desc.Format, &NumBytes, &RowBytes, &NumRows);
+            pInitData[index].pSysMem = (void*)pSrcBits;
+            pInitData[index].SysMemPitch = RowBytes;
+            ++index;
+
+            pSrcBits += NumBytes;
+            w = w >> 1;
+            h = h >> 1;
+            if (w == 0)
+                w = 1;
+            if (h == 0)
+                h = 1;
+        }
+    }
+
+    ID3D11Texture1D* pTex1D = NULL;
+    hr = pDev->CreateTexture1D(&desc, pInitData, &pTex1D);
+    if (SUCCEEDED(hr) && pTex1D)
+    {
+#if defined(DEBUG) || defined(PROFILE)
+        pTex1D->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof("DDSTextureLoader") - 1, "DDSTextureLoader");
+#endif
+        D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc;
+        ZeroMemory(&SRVDesc, sizeof(SRVDesc));
+        SRVDesc.Format = desc.Format;
+        SRVDesc.ViewDimension = D3D_SRV_DIMENSION_TEXTURE1D;
+        SRVDesc.Texture1D.MipLevels = desc.MipLevels;
+        hr = pDev->CreateShaderResourceView(pTex1D, &SRVDesc, ppSRV);
+        CHECK_RELEASE(pTex1D);
+    }
+
+    if (pInitData)
+    {
+        delete[] pInitData;
+        pInitData = NULL;
+    }
+
+    return hr;
+}
+
+
+//--------------------------------------------------------------------------------------
+HRESULT CreateDDSTexture1DFromMemory(
     __in ID3D11Device* pDev,
-    __in_z const char* szFileName,
     __in_z const void* pData,
     __in size_t DataLength,
     __out_opt ID3D11ShaderResourceView** ppSRV,
@@ -738,8 +883,9 @@ HRESULT CreateDDSTextureFromMemory(
         return hr;
     }
 
-    hr = CreateTextureFromDDS(pDev, pHeader, pBitData, BitSize, ppSRV, sRGB);
+    hr = CreateTexture1DFromDDS(pDev, pHeader, pBitData, BitSize, ppSRV, sRGB);
 
+    /*
 #if defined(DEBUG) || defined(PROFILE)
     if (*ppSRV)
     {
@@ -754,6 +900,54 @@ HRESULT CreateDDSTextureFromMemory(
         (*ppSRV)->SetPrivateData(WKPDID_D3DDebugObjectName, lstrlenA(pstrName), pstrName);
     }
 #endif
+*/
+
+    return hr;
+}
+
+
+
+//--------------------------------------------------------------------------------------
+HRESULT CreateDDSTexture2DFromMemory(
+    __in ID3D11Device* pDev,
+    __in_z const void* pData,
+    __in size_t DataLength,
+    __out_opt ID3D11ShaderResourceView** ppSRV,
+    bool sRGB
+)
+{
+    if (!pDev || !pData || !ppSRV)
+        return E_INVALIDARG;
+
+    BYTE* pHeapData = NULL;
+    DDS_HEADER* pHeader = NULL;
+    BYTE* pBitData = NULL;
+    UINT BitSize = 0;
+
+    HRESULT hr = LoadTextureDataFromMemory(pData, DataLength, &pHeapData, &pHeader, &pBitData, &BitSize);
+    if (FAILED(hr))
+    {
+        return hr;
+    }
+
+    hr = CreateTexture2DFromDDS(pDev, pHeader, pBitData, BitSize, ppSRV, sRGB);
+
+    /*
+#if defined(DEBUG) || defined(PROFILE)
+    if (*ppSRV)
+    {
+        CHAR strFileA[MAX_PATH];
+        strcpy(strFileA, szFileName);
+        CHAR* pstrName = strrchr(strFileA, '\\');
+        if (pstrName == NULL)
+            pstrName = strFileA;
+        else
+            pstrName++;
+
+        (*ppSRV)->SetPrivateData(WKPDID_D3DDebugObjectName, lstrlenA(pstrName), pstrName);
+    }
+#endif
+*/
 
     return hr;
 }

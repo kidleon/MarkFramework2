@@ -2,6 +2,7 @@
 #include <d3d11.h>
 
 
+/*
 class D3D11DDSTextureFactory final : public IDDSTextureFactory
 {
 public:
@@ -28,3 +29,4 @@ private:
 	ID3D11Device* m_pDevice;
 
 };
+*/

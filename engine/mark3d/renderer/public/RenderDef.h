@@ -2,6 +2,7 @@
 #define __RENDER_DEF_H__
 
 #include "mathlib.h"
+#include "AssetDef.h"
 
 /**
 * @brief 렌더링 API 열거형
@@ -552,6 +553,16 @@ enum class RENDER_QUEUE_TYPE : unsigned int
 	EMAX
 };
 
+enum class TEXTURE_FILE_FORMAT : unsigned int
+{
+	UNKNOWN = 0,
+	DDS,
+	PNG,
+	JPEG,
+	BMP,
+	TGA,
+};
+
 /**
 * @brief 3D 엔진 생성 정보 구조체
 * @remark CreateEngine 함수에 전달되는 구조체
@@ -577,7 +588,7 @@ struct MARKENGINE_API RENDERER_CREATE_DESC
 */
 struct TEXTURE1D_CREATE_DESC
 {
-	TEXTURE_TYPE Type; // 텍스처 타입
+	TEXTURE_FILE_FORMAT FileFormat; // 텍스처 파일 포맷
 	UINT32 Width; // 텍스처 너비
 	UINT32 MipLevels; // 밉맵 레벨 수
 	COLOR_FORMAT Format; // 색상 포맷
@@ -590,11 +601,12 @@ struct TEXTURE1D_CREATE_DESC
 */
 struct TEXTURE2D_CREATE_DESC
 {
-	TEXTURE_TYPE Type; // 텍스처 타입
+	TEXTURE_FILE_FORMAT FileFormat; // 텍스처 파일 포맷
 	UINT32 Width; // 텍스처 너비
 	UINT32 Height; // 텍스처 높이
 	UINT32 MipLevels; // 밉맵 레벨 수
 	COLOR_FORMAT Format; // 색상 포맷
+	UINT32 PADDING; 
 	const char* pData; // 초기 데이터 포인터
 	size_t DataSize; // 초기 데이터 크기 (바이트 단위)
 };
@@ -1392,6 +1404,7 @@ inline RS_RASTERIZER_STATE GetRS_WireframeTwoSide()
 	return state;
 }
 
+
 /**
 * @brief 서피스 메테리얼 인터페이스
 */
@@ -1437,6 +1450,9 @@ public:
 	virtual const FLOAT4& GetColor(int32 Pass) const noexcept = 0;
 	virtual const FLOAT4& GetColor() const noexcept = 0;
 
+	virtual void SetTexture1D(int32 Pass, int32 SamplerIndex, ITexture1D* pTexture) = 0;
+	virtual void SetTexture2D(int32 Pass, int32 SamplerIndex, ITexture2D* pTexture) = 0;
+
 
 	/*
 	virtual void SetConstantBuffer_VS(int32 SlotIndex, const NameHash& Name, IConstantBuffer* pCBuffer) = 0;
@@ -1451,8 +1467,7 @@ public:
 	virtual void SetDepthStencilState(int32 Pass, const RS_DEPTH_STENCIL_STATE& DepthStencilState) = 0;
 	virtual void SetRasterizerState(int32 Pass, const RS_RASTERIZER_STATE& RasterizerState) = 0;
 
-	virtual void SetTexture1D(int32 Pass, int32 SamplerIndex, const NameHash& Name, ITexture1D* pTexture) = 0;
-	virtual void SetTexture2D(int32 Pass, int32 SamplerIndex, const NameHash& Name, ITexture2D* pTexture) = 0;
+	
 	*/
 };
 
@@ -1695,9 +1710,11 @@ public:
 
 	virtual BOOL CreatePrimitiveBuffer(const PRIMITIVEBUFFER_CREATE_DESC& Desc, IPrimitiveBuffer** ppOut) = 0;
 	virtual BOOL CreateRenderCamera(const RENDERCAMERA_CREATE_DESC& Desc, IRenderCamera** ppOut) = 0;
+	virtual BOOL CreateTexture1D(const TEXTURE1D_CREATE_DESC& Desc, ITexture1D** ppOut) = 0;
+	virtual BOOL CreateTexture2D(const TEXTURE2D_CREATE_DESC& Desc, ITexture2D** ppOut) = 0;
 	virtual BOOL CreateSurfaceMaterial(ISurfaceMaterial** ppOut) = 0;
 	virtual BOOL GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DESC& Desc, IShaderProgram** ppOut) = 0;
-	virtual BOOL GetOrCreateDDSTextureFactory(IDDSTextureFactory** ppOut) = 0;
+	//virtual BOOL GetOrCreateDDSTextureFactory(IDDSTextureFactory** ppOut) = 0;
 	virtual BOOL GetOrCreateRenderContext(IRenderContext** ppContext) = 0;
 
 

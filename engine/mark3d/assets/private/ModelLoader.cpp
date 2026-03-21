@@ -250,8 +250,10 @@ BOOL LoadModelFromFile(
 		// Create Material
 		ISurfaceMaterial* pMaterial = nullptr;
 		pRenderSystem->CreateSurfaceMaterial(&pMaterial);
-
-
+		pMaterial->SetDiffuseTexture(0, pDiffuseTexture);
+		pMaterial->SetNormalTexture(0, pNormalTexture);
+		pMaterial->SetSpecularTexture(0, pSpecularTexture);
+		pMaterial->SetEmissiveTexture(0, pEmissiveTexture);
 	}
 
 
