@@ -24,7 +24,10 @@ public:
 public:
 	Assets();
 
-	BOOL Init(const char* szRootPath);
+	BOOL Init(
+		IRenderSystem* pRenderSystem,
+		const char* szRootPath
+	);
 	void Shutdown();
 
 	// IAssets interface
@@ -62,6 +65,7 @@ private:
 	unsigned PADDING_OR_RESERVED = 0;
 #endif // defined(__TARGET_OS_WINDOWS)
 
+	IRenderSystem* m_pRenderSystem;
 	IFileSystem* m_pFileSystem;
 	HANDLE m_hThreadPool;
 	HANDLE m_hIDGen;

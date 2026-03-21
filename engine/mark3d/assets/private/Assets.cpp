@@ -68,7 +68,10 @@ long Assets::RefCnt()
 	return m_RefCnt;
 }
 
-BOOL Assets::Init(const char* szRootPath)
+BOOL Assets::Init(
+	IRenderSystem* pRenderSystem,
+	const char* szRootPath
+)
 {
 	if (m_Initialized) return TRUE;
 
@@ -86,6 +89,8 @@ BOOL Assets::Init(const char* szRootPath)
 	fstrlcpy(m_szTexturePath[0], "texture", sizeof(m_szTexturePath[0]));
 	fstrlcpy(m_szTexturePath[1], "common/texture", sizeof(m_szTexturePath[1]));
 	fstrlcpy(m_szTexturePath[2], "model/texture", sizeof(m_szTexturePath[2]));
+
+	m_pRenderSystem = pRenderSystem;
 
 	return TRUE;
 }

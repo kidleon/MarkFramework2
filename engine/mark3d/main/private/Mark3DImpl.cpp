@@ -92,13 +92,7 @@ BOOL Mark3DImpl::Initialize(const MARK3D_CREATE_DESC& CreateDesc)
 {
 	log_init(LOG_LEVEL_DEBUG, LOG_TYPE_SYSTEM, LOG_OUTPUT_CONSOLE | LOG_OUTPUT_OUTPUT_DEBUG_STRING);
 
-	m_pAssets = CORE_NEW(Assets);
-	if (!m_pAssets->Init(CreateDesc.szRootPath))
-	{
-		CHECK_RELEASE(m_pAssets);
-
-		return FALSE;
-	};
+	
 
 #if defined(__TARGET_OS_WINDOWS)
 
@@ -106,8 +100,6 @@ BOOL Mark3DImpl::Initialize(const MARK3D_CREATE_DESC& CreateDesc)
 	if (!CreateDesc.hWnd || !IsWindow(CreateDesc.hWnd))
 	{
 		SYS_LOG_E("Mark3DImpl::Initialize: Invalid window handle provided.");
-		CHECK_RELEASE(m_pAssets);
-
 		return FALSE;
 	}
 
@@ -116,7 +108,6 @@ BOOL Mark3DImpl::Initialize(const MARK3D_CREATE_DESC& CreateDesc)
 		CreateDesc.RenderAPI != RENDER_API::D3D12)
 	{
 		SYS_LOG_E("Mark3DImpl::Initialize: Unsupported render API provided for Windows platform.");
-		CHECK_RELEASE(m_pAssets);
 
 		return FALSE;
 	}
@@ -131,10 +122,18 @@ BOOL Mark3DImpl::Initialize(const MARK3D_CREATE_DESC& CreateDesc)
 	if (!CreateAndInitRenderModule(RenderCreateDesc, &m_pRenderSystem))
 	{
 		SYS_LOG_E("Mark3DImpl::Initialize: Failed to create and initialize render module.");
-		CHECK_RELEASE(m_pAssets);
 
 		return FALSE;
 	}
+
+	m_pAssets = CORE_NEW(Assets);
+	if (!m_pAssets->Init(m_pRenderSystem, CreateDesc.szRootPath))
+	{
+		CHECK_RELEASE(m_pAssets);
+		CHECK_RELEASE(m_pRenderSystem);
+
+		return FALSE;
+	};
 
 #endif // defined(__TARGET_OS_WINDOWS)
 

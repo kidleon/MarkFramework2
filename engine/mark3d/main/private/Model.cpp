@@ -168,7 +168,7 @@ void Model::SetMaterial(int32 MeshIndex, ISurfaceMaterial* pSurfaceMaterial) noe
 		SYS_LOG_E("Model::SetMaterial - Mesh index is out of range.");
 		return;
 	}
-
+	/*
 	if (m_lstMeshData[MeshIndex].SubMeshes[0].pMaterial != pSurfaceMaterial)
 	{
 		if (m_lstMeshData[MeshIndex].SubMeshes[0].pMaterial)
@@ -179,6 +179,7 @@ void Model::SetMaterial(int32 MeshIndex, ISurfaceMaterial* pSurfaceMaterial) noe
 
 		m_lstMeshData[MeshIndex].SubMeshes[0].pMaterial = pSurfaceMaterial;
 	}
+	*/
 }
 
 void Model::SetMaterial(NameHash Name, ISurfaceMaterial* pSurfaceMaterial) noexcept
@@ -478,7 +479,7 @@ BOOL Model::LoadMaterial(IModelAsset* pModelAsset) noexcept
 		if (!pRenderSystem->CreateSurfaceMaterial(&pSurfaceMaterial))
 			continue;
 
-		const char* szDiffuseTexture = pModelAsset->GetMaterialDiffuse(i);
+		const char* szDiffuseTexture = pModelAsset->GetMaterialDiffuse((uint32)i);
 		if (szDiffuseTexture && fstrlen(szDiffuseTexture))
 		{
 			char szPath[MAX_PATH] = {};
