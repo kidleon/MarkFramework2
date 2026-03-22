@@ -2,25 +2,6 @@
 #include "D3D11Texture2D.h"
 
 
-D3D11Texture2D::D3D11Texture2D(
-	uint64 ID,
-	COLOR_FORMAT Format,
-	uint32 Width,
-	uint32 Height,
-	uint32 MipLevels,
-	ID3D11Texture2D* pTex2D,
-	ID3D11ShaderResourceView* pSRV
-)
-	: m_ID(ID)
-	, m_Format(Format)
-	, m_Width(Width)
-	, m_Height(Height)
-	, m_MipLevels(MipLevels)
-	, m_pTex2D(pTex2D)
-	, m_pSRV(pSRV)
-{
-}
-
 D3D11Texture2D::~D3D11Texture2D() noexcept
 {
 	CHECK_RELEASE(m_pSRV);
@@ -46,6 +27,21 @@ long D3D11Texture2D::Release()
 long D3D11Texture2D::RefCnt()
 {
 	return m_RefCnt;
+}
+
+uint64 D3D11Texture2D::GetID() const noexcept
+{
+	return m_ID;
+}
+
+ASSET_TYPE D3D11Texture2D::GetAssetType() const noexcept
+{
+	return ASSET_TYPE::TEXTURE_2D;
+}
+
+LOAD_STAT D3D11Texture2D::GetLoadStat() const noexcept
+{
+	return m_LoadStat;
 }
 
 uint32 D3D11Texture2D::GetWidth() const noexcept

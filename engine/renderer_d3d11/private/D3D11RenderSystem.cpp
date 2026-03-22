@@ -19,9 +19,11 @@
 #include "D3D11RenderStateCache.h"
 #include "D3D11RenderCommand.h"
 #include "D3D11BufferPool.h"
-#include "D3D11TextureLoader_DDS.h"
 #include "D3D11Texture1D.h"
 #include "D3D11Texture2D.h"
+#include "D3D11TextureUtils.h"
+#include "D3D11TextureLoader_DDS.h"
+#include "temp_pool.h"
 //#include "D3D11DDSTextureFactory.h"
 
 
@@ -291,82 +293,179 @@ BOOL D3D11RenderSystem::CreateSurfaceMaterial(ISurfaceMaterial** ppOut)
 	return TRUE;
 }
 
-BOOL D3D11RenderSystem::CreateTexture1D(const TEXTURE1D_CREATE_DESC& Desc, ITexture1D** ppOut)
+BOOL D3D11RenderSystem::CreateTexture1D(ITexture1D** ppOut)
+{
+	D3D11Texture1D* pTexture = D3D11_POOL_NEW(D3D11Texture1D);
+	*ppOut = static_cast<ITexture1D*>(pTexture);
+	return TRUE;
+}
+
+BOOL D3D11RenderSystem::CreateTexture2D(ITexture2D** ppOut)
+{
+	D3D11Texture2D* pTexture = D3D11_POOL_NEW(D3D11Texture2D);
+	*ppOut = static_cast<ITexture2D*>(pTexture);
+	return TRUE;
+}
+
+BOOL D3D11RenderSystem::CreateTexture1D(const TEXTURE1D_CREATE_DESC& Desc, ITexture1D* pTexture)
 {
 	switch (Desc.FileFormat)
 	{
 		case TEXTURE_FILE_FORMAT::DDS:
 		{
+			ID3D11Texture1D* pTex1D = nullptr;
 			ID3D11ShaderResourceView* pSRV = nullptr;
 
 			HRESULT hr = CreateDDSTexture1DFromMemory(
 				m_pRenderDevice->INL_GetD3D11Device(),
 				Desc.pData,
 				Desc.DataSize,
+				&pTex1D,
 				&pSRV,
-				false
+				Desc.sRGB
 			);
 
 			if (FAILED(hr))
 			{
 				SYS_LOG_E("D3D11RenderSystem::CreateTexture1D: Failed to create DDS texture from memory, HRESULT = 0x%X", hr);
-				*(ppOut) = nullptr;
 				return FALSE;
 			}
 
-			D3D11Texture1D* pTex1D = D3D11_POOL_NEW(D3D11Texture1D)(
-				0, // ID (추후 필요할 수도 있으므로 남겨둠)
-				Desc.Format,
-				Desc.Width,
-				Desc.MipLevels,
-				nullptr, // ID3D11Texture1D* (필요하다면 추후에 추가)
-				pSRV
-			);
-
-			(*ppOut) = pTex1D;
-
-			return TRUE;
+			D3D11Texture1D* pTextureImpl = static_cast<D3D11Texture1D*>(pTexture);
+			pTextureImpl->INL_SetColorFormat(Desc.Format);
+			pTextureImpl->INL_SetWidth(Desc.Width);
+			pTextureImpl->INL_SetMipLevels(Desc.MipLevels);
+			pTextureImpl->INL_SetD3D11Texture1D(pTex1D);
+			pTextureImpl->INL_SetSRV(pSRV);
+			pTextureImpl->INL_SetLoadStat(LOAD_STAT::LOADED);
 		}
 		break;
 
 		case TEXTURE_FILE_FORMAT::PNG:
-		{
-		}
-		break;
-
 		case TEXTURE_FILE_FORMAT::JPEG:
-		{
-		}
-		break;
-
 		case TEXTURE_FILE_FORMAT::BMP:
-		{
-		}
-		break;
-
 		case TEXTURE_FILE_FORMAT::TGA:
 		{
+			if (!Desc.hTempHeap)
+			{
+				SYS_LOG_E("D3D11RenderSystem::CreateTexture1D: Temporary heap handle is null for non-DDS texture");
+				return FALSE;
+			}
+
+			ID3D11Texture1D* pTex1D = nullptr;
+			ID3D11ShaderResourceView* pSRV = nullptr;
+
+			if (!CreateTexture1DFromSTBI(
+				Desc.hTempHeap,
+				m_pRenderDevice->INL_GetD3D11Device(),
+				Desc,
+				&pTex1D, // ppTex1D (1D 텍스처는 지원하지 않음)
+				&pSRV  // ppSRV (1D 텍스처는 지원하지 않음)
+			))
+			{
+				SYS_LOG_E("D3D11RenderSystem::CreateTexture1D: Failed to create texture from STBI for non-DDS texture");
+				return FALSE;
+			}
+
+			D3D11Texture1D* pTextureImpl = static_cast<D3D11Texture1D*>(pTexture);
+			pTextureImpl->INL_SetColorFormat(Desc.Format);
+			pTextureImpl->INL_SetWidth(Desc.Width);
+			pTextureImpl->INL_SetMipLevels(Desc.MipLevels);
+			pTextureImpl->INL_SetD3D11Texture1D(pTex1D);
+			pTextureImpl->INL_SetSRV(pSRV);
+			pTextureImpl->INL_SetLoadStat(LOAD_STAT::LOADED);
+		}
+		break;
+
+		case TEXTURE_FILE_FORMAT::UNKNOWN:
+		{
+			if (Desc.Width <= 1 || Desc.Format == COLOR_FORMAT::UNKNOWN)
+			{
+				SYS_LOG_E("D3D11RenderSystem::CreateTexture1D: Invalid parameters for unknown texture format");
+				return FALSE;
+			}
+
+			// 파일 포맷이 알려지지 않은 경우, 임시로 빈 텍스처를 생성하여 반환하며 Mip데이터는 생성하지 않는다.
+			const DXGI_FORMAT dxgiFormat = D3D11_IMPL_COLOR_FORMAT[(uint32)Desc.Format];
+			const size_t pixelSize = D3D11_IMPL_COLOR_FORMAT_SIZE[(uint32)Desc.Format];
+
+			D3D11_SUBRESOURCE_DATA SubResourceData = {};
+
+			// Mip0: stb_image 원본 그대로 (width * 4 bytes, height = 1 고정)
+			uint8_t* pTempBuffer = (uint8_t*)temppool_alloc(Desc.hTempHeap, static_cast<size_t>(Desc.Width * pixelSize));
+			memset(pTempBuffer, 0, Desc.Width * pixelSize);
+
+			SubResourceData.pSysMem = pTempBuffer;
+			SubResourceData.SysMemPitch = static_cast<UINT>(Desc.Width * pixelSize); // 1D는 사실상 의미 없지만 명시
+			SubResourceData.SysMemSlicePitch = 0;
+
+			D3D11_TEXTURE1D_DESC TexDesc = {};
+			TexDesc.Width = Desc.Width;
+			TexDesc.MipLevels = 1;
+			TexDesc.ArraySize = 1;
+			TexDesc.Format = dxgiFormat;
+			TexDesc.Usage = D3D11_USAGE_IMMUTABLE;
+			TexDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+			TexDesc.CPUAccessFlags = 0;
+			TexDesc.MiscFlags = 0;
+
+			ID3D11Texture1D* pTex1D = nullptr;
+			HRESULT hr = m_pRenderDevice->INL_GetD3D11Device()->CreateTexture1D(
+				&TexDesc,
+				&SubResourceData,
+				&pTex1D
+			);
+
+			if (FAILED(hr))
+			{
+				SYS_LOG_E("D3D11RenderSystem::CreateTexture1D: Failed to create texture from memory for unknown format, HRESULT = 0x%X", hr);
+				return FALSE;
+			}
+
+			ID3D11ShaderResourceView* pSRV = nullptr;
+
+			D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+			SRVDesc.Format = dxgiFormat;
+			SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE1D;
+			SRVDesc.Texture1D.MostDetailedMip = 0;
+			SRVDesc.Texture1D.MipLevels = 1;
+
+			hr = m_pRenderDevice->INL_GetD3D11Device()->CreateShaderResourceView(pTex1D, &SRVDesc, &pSRV);
+			if (FAILED(hr))
+			{
+				SYS_LOG_E("CreateTexture1DFromSTBI: CreateShaderResourceView failed, HRESULT = 0x%X", hr);
+				CHECK_RELEASE(pTex1D);
+				return FALSE;
+			}
+
+			D3D11Texture1D* pTextureImpl = static_cast<D3D11Texture1D*>(pTexture);
+			pTextureImpl->INL_SetColorFormat(Desc.Format);
+			pTextureImpl->INL_SetWidth(Desc.Width);
+			pTextureImpl->INL_SetMipLevels(1);
+			pTextureImpl->INL_SetD3D11Texture1D(pTex1D);
+			pTextureImpl->INL_SetSRV(pSRV);
+			pTextureImpl->INL_SetLoadStat(LOAD_STAT::LOADED);
 		}
 		break;
 	}
 	
-
-	*(ppOut) = nullptr;
 	return TRUE;
 }
 
-BOOL D3D11RenderSystem::CreateTexture2D(const TEXTURE2D_CREATE_DESC& Desc, ITexture2D** ppOut)
+BOOL D3D11RenderSystem::CreateTexture2D(const TEXTURE2D_CREATE_DESC& Desc, ITexture2D* pTexture)
 {
 	switch (Desc.FileFormat)
 	{
 		case TEXTURE_FILE_FORMAT::DDS:
 		{
+			ID3D11Texture2D* pTex2D = nullptr;
 			ID3D11ShaderResourceView* pSRV = nullptr;
 
 			HRESULT hr = CreateDDSTexture2DFromMemory(
 				m_pRenderDevice->INL_GetD3D11Device(),
 				Desc.pData,
 				Desc.DataSize,
+				&pTex2D,
 				&pSRV,
 				false
 			);
@@ -374,48 +473,126 @@ BOOL D3D11RenderSystem::CreateTexture2D(const TEXTURE2D_CREATE_DESC& Desc, IText
 			if (FAILED(hr))
 			{
 				SYS_LOG_E("D3D11RenderSystem::CreateTexture1D: Failed to create DDS texture from memory, HRESULT = 0x%X", hr);
-				*(ppOut) = nullptr;
 				return FALSE;
 			}
 
-			D3D11Texture2D* pTex2D = D3D11_POOL_NEW(D3D11Texture2D)(
-				0, // ID (추후 필요할 수도 있으므로 남겨둠)
-				Desc.Format,
-				Desc.Width,
-				Desc.Height,
-				Desc.MipLevels,
-				nullptr, // ID3D11Texture2D* (필요하다면 추후에 추가)
-				pSRV
-			);
-
-			(*ppOut) = pTex2D;
-
-			return TRUE;
+			D3D11Texture2D* pTextureImpl = static_cast<D3D11Texture2D*>(pTexture);
+			pTextureImpl->INL_SetColorFormat(Desc.Format);
+			pTextureImpl->INL_SetWidth(Desc.Width);
+			pTextureImpl->INL_SetHeight(Desc.Height);
+			pTextureImpl->INL_SetMipLevels(Desc.MipLevels);
+			pTextureImpl->INL_SetD3D11Texture2D(pTex2D);
+			pTextureImpl->INL_SetSRV(pSRV);
+			pTextureImpl->INL_SetLoadStat(LOAD_STAT::LOADED);
 		}
 		break;
 
 		case TEXTURE_FILE_FORMAT::PNG:
-		{
-		}
-		break;
-
 		case TEXTURE_FILE_FORMAT::JPEG:
-		{
-		}
-		break;
-
 		case TEXTURE_FILE_FORMAT::BMP:
-		{
-		}
-		break;
-
 		case TEXTURE_FILE_FORMAT::TGA:
 		{
+			if (!Desc.hTempHeap)
+			{
+				SYS_LOG_E("D3D11RenderSystem::CreateTexture2D: Temporary heap handle is null for non-DDS texture");
+				return FALSE;
+			}
+
+			ID3D11Texture2D* pTex2D = nullptr;
+			ID3D11ShaderResourceView* pSRV = nullptr;
+
+			if (!CreateTexture2DFromSTBI(
+				Desc.hTempHeap,
+				m_pRenderDevice->INL_GetD3D11Device(),
+				Desc,
+				&pTex2D,
+				&pSRV
+			))
+			{
+				SYS_LOG_E("D3D11RenderSystem::CreateTexture2D: Failed to create texture from STBI for non-DDS texture");
+				return FALSE;
+			}
+
+			D3D11Texture2D* pTextureImpl = static_cast<D3D11Texture2D*>(pTexture);
+			pTextureImpl->INL_SetColorFormat(Desc.Format);
+			pTextureImpl->INL_SetWidth(Desc.Width);
+			pTextureImpl->INL_SetHeight(Desc.Height);
+			pTextureImpl->INL_SetMipLevels(Desc.MipLevels);
+			pTextureImpl->INL_SetD3D11Texture2D(pTex2D);
+			pTextureImpl->INL_SetSRV(pSRV);
+			pTextureImpl->INL_SetLoadStat(LOAD_STAT::LOADED);
+		}
+		break; 
+
+		case TEXTURE_FILE_FORMAT::UNKNOWN:
+		{
+			// 파일 포맷이 알려지지 않은 경우, 임시로 빈 텍스처를 생성하여 반환하며 Mip데이터는 생성하지 않는다.
+			const DXGI_FORMAT dxgiFormat = D3D11_IMPL_COLOR_FORMAT[(uint32)Desc.Format];
+			const size_t pixelSize = D3D11_IMPL_COLOR_FORMAT_SIZE[(uint32)Desc.Format];
+
+			D3D11_SUBRESOURCE_DATA SubResourceData = {};
+
+			uint8_t* pTempBuffer = (uint8_t*)temppool_alloc(Desc.hTempHeap, static_cast<size_t>(Desc.Width * Desc.Height * pixelSize));
+			memset(pTempBuffer, 0, Desc.Width * Desc.Height * pixelSize);
+
+			SubResourceData.pSysMem = pTempBuffer;
+			SubResourceData.SysMemPitch = static_cast<UINT>(Desc.Width * pixelSize);
+			SubResourceData.SysMemSlicePitch = 0;
+
+			D3D11_TEXTURE2D_DESC TexDesc = {};
+			TexDesc.Width = Desc.Width;
+			TexDesc.Height = Desc.Height;
+			TexDesc.MipLevels = 1;
+			TexDesc.ArraySize = 1;
+			TexDesc.Format = dxgiFormat;
+			TexDesc.Usage = D3D11_USAGE_IMMUTABLE;
+			TexDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+			TexDesc.CPUAccessFlags = 0;
+			TexDesc.MiscFlags = 0;
+
+			ID3D11Texture2D* pTex2D = nullptr;
+
+			HRESULT hr = m_pRenderDevice->INL_GetD3D11Device()->CreateTexture2D(
+				&TexDesc,
+				&SubResourceData,
+				&pTex2D
+			);
+
+			if (FAILED(hr))
+			{
+				SYS_LOG_E("D3D11RenderSystem::CreateTexture2D: Failed to create texture from memory for unknown format, HRESULT = 0x%X", hr);
+				return FALSE;
+			}
+
+			D3D11_SHADER_RESOURCE_VIEW_DESC SRVDesc = {};
+			SRVDesc.Format = dxgiFormat;
+			SRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+			SRVDesc.Texture1D.MostDetailedMip = 0;
+			SRVDesc.Texture1D.MipLevels = 1;
+
+			ID3D11ShaderResourceView* pSRV = nullptr;
+
+			hr = m_pRenderDevice->INL_GetD3D11Device()->CreateShaderResourceView(pTex2D, &SRVDesc, &pSRV);
+			if (FAILED(hr))
+			{
+				SYS_LOG_E("CreateTexture2DFromSTBI: CreateShaderResourceView failed, HRESULT = 0x%X", hr);
+				CHECK_RELEASE(pTex2D);
+				return FALSE;
+			}
+
+			D3D11Texture2D* pTextureImpl = static_cast<D3D11Texture2D*>(pTexture);
+			pTextureImpl->INL_SetColorFormat(Desc.Format);
+			pTextureImpl->INL_SetWidth(Desc.Width);
+			pTextureImpl->INL_SetHeight(Desc.Height);
+			pTextureImpl->INL_SetMipLevels(1);
+			pTextureImpl->INL_SetD3D11Texture2D(pTex2D);
+			pTextureImpl->INL_SetSRV(pSRV);
+			pTextureImpl->INL_SetLoadStat(LOAD_STAT::LOADED);
 		}
 		break;
+
 	}
-		
-	*(ppOut) = nullptr;
+
 	return TRUE;
 }
 

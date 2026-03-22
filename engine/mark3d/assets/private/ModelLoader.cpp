@@ -282,5 +282,6 @@ BOOL LoadTexture(IAssets* pAssets, IFileSystem* pFileSystem, const char* szRelat
 		}
 	}
 
-	return pAssets->Load(szFinalPath, ppOut);
+	return TRUE;
+	//return pAssets->Load(szFinalPath, ppOut);
 }

@@ -40,11 +40,11 @@ public:
 	virtual BOOL Load(const char* szRelativePath, IModelAsset** ppOut) final;
 	virtual BOOL LoadAsync(const char* szRelativePath, IModelAsset** ppOut) final;
 
-	virtual BOOL Load(const char* szRelativePath, ITexture1D** ppOut) final;
-	virtual BOOL LoadAsync(const char* szRelativePath, ITexture1D** ppOut) final;
+	virtual BOOL Load(const char* szRelativePath, BOOL sRGB, ITexture1D** ppOut) final;
+	virtual BOOL LoadAsync(const char* szRelativePath, BOOL sRGB, ITexture1D** ppOut) final;
 
-	virtual BOOL Load(const char* szRelativePath, ITexture2D** ppOut) final;
-	virtual BOOL LoadAsync(const char* szRelativePath, ITexture2D** ppOut) final;
+	virtual BOOL Load(const char* szRelativePath, BOOL sRGB, ITexture2D** ppOut) final;
+	virtual BOOL LoadAsync(const char* szRelativePath, BOOL sRGB, ITexture2D** ppOut) final;
 
 	virtual BOOL Load(const char* szRelativePath, IModel** ppOut) final;
 	virtual BOOL LoadAsync(const char* szRelativePath, IModel** ppOut) final;
@@ -57,7 +57,8 @@ private:
 	virtual long Release() final;
 	virtual long RefCnt() final;
 
-	BOOL IsExistFile(const char* szRelativePath) noexcept;
+	BOOL IsExistTextureFile(const char* szRelativePath, char* szModifiedPath) noexcept;
+	TEXTURE_FILE_FORMAT GetTextureFileFormat(const char* szRelativePath) noexcept;
 
 private:
 	volatile long m_RefCnt = 1;

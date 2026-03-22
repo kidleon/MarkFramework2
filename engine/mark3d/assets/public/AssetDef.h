@@ -11,7 +11,9 @@ enum class ASSET_TYPE : unsigned
 	TEXT_ASSET,
 	BINARY_ASSET,
 	MODEL_ASSET,
-	MODEL
+	MODEL,
+	TEXTURE_1D,
+	TEXTURE_2D,
 };
 
 /**
@@ -53,7 +55,7 @@ struct IAsset : public IUNKNOWN
 	* @param IgnoreFileName 파일 이름을 무시할지 여부, TRUE일 경우 파일 이름을 제외한 경로만 반환, FALSE일 경우 전체 상대 경로 반환
 	* @return 자산 상대 경로 문자열 포인터
 	*/
-	virtual BOOL GetRelativePath(char* szBuffer, size_t BufferLen, BOOL IgnoreFileName) const noexcept = 0;
+	//virtual BOOL GetRelativePath(char* szBuffer, size_t BufferLen, BOOL IgnoreFileName) const noexcept = 0;
 };
 
 /**
@@ -451,7 +453,7 @@ interface IAssets : public IPRIVATE_UNKNOWN
 	* @param ppOut 로드된 ITexture1D 포인터를 받을 변수의 주소
 	* @return 로드 성공 시 TRUE, 실패 시 FALSE
 	*/
-	virtual BOOL Load(const char* szRelativePath, ITexture1D** ppOut) = 0;
+	virtual BOOL Load(const char* szRelativePath, BOOL sRGB, ITexture1D** ppOut) = 0;
 
 	/**
 	* @brief 비동기 텍스처 자산 로드
@@ -459,7 +461,7 @@ interface IAssets : public IPRIVATE_UNKNOWN
 	* @param ppOut 로드된 ITexture1D 포인터를 받을 변수의 주소
 	* @return 로드 성공 시 TRUE, 실패 시 FALSE
 	*/
-	virtual BOOL LoadAsync(const char* szRelativePath, ITexture1D** ppOut) = 0;
+	virtual BOOL LoadAsync(const char* szRelativePath, BOOL sRGB, ITexture1D** ppOut) = 0;
 
 	/**
 	* @brief 텍스처 자산 로드
@@ -467,7 +469,7 @@ interface IAssets : public IPRIVATE_UNKNOWN
 	* @param ppOut 로드된 ITexture2D 포인터를 받을 변수의 주소
 	* @return 로드 성공 시 TRUE, 실패 시 FALSE
 	*/
-	virtual BOOL Load(const char* szRelativePath, ITexture2D** ppOut) = 0;
+	virtual BOOL Load(const char* szRelativePath, BOOL sRGB, ITexture2D** ppOut) = 0;
 
 	/**
 	* @brief 비동기 텍스처 자산 로드
@@ -475,7 +477,7 @@ interface IAssets : public IPRIVATE_UNKNOWN
 	* @param ppOut 로드된 ITexture2D 포인터를 받을 변수의 주소
 	* @return 로드 성공 시 TRUE, 실패 시 FALSE
 	*/
-	virtual BOOL LoadAsync(const char* szRelativePath, ITexture2D** ppOut) = 0;
+	virtual BOOL LoadAsync(const char* szRelativePath, BOOL sRGB, ITexture2D** ppOut) = 0;
 };
 
 

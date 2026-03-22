@@ -588,25 +588,31 @@ struct MARKENGINE_API RENDERER_CREATE_DESC
 */
 struct TEXTURE1D_CREATE_DESC
 {
+	HANDLE hTempHeap; 
 	TEXTURE_FILE_FORMAT FileFormat; // 텍스처 파일 포맷
 	UINT32 Width; // 텍스처 너비
 	UINT32 MipLevels; // 밉맵 레벨 수
 	COLOR_FORMAT Format; // 색상 포맷
 	const char* pData; // 초기 데이터 포인터
 	size_t DataSize; // 초기 데이터 크기 (바이트 단위)
+	BOOL sRGB; // sRGB 색상 공간 여부 (포맷이 UNORM인 경우에만 적용)
+	
 };
 
 /**
 * @brief 2D 텍스처 생성 정보 구조체
 */
+constexpr size_t MAX_MIPMAP_LEVELS = 16; // 최대 밉맵 레벨 수
+
 struct TEXTURE2D_CREATE_DESC
 {
+	HANDLE hTempHeap;
 	TEXTURE_FILE_FORMAT FileFormat; // 텍스처 파일 포맷
 	UINT32 Width; // 텍스처 너비
 	UINT32 Height; // 텍스처 높이
 	UINT32 MipLevels; // 밉맵 레벨 수
 	COLOR_FORMAT Format; // 색상 포맷
-	UINT32 PADDING; 
+	BOOL sRGB; // sRGB 색상 공간 여부 (포맷이 UNORM인 경우에만 적용)
 	const char* pData; // 초기 데이터 포인터
 	size_t DataSize; // 초기 데이터 크기 (바이트 단위)
 };
@@ -704,7 +710,7 @@ public:
 
 };
 
-struct ITexture1D : public IUNKNOWN
+struct ITexture1D : public IAsset
 {
 	/**
 	* @brief 텍스처 너비 반환
@@ -727,7 +733,7 @@ struct ITexture1D : public IUNKNOWN
 };
 
 
-struct ITexture2D : public IUNKNOWN
+struct ITexture2D : public IAsset
 {
 	/**
 	* @brief 텍스처 너비 반환
@@ -1710,8 +1716,10 @@ public:
 
 	virtual BOOL CreatePrimitiveBuffer(const PRIMITIVEBUFFER_CREATE_DESC& Desc, IPrimitiveBuffer** ppOut) = 0;
 	virtual BOOL CreateRenderCamera(const RENDERCAMERA_CREATE_DESC& Desc, IRenderCamera** ppOut) = 0;
-	virtual BOOL CreateTexture1D(const TEXTURE1D_CREATE_DESC& Desc, ITexture1D** ppOut) = 0;
-	virtual BOOL CreateTexture2D(const TEXTURE2D_CREATE_DESC& Desc, ITexture2D** ppOut) = 0;
+	virtual BOOL CreateTexture1D(ITexture1D** ppOut) = 0;
+	virtual BOOL CreateTexture2D(ITexture2D** ppOut) = 0;
+	virtual BOOL CreateTexture1D(const TEXTURE1D_CREATE_DESC& Desc, ITexture1D* pTexture) = 0;
+	virtual BOOL CreateTexture2D(const TEXTURE2D_CREATE_DESC& Desc, ITexture2D* pTexture) = 0;
 	virtual BOOL CreateSurfaceMaterial(ISurfaceMaterial** ppOut) = 0;
 	virtual BOOL GetOrCreateShaderProgram(const SHADER_PROGRAM_CREATE_DESC& Desc, IShaderProgram** ppOut) = 0;
 	//virtual BOOL GetOrCreateDDSTextureFactory(IDDSTextureFactory** ppOut) = 0;

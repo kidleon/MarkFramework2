@@ -11,6 +11,7 @@
 #include "BinaryAsset.h"
 #include "ModelAsset.h"
 
+#include "TextureLoader.h"
 #include "TextAssetLoader.h"
 #include "BinaryAssetLoader.h"
 #include "FBXModelLoader.h"
@@ -86,9 +87,8 @@ BOOL Assets::Init(
 
 	m_Initialized = TRUE;
 
-	fstrlcpy(m_szTexturePath[0], "texture", sizeof(m_szTexturePath[0]));
-	fstrlcpy(m_szTexturePath[1], "common/texture", sizeof(m_szTexturePath[1]));
-	fstrlcpy(m_szTexturePath[2], "model/texture", sizeof(m_szTexturePath[2]));
+	fstrlcpy(m_szTexturePath[0], "assets/common/texture", sizeof(m_szTexturePath[0]));
+	fstrlcpy(m_szTexturePath[1], "assets/model/texture", sizeof(m_szTexturePath[1]));
 
 	m_pRenderSystem = pRenderSystem;
 
@@ -225,87 +225,135 @@ BOOL Assets::LoadAsync(const char* szRelativePath, IBinaryAsset** ppOut)
 	return TRUE;
 }
 
-BOOL Assets::Load(const char* szRelativePath, ITexture1D** ppOut)
+BOOL Assets::Load(const char* szRelativePath, BOOL sRGB, ITexture1D** ppOut)
 {
 	if (!szRelativePath || !ppOut) return FALSE;
 	
-#if defined(__MARK3D_RENDERSYSTEM_D3D11__)
-	
-	IDataStream* pDataStream = m_pFileSystem->OpenFile(szRelativePath, TRUE);
-	if (!pDataStream)
+	char szModifiedPath[MAX_FILE_LENGTH] = { 0 };
+	if (!IsExistTextureFile(szRelativePath, szModifiedPath))
 	{
-		SYS_LOG_E("Assets::Load: Failed to open texture1D file: %s", szRelativePath);
+		SYS_LOG_E("Assets::Load: Texture1D file does not exist: %s", szRelativePath);
 		return FALSE;
 	}
 
-	size_t DataSize = pDataStream->GetSize();
-	void* pData = MARK_TEMP_ALLOC(DataSize);
-	if (!pData)
+	ITexture1D* pTexture = nullptr;
+	m_pRenderSystem->CreateTexture1D(&pTexture);
+
+	BOOL result = LoadTexture1DFromFileSystem(
+		m_hSyncLoadTempPool,
+		m_pFileSystem,
+		m_pRenderSystem,
+		szModifiedPath,
+		sRGB,
+		pTexture
+	);
+
+	if (!result)
 	{
-		pDataStream->Release();
-		SYS_LOG_E("Assets::Load: Failed to allocate memory for texture1D data: %s", szRelativePath);
+		pTexture->Release();
+		*ppOut = nullptr;
 		return FALSE;
 	}
 
-	if (!pDataStream->Read(pData, DataSize))
-	{
-		SYS_LOG_E("Assets::Load: Failed to read texture1D data from file: %s", szRelativePath);
-
-		MARK_TEMP_RESET();
-		pDataStream->Release();
-		
-		return FALSE;
-	}
-
-	D3D11Texture1D* pD3D11Texture1D = nullptr;
-	if (!LoadD3D11Texture1DFromMemory(
-		GLOBAL_VARS::D3D11_RENDER_DEVICE,
-		szRelativePath,
-		pData,
-		DataSize,
-		&pD3D11Texture1D
-	))
-	{
-		SYS_LOG_E("Assets::Load: Failed to load D3D11 texture1D from memory: %s", szRelativePath);
-
-		MARK_TEMP_RESET();
-		pDataStream->Release();
-
-		return FALSE;
-	}
-
-	pDataStream->Release();
-	pDataStream = nullptr;
-
-	D3D11Texture1DProxy* pTexture1DProxy = MARK_POOL_NEW(D3D11Texture1DProxy)(pD3D11Texture1D);
-
-	Texture2D* pTexture1D = MARK_POOL_NEW(Texture2D)(idgen_getid(m_hIDGen));
-	pTexture1D->SetTexture1DProxy(pTexture1DProxy);
-	
-	(*ppOut) = pTexture1D;
-
-#endif // __MARK3D_RENDERSYSTEM_D3D11__
+	*ppOut = pTexture;
 
 	return TRUE;
 }
 
-BOOL Assets::LoadAsync(const char* szRelativePath, ITexture1D** ppOut)
+BOOL Assets::LoadAsync(const char* szRelativePath, BOOL sRGB, ITexture1D** ppOut)
 {
 	if (!szRelativePath || !ppOut) return FALSE;
+
+	char szModifiedPath[MAX_FILE_LENGTH] = { 0 };
+	if (!IsExistTextureFile(szRelativePath, szModifiedPath))
+	{
+		SYS_LOG_E("Assets::Load: Texture1D file does not exist: %s", szRelativePath);
+		return FALSE;
+	}
+
+	ITexture1D* pTexture = nullptr;
+	m_pRenderSystem->CreateTexture1D(&pTexture);
+
+	pTexture->AddRef(); // 비동기 작업에서 해제할 것이므로 참조 카운트 증가
+
+	AsyncAssetOp* pArg = (AsyncAssetOp*)CORE_POOL_ALLOC(sizeof(AsyncAssetOp));
+	fstrlcpy(pArg->szRelativePath, szModifiedPath, sizeof(szModifiedPath));
+	pArg->pFileSystem = m_pFileSystem;
+	pArg->pRenderSystem = m_pRenderSystem;
+	pArg->Argument1 = sRGB ? 1 : 0; // sRGB 여부를 Argument1에 저장
+	pArg->pAsset = pTexture;
+
+	threadpool_add_task_temppool_arg(
+		m_hThreadPool,
+		AsyncLoadTexture1DFromFileSystem,
+		(void*)pArg
+	);
 
 	return TRUE;
 }
 
-BOOL Assets::Load(const char* szRelativePath, ITexture2D** ppOut)
+BOOL Assets::Load(const char* szRelativePath, BOOL sRGB, ITexture2D** ppOut)
 {
 	if (!szRelativePath || !ppOut) return FALSE;
+
+	char szModifiedPath[MAX_FILE_LENGTH] = { 0 };
+	if (!IsExistTextureFile(szRelativePath, szModifiedPath))
+	{
+		SYS_LOG_E("Assets::Load: Texture2D file does not exist: %s", szRelativePath);
+		return FALSE;
+	}
+
+	ITexture2D* pTexture = nullptr;
+	m_pRenderSystem->CreateTexture2D(&pTexture);
+
+	BOOL result = LoadTexture2DFromFileSystem(
+		m_hSyncLoadTempPool,
+		m_pFileSystem,
+		m_pRenderSystem,
+		szModifiedPath,
+		sRGB,
+		pTexture
+	);
+
+	if (!result)
+	{
+		pTexture->Release();
+		*ppOut = nullptr;
+		return FALSE;
+	}
+
+	*ppOut = pTexture;
 
 	return TRUE;
 }
 
-BOOL Assets::LoadAsync(const char* szRelativePath, ITexture2D** ppOut)
+BOOL Assets::LoadAsync(const char* szRelativePath, BOOL sRGB, ITexture2D** ppOut)
 {
 	if (!szRelativePath || !ppOut) return FALSE;
+
+	char szModifiedPath[MAX_FILE_LENGTH] = { 0 };
+	if (!IsExistTextureFile(szRelativePath, szModifiedPath))
+	{
+		SYS_LOG_E("Assets::Load: Texture2D file does not exist: %s", szRelativePath);
+		return FALSE;
+	}
+
+	ITexture2D* pTexture = nullptr;
+	m_pRenderSystem->CreateTexture2D(&pTexture);
+	pTexture->AddRef(); // 비동기 작업에서 해제할 것이므로 참조 카운트 증가
+
+	AsyncAssetOp* pArg = (AsyncAssetOp*)CORE_POOL_ALLOC(sizeof(AsyncAssetOp));
+	fstrlcpy(pArg->szRelativePath, szModifiedPath, sizeof(szModifiedPath));
+	pArg->pFileSystem = m_pFileSystem;
+	pArg->pRenderSystem = m_pRenderSystem;
+	pArg->Argument1 = sRGB ? 1 : 0; // sRGB 여부를 Argument1에 저장
+	pArg->pAsset = pTexture;
+
+	threadpool_add_task_temppool_arg(
+		m_hThreadPool,
+		AsyncLoadTexture2DFromFileSystem,
+		(void*)pArg
+	);
 
 	return TRUE;
 }
@@ -408,6 +456,64 @@ BOOL Assets::LoadAsync(const char* szRelativePath, IModel** ppOut)
 {
 	return TRUE;
 }
+
+BOOL Assets::IsExistTextureFile(const char* szRelativePath, char* szModifiedPath) noexcept
+{
+	// 텍스처 파일이 존재하는지 확인하는 로직 구현
+	// 예시: "texture/wood.png" -> "texture/wood_diffuse.png", "texture/wood_normal.png", "texture/wood_specular.png" 등으로 변환하여 존재 여부 확인
+	char szLowerPath[MAX_FILE_LENGTH] = { 0 };
+	fstrlcpy(szLowerPath, fstrlwr((char*)szRelativePath), sizeof(szLowerPath) - 1);
+	if (m_pFileSystem->ExistFile(szLowerPath))
+	{
+		if (szModifiedPath)
+			fstrlcpy(szModifiedPath, szLowerPath, MAX_FILE_LENGTH);
+		return TRUE;
+	}
+
+	char szOnlyPath[MAX_FILE_LENGTH] = { 0 };
+	char szOnlyFileName[MAX_FILE_LENGTH] = { 0 };
+	char szTempPath[MAX_FILE_LENGTH] = { 0 };
+	char szFullPath[MAX_FILE_LENGTH] = { 0 };
+
+	get_path(szLowerPath, szOnlyPath, sizeof(szOnlyPath));
+	get_filename(szRelativePath, szOnlyFileName, sizeof(szOnlyFileName));
+
+	combine_path(szOnlyPath, "texture", szTempPath, sizeof(szTempPath));
+	combine_path(szTempPath, szOnlyFileName, szFullPath, sizeof(szFullPath));
+	if (m_pFileSystem->ExistFile(szFullPath))
+	{
+		if (szModifiedPath)
+			fstrlcpy(szModifiedPath, szFullPath, MAX_FILE_LENGTH);
+		return TRUE;
+	}
+
+	combine_path(szOnlyPath, "material", szTempPath, sizeof(szTempPath));
+	combine_path(szTempPath, szOnlyFileName, szFullPath, sizeof(szFullPath));
+	if (m_pFileSystem->ExistFile(szFullPath))
+	{
+		if (szModifiedPath)
+			fstrlcpy(szModifiedPath, szFullPath, MAX_FILE_LENGTH);
+		return TRUE;
+	}
+
+	for (int i = 0; i < 8; ++i)
+	{
+		if(m_szTexturePath[i][0] == '\0')
+			continue;
+
+		combine_path(m_szTexturePath[i], szOnlyFileName, szFullPath, sizeof(szFullPath));
+		if (m_pFileSystem->ExistFile(szFullPath))
+		{
+			if (szModifiedPath)
+				fstrlcpy(szModifiedPath, szFullPath, MAX_FILE_LENGTH);
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
+
 
 /*
 char szLowerPath[MAX_FILE_LENGTH] = { 0 };

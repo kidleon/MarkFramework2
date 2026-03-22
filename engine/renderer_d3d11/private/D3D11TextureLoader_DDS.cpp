@@ -568,7 +568,7 @@ static DXGI_FORMAT GetDXGIFormat(const DDS_PIXELFORMAT& ddpf)
 
 //--------------------------------------------------------------------------------------
 static HRESULT CreateTexture2DFromDDS(ID3D11Device* pDev, DDS_HEADER* pHeader, __inout_bcount(BitSize) BYTE* pBitData,
-    UINT BitSize, __out ID3D11ShaderResourceView** ppSRV, bool bSRGB)
+    UINT BitSize, __out ID3D11Texture2D** ppTex2D, __out ID3D11ShaderResourceView** ppSRV, bool bSRGB)
 {
     HRESULT hr = S_OK;
 
@@ -693,6 +693,7 @@ static HRESULT CreateTexture2DFromDDS(ID3D11Device* pDev, DDS_HEADER* pHeader, _
     hr = pDev->CreateTexture2D(&desc, pInitData, &pTex2D);
     if (SUCCEEDED(hr) && pTex2D)
     {
+		(*ppTex2D) = pTex2D;
 #if defined(DEBUG) || defined(PROFILE)
         pTex2D->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof("DDSTextureLoader") - 1, "DDSTextureLoader");
 #endif
@@ -702,7 +703,6 @@ static HRESULT CreateTexture2DFromDDS(ID3D11Device* pDev, DDS_HEADER* pHeader, _
         SRVDesc.ViewDimension = D3D_SRV_DIMENSION_TEXTURE2D;
         SRVDesc.Texture2D.MipLevels = desc.MipLevels;
         hr = pDev->CreateShaderResourceView(pTex2D, &SRVDesc, ppSRV);
-        CHECK_RELEASE(pTex2D);
     }
 
     if (pInitData)
@@ -716,7 +716,7 @@ static HRESULT CreateTexture2DFromDDS(ID3D11Device* pDev, DDS_HEADER* pHeader, _
 
 //--------------------------------------------------------------------------------------
 static HRESULT CreateTexture1DFromDDS(ID3D11Device* pDev, DDS_HEADER* pHeader, __inout_bcount(BitSize) BYTE* pBitData,
-    UINT BitSize, __out ID3D11ShaderResourceView** ppSRV, bool bSRGB)
+    UINT BitSize, __out ID3D11Texture1D** ppTex1D, __out ID3D11ShaderResourceView** ppSRV, bool bSRGB)
 {
     HRESULT hr = S_OK;
 
@@ -838,6 +838,7 @@ static HRESULT CreateTexture1DFromDDS(ID3D11Device* pDev, DDS_HEADER* pHeader, _
     hr = pDev->CreateTexture1D(&desc, pInitData, &pTex1D);
     if (SUCCEEDED(hr) && pTex1D)
     {
+		(*ppTex1D) = pTex1D;
 #if defined(DEBUG) || defined(PROFILE)
         pTex1D->SetPrivateData(WKPDID_D3DDebugObjectName, sizeof("DDSTextureLoader") - 1, "DDSTextureLoader");
 #endif
@@ -847,7 +848,6 @@ static HRESULT CreateTexture1DFromDDS(ID3D11Device* pDev, DDS_HEADER* pHeader, _
         SRVDesc.ViewDimension = D3D_SRV_DIMENSION_TEXTURE1D;
         SRVDesc.Texture1D.MipLevels = desc.MipLevels;
         hr = pDev->CreateShaderResourceView(pTex1D, &SRVDesc, ppSRV);
-        CHECK_RELEASE(pTex1D);
     }
 
     if (pInitData)
@@ -865,6 +865,7 @@ HRESULT CreateDDSTexture1DFromMemory(
     __in ID3D11Device* pDev,
     __in_z const void* pData,
     __in size_t DataLength,
+	__out_opt ID3D11Texture1D** ppTex1D,
     __out_opt ID3D11ShaderResourceView** ppSRV,
     bool sRGB
 )
@@ -883,7 +884,7 @@ HRESULT CreateDDSTexture1DFromMemory(
         return hr;
     }
 
-    hr = CreateTexture1DFromDDS(pDev, pHeader, pBitData, BitSize, ppSRV, sRGB);
+    hr = CreateTexture1DFromDDS(pDev, pHeader, pBitData, BitSize, ppTex1D, ppSRV, sRGB);
 
     /*
 #if defined(DEBUG) || defined(PROFILE)
@@ -912,6 +913,7 @@ HRESULT CreateDDSTexture2DFromMemory(
     __in ID3D11Device* pDev,
     __in_z const void* pData,
     __in size_t DataLength,
+	__out_opt ID3D11Texture2D** ppTex2D,
     __out_opt ID3D11ShaderResourceView** ppSRV,
     bool sRGB
 )
@@ -930,7 +932,7 @@ HRESULT CreateDDSTexture2DFromMemory(
         return hr;
     }
 
-    hr = CreateTexture2DFromDDS(pDev, pHeader, pBitData, BitSize, ppSRV, sRGB);
+    hr = CreateTexture2DFromDDS(pDev, pHeader, pBitData, BitSize, ppTex2D, ppSRV, sRGB);
 
     /*
 #if defined(DEBUG) || defined(PROFILE)
