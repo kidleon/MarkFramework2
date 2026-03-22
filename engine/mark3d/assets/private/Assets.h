@@ -58,7 +58,6 @@ private:
 	virtual long RefCnt() final;
 
 	BOOL IsExistTextureFile(const char* szRelativePath, char* szModifiedPath) noexcept;
-	TEXTURE_FILE_FORMAT GetTextureFileFormat(const char* szRelativePath) noexcept;
 
 private:
 	volatile long m_RefCnt = 1;
