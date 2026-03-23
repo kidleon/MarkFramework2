@@ -322,10 +322,72 @@ const FLOAT4& D3D11SurfaceMaterial::GetColor() const noexcept
 	return m_pMaterialBlock->RenderPasses[0].Color;
 }
 
-void D3D11SurfaceMaterial::SetTexture1D(int32 Pass, int32 SamplerIndex, ITexture1D* pTexture)
+void D3D11SurfaceMaterial::SetTexture(int32 Pass, int32 SamplerIndex, ITextureBase* pTexture)
 {
+	if (!m_pMaterialBlock->NumPasses || Pass < 0 || Pass >= (int32)m_pMaterialBlock->NumPasses)
+		return;
+
+	if (m_pMaterialBlock->RenderPasses[Pass].pTextures[SamplerIndex])
+	{
+		m_pMaterialBlock->RenderPasses[Pass].pTextures[SamplerIndex]->Release();
+		m_pMaterialBlock->RenderPasses[Pass].pTextures[SamplerIndex] = nullptr;
+	}
+
+	m_pMaterialBlock->RenderPasses[Pass].pTextures[SamplerIndex] = pTexture;
 }
 
-void D3D11SurfaceMaterial::SetTexture2D(int32 Pass, int32 SamplerIndex, ITexture2D* pTexture)
+void D3D11SurfaceMaterial::SetDiffuseTexture(int32 Pass, ITextureBase* pTexture)
 {
+	if (!m_pMaterialBlock->NumPasses || Pass < 0 || Pass >= (int32)m_pMaterialBlock->NumPasses)
+		return;
+
+	if (m_pMaterialBlock->RenderPasses[Pass].pTextures[0])
+	{
+		m_pMaterialBlock->RenderPasses[Pass].pTextures[0]->Release();
+		m_pMaterialBlock->RenderPasses[Pass].pTextures[0] = nullptr;
+	}
+
+	m_pMaterialBlock->RenderPasses[Pass].pTextures[0] = pTexture;
+}
+
+void D3D11SurfaceMaterial::SetNormalTexture(int32 Pass, ITextureBase* pTexture)	
+{
+	if (!m_pMaterialBlock->NumPasses || Pass < 0 || Pass >= (int32)m_pMaterialBlock->NumPasses)
+		return;
+
+	if (m_pMaterialBlock->RenderPasses[Pass].pTextures[1])
+	{
+		m_pMaterialBlock->RenderPasses[Pass].pTextures[1]->Release();
+		m_pMaterialBlock->RenderPasses[Pass].pTextures[1] = nullptr;
+	}
+
+	m_pMaterialBlock->RenderPasses[Pass].pTextures[1] = pTexture;
+}
+
+void D3D11SurfaceMaterial::SetSpecularTexture(int32 Pass, ITextureBase* pTexture)	
+{
+	if (!m_pMaterialBlock->NumPasses || Pass < 0 || Pass >= (int32)m_pMaterialBlock->NumPasses)
+		return;
+
+	if (m_pMaterialBlock->RenderPasses[Pass].pTextures[2])
+	{
+		m_pMaterialBlock->RenderPasses[Pass].pTextures[2]->Release();
+		m_pMaterialBlock->RenderPasses[Pass].pTextures[2] = nullptr;
+	}
+
+	m_pMaterialBlock->RenderPasses[Pass].pTextures[2] = pTexture;
+}
+
+void D3D11SurfaceMaterial::SetEmissiveTexture(int32 Pass, ITextureBase* pTexture)	
+{
+	if (!m_pMaterialBlock->NumPasses || Pass < 0 || Pass >= (int32)m_pMaterialBlock->NumPasses)
+		return;
+
+	if (m_pMaterialBlock->RenderPasses[Pass].pTextures[3])
+	{
+		m_pMaterialBlock->RenderPasses[Pass].pTextures[3]->Release();
+		m_pMaterialBlock->RenderPasses[Pass].pTextures[3] = nullptr;
+	}
+
+	m_pMaterialBlock->RenderPasses[Pass].pTextures[3] = pTexture;
 }

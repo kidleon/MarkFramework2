@@ -13,14 +13,14 @@ public:
 	struct PRIMITIVE_DESC
 	{
 		PRIMITIVE_TYPE PrimitiveType;
-		uint32 VertexStart;
-		uint32 VertexCount;
-		uint32 IndexStart;
-		uint32 IndexCount;
+		UINT32 VertexStart;
+		UINT32 VertexCount;
+		UINT32 IndexStart;
+		UINT32 IndexCount;
 
-		uint32 NumIndices = 0;
-		uint32 IndexStarts[MAX_SUB_MESH] = {};
-		uint32 IndexCounts[MAX_SUB_MESH] = {};
+		UINT32 NumIndices = 0;
+		UINT32 IndexStarts[MAX_SUB_MESH] = {};
+		UINT32 IndexCounts[MAX_SUB_MESH] = {};
 	};
 
 	static PRIMITIVE_DESC INVALID_PRIMITIVE_DESC;
@@ -36,15 +36,15 @@ public:
 
 	virtual INT32 AddPrimitive(
 		PRIMITIVE_TYPE PrimitiveType,
-		uint32 VertexCount,
-		uint32 IndexCount
+		UINT32 VertexCount,
+		UINT32 IndexCount
 	) noexcept final;
 
 	virtual INT32 AddPrimitive(
 		PRIMITIVE_TYPE PrimitiveType,
-		uint32 VertexCount,
-		uint32 NumIndices,
-		uint32* pIndices
+		UINT32 VertexCount,
+		UINT32 NumIndices,
+		UINT32* pIndices
 	) noexcept final;
 
 	virtual size_t GetNumPrimitives() const noexcept final;
@@ -147,14 +147,14 @@ public:
 
 	virtual BOOL UpdateIndex(
 		int32 PrimitiveIndex,
-		const uint32* pIndices,
+		const UINT16* pIndices,
 		UINT32 IndexCount
 	) final;
 
 	virtual BOOL UpdateIndex(
 		int32 PrimitiveIndex,
 		UINT32 NumIndices,
-		const uint32** ppIndices,
+		const UINT16** ppIndices,
 		UINT32* pIndexCounts
 	) final;
 
@@ -213,7 +213,7 @@ private:
 	UINT32 m_MaxVertexCount = 0;
 	UINT32 m_MaxIndexCount = 0;
 	INT32 m_NumPrimitives = 0;
-	uint32 m_VertexFormat = 0;
+	UINT32 m_VertexFormat = 0;
 	BOOL m_DirtyBuffer = FALSE;
 	UINT32 PADDING1 = 0;
 

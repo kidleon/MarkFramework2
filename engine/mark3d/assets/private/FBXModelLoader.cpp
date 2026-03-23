@@ -20,6 +20,8 @@ BOOL LoadModelFromFBX(
 		return FALSE;
 	}
 
+	temppool_clear(hTempPool);
+
 	size_t streamSize = pDataStream->GetSize();
 	//char* pBuffer = (char*)CORE_SYS_ALLOC(streamSize);
 	char* pBuffer = (char*)temppool_alloc(hTempPool, streamSize);
@@ -41,25 +43,9 @@ BOOL LoadModelFromFBX(
 	}
 
 	pDataStream->Release();
+	temppool_clear(hTempPool);
 
 	pModelAsset->LoadFromFBX(fbx_scene);
 
 	return TRUE;
-}
-
-void AsyncLoadModelFromFBX(HANDLE temppool_handle, void* pArg)
-{
-	if (!temppool_handle || !pArg) return;
-
-	AsyncAssetOp* pAsyncOp = (AsyncAssetOp*)pArg;
-	if (!pAsyncOp->pAsset) return;
-
-	ModelAsset* pModelAsset = static_cast<ModelAsset*>(pAsyncOp->pAsset);
-
-	BOOL Result = LoadModelFromFBX(temppool_handle, pAsyncOp->pFileSystem, pAsyncOp->szRelativePath, pModelAsset);
-
-	pModelAsset->INL_SetLoadStat(Result ? LOAD_STAT::LOADED : LOAD_STAT::FAILED);
-	pModelAsset->Release(); // 비동기 작업이 끝났으므로 참조 카운트 감소
-
-	CORE_POOL_FREE(pAsyncOp);
 }

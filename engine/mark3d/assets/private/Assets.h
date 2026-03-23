@@ -49,6 +49,9 @@ public:
 	virtual BOOL Load(const char* szRelativePath, IModel** ppOut) final;
 	virtual BOOL LoadAsync(const char* szRelativePath, IModel** ppOut) final;
 
+	BOOL Load(HANDLE hTempPool, const char* szRelativePath, BOOL sRGB, ITexture1D** ppOut);
+	BOOL Load(HANDLE hTempPool, const char* szRelativePath, BOOL sRGB, ITexture2D** ppOut);
+
 private:
 	virtual ~Assets() noexcept;
 

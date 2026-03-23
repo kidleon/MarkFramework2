@@ -44,6 +44,11 @@ LOAD_STAT D3D11Texture1D::GetLoadStat() const noexcept
 	return m_LoadStat;
 }
 
+TEXTURE_TYPE D3D11Texture1D::GetTextureType() const noexcept
+{
+	return TEXTURE_TYPE::TEX_1D;
+}
+
 uint32 D3D11Texture1D::GetWidth() const noexcept
 {
 	return m_Width;

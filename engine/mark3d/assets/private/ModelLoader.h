@@ -4,13 +4,21 @@
 
 class ModelAsset;
 class Model;
+interface IAssets;
+interface IFileSystem;
+interface IRenderSystem;
+interface ITexture2D;
 
-extern BOOL LoadModelFromFile(
+extern BOOL LoadModelFromModelAsset(
 	HANDLE hTempPool,
 	IFileSystem* pFileSystem,
+	IAssets* pAssets,
+	IRenderSystem* pRenderSystem,
 	const char* szRelativePath,
 	ModelAsset* pModelAsset,
 	Model* pModel
 );
+
+extern BOOL AsyncLoadModelFromModelAsset(HANDLE temppool_handle, void* pArg);
 
 #endif // __MODEL_LOADER_H__

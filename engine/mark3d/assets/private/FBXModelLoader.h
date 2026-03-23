@@ -11,6 +11,5 @@ extern BOOL LoadModelFromFBX(
 	ModelAsset* pModelAsset
 );
 
-extern void AsyncLoadModelFromFBX(HANDLE temppool_handle, void* pArg);
 
 #endif // __FBX_MODEL_LOADER_H__

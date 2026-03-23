@@ -24,6 +24,8 @@ struct D3D11_SURFACE_RENDER_PASS
 
 	FLOAT4 Color;
 
+	ITextureBase* pTextures[MAX_TEXTURE_SAMPLERS];
+
 	void Reset()
 	{
 		fstrcpy(PassName, "NoNamePass");
@@ -40,6 +42,15 @@ struct D3D11_SURFACE_RENDER_PASS
 		SampleMask = 0xFFFFFFFF;
 		StencilRef = 0;
 		Color = FLOAT4{ 1.0f, 1.0f, 1.0f, 1.0f };
+
+		for (int i = 0; i < MAX_TEXTURE_SAMPLERS; ++i)
+		{
+			if (pTextures[i])
+			{
+				pTextures[i]->Release();
+				pTextures[i] = nullptr;
+			}
+		}
 	}
 };
 

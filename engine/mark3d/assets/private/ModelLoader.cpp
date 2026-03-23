@@ -8,12 +8,11 @@
 #include "Mark3DImpl.h"
 
 
-
-BOOL LoadTexture(IAssets* pAssets, IFileSystem* pFileSystem, const char* szRelativePath, ITexture2D** ppOut);
-
-BOOL LoadModelFromFile(
+BOOL LoadModelFromModelAsset(
 	HANDLE hTempPool,
 	IFileSystem* pFileSystem,
+	IAssets* pAssets,
+	IRenderSystem* pRenderSystem,
 	const char* szRelativePath,
 	ModelAsset* pModelAsset,
 	Model* pModel
@@ -180,23 +179,8 @@ BOOL LoadModelFromFile(
 	}
 
 	// Load Material
-	IAssets* pAssets = nullptr;
-	Mark3DImpl::Get()->GetAssetsInterface(&pAssets);
-
-	IRenderSystem* pRenderSystem = nullptr;
-	Mark3DImpl::Get()->GetRenderSystemInterface(&pRenderSystem);
-
 	size_t NumMaterials = pModelAsset->GetNumMaterials();
-
-	char szPath[MAX_FILE_LENGTH] = {};
-	get_path(szRelativePath, szPath, MAX_FILE_LENGTH);
-
-	char szFinalPath[MAX_FILE_LENGTH] = {};
-	char szTempPath[MAX_FILE_LENGTH] = {};
-
-	// Current Path: Assets/Models/ModelName/TextureName.png
-	// Material Path : Assets/Models/ModelName/Material/TextureName.png
-	// Common Path : Assets/Models/Common/TextureName.png
+	
 	for (size_t m = 0; m < NumMaterials; m++)
 	{
 		ITexture2D* pDiffuseTexture = nullptr;
@@ -204,10 +188,10 @@ BOOL LoadModelFromFile(
 		if (pModelAsset->HasDiffuseTexture((int32)m))
 		{
 			const char* szDiffuse = pModelAsset->GetMaterialDiffuse((int32)m);
-			if (!LoadTexture(pAssets, pFileSystem, szDiffuse, &pDiffuseTexture))
+
+			if (!pAssets->Load(szRelativePath, TRUE, &pDiffuseTexture))
 			{
 				SYS_LOG_W("LoadModelFromFile - Diffuse texture file not found: %s", szDiffuse);
-				continue;
 			}
 		}
 
@@ -216,10 +200,9 @@ BOOL LoadModelFromFile(
 		if (pModelAsset->HasNormalTexture((int32)m))
 		{
 			const char* szNormal = pModelAsset->GetMaterialNormal((int32)m);
-			if (!LoadTexture(pAssets, pFileSystem, szNormal, &pNormalTexture))
+			if (!pAssets->Load(szRelativePath, FALSE, &pNormalTexture))
 			{
 				SYS_LOG_W("LoadModelFromFile - Normal texture file not found: %s", szNormal);
-				continue;
 			}
 		}
 
@@ -228,10 +211,9 @@ BOOL LoadModelFromFile(
 		if (pModelAsset->HasSpecularTexture((int32)m))
 		{
 			const char* szSpecular = pModelAsset->GetMaterialSpecular((int32)m);
-			if (!LoadTexture(pAssets, pFileSystem, szSpecular, &pSpecularTexture))
+			if (!pAssets->Load(szRelativePath, FALSE, &pSpecularTexture))
 			{
 				SYS_LOG_W("LoadModelFromFile - Specular texture file not found: %s", szSpecular);
-				continue;
 			}
 		}
 
@@ -240,48 +222,22 @@ BOOL LoadModelFromFile(
 		if (pModelAsset->HasEmissiveTexture((int32)m))
 		{
 			const char* szEmissive = pModelAsset->GetMaterialEmissive((int32)m);
-			if (!LoadTexture(pAssets, pFileSystem, szEmissive, &pEmissiveTexture))
+			if (!pAssets->Load(szRelativePath, FALSE, &pEmissiveTexture))
 			{
 				SYS_LOG_W("LoadModelFromFile - Emissive texture file not found: %s", szEmissive);
-				continue;
 			}
 		}
 
 		// Create Material
 		ISurfaceMaterial* pMaterial = nullptr;
 		pRenderSystem->CreateSurfaceMaterial(&pMaterial);
-	}
 
+		pMaterial->SetDiffuseTexture(0, pDiffuseTexture);
+		pMaterial->SetNormalTexture(0, pNormalTexture);
+		pMaterial->SetSpecularTexture(0, pSpecularTexture);
+		pMaterial->SetEmissiveTexture(0, pEmissiveTexture);
+	}
 
 	return TRUE;
 }
 
-BOOL LoadTexture(IAssets* pAssets, IFileSystem* pFileSystem, const char* szRelativePath, ITexture2D** ppOut)
-{
-	char szPath[MAX_FILE_LENGTH] = {};
-	get_path(szRelativePath, szPath, MAX_FILE_LENGTH);
-
-	char szFinalPath[MAX_FILE_LENGTH] = {};
-	char szTempPath[MAX_FILE_LENGTH] = {};
-
-	combine_path(szPath, szRelativePath, szFinalPath, MAX_FILE_LENGTH);
-
-	if (!pFileSystem->ExistFile(szFinalPath))
-	{
-		combine_path(szPath, "material", szTempPath, MAX_FILE_LENGTH);
-		combine_path(szTempPath, szRelativePath, szFinalPath, MAX_FILE_LENGTH);
-
-		if (!pFileSystem->ExistFile(szFinalPath))
-		{
-			combine_path("assets/models/common", szRelativePath, szFinalPath, MAX_FILE_LENGTH);
-			if (!pFileSystem->ExistFile(szFinalPath))
-			{
-				SYS_LOG_W("LoadTexture - Texture file not found: %s", szRelativePath);
-				return FALSE;
-			}
-		}
-	}
-
-	return TRUE;
-	//return pAssets->Load(szFinalPath, ppOut);
-}

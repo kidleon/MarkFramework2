@@ -19,6 +19,9 @@ public:
 	virtual ASSET_TYPE GetAssetType() const noexcept final;
 	virtual LOAD_STAT GetLoadStat() const noexcept final;
 
+	// ITextureBase interface
+	virtual TEXTURE_TYPE GetTextureType() const noexcept final;
+
 	// ITexture1D interface
 	virtual uint32 GetWidth() const noexcept final;
 	virtual uint32 GetMipLevels() const noexcept final;

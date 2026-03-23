@@ -184,14 +184,14 @@ inline size_t CalculateTextureSize(COLOR_FORMAT format, size_t width, size_t hei
 	return width * height * pixelSize;
 }
 
-enum class INDEX_FORMAT : uint32
+enum class INDEX_FORMAT : UINT32
 {
 	UINT16 = 0,
 	UINT32,
 	MAX
 };
 
-enum class PRIMITIVE_TYPE : uint32
+enum class PRIMITIVE_TYPE : UINT32
 {
 	UNKNOWN = 0,
 	POINT_LIST,
@@ -206,7 +206,7 @@ enum class PRIMITIVE_TYPE : uint32
 /**
 * @brief 셰이더 타입 열거형
 */
-enum class SHADER_TYPE : uint32
+enum class SHADER_TYPE : UINT32
 {
 	UNKNOWN = 0,
 	VERTEX,
@@ -220,7 +220,7 @@ enum class SHADER_TYPE : uint32
 /**
 * @brief 버퍼 사용 용도 열거형
 */
-enum class BUFFER_USAGE : uint32
+enum class BUFFER_USAGE : UINT32
 {
 	DEFAULT = 0,
 	IMMUTABLE,
@@ -325,7 +325,7 @@ enum class VERTEX_FORMAT_STRIDE : unsigned int
 static constexpr UINT32 MAX_VERTEX_FORMAT = 16; // 최대 버텍스 포맷 수
 static constexpr int32 MAX_RENDER_PASS = 4; // 서피스 메테리얼의 최대 렌더 패스 수 (추가 패스는 별도의 메테리얼로 구현)
 static constexpr int32 MAX_BLEND_TARGET = 8; // 최대 블렌드 타겟 수 (MRT 지원)
-static constexpr uint32 MAX_PRIMITIVE = 32; // 최대 프리미티브 수
+static constexpr UINT32 MAX_PRIMITIVE = 32; // 최대 프리미티브 수
 
 //static constexpr int32 MAX_TEXTURE_SLOT = 16; // 최대 텍스처 슬롯 수
 static constexpr int32 MAX_SAMPLER_SLOT = 16; // 최대 샘플러 슬롯 수
@@ -710,19 +710,28 @@ public:
 
 };
 
-struct ITexture1D : public IAsset
+struct ITextureBase : public IAsset
+{
+	/**
+	* @brief 텍스처 유형 반환
+	* @return 텍스처 유형
+	*/
+	virtual TEXTURE_TYPE GetTextureType() const noexcept = 0;
+};
+
+struct ITexture1D : public ITextureBase
 {
 	/**
 	* @brief 텍스처 너비 반환
 	* @return 텍스처 너비
 	*/
-	virtual uint32 GetWidth() const noexcept = 0;
+	virtual UINT32 GetWidth() const noexcept = 0;
 
 	/**
 	* @brief MIP 레벨 수 반환
 	* @return MIP 레벨 수
 	*/
-	virtual uint32 GetMipLevels() const noexcept = 0;
+	virtual UINT32 GetMipLevels() const noexcept = 0;
 
 	/**
 	* @brief 텍스처 컬러 포맷 반환
@@ -733,25 +742,25 @@ struct ITexture1D : public IAsset
 };
 
 
-struct ITexture2D : public IAsset
+struct ITexture2D : public ITextureBase
 {
 	/**
 	* @brief 텍스처 너비 반환
 	* @return 텍스처 너비
 	*/
-	virtual uint32 GetWidth() const noexcept = 0;
+	virtual UINT32 GetWidth() const noexcept = 0;
 
 	/**
 	* @brief 텍스처 높이 반환
 	* @return 텍스처 높이
 	*/
-	virtual uint32 GetHeight() const noexcept = 0;
+	virtual UINT32 GetHeight() const noexcept = 0;
 
 	/**
 	* @brief MIP 레벨 수 반환
 	* @return MIP 레벨 수
 	*/
-	virtual uint32 GetMipLevels() const noexcept = 0;
+	virtual UINT32 GetMipLevels() const noexcept = 0;
 
 	/**
 	* @brief 텍스처 컬러 포맷 반환
@@ -1414,6 +1423,8 @@ inline RS_RASTERIZER_STATE GetRS_WireframeTwoSide()
 /**
 * @brief 서피스 메테리얼 인터페이스
 */
+static constexpr size_t MAX_TEXTURE_SAMPLERS = 16; // 최대 텍스처 샘플러 수 (D3D11 기준)
+
 struct ISurfaceMaterial : public IUNKNOWN
 {
 public:
@@ -1456,9 +1467,12 @@ public:
 	virtual const FLOAT4& GetColor(int32 Pass) const noexcept = 0;
 	virtual const FLOAT4& GetColor() const noexcept = 0;
 
-	virtual void SetTexture1D(int32 Pass, int32 SamplerIndex, ITexture1D* pTexture) = 0;
-	virtual void SetTexture2D(int32 Pass, int32 SamplerIndex, ITexture2D* pTexture) = 0;
+	virtual void SetTexture(int32 Pass, int32 SamplerIndex, ITextureBase* pTexture) = 0;
 
+	virtual void SetDiffuseTexture(int32 Pass, ITextureBase* pTexture) = 0;
+	virtual void SetNormalTexture(int32 Pass, ITextureBase* pTexture) = 0;
+	virtual void SetSpecularTexture(int32 Pass, ITextureBase* pTexture) = 0;
+	virtual void SetEmissiveTexture(int32 Pass, ITextureBase* pTexture) = 0;
 
 	/*
 	virtual void SetConstantBuffer_VS(int32 SlotIndex, const NameHash& Name, IConstantBuffer* pCBuffer) = 0;
@@ -1497,8 +1511,8 @@ struct IPrimitiveBuffer : public IUNKNOWN
 	*/
 	virtual INT32 AddPrimitive(
 		PRIMITIVE_TYPE PrimitiveType,
-		uint32 VertexCount,
-		uint32 IndexCount
+		UINT32 VertexCount,
+		UINT32 IndexCount
 	) noexcept = 0;
 
 	/**
@@ -1510,9 +1524,9 @@ struct IPrimitiveBuffer : public IUNKNOWN
 	*/
 	virtual INT32 AddPrimitive(
 		PRIMITIVE_TYPE PrimitiveType,
-		uint32 VertexCount,
-		uint32 NumIndices,
-		uint32* pIndices
+		UINT32 VertexCount,
+		UINT32 NumIndices,
+		UINT16* pIndices
 	) noexcept = 0;
 
 	/**
@@ -1619,7 +1633,7 @@ struct IPrimitiveBuffer : public IUNKNOWN
 
 	virtual BOOL UpdateIndex(
 		int32 PrimitiveIndex,
-		const uint32* pIndices,
+		const UINT16* pIndices,
 		UINT32 IndexCount
 	) = 0;
 
@@ -1634,7 +1648,7 @@ struct IPrimitiveBuffer : public IUNKNOWN
 	virtual BOOL UpdateIndex(
 		int32 PrimitiveIndex,
 		UINT32 NumIndices,
-		const uint32** ppIndices,
+		const UINT16** ppIndices,
 		UINT32* pIndexCounts
 	) = 0;
 

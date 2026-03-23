@@ -54,8 +54,12 @@ public:
 	virtual const FLOAT4& GetColor(int32 Pass) const noexcept final;
 	virtual const FLOAT4& GetColor() const noexcept final;
 
-	virtual void SetTexture1D(int32 Pass, int32 SamplerIndex, ITexture1D* pTexture) final;
-	virtual void SetTexture2D(int32 Pass, int32 SamplerIndex, ITexture2D* pTexture) final;
+	virtual void SetTexture(int32 Pass, int32 SamplerIndex, ITextureBase* pTexture) final;
+
+	virtual void SetDiffuseTexture(int32 Pass, ITextureBase* pTexture) final;
+	virtual void SetNormalTexture(int32 Pass, ITextureBase* pTexture) final;
+	virtual void SetSpecularTexture(int32 Pass, ITextureBase* pTexture) final;
+	virtual void SetEmissiveTexture(int32 Pass, ITextureBase* pTexture) final;
 
 	__FORCEINLINE int32 INL_GetNumPass() const noexcept
 	{

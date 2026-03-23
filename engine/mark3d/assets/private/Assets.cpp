@@ -225,6 +225,79 @@ BOOL Assets::LoadAsync(const char* szRelativePath, IBinaryAsset** ppOut)
 	return TRUE;
 }
 
+BOOL Assets::Load(HANDLE hTempPool, const char* szRelativePath, BOOL sRGB, ITexture1D** ppOut)
+{
+	if (!hTempPool || !szRelativePath || !ppOut) return FALSE;
+
+	char szModifiedPath[MAX_FILE_LENGTH] = { 0 };
+
+	if (!IsExistTextureFile(szRelativePath, szModifiedPath))
+	{
+		SYS_LOG_E("Assets::Load: Texture1D file does not exist: %s", szRelativePath);
+		return FALSE;
+	}
+
+	ITexture1D* pTexture = nullptr;
+	m_pRenderSystem->CreateTexture1D(&pTexture);
+
+	BOOL result = LoadTexture1DFromFileSystem(
+		hTempPool,
+		m_pFileSystem,
+		m_pRenderSystem,
+		szModifiedPath,
+		sRGB,
+		pTexture
+	);
+
+	if (!result)
+	{
+		pTexture->Release();
+		*ppOut = nullptr;
+		return FALSE;
+	}
+
+	*ppOut = pTexture;
+
+	return TRUE;
+}
+
+BOOL Assets::Load(HANDLE hTempPool, const char* szRelativePath, BOOL sRGB, ITexture2D** ppOut)
+{
+	if (!hTempPool || !szRelativePath || !ppOut) return FALSE;
+
+	char szModifiedPath[MAX_FILE_LENGTH] = { 0 };
+
+	if (!IsExistTextureFile(szRelativePath, szModifiedPath))
+	{
+		SYS_LOG_E("Assets::Load: Texture2D file does not exist: %s", szRelativePath);
+		return FALSE;
+	}
+
+	ITexture2D* pTexture = nullptr;
+	m_pRenderSystem->CreateTexture2D(&pTexture);
+
+	BOOL result = LoadTexture2DFromFileSystem(
+		hTempPool,
+		m_pFileSystem,
+		m_pRenderSystem,
+		szModifiedPath,
+		sRGB,
+		pTexture
+	);
+
+	if (!result)
+	{
+		pTexture->Release();
+		*ppOut = nullptr;
+		return FALSE;
+	}
+
+	*ppOut = pTexture;
+
+	return TRUE;
+}
+
+
 BOOL Assets::Load(const char* szRelativePath, BOOL sRGB, ITexture1D** ppOut)
 {
 	if (!szRelativePath || !ppOut) return FALSE;
