@@ -10,6 +10,7 @@ struct AsyncAssetOp
 {
 	char szRelativePath[264];
 	IFileSystem* pFileSystem;
+	IAssets* pAssets;
 	IAsset* pAsset;
 	IRenderSystem* pRenderSystem;
 

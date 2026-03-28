@@ -645,6 +645,13 @@ struct PRIMITIVEBUFFER_CREATE_DESC
 	UINT32 MaxIndexCount;
 };
 
+struct MODEL_CREATE_DESC
+{
+	char szModelName[64];
+	UINT32 VertexFormat;
+	UINT32 MaxVertexCount;
+	UINT32 MaxIndexCount;
+};
 
 constexpr size_t MAX_SHADER_DEFINE = 32;
 constexpr size_t MAX_SHADER_DEFINE_LENGTH = 64;
@@ -1519,14 +1526,14 @@ struct IPrimitiveBuffer : public IUNKNOWN
 	* @brief 프리미티브를 추가합니다. 하나의 버텍스 데이터에 여러 인덱스 버퍼를 사용하는 경우에 사용합니다. (서브메시)
 	* @param PrimitiveType 프리미티브 타입
 	* @param VertexCount 정점 개수
-	* @param NumIndices 인덱스 갯수 배열의 갯수
+	* @param NumIndexArray 인덱스 갯수 배열의 갯수
 	* @param pIndices 인덱스 갯수 배열
 	*/
 	virtual INT32 AddPrimitive(
 		PRIMITIVE_TYPE PrimitiveType,
 		UINT32 VertexCount,
-		UINT32 NumIndices,
-		UINT16* pIndices
+		UINT32 NumIndexArray,
+		UINT32* pNumIndices
 	) noexcept = 0;
 
 	/**
@@ -1722,6 +1729,8 @@ struct IRenderContext : public IUNKNOWN
 /**
 * @brief 렌더링 시스템 인터페이스
 */
+struct IModel;
+
 struct IRenderSystem : public IUNKNOWN
 {
 public:
@@ -1730,6 +1739,7 @@ public:
 
 	virtual BOOL CreatePrimitiveBuffer(const PRIMITIVEBUFFER_CREATE_DESC& Desc, IPrimitiveBuffer** ppOut) = 0;
 	virtual BOOL CreateRenderCamera(const RENDERCAMERA_CREATE_DESC& Desc, IRenderCamera** ppOut) = 0;
+	virtual BOOL CreateModel(const MODEL_CREATE_DESC& Desc, IModel** ppOut) = 0;
 	virtual BOOL CreateTexture1D(ITexture1D** ppOut) = 0;
 	virtual BOOL CreateTexture2D(ITexture2D** ppOut) = 0;
 	virtual BOOL CreateTexture1D(const TEXTURE1D_CREATE_DESC& Desc, ITexture1D* pTexture) = 0;

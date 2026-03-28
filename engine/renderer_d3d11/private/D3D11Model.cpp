@@ -1,67 +1,63 @@
 ﻿#include "pch.h"
-#include "Model.h"
-#include "ModelAsset.h"
-#include "Assets.h"
-#include "Mark3DImpl.h"
-#include "Mesh.h"
-#include "temp_pool.h"
+#include "D3D11Model.h"
+#include "D3D11Mesh.h"
 
 
-Model::Model(UINT64 ID, uint32 VertexFormat, IPrimitiveBuffer* pPrimitiveBuffer)
-	: m_ID(ID)	
+D3D11Model::D3D11Model(UINT64 ID, uint32 VertexFormat, IPrimitiveBuffer* pPrimitiveBuffer)
+	: m_ID(ID)
 	, m_pPrimitiveBuffer(pPrimitiveBuffer)
 	, m_VertexFormat(VertexFormat)
 {
 }
 
-Model::~Model() noexcept
+D3D11Model::~D3D11Model() noexcept
 {
 	CHECK_RELEASE(m_pPrimitiveBuffer);
 }
 
-long Model::AddRef()
+long D3D11Model::AddRef()
 {
 	interlock_increment_l(&m_RefCnt, MEMORY_ORDER_RELAXED);
 	return m_RefCnt;
 }
 
-long Model::Release()
+long D3D11Model::Release()
 {
 	long NewRefCnt = interlock_decrement_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL);
 	if (!NewRefCnt)
 	{
-		CORE_POOL_DELETE(this, Model);
+		D3D11_POOL_DELETE(this, D3D11Model);
 	}
 
 	return NewRefCnt;
 }
 
-long Model::RefCnt()
+long D3D11Model::RefCnt()
 {
 	return m_RefCnt;
 }
 
-UINT64 Model::GetID() const noexcept
+UINT64 D3D11Model::GetID() const noexcept
 {
 	return m_ID;
 }
 
-ASSET_TYPE Model::GetAssetType() const noexcept
+ASSET_TYPE D3D11Model::GetAssetType() const noexcept
 {
 	return ASSET_TYPE::MODEL;
 }
 
-LOAD_STAT Model::GetLoadStat() const noexcept
+LOAD_STAT D3D11Model::GetLoadStat() const noexcept
 {
 	return m_LoadStat;
 }
 
-UINT32 Model::GetNumMesh() const noexcept
+UINT32 D3D11Model::GetNumMesh() const noexcept
 {
 	return m_NumMesh;
 }
 
-INT32 Model::AddMesh(NameHash Name, PRIMITIVE_TYPE PrimitiveType, UINT32 NumVertex, UINT32 NumIndex) noexcept
+INT32 D3D11Model::AddMesh(NameHash Name, PRIMITIVE_TYPE PrimitiveType, UINT32 NumVertex, UINT32 NumIndex) noexcept
 {
 	__ASSERT(m_NumMesh < MAX_MESH_PER_MODEL, "Exceeded maximum number of meshes per model.");
 
@@ -78,13 +74,13 @@ INT32 Model::AddMesh(NameHash Name, PRIMITIVE_TYPE PrimitiveType, UINT32 NumVert
 		return -1;
 	}
 
-	m_pMeshes[m_NumMesh] = CORE_POOL_NEW(Mesh)(m_pPrimitiveBuffer, PrimitiveIndex, NumVertex, NumIndex);
+	m_pMeshes[m_NumMesh] = D3D11_POOL_NEW(D3D11Mesh)(m_pPrimitiveBuffer, PrimitiveIndex, NumVertex, NumIndex);
 	m_NumMesh++;
 
 	return (INT32)(m_NumMesh - 1);
 }
 
-IMesh* Model::GetMesh(INT32 MeshIndex) noexcept
+IMesh* D3D11Model::GetMesh(INT32 MeshIndex) noexcept
 {
 	__ASSERT(MeshIndex >= 0 && MeshIndex < (INT32)m_NumMesh, "Mesh index is out of range.");
 
@@ -97,7 +93,7 @@ IMesh* Model::GetMesh(INT32 MeshIndex) noexcept
 	return m_pMeshes[MeshIndex];
 }
 
-IMesh* Model::GetMesh(NameHash Name) noexcept
+IMesh* D3D11Model::GetMesh(NameHash Name) noexcept
 {
 	for (UINT32 i = 0; i < m_NumMesh; i++)
 	{

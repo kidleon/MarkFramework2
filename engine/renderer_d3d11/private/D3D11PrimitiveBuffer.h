@@ -43,8 +43,8 @@ public:
 	virtual INT32 AddPrimitive(
 		PRIMITIVE_TYPE PrimitiveType,
 		UINT32 VertexCount,
-		UINT32 NumIndices,
-		UINT32* pIndices
+		UINT32 NumIndexArray,
+		UINT32* pNumIndices
 	) noexcept final;
 
 	virtual size_t GetNumPrimitives() const noexcept final;

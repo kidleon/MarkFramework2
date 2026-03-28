@@ -3,7 +3,7 @@
 
 
 class ModelAsset;
-class Model;
+class D3D11Model;
 interface IAssets;
 interface IFileSystem;
 interface IRenderSystem;
@@ -15,8 +15,8 @@ extern BOOL LoadModelFromModelAsset(
 	IAssets* pAssets,
 	IRenderSystem* pRenderSystem,
 	const char* szRelativePath,
-	ModelAsset* pModelAsset,
-	Model* pModel
+	IModelAsset* pModelAsset,
+	IModel* pModel
 );
 
 extern BOOL AsyncLoadModelFromModelAsset(HANDLE temppool_handle, void* pArg);

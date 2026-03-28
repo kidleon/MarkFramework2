@@ -188,6 +188,31 @@ struct IModelAsset : public IAsset
 	virtual const char* GetMeshName(int32 MeshIndex) const noexcept = 0;
 
 	/**
+	* @brief 메쉬에 포함된 버텍스 속성 반환, 가장 많은 버텍스 속성을 가진 메쉬의 속성을 반환
+	* @return 버텍스 속성
+	*/
+	virtual UINT32 GetVertexFormat() const noexcept = 0;
+
+	/**
+	* @brief 모델에 포함된 모든 버텍스 개수 반환, 모든 메쉬의 버텍스 개수를 합산한 값 반환
+	* @return 버텍스 개수
+	*/
+	virtual UINT32 GetTotalVertexCount() const noexcept = 0;
+
+	/**
+	* @brief 모델에 포함된 모든 인덱스 개수 반환, 모든 메쉬의 인덱스 개수를 합산한 값 반환
+	* @return 인덱스 개수
+	*/
+	virtual UINT32 GetTotalIndexCount() const noexcept = 0;
+
+	/**
+	* @brief 메쉬에 포함된 버텍스 속성 반환
+	* @param MeshIndex 메쉬 인덱스
+	* @return 버텍스 속성
+	*/
+	virtual UINT32 GetVertexFormat(int32 MeshIndex) const noexcept = 0;
+
+	/**
 	* @brief 서브메쉬 개수 반환
 	* @param MeshIndex 메쉬 인덱스
 	* @return 서브메쉬 개수
@@ -251,7 +276,7 @@ struct IModelAsset : public IAsset
 	* @param SubMeshIndex 서브메쉬 인덱스
 	* @return 인덱스 배열 포인터
 	*/
-	virtual uint32* GetIndices(int32 MeshIndex, int32 SubMeshIndex) noexcept = 0;
+	virtual uint16* GetIndices(int32 MeshIndex, int32 SubMeshIndex) noexcept = 0;
 
 	/**
 	* @brief 인덱스 개수 반환

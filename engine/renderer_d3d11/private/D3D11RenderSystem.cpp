@@ -23,6 +23,8 @@
 #include "D3D11Texture2D.h"
 #include "D3D11TextureUtils.h"
 #include "D3D11TextureLoader_DDS.h"
+#include "D3D11Model.h"
+
 #include "temp_pool.h"
 //#include "D3D11DDSTextureFactory.h"
 
@@ -270,6 +272,30 @@ BOOL D3D11RenderSystem::CreateRenderCamera(
 	pRenderCamera->SetCameraOrder(Desc.CameraOrder);
 
 	*ppOut = pRenderCamera;
+
+	return TRUE;
+}
+
+BOOL D3D11RenderSystem::CreateModel(const MODEL_CREATE_DESC& Desc, IModel** ppOut)
+{
+	PRIMITIVEBUFFER_CREATE_DESC PrimitiveBufferDesc = {};
+	PrimitiveBufferDesc.VertexFormat = Desc.VertexFormat;
+	PrimitiveBufferDesc.MaxVertexCount = Desc.MaxVertexCount;
+	PrimitiveBufferDesc.MaxIndexCount = Desc.MaxIndexCount;
+	PrimitiveBufferDesc.UsageVB = BUFFER_USAGE::DYNAMIC;
+	PrimitiveBufferDesc.UsageIB = BUFFER_USAGE::DYNAMIC;
+
+	IPrimitiveBuffer* pPrimitiveBuffer = nullptr;
+
+	if (!CreatePrimitiveBuffer(PrimitiveBufferDesc, &pPrimitiveBuffer))
+	{
+		SYS_LOG_E("D3D11RenderSystem::CreateModel: Failed to create primitive buffer for model");
+		*ppOut = nullptr;
+		return FALSE;
+	}
+
+	D3D11Model* pModel = D3D11_POOL_NEW(D3D11Model)(0, Desc.VertexFormat, pPrimitiveBuffer);
+	*ppOut = static_cast<IModel*>(pModel);
 
 	return TRUE;
 }

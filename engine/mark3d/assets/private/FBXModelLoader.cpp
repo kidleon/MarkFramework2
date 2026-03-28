@@ -49,3 +49,28 @@ BOOL LoadModelFromFBX(
 
 	return TRUE;
 }
+
+
+void AsyncLoadModelFromFBX(HANDLE temppool_handle, void* pArg)
+{
+	if (!pArg) return;
+
+	AsyncAssetOp* pAsyncOp = (AsyncAssetOp*)pArg;
+	ModelAsset* pModelAsset = (ModelAsset*)pAsyncOp->pAsset;
+
+	BOOL result = LoadModelFromFBX(
+		temppool_handle,
+		pAsyncOp->pFileSystem,
+		pAsyncOp->szRelativePath,
+		pModelAsset
+	);
+
+	if (!result)
+	{
+		SYS_LOG_E("Failed to load model asset from FBX file: %s", pAsyncOp->szRelativePath);
+		pModelAsset->Release();
+		return;
+	}
+
+	pModelAsset->INL_SetLoadStat(LOAD_STAT::LOADED);
+}

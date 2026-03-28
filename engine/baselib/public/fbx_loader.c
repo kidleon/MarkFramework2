@@ -234,7 +234,7 @@ struct FBX_SCENE* fbx_load(HANDLE temp_alloc_handle, void* data, size_t size)
 
 					submeshes[m].material_id = (int32)material->element_id;
 					submeshes[m].num_indices = (int32)part->num_triangles * 3;
-					submeshes[m].indices = (uint32*)temppool_alloc(temp_alloc_handle, sizeof(uint32) * part->num_triangles * 3);
+					submeshes[m].indices = (uint16*)temppool_alloc(temp_alloc_handle, sizeof(uint16) * part->num_triangles * 3);
 					//submeshes[m].indices = (uint32*)malloc(sizeof(uint32) * part->num_triangles * 3);
 
 					int32 num_indices = 0;
@@ -262,9 +262,9 @@ struct FBX_SCENE* fbx_load(HANDLE temp_alloc_handle, void* data, size_t size)
 							if (num_indices >= submeshes[m].num_indices)
 								break;
 
-							submeshes[m].indices[num_indices++] = idx0;
-							submeshes[m].indices[num_indices++] = idx1;
-							submeshes[m].indices[num_indices++] = idx2;
+							submeshes[m].indices[num_indices++] = (uint16)idx0;
+							submeshes[m].indices[num_indices++] = (uint16)idx1;
+							submeshes[m].indices[num_indices++] = (uint16)idx2;
 						}
 					}
 				}

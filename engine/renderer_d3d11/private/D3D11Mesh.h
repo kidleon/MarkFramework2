@@ -1,16 +1,16 @@
-﻿#ifndef __MESH_H__
-#define __MESH_H__
+﻿#pragma once
 
 
-class Mesh final : public IMesh
+class D3D11Mesh final : public IMesh
 {
+public:
 	constexpr static UINT32 MAX_MESH_PART = 8;
 
 public:
-	Mesh(
-		IPrimitiveBuffer* pPrimitiveBuffer, 
-		INT32 PrimitiveIndex, 
-		UINT32 TotalVertexCount, 
+	D3D11Mesh(
+		IPrimitiveBuffer* pPrimitiveBuffer,
+		INT32 PrimitiveIndex,
+		UINT32 TotalVertexCount,
 		UINT32 TotalIndexCount
 	);
 
@@ -48,11 +48,11 @@ public:
 
 	__FORCEINLINE INT32 INL_GetPrimitiveIndex() const noexcept { return m_PrimitiveIndex; }
 	__FORCEINLINE IPrimitiveBuffer* INL_GetPrimitiveBuffer() const noexcept { return m_pPrimitiveBuffer; }
-	__FORCEINLINE ISurfaceMaterial* INL_GetMaterial(INT32 MeshPartIndex) const noexcept { return m_pMaterials[MeshPartIndex]; }	
+	__FORCEINLINE ISurfaceMaterial* INL_GetMaterial(INT32 MeshPartIndex) const noexcept { return m_pMaterials[MeshPartIndex]; }
 
 private:
-	Mesh() = delete;
-	virtual ~Mesh() noexcept;
+	D3D11Mesh() = delete;
+	virtual ~D3D11Mesh() noexcept;
 
 private:
 	volatile long m_RefCnt = 1;
@@ -74,4 +74,3 @@ private:
 };
 
 
-#endif // !__MESH_H__

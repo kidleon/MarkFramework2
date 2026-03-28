@@ -25,7 +25,7 @@ public:
 		{
 			int32 MaterialIndex; // Material배열 인덱스
 			uint32 PADDING_OR_RESERVED = 0; // 패딩 또는 예약 필드
-			uint32* pIndices; // 인덱스 데이터
+			uint16* pIndices; // 인덱스 데이터
 			size_t NumIndices; // 인덱스 개수
 		};
 
@@ -66,6 +66,11 @@ public:
 
 	virtual size_t GetNumMesh() const noexcept final;
 
+	virtual UINT32 GetVertexFormat(int32 MeshIndex) const noexcept final;
+	virtual UINT32 GetVertexFormat() const noexcept final;
+	virtual UINT32 GetTotalVertexCount() const noexcept final;
+	virtual UINT32 GetTotalIndexCount() const noexcept final;
+
 	virtual const char* GetMeshName(int32 MeshIndex) const noexcept final;
 
 	virtual size_t GetNumSubMesh(int32 MeshIndex) noexcept final;
@@ -79,7 +84,7 @@ public:
 	virtual FLOAT3* GetTangent(int32 MeshIndex) noexcept final;
 	virtual FLOAT3* GetBinormal(int32 MeshIndex) noexcept final;
 
-	virtual uint32* GetIndices(int32 MeshIndex, int32 SubMeshIndex) noexcept final;
+	virtual uint16* GetIndices(int32 MeshIndex, int32 SubMeshIndex) noexcept final;
 	virtual size_t GetNumIndices(int32 MeshIndex) const noexcept final;
 	virtual size_t GetNumIndices(int32 MeshIndex, int32 SubMeshIndex) const noexcept final;
 

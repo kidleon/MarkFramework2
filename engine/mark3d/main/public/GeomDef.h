@@ -9,6 +9,8 @@ enum class RENDER_TYPE : UINT32
 	MAX
 };
 
+constexpr static size_t MAX_MESH_PART = 8; // 모델당 최대 메시 수
+
 
 struct ISceneObject : public IAsset
 {
@@ -45,7 +47,7 @@ struct IMesh : public IUNKNOWN
 /**
 * @brief 기본 모델 인터페이스
 */
-struct IModel : public ISceneObject
+struct IModel : public IAsset
 {
 	virtual UINT32 GetNumMesh() const noexcept = 0;
 	virtual INT32 AddMesh(NameHash Name, PRIMITIVE_TYPE PrimitiveType, UINT32 NumVertex, UINT32 NumIndex) noexcept = 0;

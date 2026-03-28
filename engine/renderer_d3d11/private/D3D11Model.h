@@ -1,14 +1,12 @@
-﻿#ifndef __MODEL_H__
-#define __MODEL_H__
+﻿#pragma once
 
-#include "GeomDef.h"
 
-class Model : public IModel
+class D3D11Model final : public IModel
 {
 	constexpr static size_t MAX_MESH_PER_MODEL = 16;
 
 public:
-	Model(UINT64 ID, UINT32 VertexFormat, IPrimitiveBuffer* pPrimitiveBuffer);
+	D3D11Model(UINT64 ID, UINT32 VertexFormat, IPrimitiveBuffer* pPrimitiveBuffer);
 
 	// IUNKNOWN interface
 	virtual long AddRef() final;
@@ -42,8 +40,8 @@ public:
 	}
 
 private:
-	Model() = delete;
-	virtual ~Model() noexcept;
+	D3D11Model() = delete;
+	virtual ~D3D11Model() noexcept;
 
 private:
 	long m_RefCnt = 1;
@@ -56,11 +54,9 @@ private:
 
 	UINT32 m_NumMesh = 0;
 	IMesh* m_pMeshes[MAX_MESH_PER_MODEL] = { nullptr };
-	
+
 	UINT32 m_VertexFormat = 0;
 	UINT32 PADDING = 0;
 	IPrimitiveBuffer* m_pPrimitiveBuffer = nullptr;
 };
 
-
-#endif // __MODEL_H__

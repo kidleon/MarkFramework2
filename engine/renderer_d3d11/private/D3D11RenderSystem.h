@@ -3,6 +3,7 @@
 
 
 interface IRenderCamera;
+interface IMddel;
 class D3D11RenderDevice;
 class D3D11ConstantBufferAllocator;
 class D3D11BlobAllocator;
@@ -39,6 +40,7 @@ public:
 
 	virtual BOOL CreatePrimitiveBuffer(const PRIMITIVEBUFFER_CREATE_DESC& Desc, IPrimitiveBuffer** ppOut) final;
 	virtual BOOL CreateRenderCamera(const RENDERCAMERA_CREATE_DESC& Desc, IRenderCamera** ppOut) final;
+	virtual BOOL CreateModel(const MODEL_CREATE_DESC& Desc, IModel** ppOut) final;
 	virtual BOOL CreateSurfaceMaterial(ISurfaceMaterial** ppOut) final;
 	virtual BOOL CreateTexture1D(ITexture1D** ppOut) final;
 	virtual BOOL CreateTexture2D(ITexture2D** ppOut) final;

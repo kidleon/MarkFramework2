@@ -2,9 +2,10 @@
 #include "ModelLoader.h"
 #include "ModelAsset.h"
 #include "temp_pool.h"
+#include "os_file.h"
 #include "fbx_loader.h"
 #include "AsyncAssetOp.h"
-#include "Model.h"
+#include "Assets.h"
 #include "Mark3DImpl.h"
 
 
@@ -14,8 +15,8 @@ BOOL LoadModelFromModelAsset(
 	IAssets* pAssets,
 	IRenderSystem* pRenderSystem,
 	const char* szRelativePath,
-	ModelAsset* pModelAsset,
-	Model* pModel
+	IModelAsset* pModelAsset,
+	IModel* pModel
 )
 {
 	if (!pModelAsset)
@@ -30,20 +31,48 @@ BOOL LoadModelFromModelAsset(
 		return FALSE;
 	}
 
-	uint32 ModelAttrib = pModelAsset->INL_GetModelAttrib();
+	UINT32 ModelAttrib = pModelAsset->GetModelAttrib();
 
 	// Load Mesh
-	if (ModelAttrib & (uint32)MODEL_ATTRIB::MESH)
+	if (ModelAttrib & (UINT32)MODEL_ATTRIB::MESH)
 	{
 		SYS_LOG_E("Model::CreateMesh - Model asset does not contain mesh data.");
 		return FALSE;
 	}
 
 	size_t NumMesh = pModelAsset->GetNumMesh();
+
 	for (size_t i = 0; i < NumMesh; i++)
 	{
-		size_t NumVertex = pModelAsset->GetNumVertices((int32)i);
-		size_t NumIndex = pModelAsset->GetNumIndices((int32)i);
+		size_t NumSubMesh = pModelAsset->GetNumSubMesh((int32)i);
+
+		NumSubMesh = T_MIN(NumSubMesh, MAX_MESH_PART);
+
+		INT32 PrimitiveIndex = -1;
+
+		const char* szMeshName = pModelAsset->GetMeshName((int32)i);
+		UINT32 NumVertex = (UINT32)pModelAsset->GetNumVertices((int32)i);
+		UINT32 NumIndex = (UINT32)pModelAsset->GetNumIndices((int32)i);
+
+		INT32 MeshIndex = pModel->AddMesh(
+			NameHash(szMeshName), 
+			PRIMITIVE_TYPE::TRIANGLE_LIST, 
+			NumVertex, 
+			NumIndex
+		);
+
+		if (-1 == MeshIndex)
+		{
+			SYS_LOG_E("LoadModelFromModelAsset - Failed to add mesh to model.");
+			continue;
+		}
+
+		IMesh* pMesh = static_cast<IMesh*>(pModel->GetMesh((UINT32)MeshIndex));
+		if (!pMesh)
+		{
+			SYS_LOG_E("LoadModelFromModelAsset - Failed to get mesh from model.");
+			continue;
+		}
 
 		FLOAT3* pPositions = pModelAsset->GetPositions((int32)i);
 		FLOAT3* pNormals = pModelAsset->GetNormals((int32)i);
@@ -52,192 +81,270 @@ BOOL LoadModelFromModelAsset(
 		FLOAT3* pTangents = pModelAsset->GetTangent((int32)i);
 		FLOAT3* pBinormals = pModelAsset->GetBinormal((int32)i);
 
-		UINT32 VertexFormat = 0;
 		if (pPositions)
-			VertexFormat |= (uint32)VERTEX_FORMAT::POSITION;
+			pMesh->SetPosition(pPositions, (UINT32)pModelAsset->GetNumVertices((int32)i));
 
 		if (pNormals)
-			VertexFormat |= (uint32)VERTEX_FORMAT::NORMAL;
+			pMesh->SetNormal(pNormals, (UINT32)pModelAsset->GetNumVertices((int32)i));
 
 		if (pTexCoords)
-			VertexFormat |= (uint32)VERTEX_FORMAT::TEXCOORD;
+			pMesh->SetTexCoord(pTexCoords, (UINT32)pModelAsset->GetNumVertices((int32)i));
 
 		if (pColors)
-			VertexFormat |= (uint32)VERTEX_FORMAT::COLOR;
+			pMesh->SetColor(pColors, (UINT32)pModelAsset->GetNumVertices((int32)i));
 
 		if (pTangents)
-			VertexFormat |= (uint32)VERTEX_FORMAT::TANGENT;
+			pMesh->SetTangent(pTangents, (UINT32)pModelAsset->GetNumVertices((int32)i));
 
 		if (pBinormals)
-			VertexFormat |= (uint32)VERTEX_FORMAT::BINORMAL;
+			pMesh->SetBinormal(pBinormals, (UINT32)pModelAsset->GetNumVertices((int32)i));
 
-		const char* szMeshName = pModelAsset->GetMeshName((int32)i);
+		Assets* pAssetsImpl = static_cast<Assets*>(pAssets);
 
-		size_t NumSubMesh = pModelAsset->GetNumSubMesh((int32)i);
-		
-		NumSubMesh = T_MIN(NumSubMesh, Model::MAX_SUBMESH_PER_MESH);
+		char szRelativeOnlyPath[MAX_FILE_LENGTH] = {};
+		char szFullPath[MAX_FILE_LENGTH] = {};
+
+		get_path(szRelativePath, szRelativeOnlyPath, sizeof(szRelativeOnlyPath));
 
 		if (1 == NumSubMesh)
 		{
-			NumIndex = pModelAsset->GetNumIndices((int32)i, 0);
+			UINT16* pIndices = pModelAsset->GetIndices((int32)i, 0);
+			UINT32 NumIndices = (UINT32)pModelAsset->GetNumIndices((int32)i, 0);
+			pMesh->SetIndex(pIndices, NumIndices);
 
-			int32 MeshIndex = pModel->AddMesh(
-				NameHash(szMeshName), 
-				PRIMITIVE_TYPE::TRIANGLE_LIST, 
-				(uint32)NumVertex, 
-				(uint32)NumIndex
-			);
+			ISurfaceMaterial* pSurfaceMaterial = nullptr;
+			pRenderSystem->CreateSurfaceMaterial(&pSurfaceMaterial);
+			pMesh->SetMaterial(0, pSurfaceMaterial);
 
-			if (-1 == MeshIndex)
+			int32 MaterialIndex = pModelAsset->GetMaterialIndex((int32)i, 0);
+			if (0 <= MaterialIndex)
 			{
-				SYS_LOG_E("Model::CreateMesh - Failed to add mesh.");
-				continue;
+				if (pModelAsset->HasDiffuseTexture(MaterialIndex))
+				{
+					temppool_clear(hTempPool);
+
+					combine_path(
+						szRelativeOnlyPath,
+						pModelAsset->GetMaterialDiffuse(MaterialIndex), 
+						szFullPath,
+						MAX_FILE_LENGTH
+					);
+
+					ITexture2D* pDiffuseTexture = nullptr;
+					pAssetsImpl->Load(
+						hTempPool,
+						szFullPath,
+						TRUE,
+						&pDiffuseTexture
+					);
+
+					pSurfaceMaterial->SetDiffuseTexture(0, pDiffuseTexture);
+				}
+
+				if (pModelAsset->HasNormalTexture(MaterialIndex))
+				{
+					temppool_clear(hTempPool);
+
+					combine_path(
+						szRelativeOnlyPath,
+						pModelAsset->GetMaterialNormal(MaterialIndex),
+						szFullPath,
+						MAX_FILE_LENGTH
+					);
+
+					ITexture2D* pNormalTexture = nullptr;
+					pAssetsImpl->Load(
+						hTempPool,
+						szFullPath,
+						FALSE,
+						&pNormalTexture
+					);
+					pSurfaceMaterial->SetNormalTexture(0, pNormalTexture);
+				}
+
+				if (pModelAsset->HasSpecularTexture(MaterialIndex))
+				{
+					temppool_clear(hTempPool);
+
+					combine_path(
+						szRelativeOnlyPath,
+						pModelAsset->GetMaterialSpecular(MaterialIndex),
+						szFullPath,
+						MAX_FILE_LENGTH
+					);
+
+					ITexture2D* pSpecularTexture = nullptr;
+					pAssetsImpl->Load(
+						hTempPool,
+						szFullPath,
+						TRUE,
+						&pSpecularTexture
+					);
+					pSurfaceMaterial->SetSpecularTexture(0, pSpecularTexture);
+				}
+
+				if (pModelAsset->HasEmissiveTexture(MaterialIndex))
+				{
+					temppool_clear(hTempPool);
+
+					combine_path(
+						szRelativeOnlyPath,
+						pModelAsset->GetMaterialEmissive(MaterialIndex),
+						szFullPath,
+						MAX_FILE_LENGTH
+					);
+
+					ITexture2D* pEmissiveTexture = nullptr;
+					pAssetsImpl->Load(
+						hTempPool,
+						szFullPath,
+						TRUE,
+						&pEmissiveTexture
+					);
+					pSurfaceMaterial->SetEmissiveTexture(0, pEmissiveTexture);
+				}
 			}
-
-			FLOAT3* pPositions = pModelAsset->GetPositions((int32)i);
-			if (pPositions)
-				pModel->SetPosition(MeshIndex, pPositions, (uint32)NumVertex);
-
-			FLOAT3* pNormals = pModelAsset->GetNormals((int32)i);
-			if (pNormals)
-				pModel->SetNormal(MeshIndex, pNormals, (uint32)NumVertex);
-
-			FLOAT2* pTexCoords = pModelAsset->GetTexCoords((int32)i);
-			if (pTexCoords)
-				pModel->SetTexCoord(MeshIndex, pTexCoords, (uint32)NumVertex);
-
-			FLOAT4* pColors = pModelAsset->GetColor((int32)i);
-			if (pColors)
-				pModel->SetColor(MeshIndex, pColors, (uint32)NumVertex);
-
-			FLOAT3* pTangents = pModelAsset->GetTangent((int32)i);
-			if (pTangents)
-				pModel->SetTangent(MeshIndex, pTangents, (uint32)NumVertex);
-
-			FLOAT3* pBinormals = pModelAsset->GetBinormal((int32)i);
-			if (pBinormals)
-				pModel->SetBinormal(MeshIndex, pBinormals, (uint32)NumVertex);
-
-			uint32* pIndices = pModelAsset->GetIndices((int32)i, 0);
-			pModel->SetIndex(MeshIndex, pIndices, (uint32)NumIndex);
 		}
-		else
+		else if(1 < NumSubMesh)
 		{
-			uint32 NumIndexArray = (uint32)NumSubMesh;
-			uint32 NumIndices[Model::MAX_SUBMESH_PER_MESH] = {};
-
-			for (int32 s = 0; s < (int32)NumIndexArray; s++)
-				NumIndices[s] = (uint32)pModelAsset->GetNumIndices((int32)i, s);
-
-			int32 MeshIndex = pModel->AddMesh(
-				NameHash(szMeshName),
-				PRIMITIVE_TYPE::TRIANGLE_LIST,
-				(uint32)NumVertex,
-				NumIndexArray,
-				NumIndices
-			);
-
-			if (-1 == MeshIndex)
-			{
-				SYS_LOG_E("Model::CreateMesh - Failed to add mesh.");
-				continue;
-			}
-
-			FLOAT3* pPositions = pModelAsset->GetPositions((int32)i);
-			if (pPositions)
-				pModel->SetPosition(MeshIndex, pPositions, (uint32)NumVertex);
-
-			FLOAT3* pNormals = pModelAsset->GetNormals((int32)i);
-			if (pNormals)
-				pModel->SetNormal(MeshIndex, pNormals, (uint32)NumVertex);
-
-			FLOAT2* pTexCoords = pModelAsset->GetTexCoords((int32)i);
-			if (pTexCoords)
-				pModel->SetTexCoord(MeshIndex, pTexCoords, (uint32)NumVertex);
-
-			FLOAT4* pColors = pModelAsset->GetColor((int32)i);
-			if (pColors)
-				pModel->SetColor(MeshIndex, pColors, (uint32)NumVertex);
-
-			FLOAT3* pTangents = pModelAsset->GetTangent((int32)i);
-			if (pTangents)
-				pModel->SetTangent(MeshIndex, pTangents, (uint32)NumVertex);
-
-			FLOAT3* pBinormals = pModelAsset->GetBinormal((int32)i);
-			if (pBinormals)
-				pModel->SetBinormal(MeshIndex, pBinormals, (uint32)NumVertex);
-
-			uint32* pIndicesData[Model::MAX_SUBMESH_PER_MESH] = {};
+			UINT32 NumIndexArray = (UINT32)NumSubMesh;
+			UINT32 NumIndices[MAX_MESH_PART] = {};
 			for (int32 s = 0; s < (int32)NumSubMesh; s++)
+			{
+				size_t NumIndex = pModelAsset->GetNumIndices((int32)i, s);
+				NumIndices[s] = (UINT32)NumIndex;
+			}
+
+			UINT16* pIndicesData[MAX_MESH_PART] = {};
+			for (int32 s = 0; s < (int32)NumSubMesh; s++)
+			{
 				pIndicesData[s] = pModelAsset->GetIndices((int32)i, s);
+			}
 
-			const uint32** ppIndicesData = (const uint32**)pIndicesData;
-			uint32* pNumIndices = NumIndices;
+			pMesh->SetIndex(NumIndexArray, (const UINT16**)(pIndicesData), (UINT32*)NumIndices);
 
-			pModel->SetIndex(MeshIndex, NumIndexArray, ppIndicesData, pNumIndices);
-		}
-	}
+			for (int32 s = 0; s < (int32)NumSubMesh; s++)
+			{
+				ISurfaceMaterial* pSurfaceMaterial = nullptr;
+				pRenderSystem->CreateSurfaceMaterial(&pSurfaceMaterial);
 
-	// Load Material
-	size_t NumMaterials = pModelAsset->GetNumMaterials();
+				pMesh->SetMaterial(s, pSurfaceMaterial);
+
+				int32 MaterialIndex = pModelAsset->GetMaterialIndex((int32)i, s);
+				if (0 <= MaterialIndex)
+				{
+					if (pModelAsset->HasDiffuseTexture(MaterialIndex))
+					{
+						temppool_clear(hTempPool);
+
+						combine_path(
+							szRelativeOnlyPath,
+							pModelAsset->GetMaterialDiffuse(MaterialIndex),
+							szFullPath,
+							MAX_FILE_LENGTH
+						);
 	
-	for (size_t m = 0; m < NumMaterials; m++)
-	{
-		ITexture2D* pDiffuseTexture = nullptr;
+						ITexture2D* pDiffuseTexture = nullptr;
+						pAssetsImpl->Load(
+							hTempPool,
+							szFullPath,
+							TRUE,
+							&pDiffuseTexture
+						);
+						pSurfaceMaterial->SetDiffuseTexture(0, pDiffuseTexture);
+					}
 
-		if (pModelAsset->HasDiffuseTexture((int32)m))
-		{
-			const char* szDiffuse = pModelAsset->GetMaterialDiffuse((int32)m);
+					if (pModelAsset->HasNormalTexture(MaterialIndex))
+					{
+						temppool_clear(hTempPool);
 
-			if (!pAssets->Load(szRelativePath, TRUE, &pDiffuseTexture))
-			{
-				SYS_LOG_W("LoadModelFromFile - Diffuse texture file not found: %s", szDiffuse);
+						combine_path(
+							szRelativeOnlyPath,
+							pModelAsset->GetMaterialNormal(MaterialIndex),
+							szFullPath,
+							MAX_FILE_LENGTH
+						);
+
+						ITexture2D* pNormalTexture = nullptr;
+						pAssetsImpl->Load(
+							hTempPool,
+							szFullPath,
+							FALSE,
+							&pNormalTexture
+						);
+						pSurfaceMaterial->SetNormalTexture(0, pNormalTexture);
+					}
+
+					if (pModelAsset->HasSpecularTexture(MaterialIndex))
+					{
+						temppool_clear(hTempPool);
+
+						combine_path(
+							szRelativeOnlyPath,
+							pModelAsset->GetMaterialSpecular(MaterialIndex),
+							szFullPath,
+							MAX_FILE_LENGTH
+						);
+
+						ITexture2D* pSpecularTexture = nullptr;
+						pAssetsImpl->Load(
+							hTempPool,
+							szRelativeOnlyPath,
+							TRUE,
+							&pSpecularTexture
+						);
+						pSurfaceMaterial->SetSpecularTexture(0, pSpecularTexture);
+					}
+
+					if (pModelAsset->HasEmissiveTexture(MaterialIndex))
+					{
+						temppool_clear(hTempPool);
+
+						combine_path(
+							szRelativeOnlyPath,
+							pModelAsset->GetMaterialEmissive(MaterialIndex),
+							szFullPath,
+							MAX_FILE_LENGTH
+						);
+
+						ITexture2D* pEmissiveTexture = nullptr;
+						pAssetsImpl->Load(
+							hTempPool,
+							szRelativeOnlyPath,
+							TRUE,
+							&pEmissiveTexture
+						);
+						pSurfaceMaterial->SetEmissiveTexture(0, pEmissiveTexture);
+					}
+				}
 			}
+			
 		}
-
-		ITexture2D* pNormalTexture = nullptr;
-
-		if (pModelAsset->HasNormalTexture((int32)m))
-		{
-			const char* szNormal = pModelAsset->GetMaterialNormal((int32)m);
-			if (!pAssets->Load(szRelativePath, FALSE, &pNormalTexture))
-			{
-				SYS_LOG_W("LoadModelFromFile - Normal texture file not found: %s", szNormal);
-			}
-		}
-
-		ITexture2D* pSpecularTexture = nullptr;
-		
-		if (pModelAsset->HasSpecularTexture((int32)m))
-		{
-			const char* szSpecular = pModelAsset->GetMaterialSpecular((int32)m);
-			if (!pAssets->Load(szRelativePath, FALSE, &pSpecularTexture))
-			{
-				SYS_LOG_W("LoadModelFromFile - Specular texture file not found: %s", szSpecular);
-			}
-		}
-
-		ITexture2D* pEmissiveTexture = nullptr;
-
-		if (pModelAsset->HasEmissiveTexture((int32)m))
-		{
-			const char* szEmissive = pModelAsset->GetMaterialEmissive((int32)m);
-			if (!pAssets->Load(szRelativePath, FALSE, &pEmissiveTexture))
-			{
-				SYS_LOG_W("LoadModelFromFile - Emissive texture file not found: %s", szEmissive);
-			}
-		}
-
-		// Create Material
-		ISurfaceMaterial* pMaterial = nullptr;
-		pRenderSystem->CreateSurfaceMaterial(&pMaterial);
-
-		pMaterial->SetDiffuseTexture(0, pDiffuseTexture);
-		pMaterial->SetNormalTexture(0, pNormalTexture);
-		pMaterial->SetSpecularTexture(0, pSpecularTexture);
-		pMaterial->SetEmissiveTexture(0, pEmissiveTexture);
 	}
 
 	return TRUE;
 }
 
+
+BOOL AsyncLoadModelFromModelAsset(HANDLE temppool_handle, void* pArg)
+{
+	AsyncAssetOp* pAsyncOp = (AsyncAssetOp*)pArg;
+	if (!pAsyncOp->pAsset) return FALSE;
+
+	BOOL Result = LoadModelFromModelAsset(
+		temppool_handle,
+		pAsyncOp->pFileSystem,
+		pAsyncOp->pAssets,
+		pAsyncOp->pRenderSystem,
+		pAsyncOp->szRelativePath,
+		reinterpret_cast<IModelAsset*>(pAsyncOp->Argument1),
+		static_cast<IModel*>(pAsyncOp->pAsset)
+	);
+
+	if (!Result)
+	{
+		SYS_LOG_E("AsyncLoadModelFromModelAsset - Failed to load model from model asset.");
+	}
+
+	return Result;
+}

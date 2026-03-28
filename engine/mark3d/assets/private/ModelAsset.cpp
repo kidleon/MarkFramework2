@@ -127,6 +127,83 @@ size_t ModelAsset::GetNumMesh() const noexcept
 	return m_NumMeshes;
 }
 
+UINT32 ModelAsset::GetVertexFormat(int32 MeshIndex) const noexcept
+{
+	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_NumMeshes)
+		return 0;
+
+	UINT32 VertexFormat = 0;
+	const Mesh& mesh = m_pMeshes[MeshIndex];
+
+	if (mesh.pPositions)
+		VertexFormat |= (uint32)VERTEX_FORMAT::POSITION;
+
+	if (mesh.pNormals)
+		VertexFormat |= (uint32)VERTEX_FORMAT::NORMAL;
+
+	if (mesh.pTexCoords)
+		VertexFormat |= (uint32)VERTEX_FORMAT::TEXCOORD;
+
+	if (mesh.pColors)
+		VertexFormat |= (uint32)VERTEX_FORMAT::COLOR;
+
+	if (mesh.pTangents)
+		VertexFormat |= (uint32)VERTEX_FORMAT::TANGENT;
+
+	if (mesh.pBinormals)
+		VertexFormat |= (uint32)VERTEX_FORMAT::BINORMAL;
+
+	return VertexFormat;
+}
+
+UINT32 ModelAsset::GetVertexFormat() const noexcept
+{
+	UINT32 VertexFormat = 0;
+
+	for (size_t i = 0; i < m_NumMeshes; i++)
+	{
+		const Mesh& mesh = m_pMeshes[i];
+		if (mesh.pPositions)
+			VertexFormat |= (uint32)VERTEX_FORMAT::POSITION;
+		if (mesh.pNormals)
+			VertexFormat |= (uint32)VERTEX_FORMAT::NORMAL;
+		if (mesh.pTexCoords)
+			VertexFormat |= (uint32)VERTEX_FORMAT::TEXCOORD;
+		if (mesh.pColors)
+			VertexFormat |= (uint32)VERTEX_FORMAT::COLOR;
+		if (mesh.pTangents)
+			VertexFormat |= (uint32)VERTEX_FORMAT::TANGENT;
+		if (mesh.pBinormals)
+			VertexFormat |= (uint32)VERTEX_FORMAT::BINORMAL;
+	}
+
+	return VertexFormat;
+}
+
+UINT32 ModelAsset::GetTotalVertexCount() const noexcept
+{
+	UINT32 TotalVertexCount = 0;
+
+	for (size_t i = 0; i < m_NumMeshes; i++)
+		TotalVertexCount += (UINT32)m_pMeshes[i].NumVertices;
+
+	return TotalVertexCount;
+}
+
+UINT32 ModelAsset::GetTotalIndexCount() const noexcept
+{
+	UINT32 TotalIndexCount = 0;
+
+	for (size_t i = 0; i < m_NumMeshes; i++)
+	{
+		for (size_t j = 0; j < m_pMeshes[i].NumSubMesh; j++)
+			TotalIndexCount += (UINT32)m_pMeshes[i].pSubMeshes[j].NumIndices;
+	}
+
+	return TotalIndexCount;
+
+}
+
 const char* ModelAsset::GetMeshName(int32 MeshIndex) const noexcept
 {
 	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_NumMeshes)
@@ -191,7 +268,7 @@ FLOAT3* ModelAsset::GetBinormal(int32 MeshIndex) noexcept
 	return m_pMeshes[MeshIndex].pBinormals;
 }
 
-uint32* ModelAsset::GetIndices(int32 MeshIndex, int32 SubMeshIndex) noexcept
+uint16* ModelAsset::GetIndices(int32 MeshIndex, int32 SubMeshIndex) noexcept
 {
 	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_NumMeshes)
 		return nullptr;
@@ -323,7 +400,6 @@ int32 ModelAsset::FindMaterialIndex(int32 MatID) const noexcept
 	return -1;
 }
 
-
 BOOL ModelAsset::LoadFromFBX(const FBX_SCENE* fbx_scene) noexcept
 {
 	if (!fbx_scene)		
@@ -422,8 +498,8 @@ BOOL ModelAsset::LoadFromFBX(const FBX_SCENE* fbx_scene) noexcept
 						submesh.NumIndices = fbx_submesh.num_indices;
 						if (fbx_submesh.indices)
 						{
-							submesh.pIndices = (uint32*)CORE_SYS_ALLOC(sizeof(uint32) * submesh.NumIndices);
-							memcpy(submesh.pIndices, fbx_submesh.indices, sizeof(uint32) * submesh.NumIndices);
+							submesh.pIndices = (uint16*)CORE_SYS_ALLOC(sizeof(uint16) * submesh.NumIndices);
+							memcpy(submesh.pIndices, fbx_submesh.indices, sizeof(uint16) * submesh.NumIndices);
 						}
 					}
 				}

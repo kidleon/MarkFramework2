@@ -15,6 +15,7 @@
 #include "TextAssetLoader.h"
 #include "BinaryAssetLoader.h"
 #include "FBXModelLoader.h"
+#include "ModelLoader.h"
 #include "AsyncAssetOp.h"
 
 
@@ -498,26 +499,46 @@ BOOL Assets::Load(const char* szRelativePath, IModel** ppOut)
 	// fbx
 	if (fstrstr(szExtension, "fbx"))
 	{
-		ModelAsset* pModelAsset = CORE_NEW(ModelAsset)(idgen_getid(m_hIDGen), szRelativePath);
-		pModelAsset->INL_SetLoadStat(LOAD_STAT::LOADING);
-		BOOL result = LoadModelFromFBX(
-			m_hSyncLoadTempPool,
-			m_pFileSystem,
-			szRelativePath,
-			pModelAsset
-		);
-
-		if (!result)
+		IModelAsset* pModelAsset = nullptr;
+		if (!Load(szRelativePath, &pModelAsset))
 		{
-			pModelAsset->Release();
 			*ppOut = nullptr;
 			return FALSE;
 		}
 
 		temppool_clear(m_hSyncLoadTempPool);
-		pModelAsset->INL_SetLoadStat(LOAD_STAT::LOADED);
 
-		return TRUE;
+		MODEL_CREATE_DESC ModelCreateDesc = {};
+		get_filename(szRelativePath, ModelCreateDesc.szModelName, sizeof(ModelCreateDesc.szModelName));
+		ModelCreateDesc.VertexFormat = pModelAsset->GetVertexFormat();
+		ModelCreateDesc.MaxVertexCount = pModelAsset->GetTotalVertexCount();
+		ModelCreateDesc.MaxIndexCount = pModelAsset->GetTotalIndexCount();
+
+		IModel* pModel = nullptr;
+		if (!m_pRenderSystem->CreateModel(ModelCreateDesc, &pModel))
+		{
+			pModelAsset->Release();
+			*ppOut = nullptr;
+			return FALSE;
+		}
+		
+		BOOL Result= LoadModelFromModelAsset(
+			m_hSyncLoadTempPool,
+			m_pFileSystem,
+			this,
+			m_pRenderSystem,
+			szRelativePath,
+			pModelAsset,
+			pModel
+		);
+
+		if (!Result)
+		{
+			pModel->Release();
+			pModelAsset->Release();
+			*ppOut = nullptr;
+			return FALSE;
+		}
 	}
 
 	// model

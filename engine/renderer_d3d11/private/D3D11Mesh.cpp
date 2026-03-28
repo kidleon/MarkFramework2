@@ -1,8 +1,8 @@
 ﻿#include "pch.h"
-#include "Mesh.h"
+#include "D3D11Mesh.h"
 
 
-Mesh::Mesh(
+D3D11Mesh::D3D11Mesh(
 	IPrimitiveBuffer* pPrimitiveBuffer,
 	INT32 PrimitiveIndex,
 	UINT32 TotalVertexCount,
@@ -15,7 +15,7 @@ Mesh::Mesh(
 {
 }
 
-Mesh::~Mesh() noexcept
+D3D11Mesh::~D3D11Mesh() noexcept
 {
 	for (UINT32 i = 0; i < MAX_MESH_PART; i++)
 	{
@@ -23,39 +23,39 @@ Mesh::~Mesh() noexcept
 	}
 }
 
-long Mesh::AddRef()
+long D3D11Mesh::AddRef()
 {
 	interlock_increment_l(&m_RefCnt, MEMORY_ORDER_RELAXED);
 	return m_RefCnt;
 }
 
-long Mesh::Release()
+long D3D11Mesh::Release()
 {
 	long NewRefCnt = interlock_decrement_l(&m_RefCnt, MEMORY_ORDER_ACQ_REL);
 	if (!NewRefCnt)
 	{
-		CORE_POOL_DELETE(this, Mesh);
+		D3D11_POOL_DELETE(this, D3D11Mesh);
 	}
 
 	return NewRefCnt;
 }
 
-long Mesh::RefCnt()
+long D3D11Mesh::RefCnt()
 {
 	return m_RefCnt;
 }
 
-void Mesh::SetName(const char* szName) noexcept
+void D3D11Mesh::SetName(const char* szName) noexcept
 {
 	m_NameHash = NameHash(szName);
 }
 
-const NameHash& Mesh::GetName() const noexcept
+const NameHash& D3D11Mesh::GetName() const noexcept
 {
 	return m_NameHash;
 }
 
-void Mesh::SetPosition(const FLOAT3* pPositions, UINT32 NumPosition) noexcept
+void D3D11Mesh::SetPosition(const FLOAT3* pPositions, UINT32 NumPosition) noexcept
 {
 	__ASSERT(m_TotalVertexCount >= NumPosition, "Number of positions exceeds total vertex count");
 
@@ -64,7 +64,7 @@ void Mesh::SetPosition(const FLOAT3* pPositions, UINT32 NumPosition) noexcept
 	m_UsedVertexCount = T_MAX(m_UsedVertexCount, NumPosition);
 }
 
-void Mesh::SetNormal(const FLOAT3* pNormals, UINT32 NumNormal) noexcept
+void D3D11Mesh::SetNormal(const FLOAT3* pNormals, UINT32 NumNormal) noexcept
 {
 	__ASSERT(m_TotalVertexCount >= NumNormal, "Number of normals exceeds total vertex count");
 
@@ -74,7 +74,7 @@ void Mesh::SetNormal(const FLOAT3* pNormals, UINT32 NumNormal) noexcept
 	m_UsedVertexCount = T_MAX(m_UsedVertexCount, NumNormal);
 }
 
-void Mesh::SetTexCoord(const FLOAT2* pTexCoords, UINT32 NumTexCoord) noexcept
+void D3D11Mesh::SetTexCoord(const FLOAT2* pTexCoords, UINT32 NumTexCoord) noexcept
 {
 	__ASSERT(m_TotalVertexCount >= NumTexCoord, "Number of texture coordinates exceeds total vertex count");
 
@@ -84,7 +84,7 @@ void Mesh::SetTexCoord(const FLOAT2* pTexCoords, UINT32 NumTexCoord) noexcept
 	m_UsedVertexCount = T_MAX(m_UsedVertexCount, NumTexCoord);
 }
 
-void Mesh::SetColor(const FLOAT4* pColors, UINT32 NumColor) noexcept
+void D3D11Mesh::SetColor(const FLOAT4* pColors, UINT32 NumColor) noexcept
 {
 	__ASSERT(m_TotalVertexCount >= NumColor, "Number of colors exceeds total vertex count");
 
@@ -94,7 +94,7 @@ void Mesh::SetColor(const FLOAT4* pColors, UINT32 NumColor) noexcept
 	m_UsedVertexCount = T_MAX(m_UsedVertexCount, NumColor);
 }
 
-void Mesh::SetTangent(const FLOAT3* pTangents, UINT32 NumTangent) noexcept
+void D3D11Mesh::SetTangent(const FLOAT3* pTangents, UINT32 NumTangent) noexcept
 {
 	__ASSERT(m_TotalVertexCount >= NumTangent, "Number of tangents exceeds total vertex count");
 
@@ -104,7 +104,7 @@ void Mesh::SetTangent(const FLOAT3* pTangents, UINT32 NumTangent) noexcept
 	m_UsedVertexCount = T_MAX(m_UsedVertexCount, NumTangent);
 }
 
-void Mesh::SetBinormal(const FLOAT3* pBinormals, UINT32 NumBinormal) noexcept
+void D3D11Mesh::SetBinormal(const FLOAT3* pBinormals, UINT32 NumBinormal) noexcept
 {
 	__ASSERT(m_TotalVertexCount >= NumBinormal, "Number of binormals exceeds total vertex count");
 
@@ -114,19 +114,19 @@ void Mesh::SetBinormal(const FLOAT3* pBinormals, UINT32 NumBinormal) noexcept
 	m_UsedVertexCount = T_MAX(m_UsedVertexCount, NumBinormal);
 }
 
-UINT32 Mesh::GetNumMeshPart() const noexcept
+UINT32 D3D11Mesh::GetNumMeshPart() const noexcept
 {
 	return m_NumMeshPart;
 }
 
-void Mesh::SetIndex(const UINT16* pIndices, UINT32 NumIndices) noexcept
+void D3D11Mesh::SetIndex(const UINT16* pIndices, UINT32 NumIndices) noexcept
 {
 	m_NumMeshPart = 1;
 	m_pNumIndices[0] = NumIndices;
 	m_pPrimitiveBuffer->UpdateIndex(m_PrimitiveIndex, pIndices, NumIndices);
 }
 
-void Mesh::SetIndex(UINT32 NumMeshParts, const UINT16** ppIndices, UINT32* pNumIndices) noexcept
+void D3D11Mesh::SetIndex(UINT32 NumMeshParts, const UINT16** ppIndices, UINT32* pNumIndices) noexcept
 {
 	__ASSERT(NumMeshParts <= MAX_MESH_PART, "Number of mesh parts exceeds maximum");
 	if (NumMeshParts > MAX_MESH_PART)
@@ -139,20 +139,20 @@ void Mesh::SetIndex(UINT32 NumMeshParts, const UINT16** ppIndices, UINT32* pNumI
 	m_pPrimitiveBuffer->UpdateIndex(m_PrimitiveIndex, NumMeshParts, ppIndices, pNumIndices);
 }
 
-UINT32 Mesh::GetNumIndex(INT32 MeshPartIndex) const noexcept
+UINT32 D3D11Mesh::GetNumIndex(INT32 MeshPartIndex) const noexcept
 {
-	__ASSERT(MeshPartIndex < m_NumMeshPart, "Invalid mesh part index");
+	__ASSERT((UINT32)MeshPartIndex < m_NumMeshPart, "Invalid mesh part index");
 
-	if (MeshPartIndex >= m_NumMeshPart)
+	if ((UINT32)MeshPartIndex >= m_NumMeshPart)
 		return 0;
 
 	return m_pNumIndices[MeshPartIndex];
 }
 
-void Mesh::SetMaterial(INT32 MeshPartIndex, ISurfaceMaterial* pMaterial) noexcept
+void D3D11Mesh::SetMaterial(INT32 MeshPartIndex, ISurfaceMaterial* pMaterial) noexcept
 {
-	__ASSERT(MeshPartIndex < m_NumMeshPart, "Invalid mesh part index");
-	if (MeshPartIndex >= m_NumMeshPart)
+	__ASSERT((UINT32)MeshPartIndex < m_NumMeshPart, "Invalid mesh part index");
+	if ((UINT32)MeshPartIndex >= m_NumMeshPart)
 		return;
 
 	if (m_pMaterials[MeshPartIndex] != pMaterial)
@@ -163,11 +163,11 @@ void Mesh::SetMaterial(INT32 MeshPartIndex, ISurfaceMaterial* pMaterial) noexcep
 	}
 }
 
-void Mesh::GetMaterial(INT32 MeshPartIndex, ISurfaceMaterial** ppMaterial) noexcept
+void D3D11Mesh::GetMaterial(INT32 MeshPartIndex, ISurfaceMaterial** ppMaterial) noexcept
 {
-	__ASSERT(MeshPartIndex < m_NumMeshPart, "Invalid mesh part index");
+	__ASSERT((UINT32)MeshPartIndex < m_NumMeshPart, "Invalid mesh part index");
 
-	if (MeshPartIndex >= m_NumMeshPart)
+	if ((UINT32)MeshPartIndex >= m_NumMeshPart)
 	{
 		*ppMaterial = nullptr;
 		return;
@@ -176,11 +176,11 @@ void Mesh::GetMaterial(INT32 MeshPartIndex, ISurfaceMaterial** ppMaterial) noexc
 	*ppMaterial = m_pMaterials[MeshPartIndex];
 }
 
-ISurfaceMaterial* Mesh::GetMaterial(INT32 MeshPartIndex) noexcept
+ISurfaceMaterial* D3D11Mesh::GetMaterial(INT32 MeshPartIndex) noexcept
 {
-	__ASSERT(MeshPartIndex < m_NumMeshPart, "Invalid mesh part index");
+	__ASSERT((UINT32)MeshPartIndex < m_NumMeshPart, "Invalid mesh part index");
 
-	if (MeshPartIndex >= m_NumMeshPart)
+	if ((UINT32)MeshPartIndex >= m_NumMeshPart)
 		return nullptr;
 
 	return m_pMaterials[MeshPartIndex];

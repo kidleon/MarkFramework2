@@ -16,7 +16,7 @@ struct FBX_MATERIAL
 
 struct FBX_SUBMESH
 {
-	uint32* indices;
+	uint16* indices;
 	int32 num_indices;
 	int32 material_id;
 };

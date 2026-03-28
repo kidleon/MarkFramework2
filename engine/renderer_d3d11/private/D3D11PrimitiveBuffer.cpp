@@ -107,11 +107,11 @@ INT32 D3D11PrimitiveBuffer::AddPrimitive(
 INT32 D3D11PrimitiveBuffer::AddPrimitive(
 	PRIMITIVE_TYPE PrimitiveType,
 	UINT32 VertexCount,
-	UINT32 NumIndices,
-	UINT32* pIndices
+	UINT32 NumIndexArray,
+	UINT32* pNumIndices
 ) noexcept
 {
-	if (!NumIndices || !pIndices)
+	if (!NumIndexArray || !pNumIndices)
 	{
 		SYS_LOG_E("D3D11PrimitiveBuffer::AddPrimitive - Invalid index count or index array.");
 		return -1;
@@ -130,9 +130,9 @@ INT32 D3D11PrimitiveBuffer::AddPrimitive(
 	}
 
 	UINT32 MaxIndexCount = 0;
-	for(UINT32 i = 0; i < NumIndices && i < MAX_SUB_MESH; ++i)
+	for(UINT32 i = 0; i < NumIndexArray && i < MAX_SUB_MESH; ++i)
 	{
-		MaxIndexCount += pIndices[i];
+		MaxIndexCount += pNumIndices[i];
 	}
 
 	if (m_CurrentIndexCount + MaxIndexCount > m_MaxIndexCount)
@@ -146,13 +146,13 @@ INT32 D3D11PrimitiveBuffer::AddPrimitive(
 	m_Primitives[m_NumPrimitives].VertexCount = VertexCount;
 	m_Primitives[m_NumPrimitives].IndexStart = 0;
 	m_Primitives[m_NumPrimitives].IndexCount = 0;
-	m_Primitives[m_NumPrimitives].NumIndices = NumIndices;
-	for (UINT32 i = 0; i < NumIndices && i < MAX_SUB_MESH; ++i)
+	m_Primitives[m_NumPrimitives].NumIndices = NumIndexArray;
+	for (UINT32 i = 0; i < NumIndexArray && i < MAX_SUB_MESH; ++i)
 	{
 		m_Primitives[m_NumPrimitives].IndexStarts[i] = m_CurrentIndexCount;
-		m_Primitives[m_NumPrimitives].IndexCounts[i] = pIndices[i];
-		m_Primitives[m_NumPrimitives].IndexCount += pIndices[i];
-		m_CurrentIndexCount += pIndices[i];
+		m_Primitives[m_NumPrimitives].IndexCounts[i] = pNumIndices[i];
+		m_Primitives[m_NumPrimitives].IndexCount += pNumIndices[i];
+		m_CurrentIndexCount += pNumIndices[i];
 	}
 
 	m_CurrentVertexCount += VertexCount;
@@ -407,7 +407,7 @@ BOOL D3D11PrimitiveBuffer::UpdateTexCoord8(
 
 BOOL D3D11PrimitiveBuffer::UpdateIndex(
 	int32 PrimitiveIndex,
-	const UINT32* pIndices,
+	const UINT16* pIndices,
 	UINT32 IndexCount
 )
 {
@@ -426,7 +426,7 @@ BOOL D3D11PrimitiveBuffer::UpdateIndex(
 
 	if (!m_pIBlob)
 	{
-		m_pIBlob = D3D11BlobAllocator::Get()->Acquire(m_MaxIndexCount * sizeof(UINT32));
+		m_pIBlob = D3D11BlobAllocator::Get()->Acquire(m_MaxIndexCount * sizeof(UINT16));
 		if (!m_pIBlob)
 		{
 			SYS_LOG_E("D3D11PrimitiveBuffer::UpdateIndex: Failed to acquire index blob.");
@@ -436,8 +436,8 @@ BOOL D3D11PrimitiveBuffer::UpdateIndex(
 
 	m_pIBlob->Update(
 		pIndices,
-		IndexCount * sizeof(UINT32),
-		m_Primitives[PrimitiveIndex].IndexStart * sizeof(UINT32)
+		IndexCount * sizeof(UINT16),
+		m_Primitives[PrimitiveIndex].IndexStart * sizeof(UINT16)
 	);
 
 	m_DirtyIB = TRUE;

@@ -34,6 +34,7 @@ do
 		"../mark3d/core/public",
 		"../mark3d/renderer/public",
 		"../mark3d/assets/public",
+		"../mark3d/main/public",
 		"public",
 		"private"
 	}
