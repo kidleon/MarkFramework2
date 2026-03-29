@@ -46,7 +46,7 @@ struct FBX_SCENE* fbx_load(HANDLE temp_alloc_handle, void* data, size_t size)
 			ufbx_material* material = scene->materials.data[i];
 			struct FBX_MATERIAL* fbx_material = &fbx_scene->materials[i];
 
-			fbx_material->id = (int32)material->element_id;
+			fbx_material->id = (INT32)material->element_id;
 			fbx_material->color[0] = (float)material->fbx.diffuse_color.value_vec4.x;
 			fbx_material->color[1] = (float)material->fbx.diffuse_color.value_vec4.y;
 			fbx_material->color[2] = (float)material->fbx.diffuse_color.value_vec4.z;
@@ -232,16 +232,16 @@ struct FBX_SCENE* fbx_load(HANDLE temp_alloc_handle, void* data, size_t size)
 
 					ufbx_material* material = mesh->materials.data[part->index];
 
-					submeshes[m].material_id = (int32)material->element_id;
-					submeshes[m].num_indices = (int32)part->num_triangles * 3;
-					submeshes[m].indices = (uint16*)temppool_alloc(temp_alloc_handle, sizeof(uint16) * part->num_triangles * 3);
-					//submeshes[m].indices = (uint32*)malloc(sizeof(uint32) * part->num_triangles * 3);
+					submeshes[m].material_id = (INT32)material->element_id;
+					submeshes[m].num_indices = (INT32)part->num_triangles * 3;
+					submeshes[m].indices = (UINT32*)temppool_alloc(temp_alloc_handle, sizeof(UINT32) * part->num_triangles * 3);
+					//submeshes[m].indices = (UINT32*)malloc(sizeof(UINT32) * part->num_triangles * 3);
 
-					int32 num_indices = 0;
+					INT32 num_indices = 0;
 
 					for (size_t f = 0; f < part->face_indices.count; ++f)
 					{
-						uint32 face_index = part->face_indices.data[f];
+						UINT32 face_index = part->face_indices.data[f];
 						
 						ufbx_face face = mesh->faces.data[face_index];
 
@@ -252,19 +252,19 @@ struct FBX_SCENE* fbx_load(HANDLE temp_alloc_handle, void* data, size_t size)
 
 						for (size_t tri = 0; tri < num_tris; ++tri)
 						{
-							uint32_t tri_indices[3];
+							UINT32 tri_indices[3];
 							ufbx_triangulate_face(tri_indices, 3, mesh, face);
 
-							uint32 idx0 = tri_indices[0];
-							uint32 idx1 = tri_indices[1];
-							uint32 idx2 = tri_indices[2];
+							UINT32 idx0 = tri_indices[0];
+							UINT32 idx1 = tri_indices[1];
+							UINT32 idx2 = tri_indices[2];
 
 							if (num_indices >= submeshes[m].num_indices)
 								break;
 
-							submeshes[m].indices[num_indices++] = (uint16)idx0;
-							submeshes[m].indices[num_indices++] = (uint16)idx1;
-							submeshes[m].indices[num_indices++] = (uint16)idx2;
+							submeshes[m].indices[num_indices++] = (UINT32)idx0;
+							submeshes[m].indices[num_indices++] = (UINT32)idx1;
+							submeshes[m].indices[num_indices++] = (UINT32)idx2;
 						}
 					}
 				}

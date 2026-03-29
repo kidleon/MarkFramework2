@@ -532,16 +532,17 @@ BOOL Assets::Load(const char* szRelativePath, IModel** ppOut)
 			pModel
 		);
 
+		CHECK_RELEASE(pModelAsset);
+
 		if (!Result)
 		{
 			pModel->Release();
-			pModelAsset->Release();
 			*ppOut = nullptr;
 			return FALSE;
 		}
-	}
 
-	// model
+		*ppOut = pModel;
+	}
 
 	return TRUE;
 }

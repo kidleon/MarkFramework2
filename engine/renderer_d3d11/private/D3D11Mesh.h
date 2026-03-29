@@ -30,8 +30,8 @@ public:
 	virtual void SetTangent(const FLOAT3* pTangents, UINT32 NumTangent) noexcept final;
 	virtual void SetBinormal(const FLOAT3* pBinormals, UINT32 NumBinormal) noexcept final;
 
-	virtual void SetIndex(const UINT16* pIndices, UINT32 NumIndices) noexcept final;
-	virtual void SetIndex(UINT32 NumMeshParts, const UINT16** ppIndices, UINT32* pNumIndices) noexcept final;
+	virtual void SetIndex(const UINT32* pIndices, UINT32 NumIndices) noexcept final;
+	virtual void SetIndex(UINT32 NumMeshParts, const UINT32** ppIndices, UINT32* pNumIndices) noexcept final;
 	virtual UINT32 GetNumMeshPart() const noexcept final;
 	virtual UINT32 GetNumIndex(INT32 MeshPartIndex) const noexcept final;
 

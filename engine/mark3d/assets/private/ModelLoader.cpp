@@ -34,7 +34,7 @@ BOOL LoadModelFromModelAsset(
 	UINT32 ModelAttrib = pModelAsset->GetModelAttrib();
 
 	// Load Mesh
-	if (ModelAttrib & (UINT32)MODEL_ATTRIB::MESH)
+	if (!(ModelAttrib & (UINT32)MODEL_ATTRIB::MESH))
 	{
 		SYS_LOG_E("Model::CreateMesh - Model asset does not contain mesh data.");
 		return FALSE;
@@ -108,13 +108,14 @@ BOOL LoadModelFromModelAsset(
 
 		if (1 == NumSubMesh)
 		{
-			UINT16* pIndices = pModelAsset->GetIndices((int32)i, 0);
+			UINT32* pIndices = pModelAsset->GetIndices((int32)i, 0);
 			UINT32 NumIndices = (UINT32)pModelAsset->GetNumIndices((int32)i, 0);
 			pMesh->SetIndex(pIndices, NumIndices);
 
 			ISurfaceMaterial* pSurfaceMaterial = nullptr;
 			pRenderSystem->CreateSurfaceMaterial(&pSurfaceMaterial);
 			pMesh->SetMaterial(0, pSurfaceMaterial);
+			
 
 			int32 MaterialIndex = pModelAsset->GetMaterialIndex((int32)i, 0);
 			if (0 <= MaterialIndex)
@@ -203,6 +204,8 @@ BOOL LoadModelFromModelAsset(
 					);
 					pSurfaceMaterial->SetEmissiveTexture(0, pEmissiveTexture);
 				}
+
+				CHECK_RELEASE(pSurfaceMaterial);
 			}
 		}
 		else if(1 < NumSubMesh)
@@ -215,13 +218,13 @@ BOOL LoadModelFromModelAsset(
 				NumIndices[s] = (UINT32)NumIndex;
 			}
 
-			UINT16* pIndicesData[MAX_MESH_PART] = {};
+			UINT32* pIndicesData[MAX_MESH_PART] = {};
 			for (int32 s = 0; s < (int32)NumSubMesh; s++)
 			{
 				pIndicesData[s] = pModelAsset->GetIndices((int32)i, s);
 			}
 
-			pMesh->SetIndex(NumIndexArray, (const UINT16**)(pIndicesData), (UINT32*)NumIndices);
+			pMesh->SetIndex(NumIndexArray, (const UINT32**)(pIndicesData), (UINT32*)NumIndices);
 
 			for (int32 s = 0; s < (int32)NumSubMesh; s++)
 			{
@@ -316,6 +319,8 @@ BOOL LoadModelFromModelAsset(
 						);
 						pSurfaceMaterial->SetEmissiveTexture(0, pEmissiveTexture);
 					}
+
+					CHECK_RELEASE(pSurfaceMaterial);
 				}
 			}
 			

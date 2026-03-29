@@ -407,7 +407,7 @@ BOOL D3D11PrimitiveBuffer::UpdateTexCoord8(
 
 BOOL D3D11PrimitiveBuffer::UpdateIndex(
 	int32 PrimitiveIndex,
-	const UINT16* pIndices,
+	const UINT32* pIndices,
 	UINT32 IndexCount
 )
 {
@@ -426,7 +426,7 @@ BOOL D3D11PrimitiveBuffer::UpdateIndex(
 
 	if (!m_pIBlob)
 	{
-		m_pIBlob = D3D11BlobAllocator::Get()->Acquire(m_MaxIndexCount * sizeof(UINT16));
+		m_pIBlob = D3D11BlobAllocator::Get()->Acquire(m_MaxIndexCount * sizeof(UINT32));
 		if (!m_pIBlob)
 		{
 			SYS_LOG_E("D3D11PrimitiveBuffer::UpdateIndex: Failed to acquire index blob.");
@@ -436,8 +436,8 @@ BOOL D3D11PrimitiveBuffer::UpdateIndex(
 
 	m_pIBlob->Update(
 		pIndices,
-		IndexCount * sizeof(UINT16),
-		m_Primitives[PrimitiveIndex].IndexStart * sizeof(UINT16)
+		IndexCount * sizeof(UINT32),
+		m_Primitives[PrimitiveIndex].IndexStart * sizeof(UINT32)
 	);
 
 	m_DirtyIB = TRUE;
@@ -449,7 +449,7 @@ BOOL D3D11PrimitiveBuffer::UpdateIndex(
 BOOL D3D11PrimitiveBuffer::UpdateIndex(
 	int32 PrimitiveIndex,
 	UINT32 NumIndices,
-	const UINT16** ppIndices,
+	const UINT32** ppIndices,
 	UINT32* pIndexCounts
 )
 {
@@ -486,8 +486,8 @@ BOOL D3D11PrimitiveBuffer::UpdateIndex(
 	{
 		m_pIBlob->Update(
 			ppIndices[i],
-			pIndexCounts[i] * sizeof(UINT16),
-			CurrentIndexStart * sizeof(UINT16)
+			pIndexCounts[i] * sizeof(UINT32),
+			CurrentIndexStart * sizeof(UINT32)
 		);
 		
 		CurrentIndexStart += pIndexCounts[i];

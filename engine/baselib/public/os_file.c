@@ -2,7 +2,7 @@
 #include "os_file.h"
 #include "strings.h"
 
-
+/*
 #ifdef _WIN32
 #define PATH_SEP '\\'
 #define PATH_SEP_STR "\\"
@@ -10,6 +10,9 @@
 #define PATH_SEP '/'
 #define PATH_SEP_STR "/"
 #endif
+*/
+#define PATH_SEP '/'
+#define PATH_SEP_STR "/"
 
 /* 컴파일러별 헤더 및 함수 정의 */
 #if defined(__TARGET_COMPILER_MSC)

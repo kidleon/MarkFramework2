@@ -38,8 +38,6 @@ public:
 
 	virtual IWorld* GetWorld() noexcept final;
 
-	// SceneObject's APIs
-	virtual BOOL CreateModel(IModelAsset* pModelAsset, IModel** ppOut) final;
 	
 	static Mark3DImpl* Get() noexcept;
 

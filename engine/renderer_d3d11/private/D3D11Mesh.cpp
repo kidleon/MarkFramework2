@@ -119,14 +119,14 @@ UINT32 D3D11Mesh::GetNumMeshPart() const noexcept
 	return m_NumMeshPart;
 }
 
-void D3D11Mesh::SetIndex(const UINT16* pIndices, UINT32 NumIndices) noexcept
+void D3D11Mesh::SetIndex(const UINT32* pIndices, UINT32 NumIndices) noexcept
 {
 	m_NumMeshPart = 1;
 	m_pNumIndices[0] = NumIndices;
 	m_pPrimitiveBuffer->UpdateIndex(m_PrimitiveIndex, pIndices, NumIndices);
 }
 
-void D3D11Mesh::SetIndex(UINT32 NumMeshParts, const UINT16** ppIndices, UINT32* pNumIndices) noexcept
+void D3D11Mesh::SetIndex(UINT32 NumMeshParts, const UINT32** ppIndices, UINT32* pNumIndices) noexcept
 {
 	__ASSERT(NumMeshParts <= MAX_MESH_PART, "Number of mesh parts exceeds maximum");
 	if (NumMeshParts > MAX_MESH_PART)

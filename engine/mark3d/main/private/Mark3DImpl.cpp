@@ -246,21 +246,6 @@ IWorld* Mark3DImpl::GetWorld() noexcept
 	return m_pWorld;
 }
 
-BOOL Mark3DImpl::CreateModel(IModelAsset* pModelAsset, IModel** ppOut)
-{
-	if (!pModelAsset || !ppOut)
-		return FALSE;
-
-	ModelAsset* pModelAssetImpl = static_cast<ModelAsset*>(pModelAsset);
-
-	uint32 ModelAttrib = pModelAssetImpl->INL_GetModelAttrib();
-	if (ModelAttrib & (uint32)MODEL_ATTRIB::MESH)
-	{
-	}
-
-	return TRUE;
-}
-
 void Mark3DImpl::UpdateCPU()
 {
 	CoreHeap_TempReset();

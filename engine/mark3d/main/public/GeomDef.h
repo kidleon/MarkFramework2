@@ -33,8 +33,8 @@ struct IMesh : public IUNKNOWN
 	virtual void SetTangent(const FLOAT3* pTangents, UINT32 NumTangent) noexcept = 0;
 	virtual void SetBinormal(const FLOAT3* pBinormals, UINT NumBinormal) noexcept = 0;
 
-	virtual void SetIndex(const UINT16* pIndices, UINT32 NumIndices) noexcept = 0;
-	virtual void SetIndex(UINT32 NumMeshParts, const UINT16** ppIndices, UINT32* pNumIndices) noexcept = 0;
+	virtual void SetIndex(const UINT32* pIndices, UINT32 NumIndices) noexcept = 0;
+	virtual void SetIndex(UINT32 NumMeshParts, const UINT32** ppIndices, UINT32* pNumIndices) noexcept = 0;
 	virtual UINT32 GetNumMeshPart() const noexcept = 0;
 	virtual UINT32 GetNumIndex(INT32 MeshPartIndex) const noexcept = 0;
 

@@ -6,30 +6,30 @@
 
 struct FBX_MATERIAL
 {
-	int32 id;
+	INT32 id;
 	char diffuse[MAX_TEXTURE_FILENAME];
 	char normal[MAX_TEXTURE_FILENAME];
 	char specular[MAX_TEXTURE_FILENAME];
 	char emissive[MAX_TEXTURE_FILENAME];
-	float color[4];
+	FLOAT color[4];
 };
 
 struct FBX_SUBMESH
 {
-	uint16* indices;
-	int32 num_indices;
-	int32 material_id;
+	UINT32* indices;
+	INT32 num_indices;
+	INT32 material_id;
 };
 
 struct FBX_MESH
 {
 	char name[64];
-	float* positions;
-	float* normals;
-	float* uvs;
-	float* colors;
-	float* tangents;
-	float* binormals;
+	FLOAT* positions;
+	FLOAT* normals;
+	FLOAT* uvs;
+	FLOAT* colors;
+	FLOAT* tangents;
+	FLOAT* binormals;
 	size_t num_vertices;
 
 	size_t num_submesh;

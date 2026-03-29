@@ -147,14 +147,14 @@ public:
 
 	virtual BOOL UpdateIndex(
 		int32 PrimitiveIndex,
-		const UINT16* pIndices,
+		const UINT32* pIndices,
 		UINT32 IndexCount
 	) final;
 
 	virtual BOOL UpdateIndex(
 		int32 PrimitiveIndex,
 		UINT32 NumIndices,
-		const UINT16** ppIndices,
+		const UINT32** ppIndices,
 		UINT32* pIndexCounts
 	) final;
 

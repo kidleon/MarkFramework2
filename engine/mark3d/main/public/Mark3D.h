@@ -106,16 +106,6 @@ struct IMark3D : public IUNKNOWN
 	virtual IWorld* GetWorld() noexcept = 0;
 
 
-	//----------------------------------------------------------------------
-	// SceneObject's APIs
-
-	/**
-	* @brief 새로운 Model 객체를 생성합니다.
-	* @param pModelAsset 생성할 Model의 자산 포인터
-	* @param ppOut 생성된 Model 객체의 포인터를 받을 IModel** 포인터
-	* @return 성공시 TRUE, 실패시 FALSE
-	*/
-	virtual BOOL CreateModel(IModelAsset* pModelAsset, IModel** ppOut) = 0;
 
 };
 

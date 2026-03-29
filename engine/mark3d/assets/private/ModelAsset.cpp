@@ -268,7 +268,7 @@ FLOAT3* ModelAsset::GetBinormal(int32 MeshIndex) noexcept
 	return m_pMeshes[MeshIndex].pBinormals;
 }
 
-uint16* ModelAsset::GetIndices(int32 MeshIndex, int32 SubMeshIndex) noexcept
+UINT32* ModelAsset::GetIndices(int32 MeshIndex, int32 SubMeshIndex) noexcept
 {
 	if (MeshIndex < 0 || static_cast<size_t>(MeshIndex) >= m_NumMeshes)
 		return nullptr;
@@ -498,8 +498,8 @@ BOOL ModelAsset::LoadFromFBX(const FBX_SCENE* fbx_scene) noexcept
 						submesh.NumIndices = fbx_submesh.num_indices;
 						if (fbx_submesh.indices)
 						{
-							submesh.pIndices = (uint16*)CORE_SYS_ALLOC(sizeof(uint16) * submesh.NumIndices);
-							memcpy(submesh.pIndices, fbx_submesh.indices, sizeof(uint16) * submesh.NumIndices);
+							submesh.pIndices = (UINT32*)CORE_SYS_ALLOC(sizeof(UINT32) * submesh.NumIndices);
+							memcpy(submesh.pIndices, fbx_submesh.indices, sizeof(UINT32) * submesh.NumIndices);
 						}
 					}
 				}

@@ -1109,7 +1109,7 @@ struct MARKENGINE_API RS_DEPTH_STENCIL_STATE
 	uint8_t StencilReadMask;
 	uint8_t StencilWriteMask;
 
-	uint16_t PADDING;
+	UINT32 PADDING;
 
 	// 앞면/뒷면 스텐실 연산
 	RS_STENCIL_OP FrontFace;
@@ -1640,7 +1640,7 @@ struct IPrimitiveBuffer : public IUNKNOWN
 
 	virtual BOOL UpdateIndex(
 		int32 PrimitiveIndex,
-		const UINT16* pIndices,
+		const UINT32* pIndices,
 		UINT32 IndexCount
 	) = 0;
 
@@ -1655,7 +1655,7 @@ struct IPrimitiveBuffer : public IUNKNOWN
 	virtual BOOL UpdateIndex(
 		int32 PrimitiveIndex,
 		UINT32 NumIndices,
-		const UINT16** ppIndices,
+		const UINT32** ppIndices,
 		UINT32* pIndexCounts
 	) = 0;
 

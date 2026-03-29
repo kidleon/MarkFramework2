@@ -79,7 +79,7 @@ interface IBinaryAsset : public IAsset
 	* @brief CRC32 계산
 	* @return CRC32 값
 	*/
-	virtual uint32 ComputeCRC32() noexcept = 0;
+	virtual UINT32 ComputeCRC32() noexcept = 0;
 
 	/**
 	* @brief CRC64 계산
@@ -149,7 +149,7 @@ interface ITextAsset : public IAsset
 };
 
 
-enum class MODEL_ATTRIB : uint32
+enum class MODEL_ATTRIB : UINT32
 {
 	MESH = 0x00000001,
 	MATERIAL = 0x00000002,
@@ -185,7 +185,7 @@ struct IModelAsset : public IAsset
 	* @param MeshIndex 메쉬 인덱스
 	* @return 메쉬 이름 문자열 포인터
 	*/
-	virtual const char* GetMeshName(int32 MeshIndex) const noexcept = 0;
+	virtual const char* GetMeshName(INT32 MeshIndex) const noexcept = 0;
 
 	/**
 	* @brief 메쉬에 포함된 버텍스 속성 반환, 가장 많은 버텍스 속성을 가진 메쉬의 속성을 반환
@@ -210,21 +210,21 @@ struct IModelAsset : public IAsset
 	* @param MeshIndex 메쉬 인덱스
 	* @return 버텍스 속성
 	*/
-	virtual UINT32 GetVertexFormat(int32 MeshIndex) const noexcept = 0;
+	virtual UINT32 GetVertexFormat(INT32 MeshIndex) const noexcept = 0;
 
 	/**
 	* @brief 서브메쉬 개수 반환
 	* @param MeshIndex 메쉬 인덱스
 	* @return 서브메쉬 개수
 	*/
-	virtual size_t GetNumSubMesh(int32 MeshIndex) noexcept = 0;
+	virtual size_t GetNumSubMesh(INT32 MeshIndex) noexcept = 0;
 
 	/**
 	* @brief 버텍스 개수 반환
 	* @param MeshIndex 메쉬 인덱스
 	* @return 버텍스 위치 개수
 	*/
-	virtual size_t GetNumVertices(int32 MeshIndex) const noexcept = 0;
+	virtual size_t GetNumVertices(INT32 MeshIndex) const noexcept = 0;
 
 	/**
 	* @brief 버텍스 위치 배열 반환
@@ -233,42 +233,42 @@ struct IModelAsset : public IAsset
 	* @note 반환 값은 FLOAT3 배열 포인터임
 	* @note GetNumPositions() 함수를 통해 배열 크기를 확인할 수 있음
 	*/
-	virtual FLOAT3* GetPositions(int32 MeshIndex) noexcept = 0;
+	virtual FLOAT3* GetPositions(INT32 MeshIndex) noexcept = 0;
 
 	/**
 	* @brief 버텍스 법선 배열 반환
 	* @param MeshIndex 메쉬 인덱스
 	* @return 버텍스 법선 배열 포인터
 	*/
-	virtual FLOAT3* GetNormals(int32 MeshIndex) noexcept = 0;
+	virtual FLOAT3* GetNormals(INT32 MeshIndex) noexcept = 0;
 
 	/**
 	* @brief 버텍스 텍스처 좌표 배열 반환
 	* @param MeshIndex 메쉬 인덱스
 	* @return 버텍스 텍스처 좌표 배열 포인터
 	*/
-	virtual FLOAT2* GetTexCoords(int32 MeshIndex) noexcept = 0;
+	virtual FLOAT2* GetTexCoords(INT32 MeshIndex) noexcept = 0;
 
 	/**
 	* @brief 버텍스 색상 배열 반환
 	* @param MeshIndex 메쉬 인덱스
 	* @return 버텍스 색상 배열 포인터
 	*/
-	virtual FLOAT4* GetColor(int32 MeshIndex) noexcept = 0;
+	virtual FLOAT4* GetColor(INT32 MeshIndex) noexcept = 0;
 
 	/**
 	* @brief 버텍스 탄젠트 배열 반환
 	* @param MeshIndex 메쉬 인덱스
 	* @return 버텍스 탄젠트 배열 포인터
 	*/
-	virtual FLOAT3* GetTangent(int32 MeshIndex) noexcept = 0;
+	virtual FLOAT3* GetTangent(INT32 MeshIndex) noexcept = 0;
 
 	/**
 	* @brief 버텍스 바이노멀 배열 반환
 	* @param MeshIndex 메쉬 인덱스
 	* @return 버텍스 바이노멀 배열 포인터
 	*/
-	virtual FLOAT3* GetBinormal(int32 MeshIndex) noexcept = 0;
+	virtual FLOAT3* GetBinormal(INT32 MeshIndex) noexcept = 0;
 
 	/**
 	* @brief 인덱스 배열 반환
@@ -276,14 +276,14 @@ struct IModelAsset : public IAsset
 	* @param SubMeshIndex 서브메쉬 인덱스
 	* @return 인덱스 배열 포인터
 	*/
-	virtual uint16* GetIndices(int32 MeshIndex, int32 SubMeshIndex) noexcept = 0;
+	virtual UINT32* GetIndices(INT32 MeshIndex, INT32 SubMeshIndex) noexcept = 0;
 
 	/**
 	* @brief 인덱스 개수 반환
 	* @param MeshIndex 메쉬 인덱스
 	* @return 인덱스 개수
 	*/
-	virtual size_t GetNumIndices(int32 MeshIndex) const noexcept = 0;
+	virtual size_t GetNumIndices(INT32 MeshIndex) const noexcept = 0;
 
 	/**
 	* @brief 인덱스 개수 반환
@@ -291,7 +291,7 @@ struct IModelAsset : public IAsset
 	* @param SubMeshIndex 서브메쉬 인덱스
 	* @return 인덱스 개수
 	*/
-	virtual size_t GetNumIndices(int32 MeshIndex, int32 SubMeshIndex) const noexcept = 0;
+	virtual size_t GetNumIndices(INT32 MeshIndex, INT32 SubMeshIndex) const noexcept = 0;
 
 	/**
 	* @brief 서브메쉬에 적용된 머티리얼 Index 반환
@@ -299,7 +299,7 @@ struct IModelAsset : public IAsset
 	* @param SubMeshIndex 서브메쉬 인덱스
 	* @return 머티리얼 Index
 	*/
-	virtual int32 GetMaterialIndex(int32 MeshIndex, int32 SubMeshIndex) const noexcept = 0;
+	virtual INT32 GetMaterialIndex(INT32 MeshIndex, INT32 SubMeshIndex) const noexcept = 0;
 
 	/**
 	* @brief 머티리얼 개수 반환
@@ -312,70 +312,70 @@ struct IModelAsset : public IAsset
 	* @param MaterialID 머티리얼 ID
 	* @return 디퓨즈 텍스처 존재 여부
 	*/
-	virtual BOOL HasDiffuseTexture(int32 MaterialID) const noexcept = 0;
+	virtual BOOL HasDiffuseTexture(INT32 MaterialID) const noexcept = 0;
 
 	/**
 	* @brief 서브메쉬에 적용된 머티리얼이 노멀 텍스처를 가지고 있는지 여부 반환
 	* @param MaterialID 머티리얼 ID
 	* @return 노멀 텍스처 존재 여부
 	*/
-	virtual BOOL HasNormalTexture(int32 MaterialID) const noexcept = 0;
+	virtual BOOL HasNormalTexture(INT32 MaterialID) const noexcept = 0;
 
 	/**
 	* @brief 서브메쉬에 적용된 머티리얼이 색상을 가지고 있는지 여부 반환
 	* @param MaterialID 머티리얼 ID
 	* @return 색상 존재 여부
 	*/
-	virtual BOOL HasColor(int32 MaterialID) const noexcept = 0;
+	virtual BOOL HasColor(INT32 MaterialID) const noexcept = 0;
 
 	/**
 	* @brief 서브메쉬에 적용된 머티리얼이 스페큘러 텍스처를 가지고 있는지 여부 반환
 	* @param MaterialID 머티리얼 ID
 	* @return 스페큘러 텍스처 존재 여부
 	*/
-	virtual BOOL HasSpecularTexture(int32 MaterialID) const noexcept = 0;
+	virtual BOOL HasSpecularTexture(INT32 MaterialID) const noexcept = 0;
 
 	/**
 	* @brief 서브메쉬에 적용된 머티리얼이 발광 텍스처를 가지고 있는지 여부 반환
 	* @param MaterialID 머티리얼 ID
 	* @return 발광 텍스처 존재 여부
 	*/
-	virtual BOOL HasEmissiveTexture(int32 MaterialID) const noexcept = 0;
+	virtual BOOL HasEmissiveTexture(INT32 MaterialID) const noexcept = 0;
 
 	/**
 	* @brief 머티리얼 디퓨즈 텍스처 경로 반환
 	* @param MaterialID 머티리얼 ID
 	* @return 디퓨즈 텍스처 경로 문자열 포인터
 	*/
-	virtual const char* GetMaterialDiffuse(int32 MaterialID) const noexcept = 0;
+	virtual const char* GetMaterialDiffuse(INT32 MaterialID) const noexcept = 0;
 
 	/**
 	* @brief 머티리얼 노멀 텍스처 경로 반환
 	* @param MaterialID 머티리얼 ID
 	* @return 노멀 텍스처 경로 문자열 포인터
 	*/
-	virtual const char* GetMaterialNormal(int32 MaterialID) const noexcept = 0;
+	virtual const char* GetMaterialNormal(INT32 MaterialID) const noexcept = 0;
 
 	/**
 	* @brief 머티리얼 스페큘러 텍스처 경로 반환
 	* @param MaterialID 머티리얼 ID
 	* @return 스페큘러 텍스처 경로 문자열 포인터
 	*/
-	virtual const char* GetMaterialSpecular(int32 MaterialID) const noexcept = 0;
+	virtual const char* GetMaterialSpecular(INT32 MaterialID) const noexcept = 0;
 
 	/**
 	* @brief 머티리얼 발광 텍스처 경로 반환
 	* @param MaterialID 머티리얼 ID
 	* @return 발광 텍스처 경로 문자열 포인터
 	*/
-	virtual const char* GetMaterialEmissive(int32 MaterialID) const noexcept = 0;
+	virtual const char* GetMaterialEmissive(INT32 MaterialID) const noexcept = 0;
 	
 	/**
 	* @brief 머티리얼 색상 반환
 	* @param MaterialID 머티리얼 ID
 	* @return 머티리얼 색상
 	*/
-	virtual FLOAT4 GetMaterialColor(int32 MaterialID) const noexcept = 0;
+	virtual FLOAT4 GetMaterialColor(INT32 MaterialID) const noexcept = 0;
 
 };
 
@@ -421,6 +421,7 @@ interface IAssetCache : public IUNKNOWN
 */
 interface ITexture1D;
 interface ITexture2D;
+interface IModel;
 
 interface IAssets : public IPRIVATE_UNKNOWN
 {
@@ -503,6 +504,22 @@ interface IAssets : public IPRIVATE_UNKNOWN
 	* @return 로드 성공 시 TRUE, 실패 시 FALSE
 	*/
 	virtual BOOL LoadAsync(const char* szRelativePath, BOOL sRGB, ITexture2D** ppOut) = 0;
+
+	/**
+	* @brief 모델 자산 로드
+	* @param szRelativePath 자산의 상대 경로
+	* @param ppOut 로드된 IModel 포인터를 받을 변수의 주소
+	* @return 로드 성공 시 TRUE, 실패 시 FALSE
+	*/
+	virtual BOOL Load(const char* szRelativePath, IModel** ppOut) = 0;
+
+	/**
+	* @brief 비동기 모델 자산 로드
+	* @param szRelativePath 자산의 상대 경로
+	* @param ppOut 로드된 IModel 포인터를 받을 변수의 주소
+	* @return 로드 성공 시 TRUE, 실패 시 FALSE
+	*/
+	virtual BOOL LoadAsync(const char* szRelativePath, IModel** ppOut) = 0;
 };
 
 
