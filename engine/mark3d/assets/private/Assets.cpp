@@ -506,8 +506,6 @@ BOOL Assets::Load(const char* szRelativePath, IModel** ppOut)
 			return FALSE;
 		}
 
-		temppool_clear(m_hSyncLoadTempPool);
-
 		MODEL_CREATE_DESC ModelCreateDesc = {};
 		get_filename(szRelativePath, ModelCreateDesc.szModelName, sizeof(ModelCreateDesc.szModelName));
 		ModelCreateDesc.VertexFormat = pModelAsset->GetVertexFormat();
@@ -521,6 +519,8 @@ BOOL Assets::Load(const char* szRelativePath, IModel** ppOut)
 			*ppOut = nullptr;
 			return FALSE;
 		}
+
+		temppool_clear(m_hSyncLoadTempPool);
 		
 		BOOL Result= LoadModelFromModelAsset(
 			m_hSyncLoadTempPool,
@@ -565,10 +565,20 @@ BOOL Assets::IsExistTextureFile(const char* szRelativePath, char* szModifiedPath
 		return TRUE;
 	}
 
+	char szExtension[16] = { 0 };
+	if (!get_file_extension(szLowerPath, szExtension, sizeof(szExtension)))
+		return FALSE;
+
 	char szOnlyPath[MAX_FILE_LENGTH] = { 0 };
 	char szOnlyFileName[MAX_FILE_LENGTH] = { 0 };
 	char szTempPath[MAX_FILE_LENGTH] = { 0 };
 	char szFullPath[MAX_FILE_LENGTH] = { 0 };
+
+	// PSD 파일인 경우 TGA로 확장자 변경하여 검색
+	if (fstrcmp(szExtension, "psd"))
+	{
+		change_extension(szLowerPath, "tga", szLowerPath, sizeof(szLowerPath));
+	}
 
 	get_path(szLowerPath, szOnlyPath, sizeof(szOnlyPath));
 	get_filename(szRelativePath, szOnlyFileName, sizeof(szOnlyFileName));

@@ -456,3 +456,39 @@ BOOL combine_path(
 
 	return TRUE;
 }
+
+BOOL change_extension(
+	const char* path,
+	const char* new_extension,
+	char* buffer,
+	size_t size
+)
+{
+	if (!path || !new_extension || !buffer || size == 0)
+		return FALSE;
+
+	const char* dot = strrchr(path, '.');
+
+	/* '/' 와 '\\' 중 더 뒤에 있는 구분자를 선택 */
+	const char* sep_fwd = strrchr(path, '/');
+	const char* sep_back = strrchr(path, '\\');
+	const char* sep = (sep_fwd > sep_back) ? sep_fwd : sep_back;
+
+	/* '.'이 마지막 구분자보다 앞에 있으면 확장자 없는 경로로 취급 */
+	size_t base_len = (dot && (!sep || dot > sep))
+		? (size_t)(dot - path)
+		: strlen(path);
+
+	/* 필요한 크기: base + '.' + new_extension + '\0' */
+	size_t new_ext_len = strlen(new_extension);
+	size_t needed = base_len + 1 + new_ext_len + 1;
+
+	if (needed > size)
+		return FALSE;
+
+	memcpy(buffer, path, base_len);
+	buffer[base_len] = '.';
+	memcpy(buffer + base_len + 1, new_extension, new_ext_len + 1); /* +1로 '\0' 포함 */
+
+	return TRUE;
+}

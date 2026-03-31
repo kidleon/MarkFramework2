@@ -184,4 +184,19 @@ MARK_BASELIB_C_API BOOL combine_path(
 	size_t size
 );
 
+/**
+* @brief 파일 전체 경로에서 확장자를 새로운 확장자로 변경한 경로를 얻어옵니다.
+* @param path 전체 경로
+* @param new_extension 새로운 확장자 ('.' 제외)
+* @param buffer 변경된 경로를 저장할 버퍼
+* @param size 버퍼 크기
+* @return 성공시 TRUE, 실패시 FALSE
+*/
+MARK_BASELIB_C_API BOOL change_extension(
+	const char* path,
+	const char* new_extension,
+	char* buffer,
+	size_t size
+);
+
 #endif // __OS_FILE_H__
