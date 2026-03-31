@@ -31,7 +31,7 @@ struct IMesh : public IUNKNOWN
 	virtual void SetTexCoord(const FLOAT2* pTexCoords, UINT32 NumTexCoord) noexcept = 0;
 	virtual void SetColor(const FLOAT4* pColors, UINT32 NumColor) noexcept = 0;
 	virtual void SetTangent(const FLOAT3* pTangents, UINT32 NumTangent) noexcept = 0;
-	virtual void SetBinormal(const FLOAT3* pBinormals, UINT NumBinormal) noexcept = 0;
+	virtual void SetBinormal(const FLOAT3* pBinormals, UINT32 NumBinormal) noexcept = 0;
 
 	virtual void SetIndex(const UINT32* pIndices, UINT32 NumIndices) noexcept = 0;
 	virtual void SetIndex(UINT32 NumMeshParts, const UINT32** ppIndices, UINT32* pNumIndices) noexcept = 0;
