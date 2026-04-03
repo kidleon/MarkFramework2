@@ -599,6 +599,14 @@ struct TEXTURE1D_CREATE_DESC
 	
 };
 
+struct TEXTURE1D_DESC
+{
+	UINT32 Width; // 텍스처 너비
+	UINT32 MipLevels; // 밉맵 레벨 수
+	COLOR_FORMAT Format; // 색상 포맷
+	BOOL sRGB; // sRGB 색상 공간 여부 (포맷이 UNORM인 경우에만 적용)
+};
+
 /**
 * @brief 2D 텍스처 생성 정보 구조체
 */
@@ -615,6 +623,15 @@ struct TEXTURE2D_CREATE_DESC
 	BOOL sRGB; // sRGB 색상 공간 여부 (포맷이 UNORM인 경우에만 적용)
 	const char* pData; // 초기 데이터 포인터
 	size_t DataSize; // 초기 데이터 크기 (바이트 단위)
+};
+
+struct TEXTURE2D_DESC
+{
+	UINT32 Width; // 텍스처 너비
+	UINT32 Height; // 텍스처 높이
+	UINT32 MipLevels; // 밉맵 레벨 수
+	COLOR_FORMAT Format; // 색상 포맷
+	BOOL sRGB; // sRGB 색상 공간 여부 (포맷이 UNORM인 경우에만 적용)
 };
 
 

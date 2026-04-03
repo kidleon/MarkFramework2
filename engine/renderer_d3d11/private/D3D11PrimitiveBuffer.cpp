@@ -418,7 +418,7 @@ BOOL D3D11PrimitiveBuffer::UpdateIndex(
 		return FALSE;
 	}
 
-	if (m_Primitives[PrimitiveIndex].IndexCount + IndexCount > m_MaxIndexCount)
+	if (m_Primitives[PrimitiveIndex].IndexCount < IndexCount)
 	{
 		SYS_LOG_E("D3D11PrimitiveBuffer::UpdateIndex: Exceeded maximum index count for primitive.");
 		return FALSE;

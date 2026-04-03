@@ -77,7 +77,7 @@ BOOL Assets::Init(
 {
 	if (m_Initialized) return TRUE;
 
-	constexpr size_t TEMP_POOL_SIZE = 1024 * 1024 * 20; // 20MB 크기의 임시 풀 생성
+	constexpr size_t TEMP_POOL_SIZE = 1024 * 1024 * 32; // 32MB 크기의 임시 풀 생성
 
 	CreateOSFileSystem(szRootPath, &m_pFileSystem);
 	m_hThreadPool = threadpool_create(THREAD_POOL_SIZE, TEMP_POOL_SIZE);
@@ -558,6 +558,17 @@ BOOL Assets::IsExistTextureFile(const char* szRelativePath, char* szModifiedPath
 	// 예시: "texture/wood.png" -> "texture/wood_diffuse.png", "texture/wood_normal.png", "texture/wood_specular.png" 등으로 변환하여 존재 여부 확인
 	char szLowerPath[MAX_FILE_LENGTH] = { 0 };
 	fstrlcpy(szLowerPath, fstrlwr((char*)szRelativePath), sizeof(szLowerPath) - 1);
+
+	char szExtension[16] = { 0 };
+	if (!get_file_extension(szLowerPath, szExtension, sizeof(szExtension)))
+		return FALSE;
+
+	// PSD 파일인 경우 TGA로 확장자 변경하여 검색
+	if (!fstrcmp(szExtension, "psd"))
+	{
+		change_extension(szLowerPath, "tga", szLowerPath, sizeof(szLowerPath));
+	}
+
 	if (m_pFileSystem->ExistFile(szLowerPath))
 	{
 		if (szModifiedPath)
@@ -565,23 +576,13 @@ BOOL Assets::IsExistTextureFile(const char* szRelativePath, char* szModifiedPath
 		return TRUE;
 	}
 
-	char szExtension[16] = { 0 };
-	if (!get_file_extension(szLowerPath, szExtension, sizeof(szExtension)))
-		return FALSE;
-
 	char szOnlyPath[MAX_FILE_LENGTH] = { 0 };
 	char szOnlyFileName[MAX_FILE_LENGTH] = { 0 };
 	char szTempPath[MAX_FILE_LENGTH] = { 0 };
 	char szFullPath[MAX_FILE_LENGTH] = { 0 };
 
-	// PSD 파일인 경우 TGA로 확장자 변경하여 검색
-	if (fstrcmp(szExtension, "psd"))
-	{
-		change_extension(szLowerPath, "tga", szLowerPath, sizeof(szLowerPath));
-	}
-
 	get_path(szLowerPath, szOnlyPath, sizeof(szOnlyPath));
-	get_filename(szRelativePath, szOnlyFileName, sizeof(szOnlyFileName));
+	get_filename(szLowerPath, szOnlyFileName, sizeof(szOnlyFileName));
 
 	combine_path(szOnlyPath, "texture", szTempPath, sizeof(szTempPath));
 	combine_path(szTempPath, szOnlyFileName, szFullPath, sizeof(szFullPath));

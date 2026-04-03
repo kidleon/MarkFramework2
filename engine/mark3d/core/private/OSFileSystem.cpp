@@ -152,5 +152,7 @@ BOOL OSFileSystem::ExistFile(
 	const char* szRelativePath
 ) noexcept
 {
-	return exist_file(szRelativePath);
+	char szFullPath[MAX_FILE_LENGTH];
+	combine_path(m_szRootPath, szRelativePath, szFullPath, sizeof(szFullPath));
+	return exist_file(szFullPath);
 }

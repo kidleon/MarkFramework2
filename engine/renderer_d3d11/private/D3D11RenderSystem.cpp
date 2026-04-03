@@ -357,10 +357,13 @@ BOOL D3D11RenderSystem::CreateTexture1D(const TEXTURE1D_CREATE_DESC& Desc, IText
 				return FALSE;
 			}
 
+			D3D11_TEXTURE1D_DESC TexDesc = {};
+			pTex1D->GetDesc(&TexDesc);
+
 			D3D11Texture1D* pTextureImpl = static_cast<D3D11Texture1D*>(pTexture);
-			pTextureImpl->INL_SetColorFormat(Desc.Format);
-			pTextureImpl->INL_SetWidth(Desc.Width);
-			pTextureImpl->INL_SetMipLevels(Desc.MipLevels);
+			pTextureImpl->INL_SetColorFormat(static_cast<COLOR_FORMAT>(TexDesc.Format));
+			pTextureImpl->INL_SetWidth(TexDesc.Width);
+			pTextureImpl->INL_SetMipLevels(TexDesc.MipLevels);
 			pTextureImpl->INL_SetD3D11Texture1D(pTex1D);
 			pTextureImpl->INL_SetSRV(pSRV);
 			pTextureImpl->INL_SetLoadStat(LOAD_STAT::LOADED);
@@ -381,10 +384,13 @@ BOOL D3D11RenderSystem::CreateTexture1D(const TEXTURE1D_CREATE_DESC& Desc, IText
 			ID3D11Texture1D* pTex1D = nullptr;
 			ID3D11ShaderResourceView* pSRV = nullptr;
 
+			TEXTURE1D_DESC TexDesc = {};
+
 			if (!CreateTexture1DFromSTBI(
 				Desc.hTempHeap,
 				m_pRenderDevice->INL_GetD3D11Device(),
 				Desc,
+				&TexDesc,
 				&pTex1D, // ppTex1D (1D 텍스처는 지원하지 않음)
 				&pSRV  // ppSRV (1D 텍스처는 지원하지 않음)
 			))
@@ -394,9 +400,9 @@ BOOL D3D11RenderSystem::CreateTexture1D(const TEXTURE1D_CREATE_DESC& Desc, IText
 			}
 
 			D3D11Texture1D* pTextureImpl = static_cast<D3D11Texture1D*>(pTexture);
-			pTextureImpl->INL_SetColorFormat(Desc.Format);
-			pTextureImpl->INL_SetWidth(Desc.Width);
-			pTextureImpl->INL_SetMipLevels(Desc.MipLevels);
+			pTextureImpl->INL_SetColorFormat(TexDesc.Format);
+			pTextureImpl->INL_SetWidth(TexDesc.Width);
+			pTextureImpl->INL_SetMipLevels(TexDesc.MipLevels);
 			pTextureImpl->INL_SetD3D11Texture1D(pTex1D);
 			pTextureImpl->INL_SetSRV(pSRV);
 			pTextureImpl->INL_SetLoadStat(LOAD_STAT::LOADED);
@@ -502,11 +508,14 @@ BOOL D3D11RenderSystem::CreateTexture2D(const TEXTURE2D_CREATE_DESC& Desc, IText
 				return FALSE;
 			}
 
+			D3D11_TEXTURE2D_DESC TexDesc = {};
+			pTex2D->GetDesc(&TexDesc);
+
 			D3D11Texture2D* pTextureImpl = static_cast<D3D11Texture2D*>(pTexture);
-			pTextureImpl->INL_SetColorFormat(Desc.Format);
-			pTextureImpl->INL_SetWidth(Desc.Width);
-			pTextureImpl->INL_SetHeight(Desc.Height);
-			pTextureImpl->INL_SetMipLevels(Desc.MipLevels);
+			pTextureImpl->INL_SetColorFormat(static_cast<COLOR_FORMAT>(TexDesc.Format));
+			pTextureImpl->INL_SetWidth(TexDesc.Width);
+			pTextureImpl->INL_SetHeight(TexDesc.Height);
+			pTextureImpl->INL_SetMipLevels(TexDesc.MipLevels);
 			pTextureImpl->INL_SetD3D11Texture2D(pTex2D);
 			pTextureImpl->INL_SetSRV(pSRV);
 			pTextureImpl->INL_SetLoadStat(LOAD_STAT::LOADED);
@@ -527,10 +536,13 @@ BOOL D3D11RenderSystem::CreateTexture2D(const TEXTURE2D_CREATE_DESC& Desc, IText
 			ID3D11Texture2D* pTex2D = nullptr;
 			ID3D11ShaderResourceView* pSRV = nullptr;
 
+			TEXTURE2D_DESC OutDesc = {};
+
 			if (!CreateTexture2DFromSTBI(
 				Desc.hTempHeap,
 				m_pRenderDevice->INL_GetD3D11Device(),
 				Desc,
+				&OutDesc,
 				&pTex2D,
 				&pSRV
 			))
@@ -540,10 +552,10 @@ BOOL D3D11RenderSystem::CreateTexture2D(const TEXTURE2D_CREATE_DESC& Desc, IText
 			}
 
 			D3D11Texture2D* pTextureImpl = static_cast<D3D11Texture2D*>(pTexture);
-			pTextureImpl->INL_SetColorFormat(Desc.Format);
-			pTextureImpl->INL_SetWidth(Desc.Width);
-			pTextureImpl->INL_SetHeight(Desc.Height);
-			pTextureImpl->INL_SetMipLevels(Desc.MipLevels);
+			pTextureImpl->INL_SetColorFormat(OutDesc.Format);
+			pTextureImpl->INL_SetWidth(OutDesc.Width);
+			pTextureImpl->INL_SetHeight(OutDesc.Height);
+			pTextureImpl->INL_SetMipLevels(OutDesc.MipLevels);
 			pTextureImpl->INL_SetD3D11Texture2D(pTex2D);
 			pTextureImpl->INL_SetSRV(pSRV);
 			pTextureImpl->INL_SetLoadStat(LOAD_STAT::LOADED);
