@@ -132,7 +132,7 @@ namespace mark
 	extern void core_spool_free(void* ptr, size_t alignment);
 	extern void core_upool_free(void* ptr, size_t alignment);
 	extern void core_temp_reset();
-	extern size_t get_alloc_count(void* ptr, size_t alignment);
+	[[nodiscard]] extern size_t get_alloc_count(void* ptr, size_t alignment);
 
 
 	// sys new/delete 
