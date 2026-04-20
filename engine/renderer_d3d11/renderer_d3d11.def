@@ -1,3 +1,0 @@
-﻿LIBRARY renderer_d3d11
-EXPORTS
-		CreateRendererD3D11
