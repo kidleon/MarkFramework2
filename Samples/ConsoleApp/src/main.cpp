@@ -1,0 +1,173 @@
+#include "pch.h"
+#include "MemoryManager.h"
+#include "MemoryAllocator.h"
+#include "StringBuffer.h"
+#include "MathLib.h"
+#include "TestMath.h"
+#include "TestMath_Utils.h"
+#include "Test_FileSystem.h"
+#include "Test_Compress.h"
+#include "Test_MemoryTempPool.h"
+#include "Test_Unicode.h"
+#include "Test_Hash.h"
+#include "Test_Timer.h"
+#include "Test_SRWLock.h"
+#include "Test_SpinLock.h"
+#include "Test_UnknownPtr.h"
+#include "UnknownPtr.h"
+
+
+struct Person
+{
+	char name[20];
+	int age;
+	int score;
+};
+
+void PrintReport(const char* msg)
+{
+	printf(msg);
+}
+
+void TestGeneric();
+void TestAllocator();
+void TestStringBuffer();
+
+int main()
+{
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	
+	mark::momory_resource_manager::initialize_memory_manager(
+		1024 * 1024 * 200,	// limited_memory_size: 200MB
+		128,				// sync_pool_count_per_chunk
+		128,				// unsync_pool_count_per_chunk
+		1024 * 16,			// sync_pool_max_size_per_block
+		1024 * 16,			// unsync_pool_max_size_per_block
+		1024 * 1024 * 32	// temp_buffer_size: 32MB
+	);
+
+	{
+		TestAllocator();
+		TestStringBuffer();
+		TestGeneric();
+		mark::TestMathLib();
+		mark::TestMathLib_Util();
+		mark::Test_FileSystem();
+		mark::Test_Compress();
+		mark::Test_MemoryTempPool();
+		mark::Test_Unicode();
+		mark::Test_Hash();
+		mark::Test_Timer();
+		mark::Test_SRWLock();
+		mark::Test_SpinLock();	
+		mark::Test_UnknownPtr();
+	}
+
+	mark::momory_resource_manager::shutdown_memory_manager();
+
+	return 0;
+}
+
+void TestAllocator()
+{
+	void* p1 = CORE_SYS_ALLOC(256);
+	CORE_SYS_FREE(p1);
+}
+
+void TestStringBuffer()
+{
+	mark::string_buffer<char> str_buf;
+
+	mark::FLOAT2 v{ 1.23f, 4.56f };
+	str_buf.format("{}", v);
+	str_buf.append_endl();
+
+	mark::FLOAT3 v3{ 7.89f, 0.12f, 3.45f };
+	str_buf.format("{}", v3);
+	str_buf.append_endl();
+
+	mark::FLOAT4 v4{ 6.78f, 9.01f, 2.34f, 5.67f };
+	str_buf.format("{}", v4);
+	str_buf.append_endl();
+
+	mark::XFLOAT4 sv = { 9.87f, 6.54f, 3.21f, 0.98f };
+	str_buf.format("{}", sv);
+	str_buf.append_endl();
+
+	mark::MATRIX4 m4 = {
+		1.0f, 2.0f, 3.0f, 4.0f,
+		5.0f, 6.0f, 7.0f, 8.0f,
+		9.0f, 10.0f, 11.0f, 12.0f,
+		13.0f, 14.0f, 15.0f, 16.0f 
+	};
+
+	str_buf.format("{}", m4);
+
+	mark::XMATRIX4 sm = {
+		1.0f, 2.0f, 3.0f, 4.0f,
+		5.0f, 6.0f, 7.0f, 8.0f,
+		9.0f, 10.0f, 11.0f, 12.0f,
+		13.0f, 14.0f, 15.0f, 16.0f
+	};
+	str_buf.format("{}", sm);
+	str_buf.format("{}", sm);
+	str_buf.format("{}", sm);
+	str_buf.format("{}", sm);
+	str_buf.format("{}", sm);
+	str_buf.format("{}", sm);
+	str_buf.format("{}", sm);
+	str_buf.format("{}", sm);
+	str_buf.format("{}", sm);
+
+	char buff[256];
+	str_buf.to_buffer(buff, sizeof(buff));
+
+	mark::sys_string s2;
+	str_buf.to_sys_string(s2);
+
+	mark::temp_string tstr;
+	str_buf.to_temp_string(tstr);
+
+	std::string_view view = str_buf.to_string_view();
+	mark::string_buffer<wchar_t> wstr_buf;
+	wstr_buf.format(L"HI{}", 1);
+
+	mark::upool_wstring uwstr;
+	wstr_buf.to_upool_string(uwstr);
+
+	wchar_t uwstr_cstr[24];
+	std::copy(uwstr.data(), uwstr.data() + uwstr.size(), uwstr_cstr);
+}
+
+void TestGeneric()
+{
+	{
+		mark::list<Person, mark::ALLOC::SYS<Person>> lstPerson;
+		lstPerson.emplace_back(Person{ "Alice", 30, 85 });
+		lstPerson.emplace_back(Person{ "Bob", 25, 90 });
+	}
+
+	{
+		mark::sys_list<Person> lstPerson;
+		lstPerson.emplace_back(Person{ "Alice", 30, 85 });
+		lstPerson.emplace_back(Person{ "Bob", 25, 90 });
+	}
+
+	{
+		mark::list<Person, mark::ALLOC::SPOOL<Person>> lstPerson;
+		lstPerson.emplace_back(Person{ "Charlie", 28, 88 });
+		lstPerson.emplace_back(Person{ "Diana", 22, 92 });
+	}
+
+	{
+		mark::list<Person, mark::ALLOC::UPOOL<Person>> lstPerson;
+		lstPerson.emplace_back(Person{ "Eve", 35, 80 });
+		lstPerson.emplace_back(Person{ "Frank", 27, 87 });
+	}
+
+	{
+		mark::list<Person, mark::ALLOC::TEMP<Person>> lstPerson;
+		lstPerson.emplace_back(Person{ "Grace", 32, 91 });
+		lstPerson.emplace_back(Person{ "Heidi", 29, 89 });
+	}
+}
