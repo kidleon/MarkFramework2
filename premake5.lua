@@ -15,6 +15,6 @@ do
 	--include "src/Rayun3D"
 	--include "Samples/ECSTestApp"
 	-- include "engine/Renderer_D3D11"
-	-- include "Samples/ConsoleApp"
+	include "Samples/ConsoleApp"
 
 end
