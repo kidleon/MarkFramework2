@@ -14,7 +14,7 @@ namespace mark
 	* @param temp_buffer_size 임시 버퍼의 크기
 	* @return 생성된 코어 힙의 핸들
 	*/
-	MARKENGINE_API HANDLE coreheap_create(
+	MARKENGINE_API [[nodiscard]] HANDLE coreheap_create(
 		size_t limited_memory_size,
 		size_t sync_pool_count_per_chunk,
 		size_t unsync_pool_count_per_chunk,
@@ -33,59 +33,59 @@ namespace mark
 	);
 
 #if defined(__MEMORY_TRACKING_ENABLED__)
-	MARKENGINE_API void* mark_sys_alloc(
+	MARKENGINE_API [[nodiscard]] void* mark_sys_alloc(
 		size_t bytes,
 		size_t alignment,
 		std::source_location loc = std::source_location::current()
 	);
 
-	MARKENGINE_API void* mark_spool_alloc(
+	MARKENGINE_API [[nodiscard]] void* mark_spool_alloc(
 		size_t bytes,
 		size_t alignment,
 		std::source_location loc = std::source_location::current()
 	);
 
-	MARKENGINE_API void* mark_upool_alloc(
+	MARKENGINE_API [[nodiscard]] void* mark_upool_alloc(
 		size_t bytes,
 		size_t alignment,
 		std::source_location loc = std::source_location::current()
 	);
 
-	MARKENGINE_API void* mark_temp_alloc(
+	MARKENGINE_API [[nodiscard]] void* mark_temp_alloc(
 		size_t bytes,
 		size_t alignment,
 		std::source_location loc = std::source_location::current()
 	);
 
-	MARKENGINE_API void* coreheap_alloc(
+	MARKENGINE_API [[nodiscard]] void* coreheap_alloc(
 		HANDLE heap_handle,
 		size_t bytes,
 		size_t alignment,
 		std::source_location loc
 	);
 
-	MARKENGINE_API void* coreheap_spool_alloc(
+	MARKENGINE_API [[nodiscard]] void* coreheap_spool_alloc(
 		HANDLE heap_handle,
 		size_t bytes,
 		size_t alignment,
 		std::source_location loc
 	);
 
-	MARKENGINE_API void* coreheap_upool_alloc(
+	MARKENGINE_API [[nodiscard]] void* coreheap_upool_alloc(
 		HANDLE heap_handle,
 		size_t bytes,
 		size_t alignment,
 		std::source_location loc
 	);
 
-	MARKENGINE_API void* coreheap_temp_alloc(
+	MARKENGINE_API [[nodiscard]] void* coreheap_temp_alloc(
 		HANDLE heap_handle,
 		size_t bytes,
 		size_t alignment,
 		std::source_location loc
 	);
 
-	MARKENGINE_API HANDLE coreheap_temppool_create(
+	MARKENGINE_API [[nodiscard]] HANDLE coreheap_temppool_create(
 		HANDLE heap_handle,
 		size_t size,
 		std::source_location loc
@@ -99,7 +99,7 @@ namespace mark
 	* @param alignment 할당할 메모리의 정렬 (바이트 단위)
 	* @return 할당된 메모리의 포인터, 할당 실패 시 nullptr
 	*/
-	MARKENGINE_API void* mark_sys_alloc(
+	MARKENGINE_API [[nodiscard]] void* mark_sys_alloc(
 		size_t bytes,
 		size_t alignment
 	);
@@ -110,7 +110,7 @@ namespace mark
 	* @param alignment 할당할 메모리의 정렬 (바이트 단위)
 	* @return 할당된 메모리의 포인터, 할당 실패 시 nullptr
 	*/
-	MARKENGINE_API void* mark_spool_alloc(
+	MARKENGINE_API [[nodiscard]] void* mark_spool_alloc(
 		size_t bytes,
 		size_t alignment
 	);
@@ -122,7 +122,7 @@ namespace mark
 	* @param alignment 할당할 메모리의 정렬 (바이트 단위)
 	* @return 할당된 메모리의 포인터, 할당 실패 시 nullptr
 	*/
-	MARKENGINE_API void* mark_upool_alloc(
+	MARKENGINE_API [[nodiscard]] void* mark_upool_alloc(
 		size_t bytes,
 		size_t alignment
 	);
@@ -133,7 +133,7 @@ namespace mark
 	* @param alignment 할당할 메모리의 정렬 (바이트 단위)
 	* @return 할당된 메모리의 포인터, 할당 실패 시 nullptr
 	*/
-	MARKENGINE_API void* mark_temp_alloc(
+	MARKENGINE_API [[nodiscard]] void* mark_temp_alloc(
 		size_t bytes,
 		size_t alignment
 	);
@@ -145,7 +145,7 @@ namespace mark
 	* @param alignment 할당할 메모리의 정렬 (바이트 단위)
 	* @return 할당된 메모리의 포인터, 할당 실패 시 nullptr
 	*/
-	MARKENGINE_API void* coreheap_alloc(
+	MARKENGINE_API [[nodiscard]] void* coreheap_alloc(
 		HANDLE heap_handle,
 		size_t bytes,
 		size_t alignment
@@ -158,7 +158,7 @@ namespace mark
 	* @param alignment 할당할 메모리의 정렬 (바이트 단위)
 	* @return 할당된 메모리의 포인터, 할당 실패 시 nullptr
 	*/
-	MARKENGINE_API void* coreheap_spool_alloc(
+	MARKENGINE_API [[nodiscard]] void* coreheap_spool_alloc(
 		HANDLE heap_handle,
 		size_t bytes,
 		size_t alignment
@@ -171,7 +171,7 @@ namespace mark
 	* @param alignment 할당할 메모리의 정렬 (바이트 단위)
 	* @return 할당된 메모리의 포인터, 할당 실패 시 nullptr
 	*/
-	MARKENGINE_API void* coreheap_upool_alloc(
+	MARKENGINE_API [[nodiscard]] void* coreheap_upool_alloc(
 		HANDLE heap_handle,
 		size_t bytes,
 		size_t alignment
@@ -184,7 +184,7 @@ namespace mark
 	* @param alignment 할당할 메모리의 정렬 (바이트 단위)
 	* @return 할당된 메모리의 포인터, 할당 실패 시 nullptr
 	*/
-	MARKENGINE_API void* coreheap_temp_alloc(
+	MARKENGINE_API [[nodiscard]] void* coreheap_temp_alloc(
 		HANDLE heap_handle,
 		size_t bytes,
 		size_t alignment
@@ -196,7 +196,7 @@ namespace mark
 	* @param size 임시 풀의 크기 (바이트 단위)
 	* @return 생성된 임시 풀의 핸들, 생성 실패 시 nullptr
 	*/
-	MARKENGINE_API HANDLE coreheap_temppool_create(
+	MARKENGINE_API [[nodiscard]] HANDLE coreheap_temppool_create(
 		HANDLE heap_handle,
 		size_t size
 	);

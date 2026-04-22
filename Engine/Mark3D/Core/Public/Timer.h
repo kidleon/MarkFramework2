@@ -13,7 +13,7 @@ namespace mark
 		* @brief 고해상도 타이머 객체를 생성한다.
 		* @return 성공시 타이머 핸들 반환 실패시 nullptr 반환한다.
 		*/
-		static HANDLE highrestimer_create();
+		[[nodiscard]] static HANDLE highrestimer_create();
 
 		/**
 		* @brief 고해상도 타이머 객체를 파괴한다. 파괴를 안할 경우 메모리 누수가 발생한다.
@@ -55,14 +55,14 @@ namespace mark
 		* @param timer 생성된 고해상도 타이머 핸들.
 		* @return 생성 시점으로 부터 지난 시간. (1.0 = 1초)
 		*/
-		static double highrestimer_gettime(HANDLE handle);
+		[[nodiscard]] static double highrestimer_gettime(HANDLE handle);
 
 		/**
 		* @brief 이전 호출된 highrestimer_getelapsedtime으로부터 지난 시간.
 		* @param timer 생성된 고해상도 타이머 핸들.
 		* @return 이전에 호출된 시점으로 부터 Delta Time을 반환한다 (1.0 = 1초)
 		*/
-		static double highrestimer_getelapsedtime(HANDLE handle);
+		[[nodiscard]] static double highrestimer_getelapsedtime(HANDLE handle);
 
 		/**
 		* @brief 현재 시간을 "YYYY-MM-DD HH:MM:SS" 형식의 문자열로 가져옵니다.

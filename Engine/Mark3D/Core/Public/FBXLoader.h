@@ -53,8 +53,8 @@ namespace mark
 			BOOL create_temppool;
 		};
 
-		static FBX_SCENE* fbx_load(void* data, size_t size);
-		static FBX_SCENE* fbx_load(HANDLE temp_alloc_handle, void* data, size_t size);
+		[[nodiscard]] static FBX_SCENE* fbx_load(void* data, size_t size);
+		[[nodiscard]] static FBX_SCENE* fbx_load(HANDLE temp_alloc_handle, void* data, size_t size);
 		static void fbx_free(FBX_SCENE* scene);
 	};
 }
