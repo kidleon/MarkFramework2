@@ -2,6 +2,15 @@ project("Mark3D")
 do
 	language "C++"
 	cppdialect "C++20"
+	configurations { "Debug", "Release", "Master" }
+	
+	filter {} 
+	
+	filter {"action:vs*"}
+	do
+		platforms { "x64" }
+		architecture "x86_64"
+	end
 	
 	sdk_bin_dir = "%{prj.location}/../Output/sdk/bin"
 	sdk_lib_dir = "%{prj.location}/../Output/sdk/lib"
@@ -47,15 +56,8 @@ do
 		"../External/stb"
 	}
 	
-	libdirs {
-		"%{prj.location}/../output/sdk/lib",
-		"../External/bin"
-	}
-	
 	pchheader "pch.h"
 	pchsource "pch.cpp"
-	
-	filter {} 
 	
 	filter { "system:windows" }
 	do
@@ -81,47 +83,47 @@ do
 				"{COPY} %{prj.location}../output/%{prj.name}/bin/*.lib %{sample_output_dir}",
 			}
 			
-			files {
-				"**.cpp",
-				"**.def"
+			libdirs {
+				"../External/bin/%{cfg.platform}"
 			}
 			
 			filter "configurations:Debug"
 			do
 				defines{"DEBUG", "USE_DLL", "MARKENGINE_EXPORTS", "__LOG_ENABLED__", "__MEMORY_TRACKER_ENABLED__", "__MOMORY_LIMIT_ENABLED__", "_CRT_SECURE_NO_WARNINGS"}
+				optimize "Off"
 				symbols "On"
-				links{"lz4_d", "ufbx_d", "libiconvStaticD", "spdlog" }
+				incrementallink "On"
 				libdirs { 
-					"../../Engine/External/iconv/windows/x64/DebugStatic"
+					"../External/iconv/x64/DebugStatic"
 				}
+				links{"lz4_d", "ufbx_d", "libiconvStaticD", "spdlog" }
 				targetname("Mark3D_d")
-				--links { "baselib_d" }
 			end
 			
 			filter "configurations:Release"
 			do
 				defines{"NDEBUG", "RELEASE", "USE_DLL", "MARKENGINE_EXPORTS", "__LOG_ENABLED__", "__MEMORY_TRACKER_ENABLED__", "__MOMORY_LIMIT_ENABLED__", "_CRT_SECURE_NO_WARNINGS"}
-				optimize "On"
-				links{"lz4", "ufbx", "libiconvStatic", "spdlog" }
-				libdirs { 
-					"../../Engine/External/iconv/windows/x64/ReleaseStatic"
-				}
+				optimize "Full"
 				symbols "On"
+				incrementallink "Off"
+				libdirs { 
+					"../External/iconv/x64/ReleaseStatic"
+				}
+				links{"lz4", "ufbx", "libiconvStatic", "spdlog" }
 				targetname("Mark3D")
-				--links { "baselib" }
 			end
 			
 			filter "configurations:Master"
 			do
 				defines{"NDEBUG", "MASTER", "USE_DLL", "MARKENGINE_EXPORTS", "__MOMORY_LIMIT_ENABLED__", "_CRT_SECURE_NO_WARNINGS"}
-				optimize "On"
+				optimize "Full"
 				symbols "On"
-				links{"lz4", "ufbx", "libiconvStatic"}
+				incrementallink "Off"
 				libdirs { 
-					"../../Engine/External/iconv/windows/x64/ReleaseStatic"
+					"../External/iconv/x64/ReleaseStatic"
 				}
+				links{"lz4", "ufbx", "libiconvStatic"}
 				targetname("Mark3D")
-				--links { "baselib" }
 			end
 		end
 	end

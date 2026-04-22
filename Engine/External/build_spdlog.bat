@@ -5,10 +5,10 @@ cmake -S ./spdlog -B ./build/spdlog/debug -G "Visual Studio 18 2026" -A x64 -DCM
 
 cmake -S ./spdlog -B ./build/spdlog/release -G "Visual Studio 18 2026" -A x64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=./build/spdlog/install -DSPDLOG_BUILD_SHARED=ON -DSPDLOG_BUILD_EXAMPLE=OFF -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_INSTALL=ON && cmake --build ./build/spdlog/release --config release --parallel && cmake --install ./build/spdlog/release --config Release
 
-xcopy "%BASE_DIR%build\spdlog\install\lib\spdlog.lib" "%BASE_DIR%bin\" /Y
-xcopy "%BASE_DIR%build\spdlog\install\lib\spdlogd.lib" "%BASE_DIR%bin\" /Y
-xcopy "%BASE_DIR%build\spdlog\install\bin\spdlog.dll" "%BASE_DIR%bin\" /Y
-xcopy "%BASE_DIR%build\spdlog\install\bin\spdlogd.dll" "%BASE_DIR%bin\" /Y
+xcopy "%BASE_DIR%build\spdlog\install\lib\spdlog.lib" "%BASE_DIR%bin\x64\" /Y
+xcopy "%BASE_DIR%build\spdlog\install\lib\spdlogd.lib" "%BASE_DIR%bin\x64\" /Y
+xcopy "%BASE_DIR%build\spdlog\install\bin\spdlog.dll" "%BASE_DIR%bin\x64\" /Y
+xcopy "%BASE_DIR%build\spdlog\install\bin\spdlogd.dll" "%BASE_DIR%bin\x64\" /Y
 
 xcopy "%BASE_DIR%build\spdlog\install\bin\spdlog.dll" "%BASE_DIR%..\..\Output\sdk\bin\" /Y
 xcopy "%BASE_DIR%build\spdlog\install\bin\spdlogd.dll" "%BASE_DIR%..\..\Output\sdk\bin\" /Y

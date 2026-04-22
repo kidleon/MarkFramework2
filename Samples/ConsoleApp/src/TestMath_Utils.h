@@ -1,4 +1,5 @@
 #pragma once
+/*
 #include "MathLib.h"
 #include <cmath>
 #include <cstdio>
@@ -312,3 +313,5 @@ namespace mark
     }
 
 } // namespace mark
+
+*/

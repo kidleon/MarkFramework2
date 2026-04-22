@@ -22,7 +22,8 @@ namespace mark
 
 	void memory_tracker::on_allocate(void* ptr, size_t bytes, size_t alignment, std::source_location location)
 	{
-		if (!ptr) return;
+		if (!ptr) [[unlikely]]
+			return;
 
 		allocation_info info{ (uint32_t)bytes, (uint32_t)alignment, location };
 		m_allocations[reinterpret_cast<uintptr_t>(ptr)] = info;
@@ -40,7 +41,8 @@ namespace mark
 
 	void memory_tracker::on_deallocate(void* ptr)
 	{
-		if (!ptr) return;
+		if (!ptr) [[unlikely]]
+			return;
 
 		auto it = m_allocations.find(reinterpret_cast<uintptr_t>(ptr));
 		if (it != m_allocations.end())
@@ -72,7 +74,7 @@ namespace mark
 
 	void memory_tracker::print_report(std::function<void(const char*)> func) const
 	{
-		if (func)
+		if (func) [[likely]]
 		{
 			char buffer[512] = {};
 

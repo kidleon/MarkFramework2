@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "FBXLoader.h"
 #include "ufbx/ufbx.h"
-#include "MemoryTempPool.h"
 #include "FileSystem.h"
 
 
@@ -16,7 +15,7 @@ namespace mark
 		else
 		{
 			HANDLE temp_alloc_handle = (HANDLE)user;
-			return temppool_alloc(temp_alloc_handle, size);
+			return temppool_alloc(temp_alloc_handle, size, sizeof(uintptr_t));
 		}
 	}
 
@@ -90,7 +89,8 @@ namespace mark
 
 		FBX::FBX_SCENE* fbx_scene = (FBX::FBX_SCENE*)temppool_alloc(
 			temp_alloc_handle,
-			sizeof(FBX::FBX_SCENE)
+			sizeof(FBX::FBX_SCENE),
+			sizeof(uintptr_t)
 		);
 
 		fbx_load_memory(temp_alloc_handle, scene, fbx_scene);

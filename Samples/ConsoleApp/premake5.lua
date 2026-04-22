@@ -1,6 +1,5 @@
 project("SampleConsole")
 do
-	--kind "WindowedApp"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++20"
@@ -38,15 +37,19 @@ do
 	
 	filter { "system:windows" }
 	do
+		platforms { "x64" }
+		architecture "x86_64"
+		
 		filter {"action:vs*"}
 		do
-			platforms { "x64" }
+			
 			buildoptions { "/utf-8" }
 			filter {"configurations:Debug"}
 			do
-				links{"Mark3D_d"}
 				defines{"DEBUG", "__MEMORY_TRACKER_ENABLED__", "__MOMORY_LIMIT_ENABLED__"}
+				optimize "Off"
 				symbols "On"
+				links{"Mark3D_d"}
 				targetname("SampleConsole_d")
 			end
 			
@@ -66,7 +69,6 @@ do
 				symbols "On"
 				links{"Mark3D"}
 				targetname("SampleConsole")
-				
 			end
 		end
 	end

@@ -1,8 +1,9 @@
 #include "pch.h"
-#include "MemoryManager.h"
-#include "MemoryAllocator.h"
+#include "Mark3D.h"
 #include "StringBuffer.h"
-#include "MathLib.h"
+#include "mathlib.h"
+/*
+
 #include "TestMath.h"
 #include "TestMath_Utils.h"
 #include "Test_FileSystem.h"
@@ -14,8 +15,14 @@
 #include "Test_SRWLock.h"
 #include "Test_SpinLock.h"
 #include "Test_UnknownPtr.h"
-#include "UnknownPtr.h"
 
+
+
+
+void TestGeneric();
+
+*/
+void TestStringBuffer();
 
 struct Person
 {
@@ -29,26 +36,18 @@ void PrintReport(const char* msg)
 	printf(msg);
 }
 
-void TestGeneric();
 void TestAllocator();
-void TestStringBuffer();
 
 int main()
 {
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	
-	mark::momory_resource_manager::initialize_memory_manager(
-		1024 * 1024 * 200,	// limited_memory_size: 200MB
-		128,				// sync_pool_count_per_chunk
-		128,				// unsync_pool_count_per_chunk
-		1024 * 16,			// sync_pool_max_size_per_block
-		1024 * 16,			// unsync_pool_max_size_per_block
-		1024 * 1024 * 32	// temp_buffer_size: 32MB
-	);
+
+	mark::Mark3D::Initialize();
 
 	{
-		TestAllocator();
 		TestStringBuffer();
+
+		/*
 		TestGeneric();
 		mark::TestMathLib();
 		mark::TestMathLib_Util();
@@ -61,17 +60,12 @@ int main()
 		mark::Test_SRWLock();
 		mark::Test_SpinLock();	
 		mark::Test_UnknownPtr();
+		*/
 	}
 
-	mark::momory_resource_manager::shutdown_memory_manager();
+	mark::Mark3D::Shutdown();
 
 	return 0;
-}
-
-void TestAllocator()
-{
-	void* p1 = CORE_SYS_ALLOC(256);
-	CORE_SYS_FREE(p1);
 }
 
 void TestStringBuffer()
@@ -98,7 +92,7 @@ void TestStringBuffer()
 		1.0f, 2.0f, 3.0f, 4.0f,
 		5.0f, 6.0f, 7.0f, 8.0f,
 		9.0f, 10.0f, 11.0f, 12.0f,
-		13.0f, 14.0f, 15.0f, 16.0f 
+		13.0f, 14.0f, 15.0f, 16.0f
 	};
 
 	str_buf.format("{}", m4);
@@ -139,6 +133,9 @@ void TestStringBuffer()
 	std::copy(uwstr.data(), uwstr.data() + uwstr.size(), uwstr_cstr);
 }
 
+
+/*
+
 void TestGeneric()
 {
 	{
@@ -171,3 +168,4 @@ void TestGeneric()
 		lstPerson.emplace_back(Person{ "Heidi", 29, 89 });
 	}
 }
+*/

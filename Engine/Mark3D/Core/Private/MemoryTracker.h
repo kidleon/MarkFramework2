@@ -52,7 +52,6 @@ namespace mark
 		* @param line 할당이 발생한 소스 파일의 라인 번호
 		* @param function 할당이 발생한 함수 이름
 		* @return 없음
-
 		*/
 		void on_allocate(void* ptr, size_t bytes, size_t alignment, std::source_location location);
 
