@@ -2,6 +2,8 @@
 #include "Mark3D.h"
 #include "StringBuffer.h"
 #include "mathlib.h"
+#include "CoreHeap.h"
+#include "CoreGeneric.h"
 /*
 
 #include "TestMath.h"
@@ -75,18 +77,22 @@ void TestStringBuffer()
 	mark::FLOAT2 v{ 1.23f, 4.56f };
 	str_buf.format("{}", v);
 	str_buf.append_endl();
+	str_buf.clear();
 
 	mark::FLOAT3 v3{ 7.89f, 0.12f, 3.45f };
 	str_buf.format("{}", v3);
 	str_buf.append_endl();
+	str_buf.clear();
 
 	mark::FLOAT4 v4{ 6.78f, 9.01f, 2.34f, 5.67f };
 	str_buf.format("{}", v4);
 	str_buf.append_endl();
+	str_buf.clear();
 
 	mark::XFLOAT4 sv = { 9.87f, 6.54f, 3.21f, 0.98f };
 	str_buf.format("{}", sv);
 	str_buf.append_endl();
+	str_buf.clear();
 
 	mark::MATRIX4 m4 = {
 		1.0f, 2.0f, 3.0f, 4.0f,
@@ -96,6 +102,7 @@ void TestStringBuffer()
 	};
 
 	str_buf.format("{}", m4);
+	str_buf.clear();
 
 	mark::XMATRIX4 sm = {
 		1.0f, 2.0f, 3.0f, 4.0f,
@@ -129,8 +136,8 @@ void TestStringBuffer()
 	mark::upool_wstring uwstr;
 	wstr_buf.to_upool_string(uwstr);
 
-	wchar_t uwstr_cstr[24];
-	std::copy(uwstr.data(), uwstr.data() + uwstr.size(), uwstr_cstr);
+	wchar_t uwstr_cstr[4];
+	wstr_buf.to_buffer(uwstr_cstr, sizeof(uwstr_cstr));
 }
 
 

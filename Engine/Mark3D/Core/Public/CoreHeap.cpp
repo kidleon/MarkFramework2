@@ -9,7 +9,6 @@ namespace mark
 	constexpr uint64_t CORE_HEAP_SIGNATURE = 0xDEADBEEFDEADBEEF;
 	constexpr uint64_t CORE_HEAP_TEMP_POOL_SIGNATURE = 0xFEEDFACEFEEDFACE;
 
-
 	struct TEMP_POOL
 	{
 #if defined(DEBUG)
@@ -98,8 +97,6 @@ namespace mark
 			assert(false && "Invalid core heap handle in coreheap_destroy");
 			return false;
 		}
-
-		return true;
 #endif // DEBUG
 
 		return true;

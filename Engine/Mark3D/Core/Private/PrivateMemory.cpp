@@ -9,7 +9,7 @@ namespace mark
 	static usync_pool_memory_resource* s_default_usync_pool_memory_resource = nullptr;
 	static temp_pool_memory_resource* s_default_temp_memory_resource = nullptr;
 
-	vector<HANDLE, ALLOC::SYS<HANDLE>> s_temp_pool_handles;
+	std::pmr::vector<HANDLE> s_temp_pool_handles; // 얘는 그냥 pmr::vector로 관리하자. 임시 풀 핸들 목록
 
 	constexpr uint64_t CORE_TEMP_POOL_SIGNATURE = 0xFEEDFACEFEEDFACE;
 

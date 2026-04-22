@@ -1,7 +1,7 @@
 #pragma once
 #include <charconv>
 #include <format>
-#include "Memory.h"
+#include "CoreGeneric.h"
 
 
 namespace mark
@@ -326,9 +326,14 @@ namespace mark
 		{
 			assert(out_buffer && buffer_size > 0 && "Output buffer must be non-null and have positive size");
 
+			// buffer_size는 바이트 단위이므로, CharT 크기에 맞게 문자 수로 변환
+			size_t char_count = buffer_size / sizeof(CharT);
+
 			// buffer_size가 작을 경우 작은 크기에 맞게 잘라서 복사
-			size_t copy_size = std::min(buffer_size - 1, m_buffer.size());
+			size_t copy_size = std::min(char_count - 1, m_buffer.size()); // -1은 null-terminator 공간 확보를 위해
 			std::copy_n(m_buffer.data(), copy_size, out_buffer);
+
+			// 복사한 문자열 뒤에 null-terminator 추가
 			out_buffer[copy_size] = CharT(0); // null-terminate
 		}
 
