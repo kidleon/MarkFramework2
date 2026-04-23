@@ -44,7 +44,7 @@ namespace mark
 		* @param src_size 압축할 데이터의 사이즈
 		* @return 압축된 데이터의 최대 사이즈를 반환합니다. 실패시 0을 반환합니다.
 		*/
-		static [[nodiscard]] size_t compress_size_lz4(size_t src_size) noexcept;
+		[[nodiscard]] static size_t compress_size_lz4(size_t src_size) noexcept;
 	};
 
 }

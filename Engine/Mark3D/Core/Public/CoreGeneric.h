@@ -10,10 +10,10 @@
 
 namespace mark
 {
-	MARKENGINE_API [[nodiscard]] std::pmr::memory_resource* get_core_system_memory_resource_ptr() noexcept;
-	MARKENGINE_API [[nodiscard]] std::pmr::memory_resource* get_core_sync_pool_memory_resource_ptr() noexcept;
-	MARKENGINE_API [[nodiscard]] std::pmr::memory_resource* get_core_usync_pool_memory_resource_ptr() noexcept;
-	MARKENGINE_API [[nodiscard]] std::pmr::memory_resource* get_core_temp_memory_resource_ptr() noexcept;
+	[[nodiscard]] MARKENGINE_API std::pmr::memory_resource* get_core_system_memory_resource_ptr() noexcept;
+	[[nodiscard]] MARKENGINE_API std::pmr::memory_resource* get_core_sync_pool_memory_resource_ptr() noexcept;
+	[[nodiscard]] MARKENGINE_API std::pmr::memory_resource* get_core_usync_pool_memory_resource_ptr() noexcept;
+	[[nodiscard]] MARKENGINE_API std::pmr::memory_resource* get_core_temp_memory_resource_ptr() noexcept;
 
 	namespace ALLOC
 	{

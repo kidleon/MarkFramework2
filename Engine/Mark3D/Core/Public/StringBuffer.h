@@ -317,7 +317,7 @@ namespace mark
 			m_buffer.clear();
 		}
 
-		inline std::basic_string_view<CharT> to_string_view() const noexcept
+		[[nodiscard]] inline std::basic_string_view<CharT> to_string_view() const noexcept
 		{
 			return std::basic_string_view<CharT>(m_buffer.data(), m_buffer.size());
 		}

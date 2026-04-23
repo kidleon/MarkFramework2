@@ -138,116 +138,43 @@ namespace mark
 	[[nodiscard]] extern usync_pool_memory_resource* get_default_usync_pool_memory_resource_ptr() noexcept;
 	[[nodiscard]] extern temp_pool_memory_resource* get_default_temp_memory_resource_ptr() noexcept;
 
-	class sync_pool_memory_resource final : public std::pmr::memory_resource
+	class sync_pool_memory_resource final : public std::pmr::synchronized_pool_resource
 	{
-		std::pmr::unsynchronized_pool_resource m_pool;
-		std::mutex m_mutex;
-
 	public:
 		explicit sync_pool_memory_resource(const std::pmr::pool_options& options = std::pmr::pool_options())
-			: m_pool(options, get_default_system_memory_resource_ptr())
+			: std::pmr::synchronized_pool_resource(options, get_default_system_memory_resource_ptr())
 		{
-		}
-
-		void release()
-		{
-			{
-				std::lock_guard<std::mutex> lock(m_mutex);
-				m_pool.release();
-			}
-		}
-
-	private:
-		inline void* do_allocate(size_t bytes, size_t alignment) final
-		{
-			{
-				std::lock_guard<std::mutex> lock(m_mutex);
-				return m_pool.allocate(bytes, alignment);
-			}
-		}
-
-		inline void do_deallocate(void* ptr, size_t bytes, size_t alignment) final
-		{
-			{
-				std::lock_guard<std::mutex> lock(m_mutex);
-				m_pool.deallocate(ptr, bytes, alignment);
-			}
-		}
-
-		inline bool do_is_equal(const std::pmr::memory_resource& Other) const noexcept final
-		{
-			return this == &Other; // 풀 메모리 리소스는 싱글톤이므로 주소 비교로 충분
 		}
 	};
 
-	class usync_pool_memory_resource final : public std::pmr::memory_resource
+	class usync_pool_memory_resource final : public std::pmr::unsynchronized_pool_resource
 	{
-		std::pmr::unsynchronized_pool_resource m_pool;
-
 	public:
 		explicit usync_pool_memory_resource(const std::pmr::pool_options& options = std::pmr::pool_options())
-			: m_pool(options, get_default_system_memory_resource_ptr())
+			: std::pmr::unsynchronized_pool_resource(options, get_default_system_memory_resource_ptr())
 		{
-		}
-
-		void release()
-		{
-			m_pool.release();
-		}
-
-	private:
-		inline void* do_allocate(size_t bytes, size_t alignment) final
-		{
-			return m_pool.allocate(bytes, alignment);
-		}
-
-		inline void do_deallocate(void* ptr, size_t bytes, size_t alignment) final
-		{
-			m_pool.deallocate(ptr, bytes, alignment);
-		}
-
-		inline bool do_is_equal(const std::pmr::memory_resource& Other) const noexcept final
-		{
-			return this == &Other; // 풀 메모리 리소스는 싱글톤이므로 주소 비교로 충분
 		}
 	};
 
-	class temp_pool_memory_resource final : public std::pmr::memory_resource
+	class temp_pool_memory_resource final : public std::pmr::monotonic_buffer_resource
 	{
-		std::pmr::monotonic_buffer_resource m_pool;
-
 	public:
 		explicit temp_pool_memory_resource(size_t initial_size)
-			: m_pool(initial_size, get_default_system_memory_resource_ptr())
+			: std::pmr::monotonic_buffer_resource(initial_size, get_default_system_memory_resource_ptr())
 		{
 		}
 
-		explicit temp_pool_memory_resource(size_t initial_size, std::pmr::memory_resource* res)
-			: m_pool(initial_size, res)
+		explicit temp_pool_memory_resource(size_t initial_size, std::pmr::memory_resource* upstream)
+			: std::pmr::monotonic_buffer_resource(initial_size, upstream)
 		{
 		}
 
-		inline void release()
+		explicit temp_pool_memory_resource(void* buffer, size_t buffer_size, std::pmr::memory_resource* upstream)
+			: std::pmr::monotonic_buffer_resource(buffer, buffer_size, upstream)
 		{
-			m_pool.release();
-		}
-
-	private:
-		inline void* do_allocate(size_t bytes, size_t alignment) final
-		{
-			return m_pool.allocate(bytes, alignment);
-		}
-
-		inline void do_deallocate(void* ptr, size_t bytes, size_t alignment) final
-		{
-			m_pool.deallocate(ptr, bytes, alignment);
-		}
-
-		inline bool do_is_equal(const std::pmr::memory_resource& Other) const noexcept final
-		{
-			return this == &Other; // 풀 메모리 리소스는 싱글톤이므로 주소 비교로 충분
 		}
 	};
+
 
 	namespace private_core_detail
 	{
@@ -491,8 +418,8 @@ namespace mark
 // temp new / delete predefine
 #define CORE_TEMP_NEW(T)						new (CORE_TEMP_ALLOC(sizeof(T))) T
 #define CORE_TEMP_NEW_A(T, A)					new (CORE_TEMP_ALLOC_A(sizeof(T), A)) T
-#define CORE_TEMP_DELETE(T, ptr)				{T* p = ptr; if(p) { (p)->~T(); CORE_TEMP_FREE(p); ptr = nullptr;} }
-#define CORE_TEMP_DELETE_A(T, ptr, A)			{T* p = ptr; if(p) { (p)->~T(); CORE_TEMP_FREE_A(p, A); ptr = nullptr;} }
+#define CORE_TEMP_DELETE(T, ptr)				{T* p = ptr; if(p) { (p)->~T(); ptr = nullptr;} }
+#define CORE_TEMP_DELETE_A(T, ptr, A)			{T* p = ptr; if(p) { (p)->~T(); ptr = nullptr;} }
 
 // sys new / delete array predefine
 #define CORE_SYS_NEW_ARRAY(T, Count)			new (CORE_SYS_ALLOC_ARRAY_A(sizeof(T), Count, sizeof(uintptr_t))) T[Count]

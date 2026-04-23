@@ -8,6 +8,7 @@ namespace mark
 {
 	constexpr uint64_t CORE_HEAP_SIGNATURE = 0xDEADBEEFDEADBEEF;
 	constexpr uint64_t CORE_HEAP_TEMP_POOL_SIGNATURE = 0xFEEDFACEFEEDFACE;
+	constexpr size_t MAX_TEMP_POOLS = 32; // 임시 풀의 최대 개수 (필요에 따라 조정 가능) 32개 이상 늘어날일은 없을듯..
 
 	struct TEMP_POOL
 	{
@@ -35,7 +36,7 @@ namespace mark
 		usync_pool_memory_resource _upool_res;
 		temp_pool_memory_resource _temp_res;
 
-		std::pmr::vector<HANDLE> _temp_pools; // 임시 풀 메모리 리소스 핸들 목록
+		HANDLE _temp_pools[MAX_TEMP_POOLS] = { nullptr }; // 임시 풀 핸들 배열 (최대 MAX_TEMP_POOLS개)
 
 		CORE_HEAP() = default;
 
@@ -58,27 +59,25 @@ namespace mark
 		~CORE_HEAP()
 		{
 			 // 임시 풀 메모리 리소스 핸들 목록 정리
-			for (HANDLE temp_pool_handle : _temp_pools)
+			for (size_t i = 0; i < MAX_TEMP_POOLS; ++i)
 			{
-				TEMP_POOL* temp_pool = reinterpret_cast<TEMP_POOL*>(temp_pool_handle);
-				if (!temp_pool || temp_pool->signature != CORE_HEAP_TEMP_POOL_SIGNATURE)
+				HANDLE temp_pool_handle = _temp_pools[i];
+				if (temp_pool_handle)
 				{
-					assert(false && "Invalid temp pool handle in CORE_HEAP destructor");
-					continue;
-				}
-
-				if (temp_pool->signature == CORE_HEAP_TEMP_POOL_SIGNATURE)
-				{
-					temp_pool->pool.release();
-					_limited_sys_res.deallocate(temp_pool, sizeof(TEMP_POOL), alignof(TEMP_POOL));
-				}
-				else
-				{
-					assert(false && "Invalid temp pool handle in CORE_HEAP destructor");
+					TEMP_POOL* temp_pool = reinterpret_cast<TEMP_POOL*>(temp_pool_handle);
+					if (temp_pool && temp_pool->signature == CORE_HEAP_TEMP_POOL_SIGNATURE)
+					{
+						temp_pool->pool.release();
+						_limited_sys_res.deallocate(temp_pool, sizeof(TEMP_POOL), alignof(TEMP_POOL));
+						_temp_pools[i] = nullptr;
+					}
+					else
+					{
+						assert(false && "Invalid temp pool handle in CORE_HEAP destructor");
+					}
 				}
 			}
 
-			_temp_pools.clear();
 			signature = 0; // 시그니처 초기화 (디버깅용)
 		}
 	};
@@ -299,6 +298,21 @@ namespace mark
 		return ptr;
 	}
 
+	__FORCEINLINE int32_t get_empty_temp_pool_index(HANDLE core_heap_handle)
+	{
+		CORE_HEAP* core_heap = reinterpret_cast<CORE_HEAP*>(core_heap_handle);
+		if (!is_valid_core_heap_handle(core_heap)) [[unlikely]]
+			return nullptr;
+
+		for (size_t i = 0; i < MAX_TEMP_POOLS; ++i)
+		{
+			if (core_heap->_temp_pools[i] == nullptr)
+				return static_cast<int32_t>(i);
+		}
+
+		return -1; // 빈 슬롯이 없는 경우
+	}
+
 	HANDLE coreheap_temppool_create(
 		HANDLE heap_handle,
 		size_t size,
@@ -314,6 +328,9 @@ namespace mark
 			return nullptr;
 
 		TEMP_POOL* temp_pool = new (temp_pool_mem) TEMP_POOL(size, core_heap->_limited_sysmem_res);
+
+		
+
 		core_heap->_temp_pools.push_back(reinterpret_cast<HANDLE>(temp_pool));
 
 		return reinterpret_cast<HANDLE>(temp_pool);
