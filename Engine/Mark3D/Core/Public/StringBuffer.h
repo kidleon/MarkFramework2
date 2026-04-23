@@ -24,7 +24,7 @@ namespace mark
 		}
 
 		template<typename... Args>
-		[[nodiscard]] inline static sys_string sys_format(std::format_string<CharT> fmt, Args&&... args)
+		[[nodiscard]] inline static sys_string sys_format(std::basic_format_string<CharT, std::type_identity_t<Args>...> fmt, Args&&... args)
 		{
 			sys_vector<CharT> buffer;
 			std::format_to(std::back_inserter(buffer), fmt, std::forward<Args>(args)...);
@@ -32,7 +32,7 @@ namespace mark
 		}
 
 		template<typename... Args>
-		[[nodiscard]] inline static spool_string spool_format(std::format_string<CharT> fmt, Args&&... args)
+		[[nodiscard]] inline static spool_string spool_format(std::basic_format_string<CharT, std::type_identity_t<Args>...> fmt, Args&&... args)
 		{
 			spool_vector<CharT> buffer;
 			std::format_to(std::back_inserter(buffer), fmt, std::forward<Args>(args)...);
@@ -40,7 +40,7 @@ namespace mark
 		}
 
 		template<typename... Args>
-		[[nodiscard]] inline static upool_string upool_format(std::format_string<CharT> fmt, Args&&... args)
+		[[nodiscard]] inline static upool_string upool_format(std::basic_format_string<CharT, std::type_identity_t<Args>...> fmt, Args&&... args)
 		{
 			upool_vector<CharT> buffer;
 			std::format_to(std::back_inserter(buffer), fmt, std::forward<Args>(args)...);
@@ -48,7 +48,7 @@ namespace mark
 		}
 
 		template<typename... Args>
-		[[nodiscard]] inline static temp_string temp_format(std::format_string<CharT> fmt, Args&&... args)
+		[[nodiscard]] inline static temp_string temp_format(std::basic_format_string<CharT, std::type_identity_t<Args>...> fmt, Args&&... args)
 		{
 			temp_vector<CharT> buffer;
 			std::format_to(std::back_inserter(buffer), fmt, std::forward<Args>(args)...);

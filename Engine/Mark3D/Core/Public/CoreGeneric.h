@@ -340,4 +340,5 @@ namespace mark
 	// std::u32string 컨테이너 재정의 (기본적으로 임시 버퍼 메모리 할당자를 사용하도록 설정)
 	using temp_u32string = std::basic_string<char32_t, std::char_traits<char32_t>, ALLOC::TEMP<char32_t>>;
 
+
 }

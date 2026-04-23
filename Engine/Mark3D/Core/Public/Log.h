@@ -1,6 +1,7 @@
 #pragma once
 #include <source_location>
 #include <string>
+#include "CoreGeneric.h"
 
 
 namespace mark
@@ -73,7 +74,7 @@ namespace mark
 		* @return 없음
 		*/
 		template<log_category category, log_level level, typename... Args>
-		static void log_msg(
+		static void log_msg_f(
 			FormatWithLocation<std::type_identity_t<Args>...> fl,
 			Args&&... args
 		)
@@ -85,23 +86,105 @@ namespace mark
 			log_impl(category, level, body);
 		}
 
+		template<log_category category, log_level level>
+		static void log_msg(const char* msg)
+		{
+			if (!msg) [[unlikely]]
+				return;
+
+			// 로그 메시지 포맷팅
+			std::string body(msg);
+			body += " (at " + std::string(std::source_location::current().file_name()) + ":" + std::to_string(std::source_location::current().line()) + ")";
+			log_impl(category, level, body);
+		}
+
+		template<log_category category, log_level level>
+		static void log_msg(const sys_string& str)
+		{
+			if (str.empty()) [[unlikely]]
+				return;
+
+			// 로그 메시지 포맷팅
+			std::string body(str.c_str());
+			body += " (at " + std::string(std::source_location::current().file_name()) + ":" + std::to_string(std::source_location::current().line()) + ")";
+			log_impl(category, level, body);
+		}
+
+		template<log_category category, log_level level>
+		static void log_msg(const spool_string& str)
+		{
+			if (str.empty()) [[unlikely]]
+				return;
+
+			// 로그 메시지 포맷팅
+			std::string body(str.c_str());
+			body += " (at " + std::string(std::source_location::current().file_name()) + ":" + std::to_string(std::source_location::current().line()) + ")";
+			log_impl(category, level, body);
+		}
+
+		template<log_category category, log_level level>
+		static void log_msg(const upool_string& str)
+		{
+			if (str.empty()) [[unlikely]]
+				return;
+
+			// 로그 메시지 포맷팅
+			std::string body(str.c_str());
+			body += " (at " + std::string(std::source_location::current().file_name()) + ":" + std::to_string(std::source_location::current().line()) + ")";
+			log_impl(category, level, body);
+		}
+
+		template<log_category category, log_level level>
+		static void log_msg(const temp_string& str)
+		{
+			if (str.empty()) [[unlikely]]
+				return;
+
+			// 로그 메시지 포맷팅
+			std::string body(str.c_str());
+			body += " (at " + std::string(std::source_location::current().file_name()) + ":" + std::to_string(std::source_location::current().line()) + ")";
+			log_impl(category, level, body);
+		}
+
 	private:
 		static void log_impl(log_category category, log_level level, const std::string& msg);
 
 	};
 }
 
-#if defined(__LOG_ENABLED__)
-#define SYS_LOG(...)				mark::log::log_msg<mark::log_category::system, mark::log_level::info>(__VA_ARGS__)
-#define SYS_LOG_WRN(...)			mark::log::log_msg<mark::log_category::system, mark::log_level::warning>(__VA_ARGS__)
-#define SYS_LOG_ERR(...)			mark::log::log_msg<mark::log_category::system, mark::log_level::error>(__VA_ARGS__)
-#define SYS_LOG_CRIT(...)			mark::log::log_msg<mark::log_category::system, mark::log_level::critical>(__VA_ARGS__)
 
-#define LOG(...)					mark::log::log_msg<mark::log_category::gameplay, mark::log_level::info>(__VA_ARGS__)
-#define LOG_WRN(...)				mark::log::log_msg<mark::log_category::gameplay, mark::log_level::warning>(__VA_ARGS__)
-#define LOG_ERR(...)				mark::log::log_msg<mark::log_category::gameplay, mark::log_level::error>(__VA_ARGS__)
-#define LOG_CRIT(...)				mark::log::log_msg<mark::log_category::gameplay, mark::log_level::critical>(__VA_ARGS__)
+#if defined(__LOG_ENABLED__)
+#define SYS_LOG_F(...)				mark::log::log_msg_f<mark::log_category::system, mark::log_level::info>(__VA_ARGS__)
+#define SYS_LOG_WRN_F(...)			mark::log::log_msg_f<mark::log_category::system, mark::log_level::warning>(__VA_ARGS__)
+#define SYS_LOG_ERR_F(...)			mark::log::log_msg_f<mark::log_category::system, mark::log_level::error>(__VA_ARGS__)
+#define SYS_LOG_CRIT_F(...)			mark::log::log_msg_f<mark::log_category::system, mark::log_level::critical>(__VA_ARGS__)
+
+#define LOG_F(...)					mark::log::log_msg_f<mark::log_category::gameplay, mark::log_level::info>(__VA_ARGS__)
+#define LOG_WRN_F(...)				mark::log::log_msg_f<mark::log_category::gameplay, mark::log_level::warning>(__VA_ARGS__)
+#define LOG_ERR_F(...)				mark::log::log_msg_f<mark::log_category::gameplay, mark::log_level::error>(__VA_ARGS__)
+#define LOG_CRIT_F(...)				mark::log::log_msg_f<mark::log_category::gameplay, mark::log_level::critical>(__VA_ARGS__)
+
+#define SYS_LOG(msg)				mark::log::log_msg<mark::log_category::system, mark::log_level::info>(msg)
+#define SYS_LOG_WRN(msg)			mark::log::log_msg<mark::log_category::system, mark::log_level::warning>(msg)
+#define SYS_LOG_ERR(msg)			mark::log::log_msg<mark::log_category::system, mark::log_level::error>(msg)
+#define SYS_LOG_CRIT(msg)			mark::log::log_msg<mark::log_category::system, mark::log_level::critical>(msg)
+
+#define LOG(msg)					mark::log::log_msg<mark::log_category::gameplay, mark::log_level::info>(msg)
+#define LOG_WRN(msg)				mark::log::log_msg<mark::log_category::gameplay, mark::log_level::warning>(msg)
+#define LOG_ERR(msg)				mark::log::log_msg<mark::log_category::gameplay, mark::log_level::error>(msg)
+#define LOG_CRIT(msg)				mark::log::log_msg<mark::log_category::gameplay, mark::log_level::critical>(msg)
+
 #else
+#define SYS_LOG_F(...)				0
+#define SYS_LOG_WRN_F(...)			0
+#define SYS_LOG_ERR_F(...)			0
+#define SYS_LOG_CRIT_F(...)			0
+
+#define LOG_F(...)					0
+#define LOG_WRN_F(...)				0
+#define LOG_ERR_F(...)				0
+#define LOG_CRIT_F(...)				0
+
 #define SYS_LOG(...)				0
 #define SYS_LOG_WRN(...)			0
 #define SYS_LOG_ERR(...)			0

@@ -79,7 +79,7 @@ void TestStringBuffer()
 	str_buf.format("{}", v);
 	str_buf.append_endl();
 
-	LOG("FLOAT2 LOG => {}", v);
+	LOG_F("FLOAT2 LOG => {}", v);
 
 	str_buf.clear();
 
@@ -143,7 +143,17 @@ void TestStringBuffer()
 	wchar_t uwstr_cstr[4];
 	wstr_buf.to_buffer(uwstr_cstr, sizeof(uwstr_cstr));
 
-	mark::temp_string str = mark::string_buffer<char>::temp_format("Hello, {}!", "world");
+	{
+		mark::temp_string str = mark::string_buffer<char>::temp_format("Hello, {}!", "world");
+		LOG(str);
+	}
+	
+
+	{
+		mark::spool_string sp_str = mark::string_buffer<char>::spool_format("Hello, {}!", "world");
+		LOG(sp_str);
+	}
+
 
 	::Sleep(1000);
 }
