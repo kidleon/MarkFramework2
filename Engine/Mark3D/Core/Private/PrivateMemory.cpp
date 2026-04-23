@@ -81,7 +81,7 @@ namespace mark
 				s_default_temp_memory_resource = new temp_pool_memory_resource(temp_buffer_size);
 			}
 
-			s_temp_pool_handles.reserve(16); // 임시 풀 핸들 초기 예약 (필요에 따라 확장)
+			s_temp_pool_handles.reserve(32); // 임시 풀 핸들 초기 예약 (필요에 따라 확장)
 
 			return true;
 		}
@@ -411,7 +411,7 @@ namespace mark
 		if (temp_pool->signature != CORE_TEMP_POOL_SIGNATURE)
 		{
 			assert(false && "Invalid temp pool handle");
-			return nullptr;
+			return;
 		}
 #endif // !MASTER
 
@@ -446,7 +446,7 @@ namespace mark
 		if (temp_pool->signature != CORE_TEMP_POOL_SIGNATURE)
 		{
 			assert(false && "Invalid temp pool handle");
-			return nullptr;
+			return;
 		}
 #endif // !MASTER
 

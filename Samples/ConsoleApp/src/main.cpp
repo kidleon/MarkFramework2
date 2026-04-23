@@ -4,6 +4,7 @@
 #include "mathlib.h"
 #include "CoreHeap.h"
 #include "CoreGeneric.h"
+#include "Log.h"
 /*
 
 #include "TestMath.h"
@@ -77,6 +78,7 @@ void TestStringBuffer()
 	mark::FLOAT2 v{ 1.23f, 4.56f };
 	str_buf.format("{}", v);
 	str_buf.append_endl();
+
 	str_buf.clear();
 
 	mark::FLOAT3 v3{ 7.89f, 0.12f, 3.45f };

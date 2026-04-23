@@ -46,7 +46,7 @@ do
 			buildoptions { "/utf-8" }
 			filter {"configurations:Debug"}
 			do
-				defines{"DEBUG", "__MEMORY_TRACKER_ENABLED__", "__MOMORY_LIMIT_ENABLED__"}
+				defines{"DEBUG", "__MEMORY_TRACKER_ENABLED__", "__MOMORY_LIMIT_ENABLED__", "__LOG_ENABLED__"}
 				optimize "Off"
 				symbols "On"
 				links{"Mark3D_d"}
@@ -55,7 +55,7 @@ do
 			
 			filter {"configurations:Release"}
 			do
-				defines{"NDEBUG", "RELEASE", "__MEMORY_TRACKER_ENABLED__", "__MOMORY_LIMIT_ENABLED__"}
+				defines{"NDEBUG", "RELEASE", "__MEMORY_TRACKER_ENABLED__", "__MOMORY_LIMIT_ENABLED__", "__LOG_ENABLED__"}
 				optimize "On"
 				symbols "On"
 				links{"Mark3D"}

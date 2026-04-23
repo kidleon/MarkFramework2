@@ -14,6 +14,6 @@
 #include "MathLib.h"
 #include "RenderDef.h"
 #include "PrivateMemory.h"
-
+#include "Log.h"
 
 #endif // __PCH_H__

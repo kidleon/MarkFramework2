@@ -8,13 +8,10 @@ namespace mark
 {
 	constexpr uint64_t CORE_HEAP_SIGNATURE = 0xDEADBEEFDEADBEEF;
 	constexpr uint64_t CORE_HEAP_TEMP_POOL_SIGNATURE = 0xFEEDFACEFEEDFACE;
-	constexpr size_t MAX_TEMP_POOLS = 32; // 임시 풀의 최대 개수 (필요에 따라 조정 가능) 32개 이상 늘어날일은 없을듯..
 
 	struct TEMP_POOL
 	{
-#if defined(DEBUG)
 		uint64_t signature = CORE_HEAP_TEMP_POOL_SIGNATURE; // 디버깅을 위한 시그니처
-#endif // DEBUG
 		char* buffer = nullptr; // 외부에서 설정한 버퍼 포인터
 		size_t buffer_size = 0; // 외부에서 설정한 버퍼 크기
 		temp_pool_memory_resource pool;
@@ -27,16 +24,14 @@ namespace mark
 
 	struct CORE_HEAP
 	{
-#if defined(DEBUG)
 		uint64_t signature = CORE_HEAP_SIGNATURE; // 디버깅을 위한 시그니처
-#endif // DEBUG
 
 		limited_memory_resource _limited_sys_res;
 		sync_pool_memory_resource _spool_res;
 		usync_pool_memory_resource _upool_res;
 		temp_pool_memory_resource _temp_res;
 
-		HANDLE _temp_pools[MAX_TEMP_POOLS] = { nullptr }; // 임시 풀 핸들 배열 (최대 MAX_TEMP_POOLS개)
+		std::pmr::vector<HANDLE> _temp_pools; // 임시 풀 메모리 리소스 핸들 목록
 
 		CORE_HEAP() = default;
 
@@ -54,30 +49,35 @@ namespace mark
 			, _temp_res(temp_buffer_size)
 			
 		{
+			_temp_pools.reserve(32); // 임시 풀 핸들 초기 예약 (필요에 따라 확장
 		}
 
 		~CORE_HEAP()
 		{
 			 // 임시 풀 메모리 리소스 핸들 목록 정리
-			for (size_t i = 0; i < MAX_TEMP_POOLS; ++i)
+			for (HANDLE temp_pool_handle : _temp_pools)
 			{
-				HANDLE temp_pool_handle = _temp_pools[i];
-				if (temp_pool_handle)
+				TEMP_POOL* temp_pool = reinterpret_cast<TEMP_POOL*>(temp_pool_handle);
+				if (!temp_pool || temp_pool->signature != CORE_HEAP_TEMP_POOL_SIGNATURE)
 				{
-					TEMP_POOL* temp_pool = reinterpret_cast<TEMP_POOL*>(temp_pool_handle);
-					if (temp_pool && temp_pool->signature == CORE_HEAP_TEMP_POOL_SIGNATURE)
-					{
-						temp_pool->pool.release();
-						_limited_sys_res.deallocate(temp_pool, sizeof(TEMP_POOL), alignof(TEMP_POOL));
-						_temp_pools[i] = nullptr;
-					}
-					else
-					{
-						assert(false && "Invalid temp pool handle in CORE_HEAP destructor");
-					}
+					assert(false && "Invalid temp pool handle in CORE_HEAP destructor");
+					continue;
+				}
+
+				if (temp_pool->signature == CORE_HEAP_TEMP_POOL_SIGNATURE)
+				{
+					temp_pool->pool.release();
+					temp_pool->~TEMP_POOL();
+					coreheap_free((HANDLE)this, temp_pool, alignof(TEMP_POOL));
+					//mark_sys_free(temp_pool, alignof(TEMP_POOL));
+				}
+				else
+				{
+					assert(false && "Invalid temp pool handle in CORE_HEAP destructor");
 				}
 			}
 
+			_temp_pools.clear();
 			signature = 0; // 시그니처 초기화 (디버깅용)
 		}
 	};
@@ -298,21 +298,6 @@ namespace mark
 		return ptr;
 	}
 
-	__FORCEINLINE int32_t get_empty_temp_pool_index(HANDLE core_heap_handle)
-	{
-		CORE_HEAP* core_heap = reinterpret_cast<CORE_HEAP*>(core_heap_handle);
-		if (!is_valid_core_heap_handle(core_heap)) [[unlikely]]
-			return nullptr;
-
-		for (size_t i = 0; i < MAX_TEMP_POOLS; ++i)
-		{
-			if (core_heap->_temp_pools[i] == nullptr)
-				return static_cast<int32_t>(i);
-		}
-
-		return -1; // 빈 슬롯이 없는 경우
-	}
-
 	HANDLE coreheap_temppool_create(
 		HANDLE heap_handle,
 		size_t size,
@@ -323,14 +308,12 @@ namespace mark
 		if (!is_valid_core_heap_handle(core_heap)) [[unlikely]]
 			return nullptr;
 
-		void* temp_pool_mem = coreheap_sys_alloc(sizeof(TEMP_POOL), alignof(TEMP_POOL), loc);
+		//void* temp_pool_mem = mark_sys_alloc(sizeof(TEMP_POOL), alignof(TEMP_POOL), loc);
+		void* temp_pool_mem = coreheap_alloc(heap_handle, (sizeof(TEMP_POOL), alignof(TEMP_POOL), loc);
 		if (!temp_pool_mem) [[unlikely]]
 			return nullptr;
 
 		TEMP_POOL* temp_pool = new (temp_pool_mem) TEMP_POOL(size, core_heap->_limited_sysmem_res);
-
-		
-
 		core_heap->_temp_pools.push_back(reinterpret_cast<HANDLE>(temp_pool));
 
 		return reinterpret_cast<HANDLE>(temp_pool);
@@ -483,7 +466,8 @@ namespace mark
 		if (!is_valid_core_heap_handle(core_heap)) [[unlikely]]
 			return nullptr;
 
-		void* temp_pool_mem = mark_sys_alloc(sizeof(TEMP_POOL), alignof(TEMP_POOL));
+		//void* temp_pool_mem = mark_sys_alloc(sizeof(TEMP_POOL), alignof(TEMP_POOL));
+		void* temp_pool_mem = coreheap_alloc(heap_handle, sizeof(TEMP_POOL), alignof(TEMP_POOL));
 		if (!temp_pool_mem) [[unlikely]]
 			return nullptr;
 
@@ -642,7 +626,8 @@ namespace mark
 		temp_pool->pool.release();
 
 		temp_pool->~TEMP_POOL();
-		mark_sys_free(temp_pool, alignof(TEMP_POOL));
+		//mark_sys_free(temp_pool, alignof(TEMP_POOL));
+		coreheap_free(heap_handle, temp_pool, alignof(TEMP_POOL));
 
 		auto it = std::find(core_heap->_temp_pools.begin(), core_heap->_temp_pools.end(), temppool_handle);
 		if (it != core_heap->_temp_pools.end())
