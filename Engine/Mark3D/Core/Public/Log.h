@@ -1,4 +1,6 @@
 #pragma once
+#include <source_location>
+#include <string>
 
 
 namespace mark
@@ -24,6 +26,24 @@ namespace mark
 		all = console | file
 	};
 
+	template<typename... Args>
+	struct FormatWithLocation
+	{
+		std::format_string<Args...> fmt;
+		std::source_location loc;
+
+		// consteval로 포맷 문자열은 컴파일 타임에 검증,
+		// source_location::current()는 호출 지점(매크로 전개 위치)에서 캡처됨
+		template<typename T>
+		consteval FormatWithLocation(
+			const T& s,
+			std::source_location l = std::source_location::current()
+		)
+			: fmt{ s }, loc{ l }
+		{
+		}
+	};
+
 	class MARKENGINE_API log
 	{
 	public:
@@ -42,56 +62,45 @@ namespace mark
 		* @return 없음
 		*/
 		static void shutdown();
-		
-		/**
-		* @brief 로그 메시지를 출력한다.
-		* @param category 로그 카테고리
-		* @param format 출력할 메시지 형식 문자열
-		* @param ... 가변 인자
-		* @return 없음
-		*/
-		static void log_msg(log_category category, const char* format, ...);
 
 		/**
-		* @brief 경고 로그 메시지를 출력한다.
-		* @param category 로그 카테고리
-		* @param format 출력할 메시지 형식 문자열
-		* @param ... 가변 인자
+		* @brief 로그 메시지 기록. 포맷 문자열과 가변 인자를 받아 로그를 기록한다.
+		* @tparam category 로그 카테고리 (system, gameplay 등)
+		* @tparam level 로그 레벨 (info, warning, error, critical)
+		* @tparam Args 포맷 문자열에 사용되는 인자들의 타입
+		* @param fl 포맷 문자열과 호출 위치 정보를 담은 구조체
+		* @param args 포맷 문자열에 전달할 가변 인자들
 		* @return 없음
 		*/
-		static void log_wrn(log_category category, const char* format, ...);
+		template<log_category category, log_level level, typename... Args>
+		static void log_msg(
+			FormatWithLocation<std::type_identity_t<Args>...> fl,
+			Args&&... args
+		)
+		{
+			// 로그 메시지 포맷팅
+			std::string body = std::format(fl.fmt, std::forward<Args>(args)...);
 
-		/**
-		* @brief 오류 로그 메시지를 출력한다.
-		* @param category 로그 카테고리
-		* @param format 출력할 메시지 형식 문자열
-		* @param ... 가변 인자
-		* @return 없음
-		*/
-		static void log_err(log_category category, const char* format, ...);
+			body += " (at " + std::string(fl.loc.file_name()) + ":" + std::to_string(fl.loc.line()) + ")";
+			log_impl(category, level, body);
+		}
 
-		/**
-		* @brief 치명적 오류 로그 메시지를 출력한다. 이 레벨의 로그는 즉시 플러시되어 유실을 방지한다.
-		* @param category 로그 카테고리
-		* @param format 출력할 메시지 형식 문자열
-		* @param ... 가변 인자
-		* @return 없음
-		*/
-		static void log_crit(log_category category, const char* format, ...);
+	private:
+		static void log_impl(log_category category, log_level level, const std::string& msg);
 
 	};
 }
 
 #if defined(__LOG_ENABLED__)
-#define SYS_LOG(...)				mark::log::log_msg(mark::log_category::system, __VA_ARGS__)
-#define SYS_LOG_WRN(...)			mark::log::log_wrn(mark::log_category::system, __VA_ARGS__)
-#define SYS_LOG_ERR(...)			mark::log::log_err(mark::log_category::system, __VA_ARGS__)
-#define SYS_LOG_CRIT(...)			mark::log::log_crit(mark::log_category::system, __VA_ARGS__)
+#define SYS_LOG(...)				mark::log::log_msg<mark::log_category::system, mark::log_level::info>(__VA_ARGS__)
+#define SYS_LOG_WRN(...)			mark::log::log_msg<mark::log_category::system, mark::log_level::warning>(__VA_ARGS__)
+#define SYS_LOG_ERR(...)			mark::log::log_msg<mark::log_category::system, mark::log_level::error>(__VA_ARGS__)
+#define SYS_LOG_CRIT(...)			mark::log::log_msg<mark::log_category::system, mark::log_level::critical>(__VA_ARGS__)
 
-#define LOG(...)					mark::log::log_msg(mark::log_category::gameplay, __VA_ARGS__)
-#define LOG_WRN(...)				mark::log::log_wrn(mark::log_category::gameplay, __VA_ARGS__)
-#define LOG_ERR(...)				mark::log::log_err(mark::log_category::gameplay, __VA_ARGS__)
-#define LOG_CRIT(...)				mark::log::log_crit(mark::log_category::gameplay, __VA_ARGS__)
+#define LOG(...)					mark::log::log_msg<mark::log_category::gameplay, mark::log_level::info>(__VA_ARGS__)
+#define LOG_WRN(...)				mark::log::log_msg<mark::log_category::gameplay, mark::log_level::warning>(__VA_ARGS__)
+#define LOG_ERR(...)				mark::log::log_msg<mark::log_category::gameplay, mark::log_level::error>(__VA_ARGS__)
+#define LOG_CRIT(...)				mark::log::log_msg<mark::log_category::gameplay, mark::log_level::critical>(__VA_ARGS__)
 #else
 #define SYS_LOG(...)				0
 #define SYS_LOG_WRN(...)			0

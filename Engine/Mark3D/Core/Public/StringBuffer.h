@@ -23,6 +23,38 @@ namespace mark
 			}
 		}
 
+		template<typename... Args>
+		[[nodiscard]] inline static sys_string sys_format(std::format_string<CharT> fmt, Args&&... args)
+		{
+			sys_vector<CharT> buffer;
+			std::format_to(std::back_inserter(buffer), fmt, std::forward<Args>(args)...);
+			return sys_string(buffer.begin(), buffer.end());
+		}
+
+		template<typename... Args>
+		[[nodiscard]] inline static spool_string spool_format(std::format_string<CharT> fmt, Args&&... args)
+		{
+			spool_vector<CharT> buffer;
+			std::format_to(std::back_inserter(buffer), fmt, std::forward<Args>(args)...);
+			return spool_string(buffer.begin(), buffer.end());
+		}
+
+		template<typename... Args>
+		[[nodiscard]] inline static upool_string upool_format(std::format_string<CharT> fmt, Args&&... args)
+		{
+			upool_vector<CharT> buffer;
+			std::format_to(std::back_inserter(buffer), fmt, std::forward<Args>(args)...);
+			return upool_string(buffer.begin(), buffer.end());
+		}
+
+		template<typename... Args>
+		[[nodiscard]] inline static temp_string temp_format(std::format_string<CharT> fmt, Args&&... args)
+		{
+			temp_vector<CharT> buffer;
+			std::format_to(std::back_inserter(buffer), fmt, std::forward<Args>(args)...);
+			return temp_string(buffer.begin(), buffer.end());
+		}
+
 		/**
 		*  // ── 너비 지정 ──────────────────────────────────────────
 		*	std::format("{:4}",   n);   // "  15"   (우측 정렬, 공백 채움)

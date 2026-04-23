@@ -160,9 +160,10 @@ namespace mark
 	{
 		if (!g_initialized) return;
 
-		if (g_system_logger)
+		if (g_system_logger) [[likely]]
 			g_system_logger->flush();
-		if (g_gameplay_logger)
+
+		if (g_gameplay_logger) [[likely]]
 			g_gameplay_logger->flush();
 
 		spdlog::shutdown();
@@ -172,33 +173,14 @@ namespace mark
 		g_initialized = false;
 	}
 
-	void log::log_msg(log_category category, const char* format, ...)
+	void log::log_impl(log_category category, log_level level, const std::string& msg)
 	{
-		va_list args; va_start(args, format);
-		dispatch_narrow(category, spdlog::level::info, format, args);
-		va_end(args);
-	}
+		spdlog::logger* lg = get_logger(category);
+		if (lg == nullptr) [[unlikely]]
+			return; // 초기화 전 호출 방어
 
-	void log::log_wrn(log_category category, const char* format, ...)
-	{
-		va_list args; va_start(args, format);
-		dispatch_narrow(category, spdlog::level::warn, format, args);
-		va_end(args);
+		spdlog::level::level_enum spd_level = to_spdlog_level(static_cast<uint32_t>(level));
+		lg->log(spd_level, msg);
 	}
-
-	void log::log_err(log_category category, const char* format, ...)
-	{
-		va_list args; va_start(args, format);
-		dispatch_narrow(category, spdlog::level::err, format, args);
-		va_end(args);
-	}
-
-	void log::log_crit(log_category category, const char* format, ...)
-	{
-		va_list args; va_start(args, format);
-		dispatch_narrow(category, spdlog::level::critical, format, args);
-		va_end(args);
-	}
-
 
 } // namespace mark
