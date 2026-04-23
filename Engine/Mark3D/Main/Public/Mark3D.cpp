@@ -17,7 +17,6 @@ namespace mark
 			static_cast<uint32_t>(log_target::console) | static_cast<uint32_t>(log_target::file)
 		);
 
-		LOG("Mark3D logging initialized.");
 #endif // __LOG_ENABLED__
 
 #if defined(__MEMORY_TRACKING_ENABLED__)

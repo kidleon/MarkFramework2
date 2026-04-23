@@ -2,6 +2,7 @@
 #include <source_location>
 #include <string>
 #include "CoreGeneric.h"
+#include "StringBuffer.h"
 
 
 namespace mark
@@ -80,74 +81,108 @@ namespace mark
 		)
 		{
 			// 로그 메시지 포맷팅
-			std::string body = std::format(fl.fmt, std::forward<Args>(args)...);
+			string_buffer<char, 2048> str_buf;
+			str_buf.format(fl.fmt, std::forward<Args>(args)...);
+			str_buf.append(" (at ");
+			str_buf.append(fl.loc.file_name());
+			str_buf.append(":");
+			str_buf.append(fl.loc.line());
+			str_buf.append(")");
 
-			body += " (at " + std::string(fl.loc.file_name()) + ":" + std::to_string(fl.loc.line()) + ")";
-			log_impl(category, level, body);
+			log_impl(category, level, str_buf.to_string_view());
 		}
 
 		template<log_category category, log_level level>
-		static void log_msg(const char* msg)
+		static void log_msg(const char* msg, std::source_location loc)
 		{
 			if (!msg) [[unlikely]]
 				return;
 
 			// 로그 메시지 포맷팅
-			std::string body(msg);
-			body += " (at " + std::string(std::source_location::current().file_name()) + ":" + std::to_string(std::source_location::current().line()) + ")";
-			log_impl(category, level, body);
+			string_buffer<char, 2048> str_buf;
+			str_buf.append(msg);
+			str_buf.append(" (at ");
+			str_buf.append(loc.file_name());
+			str_buf.append(":");
+			str_buf.append(std::to_string(loc.line()));
+			str_buf.append(")");
+
+			log_impl(category, level, str_buf.to_string_view());
 		}
 
 		template<log_category category, log_level level>
-		static void log_msg(const sys_string& str)
+		static void log_msg(const sys_string& str, std::source_location loc)
 		{
 			if (str.empty()) [[unlikely]]
 				return;
 
 			// 로그 메시지 포맷팅
-			std::string body(str.c_str());
-			body += " (at " + std::string(std::source_location::current().file_name()) + ":" + std::to_string(std::source_location::current().line()) + ")";
-			log_impl(category, level, body);
+			string_buffer<char, 2048> str_buf;
+			str_buf.append(str.c_str());
+			str_buf.append(" (at ");
+			str_buf.append(loc.file_name());
+			str_buf.append(":");
+			str_buf.append(loc.line());
+			str_buf.append(")");
+
+			log_impl(category, level, str_buf.to_string_view());
 		}
 
 		template<log_category category, log_level level>
-		static void log_msg(const spool_string& str)
+		static void log_msg(const spool_string& str, std::source_location loc)
 		{
 			if (str.empty()) [[unlikely]]
 				return;
 
 			// 로그 메시지 포맷팅
-			std::string body(str.c_str());
-			body += " (at " + std::string(std::source_location::current().file_name()) + ":" + std::to_string(std::source_location::current().line()) + ")";
-			log_impl(category, level, body);
+			string_buffer<char, 2048> str_buf;
+			str_buf.append(str.c_str());
+			str_buf.append(" (at ");
+			str_buf.append(loc.file_name());
+			str_buf.append(":");
+			str_buf.append(loc.line());
+			str_buf.append(")");
+
+			log_impl(category, level, str_buf.to_string_view());
 		}
 
 		template<log_category category, log_level level>
-		static void log_msg(const upool_string& str)
+		static void log_msg(const upool_string& str, std::source_location loc)
 		{
 			if (str.empty()) [[unlikely]]
 				return;
 
 			// 로그 메시지 포맷팅
-			std::string body(str.c_str());
-			body += " (at " + std::string(std::source_location::current().file_name()) + ":" + std::to_string(std::source_location::current().line()) + ")";
-			log_impl(category, level, body);
+			string_buffer<char, 2048> str_buf;
+			str_buf.append(str.c_str());
+			str_buf.append(" (at ");
+			str_buf.append(loc.file_name());
+			str_buf.append(":");
+			str_buf.append(loc.line());
+			str_buf.append(")");
+
+			log_impl(category, level, str_buf.to_string_view());
 		}
 
 		template<log_category category, log_level level>
-		static void log_msg(const temp_string& str)
+		static void log_msg(const temp_string& str, std::source_location loc)
 		{
 			if (str.empty()) [[unlikely]]
 				return;
 
 			// 로그 메시지 포맷팅
-			std::string body(str.c_str());
-			body += " (at " + std::string(std::source_location::current().file_name()) + ":" + std::to_string(std::source_location::current().line()) + ")";
-			log_impl(category, level, body);
+			string_buffer<char, 2048> str_buf;
+			str_buf.append(str.c_str());
+			str_buf.append(" (at ");
+			str_buf.append(loc.file_name());
+			str_buf.append(":");
+			str_buf.append(loc.line());
+			str_buf.append(")");
+
+			log_impl(category, level, str_buf.to_string_view());
 		}
 
-	private:
-		static void log_impl(log_category category, log_level level, const std::string& msg);
+		static void log_impl(log_category category, log_level level, std::string_view message);
 
 	};
 }
@@ -164,15 +199,15 @@ namespace mark
 #define LOG_ERR_F(...)				mark::log::log_msg_f<mark::log_category::gameplay, mark::log_level::error>(__VA_ARGS__)
 #define LOG_CRIT_F(...)				mark::log::log_msg_f<mark::log_category::gameplay, mark::log_level::critical>(__VA_ARGS__)
 
-#define SYS_LOG(msg)				mark::log::log_msg<mark::log_category::system, mark::log_level::info>(msg)
-#define SYS_LOG_WRN(msg)			mark::log::log_msg<mark::log_category::system, mark::log_level::warning>(msg)
-#define SYS_LOG_ERR(msg)			mark::log::log_msg<mark::log_category::system, mark::log_level::error>(msg)
-#define SYS_LOG_CRIT(msg)			mark::log::log_msg<mark::log_category::system, mark::log_level::critical>(msg)
+#define SYS_LOG(msg)				mark::log::log_msg<mark::log_category::system, mark::log_level::info>(msg, std::source_location::current())
+#define SYS_LOG_WRN(msg)			mark::log::log_msg<mark::log_category::system, mark::log_level::warning>(msg, std::source_location::current())
+#define SYS_LOG_ERR(msg)			mark::log::log_msg<mark::log_category::system, mark::log_level::error>(msg, std::source_location::current())
+#define SYS_LOG_CRIT(msg)			mark::log::log_msg<mark::log_category::system, mark::log_level::critical>(msg, std::source_location::current())
 
-#define LOG(msg)					mark::log::log_msg<mark::log_category::gameplay, mark::log_level::info>(msg)
-#define LOG_WRN(msg)				mark::log::log_msg<mark::log_category::gameplay, mark::log_level::warning>(msg)
-#define LOG_ERR(msg)				mark::log::log_msg<mark::log_category::gameplay, mark::log_level::error>(msg)
-#define LOG_CRIT(msg)				mark::log::log_msg<mark::log_category::gameplay, mark::log_level::critical>(msg)
+#define LOG(msg)					mark::log::log_msg<mark::log_category::gameplay, mark::log_level::info>(msg, std::source_location::current())
+#define LOG_WRN(msg)				mark::log::log_msg<mark::log_category::gameplay, mark::log_level::warning>(msg, std::source_location::current())
+#define LOG_ERR(msg)				mark::log::log_msg<mark::log_category::gameplay, mark::log_level::error>(msg, std::source_location::current())
+#define LOG_CRIT(msg)				mark::log::log_msg<mark::log_category::gameplay, mark::log_level::critical>(msg, std::source_location::current())
 
 #else
 #define SYS_LOG_F(...)				0

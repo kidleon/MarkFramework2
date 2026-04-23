@@ -269,6 +269,40 @@ namespace mark
 			}
 		}
 
+		inline string_buffer& append(unsigned int value)
+		{
+			if constexpr (std::is_same_v<CharT, char>)
+			{
+				char buffer[64]; // 충분히 큰 버퍼
+				std::to_chars_result result = std::to_chars(buffer, buffer + sizeof(buffer), value);
+				assert(result.ec == std::errc());
+				return append(buffer, result.ptr - buffer);
+			}
+			else if constexpr (std::is_same_v<CharT, wchar_t>)
+			{
+				wchar_t buffer[64]; // 충분히 큰 버퍼
+				std::format_to(buffer, L"{}", value);
+				return append(buffer, std::char_traits<wchar_t>::length(buffer));
+			}
+			else if constexpr (std::is_same_v<CharT, char16_t>)
+			{
+				char16_t buffer[64]; // 충분히 큰 버퍼
+				std::format_to(buffer, u"{}", value);
+				return append(buffer, std::char_traits<char16_t>::length(buffer));
+			}
+			else if constexpr (std::is_same_v<CharT, char32_t>)
+			{
+				char32_t buffer[64]; // 충분히 큰 버퍼
+				std::format_to(buffer, U"{}", value);
+				return append(buffer, std::char_traits<char32_t>::length(buffer));
+			}
+			else
+			{
+				static_assert(always_false<CharT>, "Unsupported character type");
+				return *this; // 컴파일 오류 방지용
+			}
+		}
+
 		inline string_buffer& append(float value)
 		{
 			if constexpr (std::is_same_v<CharT, char>)
@@ -339,6 +373,31 @@ namespace mark
 			}
 		}
 
+		inline string_buffer& append(const sys_string& str)
+		{
+			return append(str.data(), str.size());
+		}
+
+		inline string_buffer& append(const spool_string& str)
+		{
+			return append(str.data(), str.size());
+		}
+
+		inline string_buffer& append(const upool_string& str)
+		{
+			return append(str.data(), str.size());
+		}
+
+		inline string_buffer& append(const temp_string& str)
+		{
+			return append(str.data(), str.size());
+		}
+
+		inline string_buffer& append(std::string_view str)
+		{
+			return append(str.data(), str.size());
+		}
+
 		inline void reserve(size_t new_capacity)
 		{
 			m_buffer.reserve(new_capacity);
@@ -394,8 +453,23 @@ namespace mark
 			out_str.assign(m_buffer.data(), m_buffer.size());
 		}
 
+		inline const CharT* c_str()
+		{
+			// to_buffer()를 사용하여 C 스타일 문자열로 변환
+			m_buffer_to_c.reserve(m_buffer.size() + 1); // null-terminator 공간 확보
+			m_buffer_to_c.assign(m_buffer.begin(), m_buffer.end());
+			m_buffer_to_c.push_back(CharT(0)); // null-terminate
+			return m_buffer_to_c.data();
+		}
+
+		[[nodiscard]] inline size_t size() const noexcept
+		{
+			return m_buffer.size();
+		}
+
 	private:
 		upool_vector<CharT> m_buffer; // 내부 버퍼 (sync_pool_allocator 사용)
+		upool_vector<CharT> m_buffer_to_c; // to_buffer()에서 C 스타일 문자열로 변환할 때 사용할 임시 버퍼
 
 	};
 }
