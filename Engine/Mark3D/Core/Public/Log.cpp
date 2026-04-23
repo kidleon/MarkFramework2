@@ -100,16 +100,11 @@ namespace mark
 	} // anonymous namespace
 
 
-	// =============================================================================
-	//  공개 API 구현
-	// =============================================================================
-
 	void log::initialize(uint32_t level, uint32_t target)
 	{
 		// 두 번 이상 호출되어도 한 번만 셋업되도록 방어.
 		std::call_once(g_init_flag, [&]()
 			{
-				// 1) 타겟 플래그에 맞춰 sink 구성.
 				std::vector<spdlog::sink_ptr> sinks;
 
 				if (target & static_cast<uint32_t>(log_target::console))
@@ -127,13 +122,11 @@ namespace mark
 					sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_mt>("logs/mark.log", kMaxFileSize, kMaxFiles));
 				}
 
-				// 2) 공통 패턴. %n 자리에 로거 이름(system/gameplay)이 찍힌다.
-				//    [2026-04-23 10:12:34.567] [system] [info] 메시지
+				// [2026-04-23 10:12:34.567] [system] [info] 메시지
 				const std::string pattern = "[%Y-%m-%d %H:%M:%S.%e] [%n] [%^%l%$] %v";
 
 				const auto spd_level = to_spdlog_level(level);
 
-				// 3) 카테고리별 로거 생성. sink 리스트를 공유하도록 동일하게 전달.
 				g_system_logger = std::make_shared<spdlog::logger>("system", sinks.begin(), sinks.end());
 				g_system_logger->set_level(spd_level);
 				g_system_logger->set_pattern(pattern);
@@ -145,8 +138,6 @@ namespace mark
 				g_gameplay_logger->set_pattern(pattern);
 				g_gameplay_logger->flush_on(spdlog::level::critical);
 
-				// 4) 전역 레지스트리에 등록(선택). spdlog::get("system") 으로 찾을 수 있음.
-				//    이미 같은 이름이 등록돼 있으면 예외가 나므로 try/catch 로 감싼다.
 				try { spdlog::register_logger(g_system_logger); }
 				catch (...) {}
 				try { spdlog::register_logger(g_gameplay_logger); }

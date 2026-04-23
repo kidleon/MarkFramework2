@@ -11,14 +11,6 @@ namespace mark
 
 	bool Mark3D::Initialize()
 	{
-#if defined(__LOG_ENABLED__)
-		log::initialize(
-			static_cast<uint32_t>(log_level::info) | static_cast<uint32_t>(log_level::warning) | static_cast<uint32_t>(log_level::error) | static_cast<uint32_t>(log_level::critical),
-			static_cast<uint32_t>(log_target::console) | static_cast<uint32_t>(log_target::file)
-		);
-
-#endif // __LOG_ENABLED__
-
 #if defined(__MEMORY_TRACKING_ENABLED__)
 		std::pmr::pool_options opts = { 
 			.max_blocks_per_chunk = 1024, // 각 청크당 최대 블록 수
@@ -36,6 +28,13 @@ namespace mark
 			1024 * 1024 * 32 // 32MB 임시 버퍼
 		);
 
+#if defined(__LOG_ENABLED__)
+		log::initialize(
+			static_cast<uint32_t>(log_level::info) | static_cast<uint32_t>(log_level::warning) | static_cast<uint32_t>(log_level::error) | static_cast<uint32_t>(log_level::critical),
+			static_cast<uint32_t>(log_target::console) | static_cast<uint32_t>(log_target::file)
+		);
+#endif // __LOG_ENABLED__
+
 		LOG("Mark3D core memory initialized.");
 
 		return true;
@@ -43,6 +42,10 @@ namespace mark
 
 	void Mark3D::Shutdown()
 	{
+#if defined(__LOG_ENABLED__)
+		log::shutdown();
+#endif // __LOG_ENABLED__
+
 		shutdown_core_memory();
 
 #if defined(__MEMORY_TRACKING_ENABLED__)
@@ -53,9 +56,7 @@ namespace mark
 		}
 #endif // __MEMORY_TRACKING_ENABLED__
 
-#if defined(__LOG_ENABLED__)
-		log::shutdown();
-#endif // __LOG_ENABLED__
+
 	}
 
 }
