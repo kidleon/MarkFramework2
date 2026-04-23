@@ -118,7 +118,7 @@ namespace mark
 
 			// 로그 메시지 포맷팅
 			string_buffer<char, 2048> str_buf;
-			str_buf.append(str.c_str());
+			str_buf.append(str);
 			str_buf.append(" (at ");
 			str_buf.append(loc.file_name());
 			str_buf.append(":");
@@ -136,7 +136,7 @@ namespace mark
 
 			// 로그 메시지 포맷팅
 			string_buffer<char, 2048> str_buf;
-			str_buf.append(str.c_str());
+			str_buf.append(str);
 			str_buf.append(" (at ");
 			str_buf.append(loc.file_name());
 			str_buf.append(":");
@@ -154,7 +154,7 @@ namespace mark
 
 			// 로그 메시지 포맷팅
 			string_buffer<char, 2048> str_buf;
-			str_buf.append(str.c_str());
+			str_buf.append(str);
 			str_buf.append(" (at ");
 			str_buf.append(loc.file_name());
 			str_buf.append(":");
@@ -172,7 +172,7 @@ namespace mark
 
 			// 로그 메시지 포맷팅
 			string_buffer<char, 2048> str_buf;
-			str_buf.append(str.c_str());
+			str_buf.append(str);
 			str_buf.append(" (at ");
 			str_buf.append(loc.file_name());
 			str_buf.append(":");
