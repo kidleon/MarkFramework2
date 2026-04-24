@@ -25,7 +25,7 @@ namespace mark
 			64,  // unsync_pool_count_per_chunk = 64
 			1024 * 1024,  // sync_pool_max_size_per_block = 1MB
 			1024 * 1024,  // unsync_pool_max_size_per_block = 1MB
-			1024 * 1024 * 32 // 32MB 임시 버퍼
+			1024 * 1024 * 64 // 64MB 임시 버퍼
 		);
 
 #if defined(__LOG_ENABLED__)

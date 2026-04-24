@@ -1,3 +1,4 @@
+/*
 #pragma once
 #include "UnknownPtr.h"
 #include <cstdio>
@@ -446,3 +447,5 @@ namespace mark
     }
 
 } // namespace mark
+
+*/

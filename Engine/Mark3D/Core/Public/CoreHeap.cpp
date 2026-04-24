@@ -16,8 +16,8 @@ namespace mark
 		size_t buffer_size = 0; // 외부에서 설정한 버퍼 크기
 		temp_pool_memory_resource pool;
 
-		TEMP_POOL(size_t size, limited_memory_resource* sysmem_res)
-			: pool(size, sysmem_res)
+		TEMP_POOL(size_t size)
+			: pool(size)
 		{
 		}
 	};
@@ -471,7 +471,7 @@ namespace mark
 		if (!temp_pool_mem) [[unlikely]]
 			return nullptr;
 
-		TEMP_POOL* temp_pool = new (temp_pool_mem) TEMP_POOL(size, &core_heap->_limited_sys_res);
+		TEMP_POOL* temp_pool = new (temp_pool_mem) TEMP_POOL(size);
 
 		core_heap->_temp_pools.push_back(reinterpret_cast<HANDLE>(temp_pool));
 
@@ -514,6 +514,11 @@ namespace mark
 			ptr,
 			alignment
 		);
+	}
+
+	void mark_temp_reset()
+	{
+		get_default_temp_memory_resource_ptr()->release();
 	}
 
 	void coreheap_free(

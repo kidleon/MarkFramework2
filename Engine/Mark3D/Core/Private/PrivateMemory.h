@@ -25,20 +25,31 @@ namespace mark
 	void shutdown_core_memory();
 
 
+	static constexpr size_t MALLOC_DEFAULT_ALIGNMENT = alignof(std::max_align_t); // 항상 16 (x64)
+
 	class system_memory_resource final : public std::pmr::memory_resource
 	{
 	private:
 		void* do_allocate(size_t bytes, size_t alignment) final
 		{
+			if (alignment <= MALLOC_DEFAULT_ALIGNMENT)
+				return ::malloc(bytes);          // 모든 플랫폼에서 안전
+
 #if defined(__TARGET_OS_WINDOWS)
 			return ::_aligned_malloc(bytes, alignment);
 #else
-			return std::aligned_alloc(alignment, bytes);
+			return ::aligned_alloc(alignment, ALIGN_UP(bytes, alignment));
 #endif // __TARGET_OS_WINDOWS
 		}
 
 		void do_deallocate(void* ptr, size_t bytes, size_t alignment) final
 		{
+			if (alignment <= MALLOC_DEFAULT_ALIGNMENT)
+			{
+				std::free(ptr);
+				return;
+			}
+
 #if defined(__TARGET_OS_WINDOWS)
 			::_aligned_free(ptr);
 #else
@@ -75,7 +86,7 @@ namespace mark
 			if (bytes == 0) [[unlikely]]
 				return nullptr;
 
-			size_t aligned_bytes = ALIGN_UP(bytes, alignment);
+			const size_t aligned_bytes = ALIGN_UP(bytes, alignment);
 
 			// 제한이 없는 경우
 			if (m_limited)
@@ -84,6 +95,16 @@ namespace mark
 				{
 					assert(false && "Memory limit exceeded in limited_memory_resource");
 				}
+			}
+
+			if (alignment <= MALLOC_DEFAULT_ALIGNMENT)
+			{
+				void* ptr = ::malloc(bytes);
+				if (!ptr) [[unlikely]]
+					return nullptr;
+				m_used += aligned_bytes;
+
+				return ptr;
 			}
 
 #if defined(__TARGET_OS_WINDOWS)
@@ -156,23 +177,116 @@ namespace mark
 		}
 	};
 
-	class temp_pool_memory_resource final : public std::pmr::monotonic_buffer_resource
+	class temp_pool_memory_resource final : public std::pmr::memory_resource
 	{
+		char* m_buffer; // 내부 버퍼 포인터 (monotonic_buffer_resource가 관리하는 버퍼)
+		size_t m_buffer_size; // 내부 버퍼 크기
+		size_t m_offset; // 현재 버퍼에서의 오프셋 (monotonic_buffer_resource가 관리하는 버퍼 내에서의 위치)
+		BOOL m_free_buffer; // 버퍼 해제 여부 (true면 소유권이 있고, false면 외부에서 제공된 버퍼)
+
+		std::pmr::memory_resource* m_upstream; // 업스트림 메모리 리소스 (monotonic_buffer_resource가 관리하는 버퍼가 부족할 때 사용)
+
 	public:
-		explicit temp_pool_memory_resource(size_t initial_size)
-			: std::pmr::monotonic_buffer_resource(initial_size, get_default_system_memory_resource_ptr())
+		explicit temp_pool_memory_resource(size_t pool_size)
+			: m_buffer(static_cast<char*>(::malloc(pool_size)))
+			, m_buffer_size(0)
+			, m_offset(0)
+			, m_upstream(nullptr)
+			, m_free_buffer(true)
 		{
 		}
 
+		explicit temp_pool_memory_resource(void* buffer, size_t buffer_size)
+			: m_buffer(static_cast<char*>(buffer))
+			, m_buffer_size((uint32_t)buffer_size)
+			, m_offset(0)
+			, m_upstream(nullptr)
+			, m_free_buffer(false) // 외부에서 제공된 버퍼는 해제하지 않음
+		{
+		}
+
+		/*
+		* upstream은 안쓴다.
 		explicit temp_pool_memory_resource(size_t initial_size, std::pmr::memory_resource* upstream)
-			: std::pmr::monotonic_buffer_resource(initial_size, upstream)
+			: m_buffer(static_cast<char*>(::malloc(initial_size)))
+			, m_buffer_size(0)
+			, m_offset(0)
+			, m_upstream(upstream)
+			, m_free_buffer(true)
 		{
 		}
 
 		explicit temp_pool_memory_resource(void* buffer, size_t buffer_size, std::pmr::memory_resource* upstream)
-			: std::pmr::monotonic_buffer_resource(buffer, buffer_size, upstream)
+			: m_buffer(static_cast<char*>(buffer))
+			, m_buffer_size(buffer_size)
+			, m_offset(0)
+			, m_upstream(upstream)
+			, m_free_buffer(false) // 외부에서 제공된 버퍼는 해제하지 않음
 		{
 		}
+		*/
+
+		virtual ~temp_pool_memory_resource()
+		{
+			if (m_buffer && m_free_buffer)
+			{
+				::free(m_buffer);
+				m_buffer = nullptr;
+				m_free_buffer = false;
+				m_buffer_size = 0;
+				m_offset = 0;
+				m_upstream = nullptr;
+			}
+			else
+			{
+				m_buffer = nullptr;
+				m_free_buffer = false;
+				m_buffer_size = 0;
+				m_offset = 0;
+				m_upstream = nullptr;
+			}
+		}
+
+		inline void release() noexcept
+		{
+			m_offset = 0; // 오프셋 초기화하여 버퍼 재사용 가능
+		}
+
+		inline void set_free_buffer(bool free_buffer) noexcept
+		{
+			m_free_buffer = free_buffer;
+		}
+
+	private:
+		inline void* do_allocate(size_t bytes, size_t alignment) final
+		{
+			size_t current_offset = ALIGN_UP(m_offset, alignment);
+			if (current_offset + bytes <= m_buffer_size)
+			{
+				void* ptr = m_buffer + current_offset;
+				m_offset = current_offset + bytes;
+				return ptr;
+			}
+			else if (m_upstream)
+			{
+				return m_upstream->allocate(bytes, alignment);
+			}
+			else
+			{
+				assert(false && "Temp pool buffer exhausted and no upstream memory resource available");
+				return nullptr; // 버퍼가 부족하고 업스트림이 없으면 할당 실패
+			}
+		}
+
+		void do_deallocate(void* ptr, size_t bytes, size_t alignment) final
+		{
+		}
+
+		inline bool do_is_equal(const std::pmr::memory_resource& Other) const noexcept final
+		{
+			return this == &Other;
+		}
+
 	};
 
 

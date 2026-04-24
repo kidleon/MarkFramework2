@@ -293,12 +293,8 @@ namespace mark
 
 	void* core_temp_alloc(size_t bytes, size_t alignment)
 	{
-		return private_core_detail::alloc_impl_with_header<temp_pool_memory_resource>(
-			get_default_temp_memory_resource_ptr(),
-			bytes,
-			1,
-			alignment
-		);
+		temp_pool_memory_resource* temp_pool = get_default_temp_memory_resource_ptr();
+		return temp_pool->allocate(bytes, alignment); // 임시 풀에서 먼저 시도 (버퍼가 부족하면 업스트림으로 넘어감)
 	}
 
 	void* core_sys_alloc(size_t bytes, size_t count, size_t alignment)
@@ -333,13 +329,10 @@ namespace mark
 	}
 	void* core_temp_alloc(size_t bytes, size_t count, size_t alignment)
 	{
-		return private_core_detail::alloc_impl_with_header<temp_pool_memory_resource>(
-			get_default_temp_memory_resource_ptr(),
-			bytes,
-			count,
-			alignment
-		);
+		temp_pool_memory_resource* temp_pool = get_default_temp_memory_resource_ptr();
+		return temp_pool->allocate(bytes, alignment); // 임시 풀에서 먼저 시도 (버퍼가 부
 	}
+
 #endif // __MEMORY_TRACKING_ENABLED__
 
 	void core_sys_free(void* ptr, size_t alignment)

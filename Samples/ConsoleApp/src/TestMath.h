@@ -1,5 +1,5 @@
 #pragma once
-#include "MathLib.h"
+#include "mathlib.h"
 #include <cmath>
 #include <cstdio>
 #include <cstring>

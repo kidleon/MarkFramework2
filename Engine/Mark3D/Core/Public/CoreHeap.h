@@ -4,7 +4,7 @@
 namespace mark
 {
 	/**
-	* @brief 코어 힙 메모리를 생성한다. 이 힙은 시스템메모리, 동기화 풀 메모리, 비동기화 풀 메모리, 임시 버퍼를 관리하는 역할을 한다.
+	* @brief 코어 힙 메모리를 생성한다. 이 힙은 시스템메모리, 동기화 풀 메모리, 비 동기화 풀 메모리, 임시 버퍼를 관리하는 역할을 한다.
 	* Mark3D 외부에서 사용하기 위한 API들이며 Mark3D 내부에서는 PrivateMemory.h의 내부 함수들을 직접 호출하여 사용한다.
 	* @param limited_memory_size 힙이 사용할 수 있는 최대 메모리 크기
 	* @param sync_pool_count_per_chunk 동기화 풀의 청크당 블록 수
@@ -234,6 +234,12 @@ namespace mark
 		void* ptr,
 		size_t alignment
 	);
+
+	/**
+	* @brief 임시 메모리를 리셋한다. 외부에서는 사용해선 안되고 벤치마크 용으로 임시로 만듬.
+	* @return 없음
+	*/
+	MARKENGINE_API void mark_temp_reset();
 
 	/**
 	* @brief 임시 버퍼 메모리를 해제한다. 이 함수는 PrivateMemory의 내부 함수로 직접 해제한다.

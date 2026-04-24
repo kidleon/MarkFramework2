@@ -5,26 +5,25 @@
 #include "CoreHeap.h"
 #include "CoreGeneric.h"
 #include "Log.h"
-/*
 
 #include "TestMath.h"
 #include "TestMath_Utils.h"
 #include "Test_FileSystem.h"
 #include "Test_Compress.h"
-#include "Test_MemoryTempPool.h"
+//#include "Test_MemoryTempPool.h"
 #include "Test_Unicode.h"
 #include "Test_Hash.h"
 #include "Test_Timer.h"
 #include "Test_SRWLock.h"
 #include "Test_SpinLock.h"
-#include "Test_UnknownPtr.h"
+//#include "Test_UnknownPtr.h"
+#include "Benchmark_CoreHeap.h"
 
 
 
 
 void TestGeneric();
 
-*/
 void TestStringBuffer();
 
 struct Person
@@ -50,20 +49,20 @@ int main()
 	{
 		TestStringBuffer();
 
-		/*
 		TestGeneric();
 		mark::TestMathLib();
 		mark::TestMathLib_Util();
 		mark::Test_FileSystem();
 		mark::Test_Compress();
-		mark::Test_MemoryTempPool();
+		//mark::Test_MemoryTempPool();
 		mark::Test_Unicode();
 		mark::Test_Hash();
 		mark::Test_Timer();
 		mark::Test_SRWLock();
 		mark::Test_SpinLock();	
-		mark::Test_UnknownPtr();
-		*/
+		//mark::Test_UnknownPtr();
+
+		mark::Benchamrk_CoreHeap();
 	}
 
 	mark::Mark3D::Shutdown();
@@ -159,8 +158,6 @@ void TestStringBuffer()
 }
 
 
-/*
-
 void TestGeneric()
 {
 	{
@@ -193,4 +190,3 @@ void TestGeneric()
 		lstPerson.emplace_back(Person{ "Heidi", 29, 89 });
 	}
 }
-*/
