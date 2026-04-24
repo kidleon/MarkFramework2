@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "FBXLoader.h"
+
+/*
 #include "ufbx/ufbx.h"
 #include "FileSystem.h"
 
@@ -10,7 +12,7 @@ namespace mark
 	{
 		if (!user)
 		{
-			return CORE_SYS_ALLOC(size);
+			return mark::sys_alloc(size);
 		}
 		else
 		{
@@ -469,3 +471,4 @@ namespace mark
 
 
 }
+*/

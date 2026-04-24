@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Mark3D.h"
-#include "PrivateMemory.h"
+#include "CoreHeap.h"
 #include "MemoryTracker.h"
 
 
@@ -19,8 +19,7 @@ namespace mark
 		s_memory_tracker = new memory_tracker(opts);
 #endif // __MEMORY_TRACKING_ENABLED__
 
-		initialize_core_memory(
-			1024 * 1024 * 256, // initialize_core_memory (256MB)
+		initialize_core_memory2(
 			64,  // sync_pool_count_per_chunk = 64
 			64,  // unsync_pool_count_per_chunk = 64
 			1024 * 1024,  // sync_pool_max_size_per_block = 1MB
@@ -46,7 +45,7 @@ namespace mark
 		log::shutdown();
 #endif // __LOG_ENABLED__
 
-		shutdown_core_memory();
+		shutdown_core_memory2();
 
 #if defined(__MEMORY_TRACKING_ENABLED__)
 		if (s_memory_tracker)

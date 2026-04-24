@@ -13,7 +13,7 @@
 #include "Predefine.h"
 #include "MathLib.h"
 #include "RenderDef.h"
-#include "PrivateMemory.h"
+#include "CoreHeap.h"
 #include "Log.h"
 
 #endif // __PCH_H__

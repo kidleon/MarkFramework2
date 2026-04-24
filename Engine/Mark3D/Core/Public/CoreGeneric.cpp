@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "CoreGeneric.h"
-#include "PrivateMemory.h"
+#include "CoreHeap.h"
 
 
 namespace mark
@@ -12,7 +12,7 @@ namespace mark
 
 	std::pmr::memory_resource* get_core_sync_pool_memory_resource_ptr() noexcept
 	{
-		return get_default_sync_pool_memory_resource_ptr();
+		return get_default_spool_memory_resource_ptr();
 	}
 
 	std::pmr::memory_resource* get_core_usync_pool_memory_resource_ptr() noexcept

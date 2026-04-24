@@ -472,4 +472,327 @@ namespace mark
 		upool_vector<CharT> m_buffer_to_c; // to_buffer()에서 C 스타일 문자열로 변환할 때 사용할 임시 버퍼
 
 	};
+
+	template<typename CharT, size_t InitialCapacity = 1024>
+	class std_string_buffer
+	{
+	public:
+		std_string_buffer()
+		{
+			m_buffer.reserve(InitialCapacity);
+
+			if constexpr (!std::is_same_v<CharT, char> &&
+				!std::is_same_v<CharT, wchar_t> &&
+				!std::is_same_v<CharT, char16_t> &&
+				!std::is_same_v<CharT, char32_t>)
+			{
+				static_assert(always_false<CharT>, "Unsupported character type");
+			}
+		}
+
+		template<typename... Args>
+		inline std_string_buffer& format(std::basic_format_string<CharT, std::type_identity_t<Args>...> fmt, Args&&... args)
+		{
+			auto end = std::format_to(std::back_inserter(m_buffer), fmt, std::forward<Args>(args)...);
+			return *this;
+		}
+
+		inline std_string_buffer& append_endl()
+		{
+			if constexpr (std::is_same_v<CharT, char>)
+			{
+				return append('\n');
+			}
+			else if constexpr (std::is_same_v<CharT, wchar_t>)
+			{
+				return append(L'\n');
+			}
+			else if constexpr (std::is_same_v<CharT, char16_t>)
+			{
+				return append(u'\n');
+			}
+			else if constexpr (std::is_same_v<CharT, char32_t>)
+			{
+				return append(U'\n');
+			}
+			else
+			{
+				static_assert(always_false<CharT>, "Unsupported character type");
+				return *this; // 컴파일 오류 방지용
+			}
+		}
+
+		inline std_string_buffer& append(const CharT* str, size_t count)
+		{
+			m_buffer.insert(m_buffer.end(), str, str + count);
+			return *this;
+		}
+
+		inline std_string_buffer& append(const std::basic_string<CharT>& str)
+		{
+			return append(str.data(), str.size());
+		}
+
+		inline std_string_buffer& append(const CharT* str)
+		{
+			return append(str, std::char_traits<CharT>::length(str));
+		}
+
+		inline std_string_buffer& append(CharT ch)
+		{
+			m_buffer.push_back(ch);
+			return *this;
+		}
+
+		inline std_string_buffer& append(bool value)
+		{
+			if constexpr (std::is_same_v<CharT, char>)
+			{
+				return append(value ? "true" : "false");
+			}
+			else if constexpr (std::is_same_v<CharT, wchar_t>)
+			{
+				std::basic_string_view<wchar_t> str = value ? (std::basic_string_view<wchar_t>(L"true")) : (std::basic_string_view<wchar_t>(L"false"));
+				return append(str.data(), str.size());
+			}
+			else if constexpr (std::is_same_v<CharT, char16_t>)
+			{
+				std::basic_string_view<char16_t> str = value ? (std::basic_string_view<char16_t>(u"true")) : (std::basic_string_view<char16_t>(u"false"));
+				return append(str.data(), str.size());
+			}
+			else if constexpr (std::is_same_v<CharT, char32_t>)
+			{
+				std::basic_string_view<char32_t> str = value ? (std::basic_string_view<char32_t>(U"true")) : (std::basic_string_view<char32_t>(U"false"));
+				return append(str.data(), str.size());
+			}
+			else
+			{
+				static_assert(always_false<CharT>, "Unsupported character type");
+				return *this; // 컴파일 오류 방지용
+			}
+		}
+
+		inline std_string_buffer& append(int value)
+		{
+			if constexpr (std::is_same_v<CharT, char>)
+			{
+				char buffer[64]; // 충분히 큰 버퍼
+				std::to_chars_result result = std::to_chars(buffer, buffer + sizeof(buffer), value);
+				assert(result.ec == std::errc());
+				return append(buffer, result.ptr - buffer);
+			}
+			else if constexpr (std::is_same_v<CharT, wchar_t>)
+			{
+				wchar_t buffer[64]; // 충분히 큰 버퍼
+				std::format_to(buffer, L"{}", value);
+				return append(buffer, std::char_traits<wchar_t>::length(buffer));
+			}
+			else if constexpr (std::is_same_v<CharT, char16_t>)
+			{
+				char16_t buffer[64]; // 충분히 큰 버퍼
+				std::format_to(buffer, u"{}", value);
+				return append(buffer, std::char_traits<char16_t>::length(buffer));
+			}
+			else if constexpr (std::is_same_v<CharT, char32_t>)
+			{
+				char32_t buffer[64]; // 충분히 큰 버퍼
+				std::format_to(buffer, U"{}", value);
+				return append(buffer, std::char_traits<char32_t>::length(buffer));
+			}
+			else
+			{
+				static_assert(always_false<CharT>, "Unsupported character type");
+				return *this; // 컴파일 오류 방지용
+			}
+		}
+
+		inline std_string_buffer& append(unsigned int value)
+		{
+			if constexpr (std::is_same_v<CharT, char>)
+			{
+				char buffer[64]; // 충분히 큰 버퍼
+				std::to_chars_result result = std::to_chars(buffer, buffer + sizeof(buffer), value);
+				assert(result.ec == std::errc());
+				return append(buffer, result.ptr - buffer);
+			}
+			else if constexpr (std::is_same_v<CharT, wchar_t>)
+			{
+				wchar_t buffer[64]; // 충분히 큰 버퍼
+				std::format_to(buffer, L"{}", value);
+				return append(buffer, std::char_traits<wchar_t>::length(buffer));
+			}
+			else if constexpr (std::is_same_v<CharT, char16_t>)
+			{
+				char16_t buffer[64]; // 충분히 큰 버퍼
+				std::format_to(buffer, u"{}", value);
+				return append(buffer, std::char_traits<char16_t>::length(buffer));
+			}
+			else if constexpr (std::is_same_v<CharT, char32_t>)
+			{
+				char32_t buffer[64]; // 충분히 큰 버퍼
+				std::format_to(buffer, U"{}", value);
+				return append(buffer, std::char_traits<char32_t>::length(buffer));
+			}
+			else
+			{
+				static_assert(always_false<CharT>, "Unsupported character type");
+				return *this; // 컴파일 오류 방지용
+			}
+		}
+
+		inline std_string_buffer& append(float value)
+		{
+			if constexpr (std::is_same_v<CharT, char>)
+			{
+				char buffer[64]; // 충분히 큰 버퍼
+
+				std::to_chars_result result = std::to_chars(buffer, buffer + sizeof(buffer), value);
+				assert(result.ec == std::errc());
+
+				return append(buffer, result.ptr - buffer);
+			}
+			else if constexpr (std::is_same_v<CharT, wchar_t>)
+			{
+				wchar_t buffer[64]; // 충분히 큰 버퍼
+				std::format_to(buffer, L"{}", value);
+				return append(buffer, std::char_traits<wchar_t>::length(buffer));
+			}
+			else if constexpr (std::is_same_v<CharT, char16_t>)
+			{
+				char16_t buffer[64]; // 충분히 큰 버퍼
+				std::format_to(buffer, u"{}", value);
+				return append(buffer, std::char_traits<char16_t>::length(buffer));
+			}
+			else if constexpr (std::is_same_v<CharT, char32_t>)
+			{
+				char32_t buffer[64]; // 충분히 큰 버퍼
+				std::format_to(buffer, U"{}", value);
+				return append(buffer, std::char_traits<char32_t>::length(buffer));
+			}
+			else
+			{
+				static_assert(always_false<CharT>, "Unsupported character type");
+				return *this; // 컴파일 오류 방지용
+			}
+		}
+
+		inline std_string_buffer& append(double value)
+		{
+			if constexpr (std::is_same_v<CharT, char>)
+			{
+				char buffer[64]; // 충분히 큰 버퍼
+				std::to_chars_result result = std::to_chars(buffer, buffer + sizeof(buffer), value);
+				assert(result.ec == std::errc());
+				return append(buffer, result.ptr - buffer);
+			}
+			else if constexpr (std::is_same_v<CharT, wchar_t>)
+			{
+				wchar_t buffer[64]; // 충분히 큰 버퍼
+				std::format_to(buffer, L"{}", value);
+				return append(buffer, std::char_traits<wchar_t>::length(buffer));
+			}
+			else if constexpr (std::is_same_v<CharT, char16_t>)
+			{
+				char16_t buffer[64]; // 충분히 큰 버퍼
+				std::format_to(buffer, u"{}", value);
+				return append(buffer, std::char_traits<char16_t>::length(buffer));
+			}
+			else if constexpr (std::is_same_v<CharT, char32_t>)
+			{
+				char32_t buffer[64]; // 충분히 큰 버퍼
+				std::format_to(buffer, U"{}", value);
+				return append(buffer, std::char_traits<char32_t>::length(buffer));
+			}
+			else
+			{
+				static_assert(always_false<CharT>, "Unsupported character type");
+				return *this; // 컴파일 오류 방지용
+			}
+		}
+
+		inline std_string_buffer& append(const sys_string& str)
+		{
+			return append(str.data(), str.size());
+		}
+
+		inline std_string_buffer& append(const spool_string& str)
+		{
+			return append(str.data(), str.size());
+		}
+
+		inline std_string_buffer& append(const upool_string& str)
+		{
+			return append(str.data(), str.size());
+		}
+
+		inline std_string_buffer& append(const temp_string& str)
+		{
+			return append(str.data(), str.size());
+		}
+
+		inline std_string_buffer& append(std::string_view str)
+		{
+			return append(str.data(), str.size());
+		}
+
+		inline void reserve(size_t new_capacity)
+		{
+			m_buffer.reserve(new_capacity);
+		}
+
+		inline void clear()
+		{
+			m_buffer.clear();
+		}
+
+		[[nodiscard]] inline std::basic_string_view<CharT> to_string_view() const noexcept
+		{
+			return std::basic_string_view<CharT>(m_buffer.data(), m_buffer.size());
+		}
+
+		inline void to_buffer(CharT* out_buffer, size_t buffer_size) const
+		{
+			assert(out_buffer && buffer_size > 0 && "Output buffer must be non-null and have positive size");
+
+			// buffer_size는 바이트 단위이므로, CharT 크기에 맞게 문자 수로 변환
+			size_t char_count = buffer_size / sizeof(CharT);
+
+			// buffer_size가 작을 경우 작은 크기에 맞게 잘라서 복사
+			size_t copy_size = std::min(char_count - 1, m_buffer.size()); // -1은 null-terminator 공간 확보를 위해
+			std::copy_n(m_buffer.data(), copy_size, out_buffer);
+
+			// 복사한 문자열 뒤에 null-terminator 추가
+			out_buffer[copy_size] = CharT(0); // null-terminate
+		}
+
+		inline void to_string(std::basic_string<CharT>& out_str) const
+		{
+			out_str.assign(m_buffer.data(), m_buffer.size());
+		}
+
+		inline void to_sys_string(std::basic_string<CharT, std::char_traits<CharT>, ALLOC::SYS<CharT>>& out_str) const
+		{
+			out_str.assign(m_buffer.data(), m_buffer.size());
+		}
+
+		inline void to_spool_string(std::basic_string<CharT, std::char_traits<CharT>, ALLOC::SPOOL<CharT>>& out_str) const
+		{
+			out_str.assign(m_buffer.data(), m_buffer.size());
+		}
+
+		inline void to_upool_string(std::basic_string<CharT, std::char_traits<CharT>, ALLOC::UPOOL<CharT>>& out_str) const
+		{
+			out_str.assign(m_buffer.data(), m_buffer.size());
+		}
+
+		inline void to_temp_string(std::basic_string<CharT, std::char_traits<CharT>, ALLOC::TEMP<CharT>>& out_str) const
+		{
+			out_str.assign(m_buffer.data(), m_buffer.size());
+		}
+
+
+	private:
+		std::vector<CharT> m_buffer; // 내부 버퍼 (sync_pool_allocator 사용)
+
+	};
 }

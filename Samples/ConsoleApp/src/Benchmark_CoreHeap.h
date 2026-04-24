@@ -1,3 +1,4 @@
+/*
 #pragma once
 #include "CoreHeap.h"
 #include <cstdio>
@@ -195,7 +196,7 @@ namespace mark
         inline void thread_worker_malloc(int iters, std::atomic<int>& barrier)
         {
             barrier.fetch_add(1);
-            while (barrier.load() < THREAD_COUNT + 1) { /* spin wait for all threads */ }
+            while (barrier.load() < THREAD_COUNT + 1) { }
 
             for (int i = 0; i < iters; ++i)
             {

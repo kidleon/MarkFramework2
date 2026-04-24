@@ -17,8 +17,9 @@
 #include "Test_SRWLock.h"
 #include "Test_SpinLock.h"
 //#include "Test_UnknownPtr.h"
-#include "Benchmark_CoreHeap.h"
+#include "Test_PrivateMemory2.h"
 
+#include "Benchmark_CoreHeap.h"
 
 
 
@@ -63,6 +64,7 @@ int main()
 		//mark::Test_UnknownPtr();
 
 		mark::Benchamrk_CoreHeap();
+        mark::Test_PrivateMemory2();
 	}
 
 	mark::Mark3D::Shutdown();

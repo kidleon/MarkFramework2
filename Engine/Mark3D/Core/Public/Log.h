@@ -46,6 +46,59 @@ namespace mark
 		}
 	};
 
+	template<size_t InitialCapacity = 2048>
+	class log_string_buffer
+	{
+		std::vector<char> m_buffer;
+
+	public:
+		log_string_buffer()
+		{
+			m_buffer.reserve(InitialCapacity);
+		}
+
+		template<typename... Args>
+		inline std_string_buffer& format(std::basic_format_string<CharT, std::type_identity_t<Args>...> fmt, Args&&... args)
+		{
+			auto end = std::format_to(std::back_inserter(m_buffer), fmt, std::forward<Args>(args)...);
+			return *this;
+		}
+
+		inline std_string_buffer& append_endl() { return append('\n'); }
+		inline std_string_buffer& append(const CharT* str, size_t count)
+		{
+			m_buffer.insert(m_buffer.end(), str, str + count);
+			return *this;
+		}
+
+		inline std_string_buffer& append(const std::basic_string<CharT>& str)
+		{
+			return append(str.data(), str.size());
+		}
+
+		inline std_string_buffer& append(const char* str)
+		{
+			return append(str, std::char_traits<char>::length(str));
+		}
+
+		inline std_string_buffer& append(char ch)
+		{
+			m_buffer.push_back(ch);
+			return *this;
+		}
+
+		inline std_string_buffer& append(bool value) { return append(value ? "true" : "false"); }
+
+		inline std_string_buffer& append(int value)
+		{
+			char buffer[64]; // 충분히 큰 버퍼
+			std::to_chars_result result = std::to_chars(buffer, buffer + sizeof(buffer), value);
+			assert(result.ec == std::errc());
+			return append(buffer, result.ptr - buffer);
+		}
+
+	};
+
 	class MARKENGINE_API log
 	{
 	public:
@@ -80,8 +133,7 @@ namespace mark
 			Args&&... args
 		)
 		{
-			// 로그 메시지 포맷팅
-			string_buffer<char, 2048> str_buf;
+			thread_local std_string_buffer<char, 2048> str_buf;
 			str_buf.format(fl.fmt, std::forward<Args>(args)...);
 			str_buf.append(" (at ");
 			str_buf.append(fl.loc.file_name());
@@ -89,7 +141,7 @@ namespace mark
 			str_buf.append(fl.loc.line());
 			str_buf.append(")");
 
-			log_impl(category, level, str_buf.to_string_view());
+			log_f_impl(category, level, str_buf.to_string_view());
 		}
 
 		template<log_category category, log_level level>
@@ -98,16 +150,7 @@ namespace mark
 			if (!msg) [[unlikely]]
 				return;
 
-			// 로그 메시지 포맷팅
-			string_buffer<char, 2048> str_buf;
-			str_buf.append(msg);
-			str_buf.append(" (at ");
-			str_buf.append(loc.file_name());
-			str_buf.append(":");
-			str_buf.append(std::to_string(loc.line()));
-			str_buf.append(")");
-
-			log_impl(category, level, str_buf.to_string_view());
+			log_impl(category, level, msg, loc);
 		}
 
 		template<log_category category, log_level level>
@@ -116,16 +159,7 @@ namespace mark
 			if (str.empty()) [[unlikely]]
 				return;
 
-			// 로그 메시지 포맷팅
-			string_buffer<char, 2048> str_buf;
-			str_buf.append(str);
-			str_buf.append(" (at ");
-			str_buf.append(loc.file_name());
-			str_buf.append(":");
-			str_buf.append(loc.line());
-			str_buf.append(")");
-
-			log_impl(category, level, str_buf.to_string_view());
+			log_impl(category, level, str.c_str(), loc);
 		}
 
 		template<log_category category, log_level level>
@@ -134,16 +168,7 @@ namespace mark
 			if (str.empty()) [[unlikely]]
 				return;
 
-			// 로그 메시지 포맷팅
-			string_buffer<char, 2048> str_buf;
-			str_buf.append(str);
-			str_buf.append(" (at ");
-			str_buf.append(loc.file_name());
-			str_buf.append(":");
-			str_buf.append(loc.line());
-			str_buf.append(")");
-
-			log_impl(category, level, str_buf.to_string_view());
+			log_impl(category, level, str.c_str(), loc);
 		}
 
 		template<log_category category, log_level level>
@@ -152,16 +177,7 @@ namespace mark
 			if (str.empty()) [[unlikely]]
 				return;
 
-			// 로그 메시지 포맷팅
-			string_buffer<char, 2048> str_buf;
-			str_buf.append(str);
-			str_buf.append(" (at ");
-			str_buf.append(loc.file_name());
-			str_buf.append(":");
-			str_buf.append(loc.line());
-			str_buf.append(")");
-
-			log_impl(category, level, str_buf.to_string_view());
+			log_impl(category, level, str.c_str(), loc);
 		}
 
 		template<log_category category, log_level level>
@@ -170,19 +186,21 @@ namespace mark
 			if (str.empty()) [[unlikely]]
 				return;
 
-			// 로그 메시지 포맷팅
-			string_buffer<char, 2048> str_buf;
-			str_buf.append(str);
-			str_buf.append(" (at ");
-			str_buf.append(loc.file_name());
-			str_buf.append(":");
-			str_buf.append(loc.line());
-			str_buf.append(")");
-
-			log_impl(category, level, str_buf.to_string_view());
+			log_impl(category, level, str.c_str(), loc);
 		}
 
-		static void log_impl(log_category category, log_level level, std::string_view message);
+		static void log_f_impl(
+			log_category category,
+			log_level    level,
+			std::string_view msg
+		);
+
+		static void log_impl(
+			log_category category,
+			log_level    level,
+			const char* msg,
+			std::source_location loc
+		);
 
 	};
 }

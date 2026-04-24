@@ -203,7 +203,7 @@ namespace mark
 		if (!fp)
 			return nullptr;
 
-		file_handle_info* handle = (file_handle_info*)CORE_SPOOL_ALLOC_A(sizeof(file_handle_info), DEFAULT_ALIGNMENT);
+		file_handle_info* handle = (file_handle_info*)spool_alloc(sizeof(file_handle_info), DEFAULT_ALIGNMENT);
 
 		handle->fp = fp;
 		handle->read_buffer = nullptr;
@@ -223,9 +223,9 @@ namespace mark
 			std::fclose(handle->fp);
 
 		if (handle->read_buffer)
-			CORE_SYS_FREE(handle->read_buffer);
+			sys_free(handle->read_buffer, handle->read_buffer_size, alignof(file_handle_info));
 
-		CORE_SPOOL_FREE(handle);
+		spool_free(handle, sizeof(file_handle_info), alignof(file_handle_info));
 	}
 
 	bool file_system::rename_file(const char* old_path, const char* new_path)
@@ -346,7 +346,7 @@ namespace mark
 		}
 
 		// 읽기 버퍼 할당
-		handle->read_buffer = (char*)CORE_SYS_ALLOC(file_size);
+		handle->read_buffer = (char*)sys_alloc(file_size, alignof(file_handle_info));
 		if (!handle->read_buffer)
 		{
 			// 파일 위치를 원래대로 되돌림
@@ -359,7 +359,7 @@ namespace mark
 
 		if (read_bytes != static_cast<size_t>(file_size))
 		{
-			CORE_SYS_FREE(handle->read_buffer);
+			sys_free(handle->read_buffer, handle->read_buffer_size, alignof(file_handle_info));
 			handle->read_buffer = nullptr;
 			handle->read_buffer_size = 0;
 

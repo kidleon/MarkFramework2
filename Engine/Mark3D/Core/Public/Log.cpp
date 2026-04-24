@@ -164,14 +164,48 @@ namespace mark
 		g_initialized = false;
 	}
 
-	void log::log_impl(log_category category, log_level level, std::string_view message)
+	void log::log_f_impl(
+		log_category category,
+		log_level    level,
+		std::string_view msg
+	)
 	{
 		spdlog::logger* lg = get_logger(category);
 		if (lg == nullptr) [[unlikely]]
 			return; // 초기화 전 호출 방어
 
 		spdlog::level::level_enum spd_level = to_spdlog_level(static_cast<uint32_t>(level));
-		lg->log(spd_level, message);
+		lg->log(spd_level, msg);
 	}
+
+
+	void log::log_impl(
+		log_category category,
+		log_level    level,
+		const char* msg,
+		std::source_location loc
+	)
+	{
+		if (!msg) [[unlikely]]
+			return;
+
+		thread_local std_string_buffer<char, 2048> str_buf;
+
+		str_buf.clear();
+
+		str_buf.append(msg);
+		str_buf.append(" (at ");
+		str_buf.append(loc.file_name());
+		str_buf.append(":");
+		str_buf.append(std::to_string(loc.line()));
+		str_buf.append(")");
+
+		spdlog::logger* lg = get_logger(category);
+		if (lg == nullptr) [[unlikely]]
+			return; // 초기화 전 호출 방어
+
+		spdlog::level::level_enum spd_level = to_spdlog_level(static_cast<uint32_t>(level));
+		lg->log(spd_level, str_buf.to_string_view());
+	} 
 
 } // namespace mark

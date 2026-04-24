@@ -1,5 +1,5 @@
 #pragma once
-
+/*
 
 namespace mark
 {
@@ -58,3 +58,4 @@ namespace mark
 		static void fbx_free(FBX_SCENE* scene);
 	};
 }
+*/

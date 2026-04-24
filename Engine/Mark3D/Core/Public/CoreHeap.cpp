@@ -1,128 +1,78 @@
 #include "pch.h"
 #include "CoreHeap.h"
-#include "PrivateMemory.h"
-
 
 
 namespace mark
 {
-	constexpr uint64_t CORE_HEAP_SIGNATURE = 0xDEADBEEFDEADBEEF;
-	constexpr uint64_t CORE_HEAP_TEMP_POOL_SIGNATURE = 0xFEEDFACEFEEDFACE;
-
-	struct TEMP_POOL
+	class sync_pool_memory_resource2 final : public std::pmr::synchronized_pool_resource
 	{
-		uint64_t signature = CORE_HEAP_TEMP_POOL_SIGNATURE; // 디버깅을 위한 시그니처
-		char* buffer = nullptr; // 외부에서 설정한 버퍼 포인터
-		size_t buffer_size = 0; // 외부에서 설정한 버퍼 크기
-		temp_pool_memory_resource pool;
-
-		TEMP_POOL(size_t size)
-			: pool(size)
+	public:
+		explicit sync_pool_memory_resource2(const std::pmr::pool_options& options = std::pmr::pool_options())
+			: std::pmr::synchronized_pool_resource(options, std::pmr::get_default_resource())
 		{
 		}
 	};
 
-	struct CORE_HEAP
+	class usync_pool_memory_resource2 final : public std::pmr::unsynchronized_pool_resource
 	{
-		uint64_t signature = CORE_HEAP_SIGNATURE; // 디버깅을 위한 시그니처
-
-		limited_memory_resource _limited_sys_res;
-		sync_pool_memory_resource _spool_res;
-		usync_pool_memory_resource _upool_res;
-		temp_pool_memory_resource _temp_res;
-
-		std::pmr::vector<HANDLE> _temp_pools; // 임시 풀 메모리 리소스 핸들 목록
-
-		CORE_HEAP() = default;
-
-		explicit CORE_HEAP(
-			size_t limited_memory_size,
-			size_t sync_pool_count_per_chunk,
-			size_t unsync_pool_count_per_chunk,
-			size_t sync_pool_max_size_per_block,
-			size_t unsync_pool_max_size_per_block,
-			size_t temp_buffer_size
-		)
-			: _limited_sys_res(limited_memory_size)
-			, _spool_res({ sync_pool_count_per_chunk, sync_pool_max_size_per_block })
-			, _upool_res({ unsync_pool_count_per_chunk, unsync_pool_max_size_per_block })
-			, _temp_res(temp_buffer_size)
-			
+	public:
+		explicit usync_pool_memory_resource2(const std::pmr::pool_options& options = std::pmr::pool_options())
+			: std::pmr::unsynchronized_pool_resource(options, std::pmr::get_default_resource())
 		{
-			_temp_pools.reserve(32); // 임시 풀 핸들 초기 예약 (필요에 따라 확장
+		}
+	};
+
+	class temp_pool_memory_resource2 final : public std::pmr::monotonic_buffer_resource
+	{
+	public:
+		explicit temp_pool_memory_resource2(size_t buffer_size)
+			: std::pmr::monotonic_buffer_resource(buffer_size, std::pmr::get_default_resource())
+			, m_buffer_size(buffer_size)
+		{
 		}
 
-		~CORE_HEAP()
+		explicit temp_pool_memory_resource2(void* buffer, size_t buffer_size)
+			: std::pmr::monotonic_buffer_resource(buffer, buffer_size, std::pmr::get_default_resource())
+			, m_buffer_size(buffer_size)
 		{
-			 // 임시 풀 메모리 리소스 핸들 목록 정리
-			for (HANDLE temp_pool_handle : _temp_pools)
+		}
+
+	private:
+		inline void* do_allocate(size_t bytes, size_t alignment) final
+		{
+#if defined(DEBUG) || defined(_DEBUG)
+			if (m_used + bytes > m_buffer_size)
 			{
-				TEMP_POOL* temp_pool = reinterpret_cast<TEMP_POOL*>(temp_pool_handle);
-				if (!temp_pool || temp_pool->signature != CORE_HEAP_TEMP_POOL_SIGNATURE)
-				{
-					assert(false && "Invalid temp pool handle in CORE_HEAP destructor");
-					continue;
-				}
-
-				if (temp_pool->signature == CORE_HEAP_TEMP_POOL_SIGNATURE)
-				{
-					temp_pool->pool.release();
-					temp_pool->~TEMP_POOL();
-					coreheap_free((HANDLE)this, temp_pool, alignof(TEMP_POOL));
-					//mark_sys_free(temp_pool, alignof(TEMP_POOL));
-				}
-				else
-				{
-					assert(false && "Invalid temp pool handle in CORE_HEAP destructor");
-				}
+				assert(false && "Temp pool buffer overflow detected");
+				return nullptr;
 			}
-
-			_temp_pools.clear();
-			signature = 0; // 시그니처 초기화 (디버깅용)
+			m_used += bytes;
+			
+#endif // 디버그 모드에서는 할당된 총 바이트 수를 추적하여 버퍼 초과 여부를 확인할 수 있도록 함 (실제 할당은 monotonic_buffer_resource가 처리)
+			return std::pmr::monotonic_buffer_resource::do_allocate(bytes, alignment);
 		}
+
+		inline void do_deallocate(void* ptr, size_t bytes, size_t alignment) final
+		{
+#if defined(DEBUG) || defined(_DEBUG)
+			m_used -= bytes;
+#endif 
+			std::pmr::monotonic_buffer_resource::do_deallocate(ptr, bytes, alignment);
+		}
+
+	private:
+		size_t m_used = 0;
+		size_t m_buffer_size = 0;
+
 	};
 
-	[[nodiscard]] __FORCEINLINE bool is_valid_core_heap_handle(CORE_HEAP* core_heap)
-	{
-		if (!core_heap) [[unlikely]]
-		{
-			assert(false && "Null core heap handle in coreheap_destroy");
-			return false;
-		}
+	static sync_pool_memory_resource2* s_default_sync_pool_memory_resource2 = nullptr;
+	static usync_pool_memory_resource2* s_default_usync_pool_memory_resource2 = nullptr;
+	static temp_pool_memory_resource2* s_default_temp_memory_resource2 = nullptr;
 
-#if defined(DEBUG)
-		if (core_heap->signature != CORE_HEAP_SIGNATURE)
-		{
-			assert(false && "Invalid core heap handle in coreheap_destroy");
-			return false;
-		}
-#endif // DEBUG
+	constexpr size_t DEFAULT_ALIGNMENT = alignof(std::max_align_t);
 
-		return true;
-	}
-
-	[[nodiscard]] __FORCEINLINE bool is_valid_temp_pool_handle(TEMP_POOL* temp_pool)
-	{
-		if (!temp_pool)
-		{
-			assert(false && "Null temp pool handle");
-			return false;
-		}
-
-#if defined(DEBUG)
-		if (temp_pool->signature != CORE_HEAP_TEMP_POOL_SIGNATURE)
-		{
-			assert(false && "Invalid temp pool handle");
-			return false;
-		}
-#endif // DEBUG
-
-		return true;
-	}
-
-
-	HANDLE coreheap_create(
-		size_t limited_memory_size,
+	bool initialize_core_memory2(
 		size_t sync_pool_count_per_chunk,
 		size_t unsync_pool_count_per_chunk,
 		size_t sync_pool_max_size_per_block,
@@ -130,518 +80,111 @@ namespace mark
 		size_t temp_buffer_size
 	)
 	{
-		//CORE_HEAP* core_heap = CORE_SYS_NEW_ARGS(CORE_HEAP, limited_memory_size, sync_pool_count_per_chunk, unsync_pool_count_per_chunk, sync_pool_max_size_per_block, unsync_pool_max_size_per_block, temp_buffer_size);
-		//return reinterpret_cast<HANDLE>(core_heap);
-		return nullptr;
-	}
-
-	void coreheap_destroy(HANDLE heap_handle)
-	{
-		CORE_HEAP* core_heap = reinterpret_cast<CORE_HEAP*>(heap_handle);
-
-		if (!is_valid_core_heap_handle(core_heap)) [[unlikely]]
-			return;
-
-		CORE_SYS_DELETE(CORE_HEAP, core_heap);
-	}
-
-#if defined(__MEMORY_TRACKING_ENABLED__)
-	void* mark_sys_alloc(
-		size_t bytes,
-		size_t alignment,
-		std::source_location loc
-	)
-	{
-		void* ptr = private_core_detail::alloc_impl_with_header<select_system_memory_resource>(
-			get_default_system_memory_resource_ptr(),
-			bytes,
-			1, // count는 1로 고정 (단일 할당)
-			alignment,
-			loc
-		);
-		return ptr;
-	}
-
-	void* mark_spool_alloc(
-		size_t bytes,
-		size_t alignment,
-		std::source_location loc
-	)
-	{
-		void* ptr = private_core_detail::alloc_impl_with_header<sync_pool_memory_resource>(
-			get_default_sync_pool_memory_resource_ptr(),
-			bytes,
-			1, // count는 1로 고정 (단일 할당)
-			alignment,
-			loc
-		);
-		return ptr;
-	}
-
-	void* mark_upool_alloc(
-		size_t bytes,
-		size_t alignment,
-		std::source_location loc
-	)
-	{
-		void* ptr = private_core_detail::alloc_impl_with_header<usync_pool_memory_resource>(
-			get_default_usync_pool_memory_resource_ptr(),
-			bytes,
-			1, // count는 1로 고정 (단일 할당)
-			alignment,
-			loc
-		);
-		return ptr;
-	}
-
-	void* mark_temp_alloc(
-		size_t bytes,
-		size_t alignment,
-		std::source_location loc
-	)
-	{
-		void* ptr = private_core_detail::alloc_impl_with_header<temp_pool_memory_resource>(
-			get_default_temp_memory_resource_ptr(),
-			bytes,
-			1, // count는 1로 고정 (단일 할당)
-			alignment,
-			loc
-		);
-		return ptr;
-	}
-
-	void* coreheap_alloc(
-		HANDLE heap_handle,
-		size_t bytes,
-		size_t alignment,
-		std::source_location loc
-	)
-	{
-		CORE_HEAP* core_heap = reinterpret_cast<CORE_HEAP*>(heap_handle);
-		if(!is_valid_core_heap_handle(core_heap)) [[unlikely]]
-			return nullptr;
-
-		void* ptr = private_core_detail::alloc_impl_with_header<limited_memory_resource>(
-			&core_heap->_limited_sys_res,
-			bytes,
-			1,
-			alignment,
-			loc
-		);
-
-		return ptr;
-	}
-
-	void* coreheap_spool_alloc(
-		HANDLE heap_handle,
-		size_t bytes,
-		size_t alignment,
-		std::source_location loc
-	)
-	{
-		CORE_HEAP* core_heap = reinterpret_cast<CORE_HEAP*>(heap_handle);
-		if (!is_valid_core_heap_handle(core_heap)) [[unlikely]]
-			return nullptr;
-
-		void* ptr = private_core_detail::alloc_impl_with_header<sync_pool_memory_resource>(
-			&core_heap->_spool_res,
-			bytes,
-			1,
-			alignment,
-			loc
-		);
-
-		return ptr;
-	}
-
-	void* coreheap_upool_alloc(
-		HANDLE heap_handle,
-		size_t bytes,
-		size_t alignment,
-		std::source_location loc
-	)
-	{
-		CORE_HEAP* core_heap = reinterpret_cast<CORE_HEAP*>(heap_handle);
-		if (!is_valid_core_heap_handle(core_heap)) [[unlikely]]
-			return nullptr;
-
-		void* ptr = private_core_detail::alloc_impl_with_header<usync_pool_memory_resource>(
-			&core_heap->_upool_res,
-			bytes,
-			1,
-			alignment,
-			loc
-		);
-
-		return ptr;
-	}
-
-	void* coreheap_temp_alloc(
-		HANDLE heap_handle,
-		size_t bytes,
-		size_t alignment,
-		std::source_location loc
-	)
-	{
-		CORE_HEAP* core_heap = reinterpret_cast<CORE_HEAP*>(heap_handle);
-		if (!is_valid_core_heap_handle(core_heap)) [[unlikely]]
-			return nullptr;
-
-		void* ptr = private_core_detail::alloc_impl_with_header<temp_pool_memory_resource>(
-			&core_heap->_temp_res,
-			bytes,
-			1,
-			alignment,
-			loc
-		);
-
-		return ptr;
-	}
-
-	HANDLE coreheap_temppool_create(
-		HANDLE heap_handle,
-		size_t size,
-		std::source_location loc
-	)
-	{
-		CORE_HEAP* core_heap = reinterpret_cast<CORE_HEAP*>(heap_handle);
-		if (!is_valid_core_heap_handle(core_heap)) [[unlikely]]
-			return nullptr;
-
-		//void* temp_pool_mem = mark_sys_alloc(sizeof(TEMP_POOL), alignof(TEMP_POOL), loc);
-		void* temp_pool_mem = coreheap_alloc(heap_handle, (sizeof(TEMP_POOL), alignof(TEMP_POOL), loc);
-		if (!temp_pool_mem) [[unlikely]]
-			return nullptr;
-
-		TEMP_POOL* temp_pool = new (temp_pool_mem) TEMP_POOL(size, core_heap->_limited_sysmem_res);
-		core_heap->_temp_pools.push_back(reinterpret_cast<HANDLE>(temp_pool));
-
-		return reinterpret_cast<HANDLE>(temp_pool);
-	}
-#else
-	void* mark_sys_alloc(
-		size_t bytes,
-		size_t alignment
-	)
-	{
-		void* ptr = private_core_detail::alloc_impl_with_header<select_system_memory_resource>(
-			get_default_system_memory_resource_ptr(),
-			bytes,
-			1, // count는 1로 고정 (단일 할당)
-			alignment
-		);
-		return ptr;
-	}
-
-	void* mark_spool_alloc(
-		size_t bytes,
-		size_t alignment
-	)
-	{
-		void* ptr = private_core_detail::alloc_impl_with_header<sync_pool_memory_resource>(
-			get_default_sync_pool_memory_resource_ptr(),
-			bytes,
-			1,
-			alignment
-		);
-		return ptr;
-	}
-
-	void* mark_upool_alloc(
-		size_t bytes,
-		size_t alignment
-	)
-	{
-		void* ptr = private_core_detail::alloc_impl_with_header<usync_pool_memory_resource>(
-			get_default_usync_pool_memory_resource_ptr(),
-			bytes,
-			1,
-			alignment
-		);
-
-		return ptr;	
-	}
-
-	void* mark_temp_alloc(
-		size_t bytes,
-		size_t alignment
-	)
-	{
-		void* ptr = private_core_detail::alloc_impl_with_header<temp_pool_memory_resource>(
-			get_default_temp_memory_resource_ptr(),
-			bytes,
-			1,
-			alignment
-		);
-
-		return ptr;
-	}
-
-	void* coreheap_alloc(
-		HANDLE heap_handle,
-		size_t bytes,
-		size_t alignment
-	)
-	{
-		CORE_HEAP* core_heap = reinterpret_cast<CORE_HEAP*>(heap_handle);
-		if (!is_valid_core_heap_handle(core_heap)) [[unlikely]]
-			return nullptr;
-
-		void* ptr = private_core_detail::alloc_impl_with_header<limited_memory_resource>(
-			&core_heap->_limited_sys_res,
-			bytes,
-			1,
-			alignment
-		);
-
-		return ptr;
-	}
-
-	void* coreheap_spool_alloc(
-		HANDLE heap_handle,
-		size_t bytes,
-		size_t alignment
-	)
-	{
-		CORE_HEAP* core_heap = reinterpret_cast<CORE_HEAP*>(heap_handle);
-		if (!is_valid_core_heap_handle(core_heap)) [[unlikely]]
-			return nullptr;
-
-		void* ptr = private_core_detail::alloc_impl_with_header<sync_pool_memory_resource>(
-			&core_heap->_spool_res,
-			bytes,
-			1,
-			alignment
-		);
-
-		return ptr;
-	}
-
-	void* coreheap_upool_alloc(
-		HANDLE heap_handle,
-		size_t bytes,
-		size_t alignment
-	)
-	{
-		CORE_HEAP* core_heap = reinterpret_cast<CORE_HEAP*>(heap_handle);
-		if (!is_valid_core_heap_handle(core_heap)) [[unlikely]]
-			return nullptr;
-
-		void* ptr = private_core_detail::alloc_impl_with_header<usync_pool_memory_resource>(
-			&core_heap->_upool_res,
-			bytes,
-			1,
-			alignment
-		);
-
-		return ptr;
-	}
-
-	void* coreheap_temp_alloc(
-		HANDLE heap_handle,
-		size_t bytes,
-		size_t alignment
-	)
-	{
-		CORE_HEAP* core_heap = reinterpret_cast<CORE_HEAP*>(heap_handle);
-		if (!is_valid_core_heap_handle(core_heap)) [[unlikely]]
-			return nullptr;
-
-		void* ptr = private_core_detail::alloc_impl_with_header<temp_pool_memory_resource>(
-			&core_heap->_temp_res,
-			bytes,
-			1,
-			alignment
-		);
-
-		return ptr;
-	}
-
-	HANDLE coreheap_temppool_create(
-		HANDLE heap_handle,
-		size_t size
-	)
-	{
-		CORE_HEAP* core_heap = reinterpret_cast<CORE_HEAP*>(heap_handle);
-		if (!is_valid_core_heap_handle(core_heap)) [[unlikely]]
-			return nullptr;
-
-		//void* temp_pool_mem = mark_sys_alloc(sizeof(TEMP_POOL), alignof(TEMP_POOL));
-		void* temp_pool_mem = coreheap_alloc(heap_handle, sizeof(TEMP_POOL), alignof(TEMP_POOL));
-		if (!temp_pool_mem) [[unlikely]]
-			return nullptr;
-
-		TEMP_POOL* temp_pool = new (temp_pool_mem) TEMP_POOL(size);
-
-		core_heap->_temp_pools.push_back(reinterpret_cast<HANDLE>(temp_pool));
-
-		return reinterpret_cast<HANDLE>(temp_pool);
-	}
-#endif // __MEMORY_TRACKING_ENABLED__
-
-
-	void mark_sys_free(
-		void* ptr,
-		size_t alignment
-	)
-	{
-		private_core_detail::free_impl_with_header<select_system_memory_resource>(
-			get_default_system_memory_resource_ptr(),
-			ptr,
-			alignment
-		);
-	}
-
-	void mark_spool_free(
-		void* ptr,
-		size_t alignment
-	)
-	{
-		private_core_detail::free_impl_with_header<sync_pool_memory_resource>(
-			get_default_sync_pool_memory_resource_ptr(),
-			ptr,
-			alignment
-		);
-	}
-
-	void mark_upool_free(
-		void* ptr,
-		size_t alignment
-	)
-	{
-		private_core_detail::free_impl_with_header<usync_pool_memory_resource>(
-			get_default_usync_pool_memory_resource_ptr(),
-			ptr,
-			alignment
-		);
-	}
-
-	void mark_temp_reset()
-	{
-		get_default_temp_memory_resource_ptr()->release();
-	}
-
-	void coreheap_free(
-		HANDLE heap_handle,
-		void* ptr,
-		size_t alignment
-	)
-	{
-		CORE_HEAP* core_heap = reinterpret_cast<CORE_HEAP*>(heap_handle);
-		if (!is_valid_core_heap_handle(core_heap)) [[unlikely]]
-			return;
-
-		private_core_detail::free_impl_with_header<limited_memory_resource>(
-			&core_heap->_limited_sys_res,
-			ptr,
-			alignment
-		);
-	}
-
-	void coreheap_spool_free(
-		HANDLE heap_handle,
-		void* ptr,
-		size_t alignment
-	)
-	{
-		CORE_HEAP* core_heap = reinterpret_cast<CORE_HEAP*>(heap_handle);
-		if (!is_valid_core_heap_handle(core_heap)) [[unlikely]]
-			return;
-
-		private_core_detail::free_impl_with_header<sync_pool_memory_resource>(
-			&core_heap->_spool_res,
-			ptr,
-			alignment
-		);
-		
-	}
-
-	void coreheap_upool_free(
-		HANDLE heap_handle,
-		void* ptr,
-		size_t alignment
-	)
-	{
-		CORE_HEAP* core_heap = reinterpret_cast<CORE_HEAP*>(heap_handle);
-		if (!is_valid_core_heap_handle(core_heap)) [[unlikely]]
-			return;
-
-		private_core_detail::free_impl_with_header<usync_pool_memory_resource>(
-			&core_heap->_upool_res,
-			ptr,
-			alignment
-		);
-	}
-
-	void coreheap_temp_reset(
-		HANDLE heap_handle
-	)
-	{
-		CORE_HEAP* core_heap = reinterpret_cast<CORE_HEAP*>(heap_handle);
-		if (!is_valid_core_heap_handle(core_heap)) [[unlikely]]
-			return;
-
-		core_heap->_temp_res.release();
-	}
-
-	void* coreheap_temppool_alloc(
-		HANDLE temppool_handle,
-		size_t bytes,
-		size_t alignment
-	)
-	{
-		TEMP_POOL* temp_pool = reinterpret_cast<TEMP_POOL*>(temppool_handle);
-		if (!is_valid_temp_pool_handle(temp_pool)) [[unlikely]]
-			return nullptr;
-
-		void* ptr = private_core_detail::alloc_impl_with_header<temp_pool_memory_resource>(
-			&temp_pool->pool,
-			bytes,
-			1,
-			alignment
-		);
-
-		return ptr;
-	}
-
-	void coreheap_temppool_reset(
-		HANDLE temppool_handle
-	)
-	{
-		TEMP_POOL* temp_pool = reinterpret_cast<TEMP_POOL*>(temppool_handle);
-		if (!is_valid_temp_pool_handle(temp_pool)) [[unlikely]]
-			return;
-
-		temp_pool->pool.release();
-	}
-
-	void coreheap_temppool_destroy(
-		HANDLE heap_handle,
-		HANDLE temppool_handle
-	)
-	{
-		CORE_HEAP* core_heap = reinterpret_cast<CORE_HEAP*>(heap_handle);
-		if (!is_valid_core_heap_handle(core_heap)) [[unlikely]]
-			return;
-
-		TEMP_POOL* temp_pool = reinterpret_cast<TEMP_POOL*>(temppool_handle);
-		if (!is_valid_temp_pool_handle(temp_pool)) [[unlikely]]
-			return;
-
-		temp_pool->pool.release();
-
-		temp_pool->~TEMP_POOL();
-		//mark_sys_free(temp_pool, alignof(TEMP_POOL));
-		coreheap_free(heap_handle, temp_pool, alignof(TEMP_POOL));
-
-		auto it = std::find(core_heap->_temp_pools.begin(), core_heap->_temp_pools.end(), temppool_handle);
-		if (it != core_heap->_temp_pools.end())
+		try
 		{
-			core_heap->_temp_pools.erase(it);
+			s_default_sync_pool_memory_resource2 = new sync_pool_memory_resource2({ sync_pool_count_per_chunk, sync_pool_max_size_per_block });
+			s_default_usync_pool_memory_resource2 = new usync_pool_memory_resource2({ unsync_pool_count_per_chunk, unsync_pool_max_size_per_block });
+			s_default_temp_memory_resource2 = new temp_pool_memory_resource2(temp_buffer_size);
 		}
-		else
+		catch (const std::exception& e)
 		{
-			assert(false && "Temp pool handle not found in core heap's temp pool list during destruction");
+			assert(false && e.what());
+			shutdown_core_memory2();
+			return false;
 		}
+
+		return true;
+	}
+
+	void shutdown_core_memory2()
+	{
+		if (s_default_temp_memory_resource2)
+		{
+			delete s_default_temp_memory_resource2;
+			s_default_temp_memory_resource2 = nullptr;
+		}
+
+		if (s_default_usync_pool_memory_resource2)
+		{
+			delete s_default_usync_pool_memory_resource2;
+			s_default_usync_pool_memory_resource2 = nullptr;
+		}
+
+		if (s_default_sync_pool_memory_resource2)
+		{
+			delete s_default_sync_pool_memory_resource2;
+			s_default_sync_pool_memory_resource2 = nullptr;
+		}
+	}
+
+	void* sys_alloc(size_t bytes, size_t alignment, std::source_location loc)
+	{
+		return std::pmr::get_default_resource()->allocate(bytes, alignment); // 시스템 메모리 리소스에서 할당 (기본 리소스는 system_memory_resource)
+	}
+
+	void* spool_alloc(size_t bytes, size_t alignment, std::source_location loc)
+	{
+		return s_default_sync_pool_memory_resource2->allocate(bytes, alignment);
+	}
+	void* upool_alloc(size_t bytes, size_t alignment, std::source_location loc)
+	{
+		return s_default_usync_pool_memory_resource2->allocate(bytes, alignment);
+	}
+
+	void* sys_alloc(size_t bytes, size_t alignment)
+	{
+		return std::pmr::get_default_resource()->allocate(bytes, alignment); // 시스템 메모리 리소스에서 할당 (기본 리소스는 system_memory_resource)
+	}
+
+	void* spool_alloc(size_t bytes, size_t alignment)
+	{
+		return s_default_sync_pool_memory_resource2->allocate(bytes, alignment);
+	}
+
+	void* upool_alloc(size_t bytes, size_t alignment)
+	{
+		return s_default_usync_pool_memory_resource2->allocate(bytes, alignment);
+	}
+
+	void* temp_alloc(size_t bytes, size_t alignment)
+	{
+		return s_default_temp_memory_resource2->allocate(bytes, alignment);
+	}
+
+	void temp_reset()
+	{
+		s_default_temp_memory_resource2->release();
+	}
+
+	void sys_free(void* ptr, size_t bytes, size_t alignment)
+	{
+		std::pmr::get_default_resource()->deallocate(ptr, bytes, alignment); // 시스템 메모리 리소스에서 해제 (기본 리소스는 system_memory_resource)
+	}
+
+	void spool_free(void* ptr, size_t bytes, size_t alignment)
+	{
+		s_default_sync_pool_memory_resource2->deallocate(ptr, bytes, alignment);
+	}
+
+	void upool_free(void* ptr, size_t bytes, size_t alignment)
+	{
+		s_default_usync_pool_memory_resource2->deallocate(ptr, bytes, alignment);
+	}
+
+	std::pmr::memory_resource* get_default_system_memory_resource_ptr() noexcept
+	{
+		return std::pmr::get_default_resource(); // 시스템 메모리 리소스 반환 (기본 리소스는 system_memory_resource)
+	}
+	std::pmr::memory_resource* get_default_spool_memory_resource_ptr() noexcept
+	{
+		return s_default_sync_pool_memory_resource2;
+	}
+	std::pmr::memory_resource* get_default_usync_pool_memory_resource_ptr() noexcept
+	{
+		return s_default_usync_pool_memory_resource2;
+	}
+	std::pmr::memory_resource* get_default_temp_memory_resource_ptr() noexcept
+	{
+		return s_default_temp_memory_resource2;
 	}
 }
