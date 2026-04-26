@@ -273,8 +273,8 @@ namespace mark
 	constexpr float MX_TINY = 0.00001f; // 작은 수. 주로 0으로 나누는 것을 방지하기 위해 사용.
 	constexpr float MX_EPSILON = 0.000001f; // 부동 소수점 비교 시 허용되는 오차 범위. 두 값이 이 범위 내에 있으면 거의 같다고 간주.
 	constexpr float MX_2EPSILON = 0.000002f; // 2 * EPSILON. 부동 소수점 비교 시 더 넓은 오차 범위를 허용할 때 사용.
-	constexpr float DEG_TO_RAD = M_PI / 180.0f; // 1 degree를 라디안으로 변환하는 상수
-	constexpr float RAD_TO_DEG = 180.0f / M_PI; // 1 radian을 degree로 변환하는 상수
+	constexpr float DEG_TO_RAD = MX_PI / 180.0f; // 1 degree를 라디안으로 변환하는 상수
+	constexpr float RAD_TO_DEG = 180.0f / MX_PI; // 1 radian을 degree로 변환하는 상수
 
 	constexpr SINT2 SINT2_ZERO = { 0, 0 };
 	constexpr SINT2 SINT2_ONE = { 1, 1 };

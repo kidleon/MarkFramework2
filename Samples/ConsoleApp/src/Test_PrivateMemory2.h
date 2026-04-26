@@ -243,7 +243,7 @@ namespace mark
         printf("[TestPM2_SpoolNewDelete]\n");
 
         reset_lifecycle();
-        LifecycleProbe* p = spool_new<LifecycleProbe>(456);
+        LifecycleProbe* p = SPOOL_NEW(LifecycleProbe, 456);
         PM2_CHECK(p != nullptr, "spool_new object");
         PM2_CHECK(p && p->value == 456, "spool_new ctor args");
         spool_delete(p);
@@ -274,9 +274,9 @@ namespace mark
 
         reset_lifecycle();
         constexpr size_t kCount = 8;
-        LifecycleProbe* arr = upool_new_array<LifecycleProbe>(kCount);
+        LifecycleProbe* arr = UPOOL_NEW_ARRAY(LifecycleProbe, kCount);
         PM2_CHECK(arr != nullptr, "upool_new_array");
-        upool_delete_array(arr, kCount);
+        UPOOL_DELETE_ARRAY(LifecycleProbe, arr, kCount);
         PM2_CHECK(LifecycleProbe::ctor_count == static_cast<int>(kCount), "upool_new_array ctor count");
         PM2_CHECK(LifecycleProbe::dtor_count == static_cast<int>(kCount), "upool_delete_array dtor count");
     }
@@ -287,18 +287,18 @@ namespace mark
         printf("[TestPM2_TempNewDelete]\n");
 
         reset_lifecycle();
-        LifecycleProbe* p = temp_new<LifecycleProbe>(321);
+        LifecycleProbe* p = TEMP_NEW(LifecycleProbe, 321);
         PM2_CHECK(p != nullptr, "temp_new object");
         PM2_CHECK(p && p->value == 321, "temp_new ctor args");
-        temp_delete(p);
+        TEMP_DELETE(LifecycleProbe, p);
         PM2_CHECK(LifecycleProbe::ctor_count == 1, "temp_new ctor count");
         PM2_CHECK(LifecycleProbe::dtor_count == 1, "temp_delete dtor count");
 
         reset_lifecycle();
         constexpr size_t kCount = 8;
-        LifecycleProbe* arr = temp_new_array<LifecycleProbe>(kCount);
+        LifecycleProbe* arr = TEMP_NEW_ARRAY(LifecycleProbe, kCount);
         PM2_CHECK(arr != nullptr, "temp_new_array");
-        temp_delete_array(arr, kCount);
+        TEMP_DELETE_ARRAY(LifecycleProbe, arr, kCount);
         PM2_CHECK(LifecycleProbe::ctor_count == static_cast<int>(kCount), "temp_new_array ctor count");
         PM2_CHECK(LifecycleProbe::dtor_count == static_cast<int>(kCount), "temp_delete_array dtor count");
 

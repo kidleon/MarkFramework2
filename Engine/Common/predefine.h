@@ -125,10 +125,10 @@ typedef int LONG;
 typedef unsigned int ULONG;
 typedef long long LONG64;
 typedef unsigned long long ULONG64;
-typedef float FLOAT;
 #define __vectorcall
 #endif // defined(__TARGET_COMPILER_GCC) || defined(__TARGET_COMPILER_CLANG)
 
+typedef float FLOAT;
 
 // CHARCTER UNICODE DEFINES
 #ifndef MARK_ENCODING_ANSI

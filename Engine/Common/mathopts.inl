@@ -701,7 +701,7 @@ namespace mark
 				rotation_axis = math_cross(FLOAT3{ 1.0f, 0.0f, 0.0f }, f);
 			}
 
-			return quat_rotation_axis_angle(math_normalized(rotation_axis), M_PI);
+			return quat_rotation_axis_angle(math_normalized(rotation_axis), MX_PI);
 		}
 
 		rotation_axis = math_cross(f, t);

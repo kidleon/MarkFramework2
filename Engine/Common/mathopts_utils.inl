@@ -33,9 +33,9 @@ namespace mark
 		float delta = std::fmod(target - current, MX_2PI);
 
 		// 최단 경로 보정: (-π, π] 범위로 변환
-		if (delta > M_PI)
+		if (delta > MX_PI)
 			delta -= MX_2PI; // 반시계보다 시계가 더 가까운 경우
-		else if (delta < -M_PI)
+		else if (delta < -MX_PI)
 			delta += MX_2PI; // 시계보다 반시계가 더 가까운 경우
 
 		return delta;

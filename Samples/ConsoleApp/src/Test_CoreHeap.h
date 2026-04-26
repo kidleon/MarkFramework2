@@ -212,19 +212,19 @@ namespace mark
         using namespace test_coreheap_detail;
 
         reset_probe();
-        Probe* p = sys_new<Probe>(100);
+        Probe* p = SYS_NEW(Probe, 100);
         CH_CHECK(p != nullptr,                  "sys_new<Probe>(100) not null");
         CH_CHECK(p && p->value == 100,          "sys_new ctor arg forwarded");
-        sys_delete(p);
+        SYS_DELETE(Probe, p);
         CH_CHECK(Probe::ctor_count == 1,        "sys_new  ctor count == 1");
         CH_CHECK(Probe::dtor_count == 1,        "sys_delete dtor count == 1");
 
         // 기본 생성자
         reset_probe();
-        Probe* p2 = sys_new<Probe>();
+        Probe* p2 = SYS_NEW(Probe);
         CH_CHECK(p2 != nullptr,                 "sys_new<Probe>() not null");
         CH_CHECK(p2 && p2->value == 42,         "sys_new default ctor value");
-        sys_delete(p2);
+        SYS_DELETE(Probe, p2);
         CH_CHECK(Probe::dtor_count == 1,        "sys_delete default ctor dtor");
     }
 
@@ -237,11 +237,11 @@ namespace mark
         using namespace test_coreheap_detail;
 
         reset_probe();
-        Probe* p = sys_new<Probe, 64>(200);
+        Probe* p = SYS_NEW_A(Probe, 64, 200);
         CH_CHECK(p != nullptr,              "sys_new<Probe,64> not null");
         CH_CHECK(is_aligned(p, 64),         "sys_new<Probe,64> alignment");
         CH_CHECK(p && p->value == 200,      "sys_new<Probe,64> ctor arg");
-        sys_delete<Probe, 64>(p);
+        SYS_DELETE_A(Probe, 64, p);
         CH_CHECK(Probe::dtor_count == 1,    "sys_delete<Probe,64> dtor");
     }
 
@@ -255,19 +255,19 @@ namespace mark
 
         reset_probe();
         constexpr size_t N = 8;
-        Probe* arr = sys_new_array<Probe>(N);
+        Probe* arr = SYS_NEW_ARRAY(Probe, N);
         CH_CHECK(arr != nullptr,                        "sys_new_array not null");
         CH_CHECK(is_aligned(arr, alignof(Probe)),       "sys_new_array alignment");
-        sys_delete_array(arr, N);
+        SYS_DELETE_ARRAY(Probe, arr, N);
         CH_CHECK(Probe::ctor_count == static_cast<int>(N), "sys_new_array ctor count");
         CH_CHECK(Probe::dtor_count == static_cast<int>(N), "sys_delete_array dtor count");
 
         // 커스텀 정렬
         reset_probe();
-        Probe* arr2 = sys_new_array<Probe, 64>(N);
+        Probe* arr2 = SYS_NEW_ARRAY_A(Probe, 64, N);
         CH_CHECK(arr2 != nullptr,                       "sys_new_array<Probe,64> not null");
         CH_CHECK(is_aligned(arr2, 64),                  "sys_new_array<Probe,64> alignment");
-        sys_delete_array<Probe, 64>(arr2, N);
+        SYS_DELETE_ARRAY_A(Probe, 64, arr2, N);
         CH_CHECK(Probe::dtor_count == static_cast<int>(N), "sys_delete_array<Probe,64> dtor count");
     }
 
@@ -280,12 +280,12 @@ namespace mark
         using namespace test_coreheap_detail;
 
         reset_probe();
-        Probe* p = spool_new<Probe>(300);
-        CH_CHECK(p != nullptr,              "spool_new<Probe>(300) not null");
-        CH_CHECK(p && p->value == 300,      "spool_new ctor arg forwarded");
-        spool_delete(p);
-        CH_CHECK(Probe::ctor_count == 1,    "spool_new  ctor count == 1");
-        CH_CHECK(Probe::dtor_count == 1,    "spool_delete dtor count == 1");
+		Probe* p = SPOOL_NEW(Probe, 300);
+        CH_CHECK(p != nullptr,              "SPOOL_NEW<Probe>(300) not null");
+        CH_CHECK(p && p->value == 300,      "SPOOL_NEW ctor arg forwarded");
+        SPOOL_DELETE(Probe, p);
+        CH_CHECK(Probe::ctor_count == 1,    "SPOOL_NEW  ctor count == 1");
+        CH_CHECK(Probe::dtor_count == 1,    "SPOOL_DELETE dtor count == 1");
     }
 
     inline void TestCH_SpoolNewDeleteArray()
@@ -295,7 +295,7 @@ namespace mark
 
         reset_probe();
         constexpr size_t N = 6;
-        Probe* arr = spool_new_array<Probe>(N);
+        Probe* arr = SPOOL_NEW_ARRAY(Probe, N);
         CH_CHECK(arr != nullptr,                            "spool_new_array not null");
         spool_delete_array(arr, N);
         CH_CHECK(Probe::ctor_count == static_cast<int>(N), "spool_new_array ctor count");
@@ -303,10 +303,10 @@ namespace mark
 
         // 커스텀 정렬
         reset_probe();
-        Probe* arr2 = spool_new_array<Probe, 32>(N);
+        Probe* arr2 = SPOOL_NEW_ARRAY_A(Probe, 32, N);
         CH_CHECK(arr2 != nullptr,                          "spool_new_array<Probe,32> not null");
         CH_CHECK(is_aligned(arr2, 32),                     "spool_new_array<Probe,32> alignment");
-        spool_delete_array<Probe, 32>(arr2, N);
+        SPOOL_DELETE_ARRAY_A(Probe, 32, arr2, N);
         CH_CHECK(Probe::dtor_count == static_cast<int>(N), "spool_delete_array<Probe,32> dtor count");
     }
 
@@ -319,10 +319,10 @@ namespace mark
         using namespace test_coreheap_detail;
 
         reset_probe();
-        Probe* p = upool_new<Probe>(400);
+        Probe* p = UPOOL_NEW(Probe, 400);
         CH_CHECK(p != nullptr,              "upool_new<Probe>(400) not null");
         CH_CHECK(p && p->value == 400,      "upool_new ctor arg forwarded");
-        upool_delete(p);
+        UPOOL_DELETE(Probe, p);
         CH_CHECK(Probe::ctor_count == 1,    "upool_new  ctor count == 1");
         CH_CHECK(Probe::dtor_count == 1,    "upool_delete dtor count == 1");
     }
@@ -334,18 +334,18 @@ namespace mark
 
         reset_probe();
         constexpr size_t N = 5;
-        Probe* arr = upool_new_array<Probe>(N);
+        Probe* arr = UPOOL_NEW_ARRAY(Probe, N);
         CH_CHECK(arr != nullptr,                            "upool_new_array not null");
-        upool_delete_array(arr, N);
+        UPOOL_DELETE_ARRAY(Probe, arr, N);
         CH_CHECK(Probe::ctor_count == static_cast<int>(N), "upool_new_array ctor count");
         CH_CHECK(Probe::dtor_count == static_cast<int>(N), "upool_delete_array dtor count");
 
         // 커스텀 정렬
         reset_probe();
-        Probe* arr2 = upool_new_array<Probe, 32>(N);
+        Probe* arr2 = UPOOL_NEW_ARRAY_A(Probe, 32, N);
         CH_CHECK(arr2 != nullptr,                          "upool_new_array<Probe,32> not null");
         CH_CHECK(is_aligned(arr2, 32),                     "upool_new_array<Probe,32> alignment");
-        upool_delete_array<Probe, 32>(arr2, N);
+        UPOOL_DELETE_ARRAY_A(Probe, 32, arr2, N);
         CH_CHECK(Probe::dtor_count == static_cast<int>(N), "upool_delete_array<Probe,32> dtor count");
     }
 
@@ -358,10 +358,10 @@ namespace mark
         using namespace test_coreheap_detail;
 
         reset_probe();
-        Probe* p = temp_new<Probe>(500);
+        Probe* p = TEMP_NEW(Probe, 500);
         CH_CHECK(p != nullptr,              "temp_new<Probe>(500) not null");
         CH_CHECK(p && p->value == 500,      "temp_new ctor arg forwarded");
-        temp_delete(p);
+        TEMP_DELETE(Probe, p);
         CH_CHECK(Probe::ctor_count == 1,    "temp_new  ctor count == 1");
         CH_CHECK(Probe::dtor_count == 1,    "temp_delete dtor count == 1");
 
@@ -375,9 +375,9 @@ namespace mark
 
         reset_probe();
         constexpr size_t N = 4;
-        Probe* arr = temp_new_array<Probe>(N);
+        Probe* arr = TEMP_NEW_ARRAY(Probe, N);
         CH_CHECK(arr != nullptr,                            "temp_new_array not null");
-        temp_delete_array(arr, N);
+        TEMP_DELETE_ARRAY(Probe, arr, N);
         CH_CHECK(Probe::ctor_count == static_cast<int>(N), "temp_new_array ctor count");
         CH_CHECK(Probe::dtor_count == static_cast<int>(N), "temp_delete_array dtor count");
 

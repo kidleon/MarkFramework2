@@ -89,10 +89,10 @@ namespace mark
         UTIL_CHECK(test_math_utils_detail::nearly_equal(delta_angle(0.5f, 0.0f), -0.5f, 0.001f), "delta_angle 0.5 -> 0");
 
         // Wrap around: 350deg -> 10deg should be +20deg (shortest path)
-        float deg350 = 350.0f * M_PI / 180.0f;
-        float deg10 = 10.0f * M_PI / 180.0f;
+        float deg350 = 350.0f * MX_PI / 180.0f;
+        float deg10 = 10.0f * MX_PI / 180.0f;
         float da = delta_angle(deg350, deg10);
-        float expected = 20.0f * M_PI / 180.0f;
+        float expected = 20.0f * MX_PI / 180.0f;
         UTIL_CHECK(test_math_utils_detail::nearly_equal(da, expected, 0.01f), "delta_angle 350deg -> 10deg == +20deg");
 
         // Wrap around: 10deg -> 350deg should be -20deg (shortest path)
@@ -100,8 +100,8 @@ namespace mark
         UTIL_CHECK(test_math_utils_detail::nearly_equal(da2, -expected, 0.01f), "delta_angle 10deg -> 350deg == -20deg");
 
         // Opposite direction: 0 -> PI
-        float da3 = delta_angle(0.0f, M_PI);
-        UTIL_CHECK(std::fabs(da3) <= M_PI + 0.01f, "delta_angle 0 -> PI within range");
+        float da3 = delta_angle(0.0f, MX_PI);
+        UTIL_CHECK(std::fabs(da3) <= MX_PI + 0.01f, "delta_angle 0 -> PI within range");
     }
 
     // ========================================================================
@@ -262,7 +262,7 @@ namespace mark
         {
             FLOAT3 cur = { 1.0f, 0.0f, 0.0f };
             FLOAT3 tgt = math_normalized(FLOAT3{ 0.99f, 0.1f, 0.0f });
-            FLOAT3 r = rotate_towards(cur, tgt, M_PI);
+            FLOAT3 r = rotate_towards(cur, tgt, MX_PI);
             UTIL_CHECK(test_math_utils_detail::nearly_equal(r.x, tgt.x, 0.01f) && test_math_utils_detail::nearly_equal(r.y, tgt.y, 0.01f) && test_math_utils_detail::nearly_equal(r.z, tgt.z, 0.01f), "rotate_towards FLOAT3 within max_angle");
         }
 

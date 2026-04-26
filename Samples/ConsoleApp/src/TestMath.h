@@ -510,7 +510,7 @@ namespace mark
         printf("[TestQuat_Slerp]\n");
 
         QUAT q0 = quat_ident();
-        QUAT q1 = quat_rotation_axis_angle(FLOAT3{ 0.0f, 0.0f, 1.0f }, M_PI);
+        QUAT q1 = quat_rotation_axis_angle(FLOAT3{ 0.0f, 0.0f, 1.0f }, MX_PI);
 
         // t=0 -> q0
         QUAT r0 = quat_slerp(q0, q1, 0.0f);
@@ -542,7 +542,7 @@ namespace mark
     {
         printf("[TestQuat_RotationAxisAngle]\n");
 
-        QUAT q = quat_rotation_axis_angle(FLOAT3{ 0.0f, 1.0f, 0.0f }, M_PI);
+        QUAT q = quat_rotation_axis_angle(FLOAT3{ 0.0f, 1.0f, 0.0f }, MX_PI);
         float len = std::sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w);
         MATH_CHECK(test_math_detail::nearly_equal(len, 1.0f, 0.001f), "quat_rotation_axis_angle unit length");
 
@@ -876,13 +876,13 @@ namespace mark
         printf("[TestMat4_RotationAxis]\n");
 
         FLOAT3 axis = { 0.0f, 1.0f, 0.0f };
-        MATRIX4 m = mat4_rotation_axis(axis, M_PI);
+        MATRIX4 m = mat4_rotation_axis(axis, MX_PI);
         FLOAT3 v = { 1.0f, 0.0f, 0.0f };
         FLOAT3 rv = mat4_mul(m, v);
         MATH_CHECK(test_math_detail::nearly_equal(rv.x, -1.0f, 0.01f), "mat4_rotation_axis Y 180deg");
 
         MATRIX4 m2;
-        mat4_rotation_axis(axis, M_PI, m2);
+        mat4_rotation_axis(axis, MX_PI, m2);
         FLOAT3 rv2 = mat4_mul(m2, v);
         MATH_CHECK(test_math_detail::nearly_equal(rv2.x, -1.0f, 0.01f), "mat4_rotation_axis Y 180deg out");
     }
@@ -948,7 +948,7 @@ namespace mark
     {
         printf("[TestMat4_Perspective]\n");
 
-        float fov = M_PI / 4.0f;
+        float fov = MX_PI / 4.0f;
         float aspect = 16.0f / 9.0f;
         float nearZ = 0.1f;
         float farZ = 1000.0f;
@@ -1353,7 +1353,7 @@ namespace mark
         MATH_CHECK(test_math_detail::nearly_equal(rv3.x, 1.0f, 0.001f) && test_math_detail::nearly_equal(rv3.y, 0.0f, 0.001f) && test_math_detail::nearly_equal(rv3.z, 0.0f, 0.001f), "xquat_mul identity*vec");
 
         // Inverse
-        XQUAT qrot = xquat_rotation_axis(M_PIDIV2, xvec3_set(0.0f, 0.0f, 1.0f));
+        XQUAT qrot = xquat_rotation_axis(MX_PIDIV2, xvec3_set(0.0f, 0.0f, 1.0f));
         XQUAT qinv = xquat_inverse(qrot);
         XQUAT qprod = xquat_mul(qrot, qinv);
         MATH_CHECK(test_math_detail::nearly_equal(std::fabs(qprod.w), 1.0f, 0.01f), "xquat_inverse q*q^-1 == identity");
@@ -1369,7 +1369,7 @@ namespace mark
 
         // Slerp
         XQUAT q0 = xquat_ident();
-        XQUAT q1 = xquat_rotation_axis(M_PI, xvec3_set(0.0f, 0.0f, 1.0f));
+        XQUAT q1 = xquat_rotation_axis(MX_PI, xvec3_set(0.0f, 0.0f, 1.0f));
         XQUAT qs0 = xquat_slerp(q0, q1, 0.0f);
         MATH_CHECK(test_math_detail::nearly_equal(qs0.w, q0.w, 0.01f), "xquat_slerp t=0");
 
@@ -1385,11 +1385,11 @@ namespace mark
         MATH_CHECK(test_math_detail::nearly_equal(qrpy2.w, 1.0f, 0.001f), "xquat_rotation_yaw_pitch_roll XFLOAT3(0,0,0)");
 
         // Rotation axis/angle
-        XQUAT qra = xquat_rotation_axis(M_PIDIV2, xvec3_set(0.0f, 1.0f, 0.0f));
+        XQUAT qra = xquat_rotation_axis(MX_PIDIV2, xvec3_set(0.0f, 1.0f, 0.0f));
         float ralen = std::sqrt(qra.x * qra.x + qra.y * qra.y + qra.z * qra.z + qra.w * qra.w);
         MATH_CHECK(test_math_detail::nearly_equal(ralen, 1.0f, 0.001f), "xquat_rotation_axis XFLOAT3 unit length");
 
-        XQUAT qra2 = xquat_rotation_axis(M_PIDIV2, 0.0f, 1.0f, 0.0f);
+        XQUAT qra2 = xquat_rotation_axis(MX_PIDIV2, 0.0f, 1.0f, 0.0f);
         MATH_CHECK(test_math_detail::nearly_equal(qra2.y, qra.y, 0.001f), "xquat_rotation_axis float xyz");
 
         // Rotation from matrix
@@ -1419,7 +1419,7 @@ namespace mark
         XFLOAT3 axisOut;
         float angleOut = 0.0f;
         xquat_to_axis_angle(qra, axisOut, angleOut);
-        MATH_CHECK(test_math_detail::nearly_equal(angleOut, M_PIDIV2, 0.01f), "xquat_to_axis_angle angle");
+        MATH_CHECK(test_math_detail::nearly_equal(angleOut, MX_PIDIV2, 0.01f), "xquat_to_axis_angle angle");
 
         // To matrix
         XMATRIX4 xm2 = xquat_to_matrix(xquat_ident());
@@ -1530,25 +1530,25 @@ namespace mark
         MATH_CHECK(test_math_detail::nearly_equal(xs4.m00, 2.0f), "xmat4_scale XFLOAT3 out");
 
         // Rotations
-        XMATRIX4 xrx = xmat4_rotation_x(M_PIDIV2);
+        XMATRIX4 xrx = xmat4_rotation_x(MX_PIDIV2);
         MATH_CHECK(!xmat4_is_nan(xrx), "xmat4_rotation_x valid");
 
         XMATRIX4 xrx2;
-        xmat4_rotation_x(M_PIDIV2, xrx2);
+        xmat4_rotation_x(MX_PIDIV2, xrx2);
         MATH_CHECK(test_math_detail::nearly_equal(xrx.m11, xrx2.m11, 0.001f), "xmat4_rotation_x out");
 
-        XMATRIX4 xry = xmat4_rotation_y(M_PIDIV2);
+        XMATRIX4 xry = xmat4_rotation_y(MX_PIDIV2);
         MATH_CHECK(!xmat4_is_nan(xry), "xmat4_rotation_y valid");
 
         XMATRIX4 xry2;
-        xmat4_rotation_y(M_PIDIV2, xry2);
+        xmat4_rotation_y(MX_PIDIV2, xry2);
         MATH_CHECK(test_math_detail::nearly_equal(xry.m00, xry2.m00, 0.001f), "xmat4_rotation_y out");
 
-        XMATRIX4 xrz = xmat4_rotation_z(M_PIDIV2);
+        XMATRIX4 xrz = xmat4_rotation_z(MX_PIDIV2);
         MATH_CHECK(!xmat4_is_nan(xrz), "xmat4_rotation_z valid");
 
         XMATRIX4 xrz2;
-        xmat4_rotation_z(M_PIDIV2, xrz2);
+        xmat4_rotation_z(MX_PIDIV2, xrz2);
         MATH_CHECK(test_math_detail::nearly_equal(xrz.m00, xrz2.m00, 0.001f), "xmat4_rotation_z out");
 
         // YawPitchRoll
@@ -1560,11 +1560,11 @@ namespace mark
         MATH_CHECK(xmat4_is_ident(xypr2), "xmat4_rotation_yaw_pitch_roll out");
 
         // Rotation Axis
-        XMATRIX4 xra = xmat4_rotation_axis(xvec3_set(0.0f, 1.0f, 0.0f), M_PI);
+        XMATRIX4 xra = xmat4_rotation_axis(xvec3_set(0.0f, 1.0f, 0.0f), MX_PI);
         MATH_CHECK(!xmat4_is_nan(xra), "xmat4_rotation_axis valid");
 
         XMATRIX4 xra2;
-        xmat4_rotation_axis(xvec3_set(0.0f, 1.0f, 0.0f), M_PI, xra2);
+        xmat4_rotation_axis(xvec3_set(0.0f, 1.0f, 0.0f), MX_PI, xra2);
         MATH_CHECK(test_math_detail::nearly_equal(xra.m00, xra2.m00, 0.001f), "xmat4_rotation_axis out");
 
         // LookTo LH / RH
@@ -1587,7 +1587,7 @@ namespace mark
         MATH_CHECK(test_math_detail::nearly_equal(xltrh.m00, xltrh2.m00, 0.001f), "xmat4_lookto_rh out");
 
         // Perspective LH / RH (FOV)
-        float fov = M_PI / 4.0f, aspect = 16.0f / 9.0f, nearZ = 0.1f, farZ = 1000.0f;
+        float fov = MX_PI / 4.0f, aspect = 16.0f / 9.0f, nearZ = 0.1f, farZ = 1000.0f;
 
         XMATRIX4 xplh = xmat4_perspective_lh(fov, aspect, nearZ, farZ);
         MATH_CHECK(!xmat4_is_nan(xplh), "xmat4_perspective_lh fov valid");

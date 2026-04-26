@@ -176,7 +176,7 @@ namespace mark
     __FORCEINLINE __m128 xmvec2_normalize(__m128 v) noexcept
     {
         __m128 length = xmvec2_length(v);
-        if (length.m128_f32[0] < M_TINY)
+        if (length.m128_f32[0] < MX_TINY)
             return v;
         __m128 inv_len = _mm_div_ps(XFLOAT4_ONE.xmm, length);
         return _mm_mul_ps(v, inv_len);
@@ -185,7 +185,7 @@ namespace mark
     __FORCEINLINE __m128 xmvec3_normalize(__m128 v) noexcept
     {
         __m128 length = xmvec3_length(v);
-        if (length.m128_f32[0] < M_TINY)
+        if (length.m128_f32[0] < MX_TINY)
             return v;
         __m128 inv_len = _mm_div_ps(XFLOAT4_ONE.xmm, length);
         return _mm_mul_ps(v, inv_len);
@@ -194,7 +194,7 @@ namespace mark
     __FORCEINLINE __m128 xmvec4_normalize(__m128 v) noexcept
     {
         __m128 length = xmvec4_length(v);
-        if (length.m128_f32[0] < M_TINY)
+        if (length.m128_f32[0] < MX_TINY)
             return v;
         __m128 inv_len = _mm_div_ps(XFLOAT4_ONE.xmm, length);
         return _mm_mul_ps(v, inv_len);
@@ -824,7 +824,7 @@ namespace mark
         float norm = xvec4_dot_f(q, q);
 
         // Check if norm is close to zero
-        if (norm < M_TINY)
+        if (norm < MX_TINY)
         {
             return xquat_ident();
         }
@@ -871,7 +871,7 @@ namespace mark
         float sinTheta = sinf(theta);
 
         // Check if sine of angle is too small
-        if (fabsf(sinTheta) < M_TINY)
+        if (fabsf(sinTheta) < MX_TINY)
         {
 			return xvec4_lerp(q0, q1Adj, t);
         }
@@ -1072,12 +1072,12 @@ namespace mark
         if (test > 0.499f)
         {
             // Singularity at north pole
-			return xvec3_set(2.0f * atan2f(q.x, q.w), M_PIDIV2, 0.0f); // pitch, yaw, roll
+			return xvec3_set(2.0f * atan2f(q.x, q.w), MX_PIDIV2, 0.0f); // pitch, yaw, roll
         }
         if (test < -0.499f)
         {
             // Singularity at south pole
-            return xvec3_set(-2.0f * atan2f(q.x, q.w), -M_PIDIV2, 0.0f); // pitch, yaw, roll
+            return xvec3_set(-2.0f * atan2f(q.x, q.w), -MX_PIDIV2, 0.0f); // pitch, yaw, roll
         }
 
         // Normal case
@@ -1099,7 +1099,7 @@ namespace mark
         angle = 2.0f * acosf(q.w);
 
         // If rotation is nearly zero
-        if (angle < M_TINY)
+        if (angle < MX_TINY)
         {
 			axis = xvec3_unit_x(); // Default axis
             angle = 0.0f;
@@ -1110,7 +1110,7 @@ namespace mark
         float sinHalfAngle = sqrtf(1.0f - q.w * q.w);
 
         // Avoid division by zero
-        if (fabsf(sinHalfAngle) < M_TINY)
+        if (fabsf(sinHalfAngle) < MX_TINY)
         {
             sinHalfAngle = 1.0f;
         }
@@ -1651,7 +1651,7 @@ namespace mark
         __m128 zaxis_length = _mm_sqrt_ps(zaxis_dot);
 
         // Prevent division by zero
-        __m128 zaxis_is_zero = _mm_cmplt_ps(zaxis_dot, _mm_set1_ps(M_TINY));
+        __m128 zaxis_is_zero = _mm_cmplt_ps(zaxis_dot, _mm_set1_ps(MX_TINY));
         __m128 zaxis_safe_length = _mm_or_ps(_mm_andnot_ps(zaxis_is_zero, zaxis_length),
             _mm_and_ps(zaxis_is_zero, _mm_set1_ps(1.0f)));
 
@@ -1672,7 +1672,7 @@ namespace mark
         __m128 xaxis_length = _mm_sqrt_ps(xaxis_dot);
 
         // Prevent division by zero
-        __m128 xaxis_is_zero = _mm_cmplt_ps(xaxis_dot, _mm_set1_ps(M_TINY));
+        __m128 xaxis_is_zero = _mm_cmplt_ps(xaxis_dot, _mm_set1_ps(MX_TINY));
         __m128 xaxis_safe_length = _mm_or_ps(_mm_andnot_ps(xaxis_is_zero, xaxis_length),
             _mm_and_ps(xaxis_is_zero, _mm_set1_ps(1.0f)));
 

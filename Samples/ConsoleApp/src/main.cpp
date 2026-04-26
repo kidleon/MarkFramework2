@@ -46,7 +46,9 @@ void TestAllocator();
 
 int main()
 {
-	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#if defined(__MEMORY_TRACKER_ENABLED__) && defined(__TARGET_OS_WINDOWS)
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif // __MEMORY_TRACKER_ENABLED__ && __TARGET_OS_WINDOWS
 
 	mark::Mark3D::Initialize();
 

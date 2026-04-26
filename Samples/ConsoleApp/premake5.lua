@@ -62,11 +62,11 @@ do
 		
 		filter {"action:vs*"}
 		do
-			buildoptions { "/utf-8" }
+			buildoptions { "/utf-8", "/Zc:preprocessor" }
 
 			filter {"configurations:Debug"}
 			do
-				defines{"DEBUG", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__MOMORY_LIMIT_ENABLED__", "__LOG_ENABLED__"}
+				defines{"DEBUG", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__MEMORY_LIMIT_ENABLED__", "__LOG_ENABLED__"}
 				optimize "Off"
 				symbols "On"
 				links{"Mark3D_d"}
@@ -75,7 +75,7 @@ do
 			
 			filter {"configurations:Release"}
 			do
-				defines{"NDEBUG", "RELEASE", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__MOMORY_LIMIT_ENABLED__", "__LOG_ENABLED__"}
+				defines{"NDEBUG", "RELEASE", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__MEMORY_LIMIT_ENABLED__", "__LOG_ENABLED__"}
 				optimize "On"
 				symbols "On"
 				links{"Mark3D"}

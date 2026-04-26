@@ -8,11 +8,11 @@ do
 
 	filter {"action:vs*"}
 		platforms { "x64" }
-
+	filter {}
+	
 	filter {"action:xcode*"}
 		platforms { "ARM64" }
 		architecture "arm64"
-	
 	filter {}
 
 	sample_output_dir = "%{wks.location}/../Samples/Output"
@@ -21,7 +21,7 @@ do
 	--include "src/Rayun3D"
 	--include "Samples/ECSTestApp"
 	-- include "Engine/Renderer_D3D11"
-	filter {}
+
 	include "Samples/ConsoleApp"
 
 end
