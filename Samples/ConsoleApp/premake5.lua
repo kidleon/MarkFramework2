@@ -9,7 +9,7 @@ do
 	sdk_sym_dir = "%{prj.location}/../output/sdk/sym"
 	sdk_inc_dir = "%{prj.location}/../output/sdk/inc"
 	output_dir = "%{sample_output_dir}"
-	targetdir (output_dir);
+	targetdir (output_dir)
 	
 	files { 
 		"src/*.cpp",
@@ -34,7 +34,10 @@ do
 	pchheader "pch.h"
 	pchsource "src/pch.cpp"
 	debugdir "%{sample_output_dir}"
-	
+
+	-- =========================================================================
+	-- Windows
+	-- =========================================================================
 	filter { "system:windows" }
 	do
 		platforms { "x64" }
@@ -42,8 +45,8 @@ do
 		
 		filter {"action:vs*"}
 		do
-			
 			buildoptions { "/utf-8" }
+
 			filter {"configurations:Debug"}
 			do
 				defines{"DEBUG", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__MOMORY_LIMIT_ENABLED__", "__LOG_ENABLED__"}
@@ -64,12 +67,52 @@ do
 			
 			filter {"configurations:Master"}
 			do
-				defines{"NDEBUG", "MASTER", "USE_DLL" }
+				defines{"NDEBUG", "MASTER", "USE_DLL"}
 				optimize "On"
 				symbols "On"
 				links{"Mark3D"}
 				targetname("SampleConsole")
 			end
+		end
+	end
+
+	-- =========================================================================
+	-- macOS
+	-- =========================================================================
+	filter { "action:xcode*", "system:macosx" }
+	do
+		system "macosx"
+		buildoptions { "-mmacosx-version-min=11.0" }
+		linkoptions  { "-mmacosx-version-min=11.0", "-arch arm64", "-arch x86_64" }
+
+		-- Mark3D.dylib 런타임 탐색 경로 (실행 파일과 같은 디렉토리)
+		linkoptions  { "-rpath @executable_path" }
+
+		filter {"configurations:Debug"}
+		do
+			defines{"DEBUG", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__MOMORY_LIMIT_ENABLED__", "__LOG_ENABLED__"}
+			optimize "Off"
+			symbols "On"
+			links{"Mark3D_d"}
+			targetname("SampleConsole_d")
+		end
+
+		filter {"configurations:Release"}
+		do
+			defines{"NDEBUG", "RELEASE", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__MOMORY_LIMIT_ENABLED__", "__LOG_ENABLED__"}
+			optimize "On"
+			symbols "On"
+			links{"Mark3D"}
+			targetname("SampleConsole")
+		end
+
+		filter {"configurations:Master"}
+		do
+			defines{"NDEBUG", "MASTER", "USE_DLL"}
+			optimize "On"
+			symbols "On"
+			links{"Mark3D"}
+			targetname("SampleConsole")
 		end
 	end
 end

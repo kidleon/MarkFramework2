@@ -11,6 +11,13 @@ do
 		platforms { "x64" }
 		architecture "x86_64"
 	end
+
+	filter {"action:xcode*"}
+	do
+		platforms { "Universal" }
+		architecture "universal"
+		buildoptions { "-arch arm64", "-arch x86_64" }
+	end
 	
 	sdk_bin_dir = "%{prj.location}/../Output/sdk/bin"
 	sdk_lib_dir = "%{prj.location}/../Output/sdk/lib"
@@ -49,18 +56,21 @@ do
 		"Renderer/Public",
 		"../Common",
 	}
-	
-	externalincludedirs {
-		"../External/inc",
-		"../External/iconv",
-		"../External/stb"
-	}
-	
+
 	pchheader "pch.h"
 	pchsource "pch.cpp"
-	
+
+	-- =========================================================================
+	-- Windows
+	-- =========================================================================
 	filter { "system:windows" }
 	do
+		externalincludedirs {
+			"../External/inc",
+			"../External/iconv",
+			"../External/stb"
+		}
+
 		filter {"action:vs*"}
 		do
 			kind "SharedLib"
@@ -127,5 +137,72 @@ do
 			end
 		end
 	end
-	
+
+	-- =========================================================================
+	-- macOS
+	-- =========================================================================
+	filter { "action:xcode*", "system:macosx" }
+	do
+		externalincludedirs {
+			"../External/inc",
+			"../External/stb"
+		}
+
+		kind "SharedLib"
+		system "macosx"
+		buildoptions { "-mmacosx-version-min=11.0" }
+		linkoptions  { "-mmacosx-version-min=11.0", "-arch arm64", "-arch x86_64" }
+
+		libdirs {
+			"../External/bin/macos/universal"
+		}
+
+		links {
+			"CoreFoundation.framework",
+			"CoreServices.framework",
+		}
+
+		postbuildcommands
+		{
+			"cp -Rf %{prj.location}../Engine/Common/*.h %{inc_output_dir}/",
+			"cp -Rf %{prj.location}../Engine/Common/*.inl %{inc_output_dir}/",
+			"cp -Rf %{prj.location}../Engine/Mark3D/Core/Public/*.h %{inc_output_dir}/",
+			"cp -Rf %{prj.location}../Engine/Mark3D/Core/Public/*.inl %{inc_output_dir}/",
+			"cp -Rf %{prj.location}../Engine/Mark3D/Main/Public/*.h %{inc_output_dir}/",
+			"cp -Rf %{prj.location}../Engine/Mark3D/Main/Public/*.inl %{inc_output_dir}/",
+			"cp -Rf %{output_dir}/*.dylib %{sdk_bin_dir}/",
+			"cp -Rf %{output_dir}/*.a %{sdk_lib_dir}/",
+			"cp -Rf %{inc_output_dir}/*.h %{sdk_inc_dir}/",
+			"cp -Rf %{inc_output_dir}/*.inl %{sdk_inc_dir}/",
+			"cp -Rf %{output_dir}/*.dylib %{sample_output_dir}/",
+		}
+
+		filter "configurations:Debug"
+		do
+			defines{"DEBUG", "USE_DLL", "MARKENGINE_EXPORTS", "__LOG_ENABLED__", "__MEMORY_TRACKER_ENABLED__", "__MOMORY_LIMIT_ENABLED__"}
+			optimize "Off"
+			symbols "On"
+			links{"lz4_d", "ufbx_d", "spdlog_d"}
+			targetname("Mark3D_d")
+		end
+
+		filter "configurations:Release"
+		do
+			defines{"NDEBUG", "RELEASE", "USE_DLL", "MARKENGINE_EXPORTS", "__LOG_ENABLED__", "__MEMORY_TRACKER_ENABLED__", "__MOMORY_LIMIT_ENABLED__"}
+			optimize "Full"
+			symbols "On"
+			links{"lz4", "ufbx", "spdlog"}
+			targetname("Mark3D")
+		end
+
+		filter "configurations:Master"
+		do
+			defines{"NDEBUG", "MASTER", "USE_DLL", "MARKENGINE_EXPORTS", "__MOMORY_LIMIT_ENABLED__"}
+			optimize "Full"
+			symbols "On"
+			links{"lz4", "ufbx"}
+			targetname("Mark3D")
+		end
+	end
+
 end
