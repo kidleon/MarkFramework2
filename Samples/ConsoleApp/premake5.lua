@@ -39,6 +39,7 @@ do
 	filter { "action:vs*" }
 		pchheader "pch.h"
 		pchsource "src/pch.cpp"
+	filter {}
 
 	-- macOS(Xcode): PCH 컴파일 시 includedirs 가 전달되지 않는 문제로
 	-- -include 플래그로 직접 강제 포함, -I 로 Common 경로 명시
@@ -72,6 +73,7 @@ do
 				links{"Mark3D_d"}
 				targetname("SampleConsole_d")
 			end
+			filter {}
 			
 			filter {"configurations:Release"}
 			do
@@ -81,6 +83,7 @@ do
 				links{"Mark3D"}
 				targetname("SampleConsole")
 			end
+			filter {}
 			
 			filter {"configurations:Master"}
 			do
@@ -90,8 +93,11 @@ do
 				links{"Mark3D"}
 				targetname("SampleConsole")
 			end
+			filter {}
 		end
+		filter {}
 	end
+	filter {}
 
 	-- =========================================================================
 	-- macOS
@@ -116,7 +122,6 @@ do
 			linkoptions { "-lMark3D_d" }
 			targetname("SampleConsole_d")
 		end
-
 		filter{}	
 
 		filter {"configurations:Release"}
