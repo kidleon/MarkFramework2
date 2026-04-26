@@ -221,10 +221,10 @@ namespace mark
         printf("[TestPM2_SysNewDelete]\n");
 
         reset_lifecycle();
-        LifecycleProbe* p = SYS_NEW_ARRAY(LifecycleProbe, 123);
+        LifecycleProbe* p = SYS_NEW(LifecycleProbe, 123);
         PM2_CHECK(p != nullptr, "sys_new object");
         PM2_CHECK(p && p->value == 123, "sys_new ctor args");
-        sys_delete(p);
+        SYS_DELETE(LifecycleProbe, p);
         PM2_CHECK(LifecycleProbe::ctor_count == 1, "sys_new ctor count");
         PM2_CHECK(LifecycleProbe::dtor_count == 1, "sys_delete dtor count");
 
@@ -232,7 +232,7 @@ namespace mark
         constexpr size_t kCount = 8;
         LifecycleProbe* arr = SYS_NEW_ARRAY(LifecycleProbe, kCount);
         PM2_CHECK(arr != nullptr, "sys_new_array");
-        sys_delete_array(arr, kCount);
+		SYS_DELETE_ARRAY(LifecycleProbe, arr, kCount);
         PM2_CHECK(LifecycleProbe::ctor_count == static_cast<int>(kCount), "sys_new_array ctor count");
         PM2_CHECK(LifecycleProbe::dtor_count == static_cast<int>(kCount), "sys_delete_array dtor count");
     }
