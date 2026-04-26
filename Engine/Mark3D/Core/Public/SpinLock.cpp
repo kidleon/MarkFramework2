@@ -1,29 +1,6 @@
 #include "pch.h"
 #include "SpinLock.h"
 
-/**
- * @file SpinLock.cpp
- * @brief 멀티 플랫폼 스핀락 내부 구현
- *
- * [지원 플랫폼 / 컴파일러 / 아키텍처]
- *  컴파일러  : MSVC, GCC, Clang
- *  OS        : Windows, Linux, macOS, (기타 POSIX)
- *  아키텍처  : x86, x86-64, ARM32, AArch64, PowerPC, RISC-V
- *
- * [플랫폼 감지 매크로 규칙 (pch.h 또는 빌드 시스템에서 정의)]
- *  __COMPILER_MSVC   : MSVC 컴파일러
- *  __COMPILER_GCC    : GCC 컴파일러
- *  __COMPILER_CLANG  : Clang 컴파일러
- *
- * [백오프(Back-off) 전략]
- *  1단계 (round < MAX_YIELD_ROUND):
- *      CPU pause/yield 명령어를 MAX_YIELD_COUNT 회 반복.
- *      실제 컨텍스트 스위치 없이 파이프라인만 양보 → 전력/열 절감.
- *  2단계 (round >= MAX_YIELD_ROUND):
- *      OS 스케줄러에 실행권을 완전히 양보(SwitchToThread / sched_yield).
- *      잠금 경쟁이 심할 때 CPU를 낭비하지 않기 위함.
- */
-
 // POSIX 계열 OS에서 sched_yield 사용을 위한 헤더
 #if !defined(__TARGET_OS_WINDOWS)
 #   include <sched.h>
@@ -31,10 +8,6 @@
 
 namespace mark
 {
-	// =========================================================================
-	// 상수 정의
-	// =========================================================================
-
 	/** 잠금 해제 상태: stat 이 이 값이면 아무 스레드도 잠금을 보유하지 않음 */
 	constexpr static long SPIN_THREAD_WAIT    = 0;
 
@@ -52,11 +25,6 @@ namespace mark
 	 * 너무 작으면 루프 오버헤드가 커지고, 너무 크면 응답 지연이 생긴다.
 	 */
 	constexpr static long MAX_YIELD_COUNT = 32;
-
-
-	// =========================================================================
-	// 플랫폼별 CPU 파이프라인 힌트
-	// =========================================================================
 
 	/**
 	 * @brief YIELD_PROCESSOR
@@ -118,11 +86,6 @@ namespace mark
 #endif
 	}
 
-
-	// =========================================================================
-	// 플랫폼별 OS 스케줄러 양보
-	// =========================================================================
-
 	/**
 	 * @brief SWITCH_TO_THREAD
 	 *
@@ -148,11 +111,6 @@ namespace mark
 #   warning "SWITCH_TO_THREAD: 알 수 없는 컴파일러 – 양보 불가"
 #endif
 	}
-
-
-	// =========================================================================
-	// 내부 원자 연산 헬퍼
-	// =========================================================================
 
 	/**
 	 * @brief CAS(Compare-And-Swap)로 잠금 획득을 시도한다.
@@ -213,11 +171,6 @@ namespace mark
 		__atomic_store_n(stat, SPIN_THREAD_WAIT, __ATOMIC_RELEASE);
 #endif
 	}
-
-
-	// =========================================================================
-	// 공개 API 구현
-	// =========================================================================
 
 	/**
 	 * @brief spin_lock_t 를 초기화한다.
