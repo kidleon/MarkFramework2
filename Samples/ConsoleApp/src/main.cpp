@@ -18,6 +18,7 @@
 #include "Test_SpinLock.h"
 //#include "Test_UnknownPtr.h"
 #include "Test_PrivateMemory2.h"
+#include "Test_CoreHeap.h"
 
 #include "Benchmark_CoreHeap.h"
 
@@ -63,8 +64,10 @@ int main()
 		mark::Test_SpinLock();	
 		//mark::Test_UnknownPtr();
 
-		mark::Benchamrk_CoreHeap();
-        mark::Test_PrivateMemory2();
+		mark::Test_PrivateMemory2();
+		mark::Test_CoreHeap();
+
+		mark::Benchmark_PrivateMemory2();
 	}
 
 	mark::Mark3D::Shutdown();

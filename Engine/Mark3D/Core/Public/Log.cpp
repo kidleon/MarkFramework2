@@ -189,7 +189,7 @@ namespace mark
 		if (!msg) [[unlikely]]
 			return;
 
-		thread_local std_string_buffer<char, 2048> str_buf;
+		thread_local std_string_buffer<2048> str_buf;
 
 		str_buf.clear();
 

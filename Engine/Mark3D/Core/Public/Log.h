@@ -47,31 +47,33 @@ namespace mark
 	};
 
 	template<size_t InitialCapacity = 2048>
-	class log_string_buffer
+	class std_string_buffer
 	{
-		std::vector<char> m_buffer;
-
 	public:
-		log_string_buffer()
+		std_string_buffer()
 		{
 			m_buffer.reserve(InitialCapacity);
 		}
 
 		template<typename... Args>
-		inline std_string_buffer& format(std::basic_format_string<CharT, std::type_identity_t<Args>...> fmt, Args&&... args)
+		inline std_string_buffer& format(std::basic_format_string<char, std::type_identity_t<Args>...> fmt, Args&&... args)
 		{
 			auto end = std::format_to(std::back_inserter(m_buffer), fmt, std::forward<Args>(args)...);
 			return *this;
 		}
 
-		inline std_string_buffer& append_endl() { return append('\n'); }
-		inline std_string_buffer& append(const CharT* str, size_t count)
+		inline std_string_buffer& append_endl()
+		{
+			return append('\n');
+		}
+
+		inline std_string_buffer& append(const char* str, size_t count)
 		{
 			m_buffer.insert(m_buffer.end(), str, str + count);
 			return *this;
 		}
 
-		inline std_string_buffer& append(const std::basic_string<CharT>& str)
+		inline std_string_buffer& append(const std::basic_string<char>& str)
 		{
 			return append(str.data(), str.size());
 		}
@@ -87,7 +89,10 @@ namespace mark
 			return *this;
 		}
 
-		inline std_string_buffer& append(bool value) { return append(value ? "true" : "false"); }
+		inline std_string_buffer& append(bool value)
+		{
+			return append(value ? "true" : "false");
+		}
 
 		inline std_string_buffer& append(int value)
 		{
@@ -96,6 +101,94 @@ namespace mark
 			assert(result.ec == std::errc());
 			return append(buffer, result.ptr - buffer);
 		}
+
+		inline std_string_buffer& append(unsigned int value)
+		{
+			char buffer[64]; // 충분히 큰 버퍼
+			std::to_chars_result result = std::to_chars(buffer, buffer + sizeof(buffer), value);
+			assert(result.ec == std::errc());
+			return append(buffer, result.ptr - buffer);
+		}
+
+		inline std_string_buffer& append(float value)
+		{
+			char buffer[64]; // 충분히 큰 버퍼
+
+			std::to_chars_result result = std::to_chars(buffer, buffer + sizeof(buffer), value);
+			assert(result.ec == std::errc());
+
+			return append(buffer, result.ptr - buffer);
+		}
+
+		inline std_string_buffer& append(double value)
+		{
+			char buffer[64]; // 충분히 큰 버퍼
+			std::to_chars_result result = std::to_chars(buffer, buffer + sizeof(buffer), value);
+			assert(result.ec == std::errc());
+			return append(buffer, result.ptr - buffer);
+		}
+
+		inline std_string_buffer& append(const sys_string& str)
+		{
+			return append(str.data(), str.size());
+		}
+
+		inline std_string_buffer& append(const spool_string& str)
+		{
+			return append(str.data(), str.size());
+		}
+
+		inline std_string_buffer& append(const upool_string& str)
+		{
+			return append(str.data(), str.size());
+		}
+
+		inline std_string_buffer& append(const temp_string& str)
+		{
+			return append(str.data(), str.size());
+		}
+
+		inline std_string_buffer& append(std::string_view str)
+		{
+			return append(str.data(), str.size());
+		}
+
+		inline void reserve(size_t new_capacity)
+		{
+			m_buffer.reserve(new_capacity);
+		}
+
+		inline void clear()
+		{
+			m_buffer.clear();
+		}
+
+		[[nodiscard]] inline std::basic_string_view<char> to_string_view() const noexcept
+		{
+			return std::basic_string_view<char>(m_buffer.data(), m_buffer.size());
+		}
+
+		inline void to_buffer(char* out_buffer, size_t buffer_size) const
+		{
+			assert(out_buffer && buffer_size > 0 && "Output buffer must be non-null and have positive size");
+
+			size_t char_count = buffer_size;
+
+			// buffer_size가 작을 경우 작은 크기에 맞게 잘라서 복사
+			size_t copy_size = std::min(char_count - 1, m_buffer.size()); // -1은 null-terminator 공간 확보를 위해
+			std::copy_n(m_buffer.data(), copy_size, out_buffer);
+
+			// 복사한 문자열 뒤에 null-terminator 추가
+			out_buffer[copy_size] = char(0); // null-terminate
+		}
+
+		inline void to_string(std::basic_string<char>& out_str) const
+		{
+			out_str.assign(m_buffer.data(), m_buffer.size());
+		}
+
+	private:
+		std::vector<char> m_buffer; // 내부 버퍼 (sync_pool_allocator 사용)
 
 	};
 
@@ -133,7 +226,7 @@ namespace mark
 			Args&&... args
 		)
 		{
-			thread_local std_string_buffer<char, 2048> str_buf;
+			thread_local std_string_buffer<2048> str_buf;
 			str_buf.format(fl.fmt, std::forward<Args>(args)...);
 			str_buf.append(" (at ");
 			str_buf.append(fl.loc.file_name());

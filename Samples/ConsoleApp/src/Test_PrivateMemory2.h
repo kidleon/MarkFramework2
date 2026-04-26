@@ -1,6 +1,6 @@
 #pragma once
 
-#include "PrivateMemory2.h"
+#include "CoreHeap.h"
 #include <cstdio>
 #include <thread>
 #include <vector>
@@ -80,15 +80,15 @@ namespace mark
     {
         printf("[TestPM2_InitShutdown]\n");
 
-        shutdown_core_memory2();
+        shutdown_core_memory();
 
-        bool ok = initialize_core_memory2(256, 256, 1024, 1024, 1024 * 1024 * 4);
+        bool ok = initialize_core_memory(256, 256, 1024, 1024, 1024 * 1024 * 4);
         PM2_CHECK(ok, "initialize_core_memory2 success");
 
-        shutdown_core_memory2();
+        shutdown_core_memory();
         PM2_CHECK(true, "shutdown_core_memory2 no crash");
 
-        ok = initialize_core_memory2(256, 256, 1024, 1024, 1024 * 1024 * 4);
+        ok = initialize_core_memory(256, 256, 1024, 1024, 1024 * 1024 * 4);
         PM2_CHECK(ok, "re-initialize_core_memory2 success");
     }
 
@@ -326,7 +326,7 @@ namespace mark
         TestPM2_MultiThreadSys();
         TestPM2_MultiThreadSpool();
 
-        shutdown_core_memory2();
+        shutdown_core_memory();
 
         print_summary();
     }
