@@ -48,8 +48,6 @@ do
 	filter { "action:vs*", "system:windows" }
 	do
 		kind "SharedLib"
-		platforms { "x64" }
-		architecture "x86_64"
 		
 		pchheader "pch.h"
 		pchsource "pch.cpp"
@@ -83,7 +81,7 @@ do
 			"../External/bin/%{cfg.platform}"
 		}
 		
-		filter { "configurations:Debug" }
+		filter { "system:windows", "configurations:Debug" }
 		do
 			defines{"DEBUG", "USE_DLL", "MARKENGINE_EXPORTS", "__LOG_ENABLED__", "__MEMORY_TRACKER_ENABLED__", "__MOMORY_LIMIT_ENABLED__", "_CRT_SECURE_NO_WARNINGS"}
 			optimize "Off"
@@ -97,7 +95,7 @@ do
 		end
 		filter {}
 		
-		filter { "configurations:Release" }
+		filter { "system:windows", "configurations:Release" }
 		do
 			defines{"NDEBUG", "RELEASE", "USE_DLL", "MARKENGINE_EXPORTS", "__LOG_ENABLED__", "__MEMORY_TRACKER_ENABLED__", "__MOMORY_LIMIT_ENABLED__", "_CRT_SECURE_NO_WARNINGS"}
 			optimize "Full"
@@ -111,7 +109,7 @@ do
 		end
 		filter {}
 		
-		filter { "configurations:Master" }
+		filter { "system:windows", "configurations:Master" }
 		do
 			defines{"NDEBUG", "MASTER", "USE_DLL", "MARKENGINE_EXPORTS", "__MOMORY_LIMIT_ENABLED__", "_CRT_SECURE_NO_WARNINGS"}
 			optimize "Full"
@@ -133,10 +131,7 @@ do
 	-- =========================================================================
 	filter { "action:xcode*", "system:macosx" }
 	do
-		system "macosx"
 		systemversion "13.3"        -- -target 플래그와 충돌 방지
-		platforms { "ARM64" }
-		architecture "arm64"
 		
 		externalincludedirs {
 			"../External/inc",
