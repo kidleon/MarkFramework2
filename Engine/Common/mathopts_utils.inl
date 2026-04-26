@@ -30,13 +30,13 @@ namespace mark
 	inline float delta_angle(float current, float target) noexcept
 	{
 		// target - current 의 차이를 [0, 2π) 범위로 순환
-		float delta = std::fmod(target - current, M_2PI);
+		float delta = std::fmod(target - current, MX_2PI);
 
 		// 최단 경로 보정: (-π, π] 범위로 변환
 		if (delta > M_PI)
-			delta -= M_2PI; // 반시계보다 시계가 더 가까운 경우
+			delta -= MX_2PI; // 반시계보다 시계가 더 가까운 경우
 		else if (delta < -M_PI)
-			delta += M_2PI; // 시계보다 반시계가 더 가까운 경우
+			delta += MX_2PI; // 시계보다 반시계가 더 가까운 경우
 
 		return delta;
 	}

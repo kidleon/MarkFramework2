@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MathLib.h"
+#include "mathlib.h"
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -13,7 +13,7 @@ namespace mark
         static int g_passed = 0;
         static int g_failed = 0;
 
-        inline bool nearly_equal(float a, float b, float eps = M_TINY)
+        inline bool nearly_equal(float a, float b, float eps = MX_TINY)
         {
             return std::fabs(a - b) <= eps;
         }

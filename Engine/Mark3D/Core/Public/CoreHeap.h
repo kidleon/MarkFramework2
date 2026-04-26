@@ -46,7 +46,7 @@ namespace mark
 	namespace implements
 	{
 		// sys_new/sys_delete 스타일의 실제 실행 함수들
-#if defined(__MEMORY_TRACKING_ENABLED__)
+#if defined(__MEMORY_TRACKER_ENABLED__)
 		template<typename T, size_t Align, POOL Pool>
 		[[nodiscard]] inline T* alloc_impl(std::source_location loc, size_t count)
 		{
@@ -231,7 +231,7 @@ namespace mark
 				return nullptr;
 			}
 		}
-#endif // __MEMORY_TRACKING_ENABLED__
+#endif // __MEMORY_TRACKER_ENABLED__
 
 		template<typename T, size_t Align, POOL Pool>
 		inline void delete_impl(T* ptr, size_t count)
@@ -258,7 +258,7 @@ namespace mark
 
 	//--------------------------------------------------------------------------------
 	// sys_new/sys_delete 스타일의 간단한 인터페이스
-#if defined(__MEMORY_TRACKING_ENABLED__)
+#if defined(__MEMORY_TRACKER_ENABLED__)
 
 	template<typename T, size_t Align>
 	[[nodiscard]] inline T* sys_new(std::source_location loc = std::source_location::current())
@@ -307,7 +307,7 @@ namespace mark
 	{
 		return sys_new<T, alignof(T), Args...>(std::forward<Args>(args)...);
 	}
-#endif // __MEMORY_TRACKING_ENABLED__
+#endif // __MEMORY_TRACKER_ENABLED__
 
 	template<typename T, size_t Align>
 	inline void sys_delete(T* ptr)
@@ -324,7 +324,7 @@ namespace mark
 
 	//--------------------------------------------------------------------------------
 	// sys_new_array/sys_delete_array 스타일의 간단한 인터페이스
-#if defined(__MEMORY_TRACKING_ENABLED__)
+#if defined(__MEMORY_TRACKER_ENABLED__)
 	template<typename T, size_t Align>
 	[[nodiscard]] inline T* sys_new_array(std::source_location loc, size_t count)
 	{
@@ -373,7 +373,7 @@ namespace mark
 		return sys_new_array<T, alignof(T), Args...>(count, std::forward<Args>(args)...);
 	}
 		
-#endif // __MEMORY_TRACKING_ENABLED__
+#endif // __MEMORY_TRACKER_ENABLED__
 	template<typename T, size_t Align>
 	void sys_delete_array(T* ptr, size_t count)
 	{
@@ -388,7 +388,7 @@ namespace mark
 
 	//--------------------------------------------------------------------------------
 	// spool_new/spool_delete 스타일의 간단한 인터페이스
-#if defined(__MEMORY_TRACKING_ENABLED__)
+#if defined(__MEMORY_TRACKER_ENABLED__)
 	template<typename T, size_t Align>
 	[[nodiscard]] inline T* spool_new(std::source_location loc = std::source_location::current())
 	{
@@ -436,7 +436,7 @@ namespace mark
 	{
 		return spool_new<T, alignof(T), Args...>(std::forward<Args>(args)...);
 	}
-#endif // __MEMORY_TRACKING_ENABLED__
+#endif // __MEMORY_TRACKER_ENABLED__
 
 	template<typename T, size_t Align>
 	inline void spool_delete(T* ptr)
@@ -452,7 +452,7 @@ namespace mark
 
 	//--------------------------------------------------------------------------------
 	// spool_new_array/spool_delete_array 스타일의 간단한 인터페이스
-#if defined(__MEMORY_TRACKING_ENABLED__)
+#if defined(__MEMORY_TRACKER_ENABLED__)
 	template<typename T, size_t Align>
 	[[nodiscard]] inline T* spool_new_array(std::source_location loc, size_t count)
 	{
@@ -500,7 +500,7 @@ namespace mark
 	{
 		return spool_new_array<T, alignof(T), Args...>(count, std::forward<Args>(args)...);
 	}
-#endif // __MEMORY_TRACKING_ENABLED__
+#endif // __MEMORY_TRACKER_ENABLED__
 
 	template<typename T, size_t Align>
 	void spool_delete_array(T* ptr, size_t count)
@@ -516,7 +516,7 @@ namespace mark
 
 	//--------------------------------------------------------------------------------
 	// upool_new/spool_delete 스타일의 간단한 인터페이스
-#if defined(__MEMORY_TRACKING_ENABLED__)
+#if defined(__MEMORY_TRACKER_ENABLED__)
 	template<typename T, size_t Align>
 	[[nodiscard]] inline T* upool_new(std::source_location loc = std::source_location::current())
 	{
@@ -564,7 +564,7 @@ namespace mark
 	{
 		return upool_new<T, alignof(T), Args...>(std::forward<Args>(args)...);
 	}
-#endif // __MEMORY_TRACKING_ENABLED__
+#endif // __MEMORY_TRACKER_ENABLED__
 
 	template<typename T, size_t Align>
 	inline void upool_delete(T* ptr)
@@ -580,7 +580,7 @@ namespace mark
 
 	//--------------------------------------------------------------------------------
 	// upool_new_array/upool_delete_array 스타일의 간단한 인터페이스
-#if defined(__MEMORY_TRACKING_ENABLED__)
+#if defined(__MEMORY_TRACKER_ENABLED__)
 	template<typename T, size_t Align>
 	[[nodiscard]] inline T* upool_new_array(std::source_location loc, size_t count)
 	{
@@ -628,7 +628,7 @@ namespace mark
 	{
 		return upool_new_array<T, alignof(T), Args...>(count, std::forward<Args>(args)...);
 	}
-#endif // __MEMORY_TRACKING_ENABLED__
+#endif // __MEMORY_TRACKER_ENABLED__
 
 	template<typename T, size_t Align>
 	void upool_delete_array(T* ptr, size_t count)
@@ -646,7 +646,7 @@ namespace mark
 	// temp_new/temp_delete 스타일의 간단한 인터페이스.
 	// 단일 쓰레드에서만 사용해야 한다. 멀티 쓰레드 접근시 lock/unlock이 필요하다.
 	// temp객체도 반드시 temp_delete로 해제해야 소멸자가 호출된다.
-#if defined(__MEMORY_TRACKING_ENABLED__)
+#if defined(__MEMORY_TRACKER_ENABLED__)
 	template<typename T, size_t Align>
 	[[nodiscard]] inline T* temp_new(std::source_location loc = std::source_location::current())
 	{
@@ -694,7 +694,7 @@ namespace mark
 	{
 		return temp_new<T, alignof(T), Args...>(std::forward<Args>(args)...);
 	}
-#endif // __MEMORY_TRACKING_ENABLED__
+#endif // __MEMORY_TRACKER_ENABLED__
 	
 
 	template<typename T, size_t Align>
@@ -713,7 +713,7 @@ namespace mark
 	// temp_new_array/temp_delete_array 스타일의 간단한 인터페이스
 	// 단일 쓰레드에서만 사용해야 한다. 멀티 쓰레드 접근시 lock/unlock이 필요하다.
 	// temp객체도 반드시 temp_delete로 해제해야 소멸자가 호출된다.
-#if defined(__MEMORY_TRACKING_ENABLED__)
+#if defined(__MEMORY_TRACKER_ENABLED__)
 	template<typename T, size_t Align>
 	[[nodiscard]] inline T* temp_new_array(std::source_location loc, size_t count)
 	{
@@ -761,7 +761,7 @@ namespace mark
 	{
 		return temp_new_array<T, alignof(T), Args...>(count, std::forward<Args>(args)...);
 	}
-#endif // __MEMORY_TRACKING_ENABLED__
+#endif // __MEMORY_TRACKER_ENABLED__
 	template<typename T, size_t Align>
 	void temp_delete_array(T* ptr, size_t count)
 	{
@@ -775,7 +775,7 @@ namespace mark
 	}
 }
 
-#if defined(__MEMORY_TRACKING_ENABLED__)
+#if defined(__MEMORY_TRACKER_ENABLED__)
 #define SYS_NEW_A(T, A, ...)					::mark::sys_new<T, A>(std::source_location::current()__VA_OPT__(,) __VA_ARGS__)
 #define SPOOL_NEW_A(T, A, ...)					::mark::spool_new<T, A>(std::source_location::current()__VA_OPT__(,) __VA_ARGS__)
 #define UPOOL_NEW_A(T, A, ...)					::mark::upool_new<T, A>(std::source_location::current()__VA_OPT__(,) __VA_ARGS__)
@@ -795,7 +795,7 @@ namespace mark
 #define SPOOL_NEW_ARRAY_A(T, A, ...)			::mark::spool_new_array<T, A>(__VA_ARGS__)
 #define UPOOL_NEW_ARRAY_A(T, A, ...)			::mark::upool_new_array<T, A>(__VA_ARGS__)
 #define TEMP_NEW_ARRAY_A(T, A, ...)				::mark::temp_new_array<T, A>(__VA_ARGS__)
-#endif // __MEMORY_TRACKING_ENABLED__
+#endif // __MEMORY_TRACKER_ENABLED__
 
 #define SYS_NEW(T, ...)							SYS_NEW_A(T, alignof(T), __VA_ARGS__)
 #define SYS_DELETE_A(T, A, ptr)					::mark::sys_delete<T, A>(ptr)

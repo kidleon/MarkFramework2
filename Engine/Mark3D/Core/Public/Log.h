@@ -2,7 +2,6 @@
 #include <source_location>
 #include <string>
 #include "CoreGeneric.h"
-#include "StringBuffer.h"
 
 
 namespace mark
@@ -56,12 +55,14 @@ namespace mark
 		}
 
 		template<typename... Args>
-		inline std_string_buffer& format(std::basic_format_string<char, std::type_identity_t<Args>...> fmt, Args&&... args)
+		inline std_string_buffer& format(
+			std::format_string<Args...> fmt,
+			Args&&... args)
 		{
-			auto end = std::format_to(std::back_inserter(m_buffer), fmt, std::forward<Args>(args)...);
+			std::format_to(std::back_inserter(m_buffer), fmt, std::forward<Args>(args)...);
 			return *this;
 		}
-
+		
 		inline std_string_buffer& append_endl()
 		{
 			return append('\n');

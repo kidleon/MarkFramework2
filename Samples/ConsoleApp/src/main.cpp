@@ -46,7 +46,7 @@ void TestAllocator();
 
 int main()
 {
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
 	mark::Mark3D::Initialize();
 
@@ -161,9 +161,6 @@ void TestStringBuffer()
 		mark::spool_string sp_str = mark::string_buffer<char>::spool_format("Hello, {}!", "world");
 		LOG(sp_str);
 	}
-
-
-	::Sleep(1000);
 }
 
 /*

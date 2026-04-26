@@ -15,7 +15,7 @@ namespace mark
         static int g_passed = 0;
         static int g_failed = 0;
 
-        inline bool nearly_equal(float a, float b, float eps = M_TINY)
+        inline bool nearly_equal(float a, float b, float eps = MX_TINY)
         {
             return std::fabs(a - b) <= eps;
         }
@@ -465,7 +465,7 @@ namespace mark
         MATH_CHECK(test_math_detail::nearly_equal(rv.x, 1.0f, 0.001f) && test_math_detail::nearly_equal(rv.y, 0.0f, 0.001f) && test_math_detail::nearly_equal(rv.z, 0.0f, 0.001f), "quat_mul identity*vec");
 
         // 90-degree rotation around Z-axis: (1,0,0) -> (0,1,0)
-        QUAT qz90 = quat_rotation_axis_angle(FLOAT3{ 0.0f, 0.0f, 1.0f }, M_PIDIV2);
+		QUAT qz90 = quat_rotation_axis_angle(FLOAT3{ 0.0f, 0.0f, 1.0f }, MX_PIDIV2);
         FLOAT3 rotated = quat_mul(qz90, v);
         MATH_CHECK(test_math_detail::nearly_equal(rotated.x, 0.0f, 0.01f) && test_math_detail::nearly_equal(rotated.y, 1.0f, 0.01f) && test_math_detail::nearly_equal(rotated.z, 0.0f, 0.01f), "quat_mul 90deg Z rotation");
     }
@@ -533,7 +533,7 @@ namespace mark
         QUAT q0 = quat_rotation_roll_pitch_yaw(0.0f, 0.0f, 0.0f);
         MATH_CHECK(test_math_detail::nearly_equal(q0.x, 0.0f, 0.001f) && test_math_detail::nearly_equal(q0.y, 0.0f, 0.001f) && test_math_detail::nearly_equal(q0.z, 0.0f, 0.001f) && test_math_detail::nearly_equal(q0.w, 1.0f, 0.001f), "quat_rotation_roll_pitch_yaw (0,0,0) == identity");
 
-        QUAT q90z = quat_rotation_roll_pitch_yaw(0.0f, 0.0f, M_PIDIV2);
+		QUAT q90z = quat_rotation_roll_pitch_yaw(0.0f, 0.0f, MX_PIDIV2);
         float len = std::sqrt(q90z.x * q90z.x + q90z.y * q90z.y + q90z.z * q90z.z + q90z.w * q90z.w);
         MATH_CHECK(test_math_detail::nearly_equal(len, 1.0f, 0.001f), "quat_rotation_roll_pitch_yaw unit length");
     }
@@ -580,7 +580,7 @@ namespace mark
     {
         printf("[TestQuat_FromMatrix]\n");
 
-        QUAT q_orig = quat_rotation_axis_angle(FLOAT3{ 0.0f, 1.0f, 0.0f }, M_PIDIV2);
+		QUAT q_orig = quat_rotation_axis_angle(FLOAT3{ 0.0f, 1.0f, 0.0f }, MX_PIDIV2);
         MATRIX4 m = quat_to_matrix(q_orig);
         QUAT q_back = quat_from_matrix(m);
 
@@ -609,7 +609,7 @@ namespace mark
     {
         printf("[TestQuat_ToAxisAngle]\n");
 
-        float angle_in = M_PIDIV2;
+		float angle_in = MX_PIDIV2;
         FLOAT3 axis_in = { 0.0f, 1.0f, 0.0f };
         QUAT q = quat_rotation_axis_angle(axis_in, angle_in);
         FLOAT4 aa = quat_to_axis_angle(q);
@@ -627,7 +627,7 @@ namespace mark
         MATH_CHECK(mat4_is_ident(mid), "quat_to_matrix identity");
 
         // 90-degree rotation around Z should move X-axis to Y-axis
-        QUAT qz = quat_rotation_axis_angle(FLOAT3{ 0.0f, 0.0f, 1.0f }, M_PIDIV2);
+		QUAT qz = quat_rotation_axis_angle(FLOAT3{ 0.0f, 0.0f, 1.0f }, MX_PIDIV2);
         MATRIX4 mz = quat_to_matrix(qz);
         FLOAT3 vx = { 1.0f, 0.0f, 0.0f };
         FLOAT3 rv = mat4_mul(mz, vx);
@@ -818,39 +818,39 @@ namespace mark
 
         // Rotation X : 90 degrees -> (0,1,0) should become (0,0,1)
         {
-            MATRIX4 rx = mat4_rotation_x(M_PIDIV2);
+            MATRIX4 rx = mat4_rotation_x(MX_PIDIV2);
             FLOAT3 v = { 0.0f, 1.0f, 0.0f };
             FLOAT3 rv = mat4_mul(rx, v);
             MATH_CHECK(test_math_detail::nearly_equal(rv.y, 0.0f, 0.01f) && test_math_detail::nearly_equal(rv.z, 1.0f, 0.01f), "mat4_rotation_x 90deg");
 
             MATRIX4 rx2;
-            mat4_rotation_x(M_PIDIV2, rx2);
+            mat4_rotation_x(MX_PIDIV2, rx2);
             FLOAT3 rv2 = mat4_mul(rx2, v);
             MATH_CHECK(test_math_detail::nearly_equal(rv2.z, 1.0f, 0.01f), "mat4_rotation_x 90deg out");
         }
 
         // Rotation Y : 90 degrees -> (1,0,0) should become (0,0,-1)
         {
-            MATRIX4 ry = mat4_rotation_y(M_PIDIV2);
+            MATRIX4 ry = mat4_rotation_y(MX_PIDIV2);
             FLOAT3 v = { 1.0f, 0.0f, 0.0f };
             FLOAT3 rv = mat4_mul(ry, v);
             MATH_CHECK(test_math_detail::nearly_equal(rv.x, 0.0f, 0.01f) && test_math_detail::nearly_equal(rv.z, -1.0f, 0.01f), "mat4_rotation_y 90deg");
 
             MATRIX4 ry2;
-            mat4_rotation_y(M_PIDIV2, ry2);
+            mat4_rotation_y(MX_PIDIV2, ry2);
             FLOAT3 rv2 = mat4_mul(ry2, v);
             MATH_CHECK(test_math_detail::nearly_equal(rv2.z, -1.0f, 0.01f), "mat4_rotation_y 90deg out");
         }
 
         // Rotation Z : 90 degrees -> (1,0,0) should become (0,1,0)
         {
-            MATRIX4 rz = mat4_rotation_z(M_PIDIV2);
+            MATRIX4 rz = mat4_rotation_z(MX_PIDIV2);
             FLOAT3 v = { 1.0f, 0.0f, 0.0f };
             FLOAT3 rv = mat4_mul(rz, v);
             MATH_CHECK(test_math_detail::nearly_equal(rv.x, 0.0f, 0.01f) && test_math_detail::nearly_equal(rv.y, 1.0f, 0.01f), "mat4_rotation_z 90deg");
 
             MATRIX4 rz2;
-            mat4_rotation_z(M_PIDIV2, rz2);
+            mat4_rotation_z(MX_PIDIV2, rz2);
             FLOAT3 rv2 = mat4_mul(rz2, v);
             MATH_CHECK(test_math_detail::nearly_equal(rv2.y, 1.0f, 0.01f), "mat4_rotation_z 90deg out");
         }
@@ -867,7 +867,7 @@ namespace mark
         mat4_rotation_yaw_pitch_roll(0.0f, 0.0f, 0.0f, m2);
         MATH_CHECK(mat4_is_ident(m2), "mat4_rotation_yaw_pitch_roll (0,0,0) out == identity");
 
-        MATRIX4 m3 = mat4_rotation_yaw_pitch_roll(M_PIDIV2, 0.0f, 0.0f);
+		MATRIX4 m3 = mat4_rotation_yaw_pitch_roll(MX_PIDIV2, 0.0f, 0.0f);
         MATH_CHECK(!mat4_is_ident(m3), "mat4_rotation_yaw_pitch_roll non-zero != identity");
     }
 
@@ -891,7 +891,7 @@ namespace mark
     {
         printf("[TestMat4_RotationQuat]\n");
 
-        QUAT q = quat_rotation_axis_angle(FLOAT3{ 0.0f, 0.0f, 1.0f }, M_PIDIV2);
+		QUAT q = quat_rotation_axis_angle(FLOAT3{ 0.0f, 0.0f, 1.0f }, MX_PIDIV2);
         MATRIX4 m = mat4_rotation_quat(q);
         FLOAT3 v = { 1.0f, 0.0f, 0.0f };
         FLOAT3 rv = mat4_mul(m, v);

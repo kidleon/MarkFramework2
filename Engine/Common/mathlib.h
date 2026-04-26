@@ -185,8 +185,6 @@ namespace mark
 		explicit XFLOAT4(__m128 _xmm) : xmm(_xmm) {}
 	};
 
-	using XQUAT = XFLOAT4; // 쿼터니언도 4개의 float로 표현되므로 XFLOAT4를 재사용
-
 	struct alignas(16) XMATRIX4
 	{
 		union
@@ -251,6 +249,8 @@ namespace mark
 		};
 	};
 #endif // #if defined(__SSE__)
+	using XQUAT = XFLOAT4; // 쿼터니언도 4개의 float로 표현되므로 XFLOAT4를 재사용
+
 
 	//-----------------------------------------------------------------------------
 	// MATH UTILITY
@@ -265,14 +265,14 @@ namespace mark
 	template<typename T> inline T T_LERP(const T& a, const T& b, float t) { return a + (b - a) * t; }
 	inline float F_SIGN(float value) { return (float)((0.0f < value) - (value < 0.0f)); }
 
-	constexpr float M_PI = 3.14159265358979323846f; // 파이값.
-	constexpr float M_2PI = 6.283185307f; // 2 * 파이값.
-	constexpr float M_1DIVPI = 0.318309886f; // 1 / 파이값.
-	constexpr float M_1DIV2PI = 0.159154943f; // 1 / (2 * 파이값).
-	constexpr float M_PIDIV2 = 1.570796327f; // 파이값 / 2.
-	constexpr float M_TINY = 0.00001f; // 작은 수. 주로 0으로 나누는 것을 방지하기 위해 사용.
-	constexpr float M_EPSILON = 0.000001f; // 부동 소수점 비교 시 허용되는 오차 범위. 두 값이 이 범위 내에 있으면 거의 같다고 간주.
-	constexpr float M_2EPSILON = 0.000002f; // 2 * EPSILON. 부동 소수점 비교 시 더 넓은 오차 범위를 허용할 때 사용.
+	constexpr float MX_PI= 3.14159265358979323846f; // 파이값.
+	constexpr float MX_2PI = 6.283185307f; // 2 * 파이값.
+	constexpr float MX_1DIVPI = 0.318309886f; // 1 / 파이값.
+	constexpr float MX_1DIV2PI = 0.159154943f; // 1 / (2 * 파이값).
+	constexpr float MX_PIDIV2 = 1.570796327f; // 파이값 / 2.
+	constexpr float MX_TINY = 0.00001f; // 작은 수. 주로 0으로 나누는 것을 방지하기 위해 사용.
+	constexpr float MX_EPSILON = 0.000001f; // 부동 소수점 비교 시 허용되는 오차 범위. 두 값이 이 범위 내에 있으면 거의 같다고 간주.
+	constexpr float MX_2EPSILON = 0.000002f; // 2 * EPSILON. 부동 소수점 비교 시 더 넓은 오차 범위를 허용할 때 사용.
 	constexpr float DEG_TO_RAD = M_PI / 180.0f; // 1 degree를 라디안으로 변환하는 상수
 	constexpr float RAD_TO_DEG = 180.0f / M_PI; // 1 radian을 degree로 변환하는 상수
 
@@ -611,7 +611,6 @@ namespace mark
 	inline XMATRIX4 __vectorcall xmat4_frustum_lh(float left, float right, float bottom, float top, float nearZ, float farZ) noexcept;
 	inline void __vectorcall xmat4_frustum_rh(float left, float right, float bottom, float top, float nearZ, float farZ, XMATRIX4& out) noexcept;
 	inline XMATRIX4 __vectorcall xmat4_frustum_rh(float left, float right, float bottom, float top, float nearZ, float farZ) noexcept;
-
 	
 }
 

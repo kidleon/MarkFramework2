@@ -270,7 +270,7 @@ namespace mark
 			return false;
 
 		// 버퍼 크기 확인 (표준 UUID 문자열은 36자 + 널 종료 문자)
-		if (length < 37)
+		if (buffer_size < 37)
 			return false;
 
 		uuid_t uuid;

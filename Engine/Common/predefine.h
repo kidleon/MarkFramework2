@@ -1,29 +1,31 @@
 #pragma once
 
-
 // OS PLATFORM DETECTION
 #if defined(_WIN32) || defined(_WIN64)
-#	define __TARGET_OS_WINDOWS
-#	define __PLATFORM_WINDOWS
+#   define __TARGET_OS_WINDOWS
+#   define __PLATFORM_WINDOWS
 #elif defined(__linux__)
-#	define __TARGET_OS_LINUX
-#	define __PLATFORM_LINUX
+#   define __TARGET_OS_LINUX
+#   define __PLATFORM_LINUX
 #elif defined(__APPLE__)
-#	if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
-#		define __TARGET_OS_IOS
-#		define __PLATFORM_IOS
-#	else
-#		define __TARGET_OS_MAC
-#		define __PLATFORM_MAC
-#	endif // #if defined(TARGET_IPHONE_SIMULATOR) || defined(TARGET_OS_IPHONE)
+#   include <TargetConditionals.h>   // TARGET_OS_* 매크로 정의 헤더
+#   if TARGET_OS_SIMULATOR || TARGET_OS_IPHONE
+#       define __TARGET_OS_IOS
+#       define __PLATFORM_IOS
+#   elif TARGET_OS_MAC
+#       define __TARGET_OS_MAC
+#       define __PLATFORM_MAC
+#   endif
 #elif defined(__FreeBSD__)
-#	define __TARGET_OS_FREEBSD
-#	define __PLATFORM_FREEBSD
-#endif // #if defined(_WIN32) || defined(_WIN64)
+#   define __TARGET_OS_FREEBSD
+#   define __PLATFORM_FREEBSD
+#endif
 
 // PROCESSOR ARCHITECTURE DETECTION
 #if defined(_M_X64) || defined(__aarch64__) || defined(_M_ARM64) || defined(_M_IX86) || defined(__i386__) || defined(__arm__)
-#	define __LITTLE_ENDIAN__
+#	ifndef __LITTLE_ENDIAN__
+#		define __LITTLE_ENDIAN__
+#	endif // __LITTLE_ENDIAN__
 #elif defined(_PPC_) || defined(__ppc__) || defined(__powerpc__) || defined(__PPC64__) || defined(__powerpc64__)
 #	define __BIG_ENDIAN__
 #endif // PROCESSOR ARCHITECTURE
@@ -107,9 +109,12 @@
 #	define interface struct
 #endif // #if defined(__COMPILER_MSVC)
 
+#if defined(__ARM_NEON) || defined(__ARM_NEON__)
+	#include <arm_neon.h>
+#endif
 
 // BASIC TYPES DEFINES
-#if defined(__TARGET_COMPILER_GCC) || defined(__TARGET_COMPILER_CLANG)
+#if defined(__APPLE__)
 typedef unsigned char BYTE;
 typedef unsigned short WORD;
 typedef unsigned int DWORD;
@@ -120,7 +125,9 @@ typedef int LONG;
 typedef unsigned int ULONG;
 typedef long long LONG64;
 typedef unsigned long long ULONG64;
-#endif // #if defined(__TARGET_COMPILER_GCC) || defined(__TARGET_COMPILER_CLANG)
+typedef float FLOAT;
+#define __vectorcall
+#endif // defined(__TARGET_COMPILER_GCC) || defined(__TARGET_COMPILER_CLANG)
 
 
 // CHARCTER UNICODE DEFINES
@@ -149,11 +156,11 @@ typedef unsigned long long ULONG64;
 #endif // MARK_ENCODING_WCHAR
 
 #ifndef BOOL
-#	define BOOL UINT32
+#	define BOOL uint32_t
 #endif // BOOL
 
 #ifndef BOOL8
-#	define BOOL8 UINT8
+#	define BOOL8 uint8_t
 #endif // BOOL8
 
 #ifndef S_OK
@@ -183,6 +190,11 @@ typedef unsigned long long ULONG64;
 #ifndef MAX_PATH
 #	define MAX_PATH 256
 #endif // MAX_PATH
+
+
+#ifndef _MAX_PATH
+# 	define _MAX_PATH 256
+#endif // _MAX_PATH
 
 using resource_handle = uint64_t;
 

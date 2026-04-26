@@ -221,7 +221,7 @@ namespace mark
         printf("[TestPM2_SysNewDelete]\n");
 
         reset_lifecycle();
-        LifecycleProbe* p = sys_new<LifecycleProbe>(123);
+        LifecycleProbe* p = SYS_NEW_ARRAY(LifecycleProbe, 123);
         PM2_CHECK(p != nullptr, "sys_new object");
         PM2_CHECK(p && p->value == 123, "sys_new ctor args");
         sys_delete(p);
@@ -230,7 +230,7 @@ namespace mark
 
         reset_lifecycle();
         constexpr size_t kCount = 8;
-        LifecycleProbe* arr = sys_new_array<LifecycleProbe>(kCount);
+        LifecycleProbe* arr = SYS_NEW_ARRAY(LifecycleProbe, kCount);
         PM2_CHECK(arr != nullptr, "sys_new_array");
         sys_delete_array(arr, kCount);
         PM2_CHECK(LifecycleProbe::ctor_count == static_cast<int>(kCount), "sys_new_array ctor count");
@@ -252,7 +252,7 @@ namespace mark
 
         reset_lifecycle();
         constexpr size_t kCount = 8;
-        LifecycleProbe* arr = spool_new_array<LifecycleProbe>(kCount);
+        LifecycleProbe* arr = SPOOL_NEW_ARRAY(LifecycleProbe, kCount);
         PM2_CHECK(arr != nullptr, "spool_new_array");
         spool_delete_array(arr, kCount);
         PM2_CHECK(LifecycleProbe::ctor_count == static_cast<int>(kCount), "spool_new_array ctor count");
@@ -265,7 +265,7 @@ namespace mark
         printf("[TestPM2_UpoolNewDelete]\n");
 
         reset_lifecycle();
-        LifecycleProbe* p = upool_new<LifecycleProbe>(789);
+        LifecycleProbe* p = UPOOL_NEW(LifecycleProbe, 789);
         PM2_CHECK(p != nullptr, "upool_new object");
         PM2_CHECK(p && p->value == 789, "upool_new ctor args");
         upool_delete(p);

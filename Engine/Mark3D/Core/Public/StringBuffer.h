@@ -15,16 +15,16 @@ namespace mark
 			m_buffer.reserve(InitialCapacity);
 
 			if constexpr (!std::is_same_v<CharT, char> &&
-				!std::is_same_v<CharT, wchar_t> &&
-				!std::is_same_v<CharT, char16_t> &&
-				!std::is_same_v<CharT, char32_t>)
+				!std::is_same_v<CharT, wchar_t>)
 			{
 				static_assert(always_false<CharT>, "Unsupported character type");
 			}
 		}
 
 		template<typename... Args>
-		[[nodiscard]] inline static sys_string sys_format(std::basic_format_string<CharT, std::type_identity_t<Args>...> fmt, Args&&... args)
+		[[nodiscard]] inline static sys_string sys_format(
+			std::format_string<Args...> fmt,
+			Args&&... args)
 		{
 			sys_vector<CharT> buffer;
 			std::format_to(std::back_inserter(buffer), fmt, std::forward<Args>(args)...);
@@ -170,14 +170,6 @@ namespace mark
 			{
 				return append(L'\n');
 			}
-			else if constexpr (std::is_same_v<CharT, char16_t>)
-			{
-				return append(u'\n');
-			}
-			else if constexpr (std::is_same_v<CharT, char32_t>)
-			{
-				return append(U'\n');
-			}
 			else
 			{
 				static_assert(always_false<CharT>, "Unsupported character type");
@@ -218,16 +210,6 @@ namespace mark
 				std::basic_string_view<wchar_t> str = value ? (std::basic_string_view<wchar_t>(L"true")) : (std::basic_string_view<wchar_t>(L"false"));
 				return append(str.data(), str.size());
 			}
-			else if constexpr (std::is_same_v<CharT, char16_t>)
-			{
-				std::basic_string_view<char16_t> str = value ? (std::basic_string_view<char16_t>(u"true")) : (std::basic_string_view<char16_t>(u"false"));
-				return append(str.data(), str.size());
-			}
-			else if constexpr (std::is_same_v<CharT, char32_t>)
-			{
-				std::basic_string_view<char32_t> str = value ? (std::basic_string_view<char32_t>(U"true")) : (std::basic_string_view<char32_t>(U"false"));
-				return append(str.data(), str.size());
-			}
 			else
 			{
 				static_assert(always_false<CharT>, "Unsupported character type");
@@ -250,18 +232,6 @@ namespace mark
 				std::format_to(buffer, L"{}", value);
 				return append(buffer, std::char_traits<wchar_t>::length(buffer));
 			}
-			else if constexpr (std::is_same_v<CharT, char16_t>)
-			{
-				char16_t buffer[64]; // 충분히 큰 버퍼
-				std::format_to(buffer, u"{}", value);
-				return append(buffer, std::char_traits<char16_t>::length(buffer));
-			}
-			else if constexpr (std::is_same_v<CharT, char32_t>)
-			{
-				char32_t buffer[64]; // 충분히 큰 버퍼
-				std::format_to(buffer, U"{}", value);
-				return append(buffer, std::char_traits<char32_t>::length(buffer));
-			}
 			else
 			{
 				static_assert(always_false<CharT>, "Unsupported character type");
@@ -283,18 +253,6 @@ namespace mark
 				wchar_t buffer[64]; // 충분히 큰 버퍼
 				std::format_to(buffer, L"{}", value);
 				return append(buffer, std::char_traits<wchar_t>::length(buffer));
-			}
-			else if constexpr (std::is_same_v<CharT, char16_t>)
-			{
-				char16_t buffer[64]; // 충분히 큰 버퍼
-				std::format_to(buffer, u"{}", value);
-				return append(buffer, std::char_traits<char16_t>::length(buffer));
-			}
-			else if constexpr (std::is_same_v<CharT, char32_t>)
-			{
-				char32_t buffer[64]; // 충분히 큰 버퍼
-				std::format_to(buffer, U"{}", value);
-				return append(buffer, std::char_traits<char32_t>::length(buffer));
 			}
 			else
 			{
@@ -320,18 +278,6 @@ namespace mark
 				std::format_to(buffer, L"{}", value);
 				return append(buffer, std::char_traits<wchar_t>::length(buffer));
 			}
-			else if constexpr (std::is_same_v<CharT, char16_t>)
-			{
-				char16_t buffer[64]; // 충분히 큰 버퍼
-				std::format_to(buffer, u"{}", value);
-				return append(buffer, std::char_traits<char16_t>::length(buffer));
-			}
-			else if constexpr (std::is_same_v<CharT, char32_t>)
-			{
-				char32_t buffer[64]; // 충분히 큰 버퍼
-				std::format_to(buffer, U"{}", value);
-				return append(buffer, std::char_traits<char32_t>::length(buffer));
-			}
 			else
 			{
 				static_assert(always_false<CharT>, "Unsupported character type");
@@ -353,18 +299,6 @@ namespace mark
 				wchar_t buffer[64]; // 충분히 큰 버퍼
 				std::format_to(buffer, L"{}", value);
 				return append(buffer, std::char_traits<wchar_t>::length(buffer));
-			}
-			else if constexpr (std::is_same_v<CharT, char16_t>)
-			{
-				char16_t buffer[64]; // 충분히 큰 버퍼
-				std::format_to(buffer, u"{}", value);
-				return append(buffer, std::char_traits<char16_t>::length(buffer));
-			}
-			else if constexpr (std::is_same_v<CharT, char32_t>)
-			{
-				char32_t buffer[64]; // 충분히 큰 버퍼
-				std::format_to(buffer, U"{}", value);
-				return append(buffer, std::char_traits<char32_t>::length(buffer));
 			}
 			else
 			{

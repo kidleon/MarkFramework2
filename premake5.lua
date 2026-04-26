@@ -10,10 +10,9 @@ do
 		platforms { "x64" }
 
 	filter {"action:xcode*"}
-		platforms { "Universal" }
-		architecture "universal"
-		buildoptions { "-arch arm64", "-arch x86_64" }
-
+		platforms { "ARM64" }
+		architecture "arm64"
+	
 	filter {}
 
 	sample_output_dir = "%{wks.location}/../Samples/Output"
@@ -21,7 +20,8 @@ do
 	include "Engine/Mark3D"
 	--include "src/Rayun3D"
 	--include "Samples/ECSTestApp"
-	-- include "engine/Renderer_D3D11"
+	-- include "Engine/Renderer_D3D11"
+	filter {}
 	include "Samples/ConsoleApp"
 
 end

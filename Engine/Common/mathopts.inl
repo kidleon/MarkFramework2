@@ -605,7 +605,7 @@ namespace mark
 		}
 
 		const float DOT_THRESHOLD = 0.99995f;
-		if (1.0f - dot <= M_TINY)
+		if (1.0f - dot <= MX_TINY)
 		{
 			// If the quaternions are very close, use linear interpolation to avoid division by zero
 			return quat_normalize(QUAT{
@@ -692,11 +692,11 @@ namespace mark
 		float cos_theta = math_dot(f, t);
 		FLOAT3 rotation_axis;
 
-		if (cos_theta < -1.0f + M_TINY)
+		if (cos_theta < -1.0f + MX_TINY)
 		{
 			// 180 degree rotation around any orthogonal vector
 			rotation_axis = math_cross(FLOAT3{ 0.0f, 0.0f, 1.0f }, f);
-			if (math_lengthsq(rotation_axis) < M_TINY)
+			if (math_lengthsq(rotation_axis) < MX_TINY)
 			{
 				rotation_axis = math_cross(FLOAT3{ 1.0f, 0.0f, 0.0f }, f);
 			}
@@ -806,7 +806,7 @@ namespace mark
 		FLOAT4 out;
 		float angle = 2.0f * acosf(q.w);
 		float s = sqrtf(1.0f - q.w * q.w);
-		if (s < M_TINY)
+		if (s < MX_TINY)
 		{
 			out.x = 1.0f; // Arbitrary axis
 			out.y = 0.0f;

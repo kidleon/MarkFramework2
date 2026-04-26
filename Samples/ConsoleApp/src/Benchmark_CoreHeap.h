@@ -52,6 +52,7 @@ namespace mark
             return max_iters < default_iters ? max_iters : default_iters;
         }
 
+		volatile uintptr_t sink = 0;
         template<typename T>
         inline double bench_malloc(int iters)
         {
@@ -61,6 +62,7 @@ namespace mark
                 void* p = malloc(sizeof(T));
                 volatile T* vp = reinterpret_cast<volatile T*>(p);
                 (void)vp;
+				sink = reinterpret_cast<uintptr_t>(p);
                 free(p);
             }
             return elapsed_ms(start, Clock::now());
@@ -75,6 +77,7 @@ namespace mark
                 void* p = sys_alloc(sizeof(T), alignof(T));
                 volatile T* vp = reinterpret_cast<volatile T*>(p);
                 (void)vp;
+				sink = reinterpret_cast<uintptr_t>(p);
                 sys_free(p, sizeof(T), alignof(T));
             }
             return elapsed_ms(start, Clock::now());
@@ -89,6 +92,7 @@ namespace mark
                 void* p = spool_alloc(sizeof(T), alignof(T));
                 volatile T* vp = reinterpret_cast<volatile T*>(p);
                 (void)vp;
+				sink = reinterpret_cast<uintptr_t>(p);
                 spool_free(p, sizeof(T), alignof(T));
             }
             return elapsed_ms(start, Clock::now());
@@ -103,6 +107,7 @@ namespace mark
                 void* p = upool_alloc(sizeof(T), alignof(T));
                 volatile T* vp = reinterpret_cast<volatile T*>(p);
                 (void)vp;
+				sink = reinterpret_cast<uintptr_t>(p);
                 upool_free(p, sizeof(T), alignof(T));
             }
             return elapsed_ms(start, Clock::now());
@@ -117,6 +122,7 @@ namespace mark
                 void* p = temp_alloc(sizeof(T), alignof(T));
                 volatile T* vp = reinterpret_cast<volatile T*>(p);
                 (void)vp;
+				sink = reinterpret_cast<uintptr_t>(p);
             }
             temp_reset();
             return elapsed_ms(start, Clock::now());
