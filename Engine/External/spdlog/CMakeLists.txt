@@ -19,7 +19,7 @@ include(GNUInstallDirs)
 # Set default build to release
 # ---------------------------------------------------------------------------------------
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-    # Set CMAKE_BUILD_TYPE only if this project is top-level
+    # Set CMAKE_BUILD_TYPE only if this project is top-levelbuild_external_apple
     if((DEFINED PROJECT_IS_TOP_LEVEL AND PROJECT_IS_TOP_LEVEL) OR (NOT DEFINED PROJECT_IS_TOP_LEVEL
                                                                    AND CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR))
         set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose Release or Debug" FORCE)
