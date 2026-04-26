@@ -19,8 +19,10 @@
 //#include "Test_UnknownPtr.h"
 #include "Test_PrivateMemory2.h"
 #include "Test_CoreHeap.h"
+#include "Test_CoreGeneric.h"
 
 #include "Benchmark_CoreHeap.h"
+#include "Benchmark_CoreGeneric.h"
 
 
 
@@ -51,7 +53,7 @@ int main()
 	{
 		TestStringBuffer();
 
-		TestGeneric();
+		//TestGeneric();
 		mark::TestMathLib();
 		mark::TestMathLib_Util();
 		mark::Test_FileSystem();
@@ -66,11 +68,13 @@ int main()
 
 		mark::Test_PrivateMemory2();
 		mark::Test_CoreHeap();
-
-		mark::Benchmark_PrivateMemory2();
+		mark::Test_CoreGeneric();
 	}
 
 	mark::Mark3D::Shutdown();
+
+	mark::Benchmark_PrivateMemory2();
+	mark::Benchmark_CoreGeneric();
 
 	return 0;
 }
@@ -162,7 +166,7 @@ void TestStringBuffer()
 	::Sleep(1000);
 }
 
-
+/*
 void TestGeneric()
 {
 	{
@@ -195,3 +199,4 @@ void TestGeneric()
 		lstPerson.emplace_back(Person{ "Heidi", 29, 89 });
 	}
 }
+*/

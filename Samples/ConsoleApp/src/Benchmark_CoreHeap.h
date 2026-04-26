@@ -10,7 +10,7 @@
 
 namespace mark
 {
-    namespace benchmark_privatememory2_detail
+    namespace benchmark_privatememory_detail
     {
         struct SmallData
         {
@@ -211,7 +211,7 @@ namespace mark
 
     inline void Benchmark_PrivateMemory2()
     {
-        using namespace benchmark_privatememory2_detail;
+        using namespace benchmark_privatememory_detail;
 
         const bool initialized = initialize_core_memory(
             256,
