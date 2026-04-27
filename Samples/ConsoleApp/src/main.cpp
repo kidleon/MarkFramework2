@@ -22,6 +22,8 @@
 #include "Test_CoreGeneric.h"
 
 #include "Benchmark_CoreHeap.h"
+#include "Test_ObjectPool.h"
+#include "Benchmark_ObjectPool.h"
 #include "Benchmark_CoreGeneric.h"
 
 
@@ -71,12 +73,15 @@ int main()
 		mark::Test_PrivateMemory2();
 		mark::Test_CoreHeap();
 		mark::Test_CoreGeneric();
+
+		mark::Test_ObjectPool();
 	}
 
 	mark::Mark3D::Shutdown();
 
 	mark::Benchmark_PrivateMemory2();
 	mark::Benchmark_CoreGeneric();
+	mark::Benchmark_ObjectPool();
 
 	return 0;
 }
