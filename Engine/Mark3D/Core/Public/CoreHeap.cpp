@@ -328,12 +328,16 @@ namespace mark
 			hdr->alignment = alignment;
 
 			chunk_header* old_head = _chunks.load(std::memory_order_relaxed);
-			do {
+			do
+			{
 				hdr->next = old_head;
-			} while (!_chunks.compare_exchange_weak(
-				old_head, hdr,
+			}
+			while (!_chunks.compare_exchange_weak(
+				old_head,
+				hdr,
 				std::memory_order_release,
-				std::memory_order_relaxed));
+				std::memory_order_relaxed
+			));
 
 			std::byte* base = static_cast<std::byte*>(raw);
 			std::size_t header_offset = sizeof(chunk_header);
