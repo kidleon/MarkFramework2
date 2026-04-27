@@ -6,6 +6,7 @@
 #include <type_traits>
 #include <new>
 #include <memory>
+#include "CoreGeneric.h"
 
 
 namespace mark
@@ -19,9 +20,9 @@ namespace mark
 	/**
 	* @brief object_pool<T, Allocator>는 객체 풀을 구현한 클래스입니다. Lock-free로 구현되어 있음.
 	* @tparam T 풀에서 관리할 객체 타입입니다. T는 default 생성 가능해야 합니다.
-	* @tparam Allocator 슬롯 메모리 할당에 사용할 표준 Allocator. 기본값은 std::allocator<T>.
+	* @tparam Allocator 슬롯 메모리 할당에 사용할 표준 Allocator. 기본값은 system_allocator<T>.
 	*/
-	template <typename T, typename Allocator = std::allocator<T>>
+	template <typename T, typename Allocator = system_allocator<T>>
 	class object_pool
 	{
 	private:

@@ -55,7 +55,7 @@ do
 		externalincludedirs {
 			"../External/inc",
 			"../External/iconv",
-			"../External/stb"
+			"../External/stb",
 		}
 
 		buildoptions { "/utf-8", "/Zc:preprocessor" }
@@ -90,7 +90,7 @@ do
 			libdirs { 
 				"../External/iconv/x64/DebugStatic"
 			}
-			links{"lz4_d", "ufbx_d", "libiconvStaticD", "spdlog" }
+			links{"lz4_d", "ufbx_d", "libiconvStaticD", "mimalloc_d", "spdlog" }
 			targetname("Mark3D_d")
 		end
 		filter {}
@@ -104,7 +104,7 @@ do
 			libdirs { 
 				"../External/iconv/x64/ReleaseStatic"
 			}
-			links{"lz4", "ufbx", "libiconvStatic", "spdlog" }
+			links{"lz4", "ufbx", "libiconvStatic", "mimalloc_d", "spdlog" }
 			targetname("Mark3D")
 		end
 		filter {}
@@ -118,7 +118,7 @@ do
 			libdirs { 
 				"../External/iconv/x64/ReleaseStatic"
 			}
-			links{"lz4", "ufbx", "libiconvStatic"}
+			links{"lz4", "ufbx", "libiconvStatic", "mimalloc"}
 			targetname("Mark3D")
 		end
 		filter {}

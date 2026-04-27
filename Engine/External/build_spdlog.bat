@@ -1,5 +1,6 @@
 set BASE_DIR=%~dp0
 
+
 cmake -S ./spdlog -B ./build/spdlog/debug -G "Visual Studio 18 2026" -A x64 -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=./build/spdlog/install -DSPDLOG_BUILD_SHARED=ON -DSPDLOG_BUILD_EXAMPLE=OFF -DSPDLOG_BUILD_TESTS=OFF -DSPDLOG_INSTALL=ON && cmake --build ./build/spdlog/debug --config Debug --parallel && cmake --install ./build/spdlog/debug --config Debug
 
 
@@ -16,7 +17,7 @@ xcopy "%BASE_DIR%build\spdlog\install\bin\spdlogd.dll" "%BASE_DIR%..\..\Output\s
 xcopy "%BASE_DIR%build\spdlog\install\bin\spdlog.dll" "%BASE_DIR%..\..\Samples\Output\" /Y
 xcopy "%BASE_DIR%build\spdlog\install\bin\spdlogd.dll" "%BASE_DIR%..\..\Samples\Output\" /Y
 
-xcopy "%BASE_DIR%build\spdlog\install\include\spdlog\*.*" "%BASE_DIR%inc\spdlog\" /Y /S
+xcopy "%BASE_DIR%build\spdlog\install\include\mimalloc-3.3\*.*" "%BASE_DIR%inc\mimalloc\" /Y /S
 
 rmdir "%BASE_DIR%build" /s /q
 
