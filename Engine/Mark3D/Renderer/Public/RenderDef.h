@@ -530,14 +530,24 @@ namespace mark
 		TEXTURE_CUBE,
 	};
 
-	struct D3D11_RENDER_HANDLE
+	enum class BUFFER_SIZE : uint8_t
 	{
-		uint64_t TypeIndex : 8;
-		uint64_t PageIndex : 8;
-		uint64_t Index : 22;
-		uint64_t Version : 8;
-		uint64_t RefCnt : 18; // 참조 카운트 (최대 262143)
+		SIZE_1K = 0,
+		SIZE_2K,
+		SIZE_4K,
+		SIZE_8K,
+		SIZE_16K,
+		SIZE_32K,
+		SIZE_64K,
+		SIZE_128K,
+		SIZE_256K,
+		SIZE_512K,
+		SIZE_1M,
+		SIZE_2M,
+
+		SIZE_COUNT
 	};
+
 
 	/**
 	* @brief 3D 엔진 생성 정보 구조체
@@ -565,5 +575,14 @@ namespace mark
 		BUFFER_USAGE IBUsage; // 버퍼 사용 용도 (인덱스 버퍼, IndexCount > 0인 경우에만 사용)
 	};
 
-	using RENDER_HANDLE = uint64_t;
+	using ResourceHandle = uint64_t;
+
+	interface IRenderer : public __IUnknown
+	{
+		virtual bool Initialize(const RENDERER_CREATE_DESC& CreateDesc) = 0;
+		virtual void Shutdown() = 0;
+
+		[[nodiscard]] virtual ResourceHandle CreatePrimitiveBuffer(const PRIMITIVEBUFFER_CREATE_DESC& CreateDesc) = 0;
+		virtual void ReleaseHandle(ResourceHandle Handle) = 0;
+	};
 }

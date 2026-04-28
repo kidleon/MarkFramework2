@@ -19,6 +19,8 @@ namespace mark
 			return *s_pInstance;
 		}
 
+		inline ID3D11Device* INL_GetDevice() const noexcept { return m_pD3D11Device; }
+
 	private:
 		void DestroyDevice() noexcept;
 		void ReportLiveObjects() noexcept;

@@ -56,7 +56,7 @@ namespace mark
 #define CORE_SYS_REALLOC(ptr, new_bytes)			::mark::sys_realloc(ptr, new_bytes)
 #define CORE_SYS_REALLOC_ALIGNED(ptr, new_bytes, alignment)	::mark::sys_realloc(ptr, new_bytes, alignment)
 #endif // __MEMORY_TRACKER_ENABLED__
-#define CORE_SYS_FREE(ptr)							::mark::sys_free(ptr)
+#define CORE_SYS_FREE(ptr)							if(ptr) { ::mark::sys_free(ptr); ptr = nullptr; }
 #define CORE_TEMP_ALLOC(bytes)						::mark::temp_alloc(bytes)
 #define CORE_TEMP_ALLOC_ALIGNED(bytes, alignment)	::mark::temp_alloc(bytes, alignment)
 #define CORE_TEMP_CALLOC(bytes)						::mark::temp_calloc(bytes)

@@ -6,6 +6,7 @@
 
 namespace mark
 {
+	/*
 	D3D11PrimitiveBuffer::~D3D11PrimitiveBuffer()
 	{
 		for (uint32_t i = 0; i < MAX_BIND_VB; ++i)
@@ -50,4 +51,5 @@ namespace mark
 
 		return m_NumPrimitives++;
 	}
+	*/
 }

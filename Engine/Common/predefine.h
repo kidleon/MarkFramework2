@@ -217,6 +217,12 @@ namespace mark
 {
 	template <typename>
 	inline constexpr bool always_false = false;
+
+	struct __IUnknown
+	{
+		virtual unsigned long AddRef() = 0;
+		virtual unsigned long Release() = 0;
+	};
 }
 
 /* strcpy_s가 없는 플랫폼을 위한 크로스플랫폼 래퍼 */

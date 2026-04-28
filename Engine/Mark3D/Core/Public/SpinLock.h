@@ -97,10 +97,6 @@ namespace mark
 			}
 		}
 
-		// ---------------------------------------------------------------
-		// 복사/이동 금지: 같은 spin_lock_t를 두 객체가 소유하면
-		// 소멸 시 이중 해제(double-release)가 발생한다.
-		// ---------------------------------------------------------------
 		AUTO_SPIN_LOCK(const AUTO_SPIN_LOCK&)            = delete;
 		AUTO_SPIN_LOCK& operator=(const AUTO_SPIN_LOCK&) = delete;
 		AUTO_SPIN_LOCK(AUTO_SPIN_LOCK&&)                 = delete;
