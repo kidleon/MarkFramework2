@@ -35,5 +35,25 @@ namespace mark
 	};
 
 
+	D3D11Buffer* CreateBuffer(
+		BUFFER_TYPE BufferType,
+		BUFFER_USAGE Usage,
+		size_t BufferSize
+	)
+	{
+		D3D11Buffer* pBuffer = s_BufferPool[(size_t)BufferType].m_lstBuffers[(size_t)Usage][(size_t)BUFFER_SIZE::SIZE_1K].front();
+		if (pBuffer)
+		{
+			s_BufferPool[(size_t)BufferType].m_lstBuffers[(size_t)Usage][(size_t)BUFFER_SIZE::SIZE_1K].pop_front();
+			return pBuffer;
+		}
+		return nullptr;
+	}
+
+	bool Initialize()
+	{
+
+	}
+
 
 }
