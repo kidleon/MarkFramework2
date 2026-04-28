@@ -199,6 +199,15 @@ namespace mark
 		MAX
 	};
 
+	enum class BUFFER_TYPE : uint32_t
+	{
+		UNKNOWN = 0,
+		VERTEX,
+		INDEX,
+		CONSTANT,
+		EMAX
+	};
+
 	// 버퍼 사용 용도를 나타내는 열거형
 	enum class BUFFER_USAGE : uint32_t
 	{

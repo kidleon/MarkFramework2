@@ -51,8 +51,14 @@
 
 // FUNCTION's EXPORT TYPES
 #if defined(__TARGET_OS_WINDOWS)
+#ifndef WIN32_LEAN_AND_MEAN
 #	define WIN32_LEAN_AND_MEAN
+#endif // WIN32_LEAN_AND_MEAN
+
+#ifndef NOMINMAX
 #	define NOMINMAX
+#endif // NOMINMAX
+
 #	include <crtdbg.h>
 #	include <Windows.h>
 #	include <intrin.h>

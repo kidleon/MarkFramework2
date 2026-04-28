@@ -16,7 +16,7 @@ namespace mark
 	{
 		/**
 		* @brief 개별 할당에 대한 정보 구조체
-		 * @note 이 구조체는 각 할당에 대한 상세 정보를 저장하는 데 사용된다. 할당된 바이트 수, 정렬, 소스 파일, 라인 번호, 함수 이름 등을 포함한다.
+		* @note 이 구조체는 각 할당에 대한 상세 정보를 저장하는 데 사용된다. 할당된 바이트 수, 정렬, 소스 파일, 라인 번호, 함수 이름 등을 포함한다.
 		*/
 		struct allocation_info
 		{
@@ -118,7 +118,7 @@ namespace mark
 		std::atomic<size_t> m_peak_usage;
 		std::atomic<size_t> m_alloc_count;
 
-		sys_unordered_map<uintptr_t, allocation_info> m_allocations; // 할당된 메모리 주소를 키로, 할당 정보를 값으로 저장하는 맵
+		std::unordered_map<uintptr_t, allocation_info> m_allocations; // 할당된 메모리 주소를 키로, 할당 정보를 값으로 저장하는 맵
 		
 
 	};

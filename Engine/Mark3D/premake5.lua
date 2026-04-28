@@ -24,6 +24,8 @@ do
 		"Renderer/**.h",
 		"Renderer/**.inl",
 		"Renderer/**.cpp",
+		"Renderer_D3D11/**.h",
+		"Renderer_D3D11/**.cpp",
 		"../Common/**.h",
 		"../Common/**.inl"
 	}
@@ -39,6 +41,7 @@ do
 		"Renderer",
 		"Renderer/Private",
 		"Renderer/Public",
+		"Renderer_D3D11/Private",
 		"../Common",
 	}
 
@@ -82,7 +85,8 @@ do
 		
 		filter { "system:windows", "configurations:Debug" }
 		do
-			defines{"DEBUG", "USE_DLL", "MARKENGINE_EXPORTS", "__LOG_ENABLED__", "__MEMORY_TRACKER_ENABLED__", "_CRT_SECURE_NO_WARNINGS"}
+		
+			defines{"NOMINMAX", "WIN32_LEAN_AND_MEAN", "DEBUG", "USE_DLL", "MARKENGINE_EXPORTS", "__LOG_ENABLED__", "__MEMORY_TRACKER_ENABLED__", "_CRT_SECURE_NO_WARNINGS"}
 			optimize "Off"
 			symbols "On"
 			incrementallink "On"
@@ -94,7 +98,7 @@ do
 		
 		filter { "system:windows", "configurations:Release" }
 		do
-			defines{"NDEBUG", "RELEASE", "USE_DLL", "MARKENGINE_EXPORTS", "__LOG_ENABLED__", "__MEMORY_TRACKER_ENABLED__", "_CRT_SECURE_NO_WARNINGS"}
+			defines{"NOMINMAX", "WIN32_LEAN_AND_MEAN", "NDEBUG", "RELEASE", "USE_DLL", "MARKENGINE_EXPORTS", "__LOG_ENABLED__", "__MEMORY_TRACKER_ENABLED__", "_CRT_SECURE_NO_WARNINGS"}
 			optimize "Full"
 			symbols "On"
 			incrementallink "Off"
@@ -105,7 +109,7 @@ do
 		
 		filter { "system:windows", "configurations:Master" }
 		do
-			defines{"NDEBUG", "MASTER", "USE_DLL", "MARKENGINE_EXPORTS", "_CRT_SECURE_NO_WARNINGS"}
+			defines{"NOMINMAX", "WIN32_LEAN_AND_MEAN", "NDEBUG", "MASTER", "USE_DLL", "MARKENGINE_EXPORTS", "_CRT_SECURE_NO_WARNINGS"}
 			optimize "Full"
 			symbols "On"
 			incrementallink "Off"

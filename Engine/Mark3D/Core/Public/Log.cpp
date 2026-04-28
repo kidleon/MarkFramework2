@@ -136,6 +136,7 @@ namespace mark
 			return;
 
 		thread_local string_buffer<2048> str_buf;
+		str_buf.clear();
 		str_buf.format(fmt, args);
 		str_buf.append(" (at ");
 		str_buf.append(loc.file_name());
