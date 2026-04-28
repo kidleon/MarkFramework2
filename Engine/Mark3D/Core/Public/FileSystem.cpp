@@ -203,7 +203,7 @@ namespace mark
 		if (!fp)
 			return nullptr;
 
-		file_handle_info* handle = (file_handle_info*)spool_alloc(sizeof(file_handle_info), DEFAULT_ALIGNMENT);
+		file_handle_info* handle = (file_handle_info*)sys_alloc(sizeof(file_handle_info), DEFAULT_ALIGNMENT);
 
 		handle->fp = fp;
 		handle->read_buffer = nullptr;
@@ -223,9 +223,9 @@ namespace mark
 			std::fclose(handle->fp);
 
 		if (handle->read_buffer)
-			sys_free(handle->read_buffer, handle->read_buffer_size, alignof(file_handle_info));
+			sys_free(handle->read_buffer);
 
-		spool_free(handle, sizeof(file_handle_info), alignof(file_handle_info));
+		sys_free(handle);
 	}
 
 	bool file_system::rename_file(const char* old_path, const char* new_path)
@@ -359,7 +359,7 @@ namespace mark
 
 		if (read_bytes != static_cast<size_t>(file_size))
 		{
-			sys_free(handle->read_buffer, handle->read_buffer_size, alignof(file_handle_info));
+			sys_free(handle->read_buffer);
 			handle->read_buffer = nullptr;
 			handle->read_buffer_size = 0;
 

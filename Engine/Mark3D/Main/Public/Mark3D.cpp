@@ -20,17 +20,14 @@ namespace mark
 #endif // __MEMORY_TRACKING_ENABLED__
 
 		initialize_core_memory(
-			64,  // sync_pool_count_per_chunk = 64
-			64,  // unsync_pool_count_per_chunk = 64
-			1024 * 1024,  // sync_pool_max_size_per_block = 1MB
-			1024 * 1024,  // unsync_pool_max_size_per_block = 1MB
 			1024 * 1024 * 64 // 64MB 임시 버퍼
 		);
 
 #if defined(__LOG_ENABLED__)
-		log::initialize(
-			static_cast<uint32_t>(log_level::info) | static_cast<uint32_t>(log_level::warning) | static_cast<uint32_t>(log_level::error) | static_cast<uint32_t>(log_level::critical),
-			static_cast<uint32_t>(log_target::console) | static_cast<uint32_t>(log_target::file)
+		log::init(
+			static_cast<uint32_t>(log::level::info) | static_cast<uint32_t>(log::level::warning) | static_cast<uint32_t>(log::level::error) | static_cast<uint32_t>(log::level::critical),
+			static_cast<uint32_t>(log::target::console) | static_cast<uint32_t>(log::target::file),
+			false
 		);
 #endif // __LOG_ENABLED__
 

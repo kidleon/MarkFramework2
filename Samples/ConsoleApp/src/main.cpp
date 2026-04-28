@@ -17,14 +17,7 @@
 #include "Test_SRWLock.h"
 #include "Test_SpinLock.h"
 //#include "Test_UnknownPtr.h"
-#include "Test_PrivateMemory2.h"
 #include "Test_CoreHeap.h"
-#include "Test_CoreGeneric.h"
-
-#include "Benchmark_CoreHeap.h"
-#include "Test_ObjectPool.h"
-#include "Benchmark_ObjectPool.h"
-#include "Benchmark_CoreGeneric.h"
 
 
 
@@ -70,25 +63,18 @@ int main()
 		mark::Test_SpinLock();	
 		//mark::Test_UnknownPtr();
 
-		mark::Test_PrivateMemory2();
 		mark::Test_CoreHeap();
-		mark::Test_CoreGeneric();
-
-		mark::Test_ObjectPool();
+		mark::Bench_CoreHeap();
 	}
 
 	mark::Mark3D::Shutdown();
-
-	mark::Benchmark_PrivateMemory2();
-	mark::Benchmark_CoreGeneric();
-	mark::Benchmark_ObjectPool();
 
 	return 0;
 }
 
 void TestStringBuffer()
 {
-	mark::string_buffer<char> str_buf;
+	mark::string_buffer str_buf;
 
 	mark::FLOAT2 v{ 1.23f, 4.56f };
 	str_buf.format("{}", v);
@@ -149,25 +135,7 @@ void TestStringBuffer()
 	str_buf.to_temp_string(tstr);
 
 	std::string_view view = str_buf.to_string_view();
-	mark::string_buffer<wchar_t> wstr_buf;
-	wstr_buf.format(L"HI{}", 1);
 
-	mark::upool_wstring uwstr;
-	wstr_buf.to_upool_string(uwstr);
-
-	wchar_t uwstr_cstr[4];
-	wstr_buf.to_buffer(uwstr_cstr, sizeof(uwstr_cstr));
-
-	{
-		mark::temp_string str = mark::string_buffer<char>::temp_format("Hello, {}!", "world");
-		LOG(str);
-	}
-	
-
-	{
-		mark::spool_string sp_str = mark::string_buffer<char>::spool_format("Hello, {}!", "world");
-		LOG(sp_str);
-	}
 }
 
 /*

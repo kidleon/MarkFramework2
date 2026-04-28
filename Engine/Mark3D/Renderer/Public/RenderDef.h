@@ -533,7 +533,7 @@ namespace mark
 	/**
 	* @brief 3D 엔진 생성 정보 구조체
 	*/
-	struct MARKENGINE_API RENDERER_CREATE_DESC
+	struct RENDERER_CREATE_DESC
 	{
 #if defined(__TARGET_OS_WINDOWS)
 		HWND hWnd; // 윈도우 핸들
@@ -547,7 +547,7 @@ namespace mark
 
 	};
 
-	struct MARKENGINE_API PRIMITIVEBUFFER_CREATE_DESC
+	struct PRIMITIVEBUFFER_CREATE_DESC
 	{
 		uint32_t VertexFormats;
 		uint32_t VertexCount; // 버텍스 수

@@ -56,46 +56,42 @@ do
 	-- =========================================================================
 	-- Windows
 	-- =========================================================================
-	filter { "system:windows" }
+	filter { "action:vs*", "system:windows" }
 	do
 		platforms { "x64" }
 		architecture "x86_64"
-		
-		filter {"action:vs*"}
-		do
-			buildoptions { "/utf-8", "/Zc:preprocessor" }
+		buildoptions { "/utf-8", "/Zc:preprocessor" }
 
-			filter {"configurations:Debug"}
-			do
-				defines{"DEBUG", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__MEMORY_LIMIT_ENABLED__", "__LOG_ENABLED__"}
-				optimize "Off"
-				symbols "On"
-				links{"Mark3D_d"}
-				targetname("SampleConsole_d")
-			end
-			filter {}
-			
-			filter {"configurations:Release"}
-			do
-				defines{"NDEBUG", "RELEASE", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__MEMORY_LIMIT_ENABLED__", "__LOG_ENABLED__"}
-				optimize "On"
-				symbols "On"
-				links{"Mark3D"}
-				targetname("SampleConsole")
-			end
-			filter {}
-			
-			filter {"configurations:Master"}
-			do
-				defines{"NDEBUG", "MASTER", "USE_DLL"}
-				optimize "On"
-				symbols "On"
-				links{"Mark3D"}
-				targetname("SampleConsole")
-			end
-			filter {}
+		filter { "system:windows", "configurations:Debug" }
+		do
+			defines{"DEBUG", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__MEMORY_LIMIT_ENABLED__", "__LOG_ENABLED__"}
+			optimize "Off"
+			symbols "On"
+			links{"Mark3D_d"}
+			targetname("SampleConsole_d")
 		end
 		filter {}
+		
+		filter { "system:windows", "configurations:Release" }
+		do
+			defines{"NDEBUG", "RELEASE", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__MEMORY_LIMIT_ENABLED__", "__LOG_ENABLED__"}
+			optimize "On"
+			symbols "On"
+			links{"Mark3D"}
+			targetname("SampleConsole")
+		end
+		filter {}
+		
+		filter { "system:windows", "configurations:Master" }
+		do
+			defines{"NDEBUG", "MASTER", "USE_DLL"}
+			optimize "On"
+			symbols "On"
+			links{"Mark3D"}
+			targetname("SampleConsole")
+		end
+		filter {}
+		
 	end
 	filter {}
 
@@ -114,7 +110,7 @@ do
 		-- Mark3D.dylib 런타임 탐색 경로 (실행 파일과 같은 디렉토리)
 		linkoptions  { "-rpath @executable_path" }
 
-		filter {"configurations:Debug"}
+		filter { "system:macosx", "configurations:Debug" }
 		do
 			defines{"DEBUG", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__MEMORY_LIMIT_ENABLED__", "__LOG_ENABLED__"}
 			optimize "Off"
@@ -124,7 +120,8 @@ do
 		end
 		filter{}	
 
-		filter {"configurations:Release"}
+
+		filter { "system:macosx", "configurations:Release" }
 		do
 			defines{"NDEBUG", "RELEASE", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__MEMORY_LIMIT_ENABLED__", "__LOG_ENABLED__"}
 			optimize "On"
@@ -135,7 +132,7 @@ do
 
 		filter{}	
 
-		filter {"configurations:Master"}
+		filter { "system:macosx", "configurations:Master" }
 		do
 			defines{"NDEBUG", "MASTER", "USE_DLL"}
 			optimize "On"

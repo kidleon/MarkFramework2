@@ -3,7 +3,7 @@
 
 namespace mark
 {
-	class MARKENGINE_API FBX
+	class FBX
 	{
 	public:
 		struct FBX_MATERIAL

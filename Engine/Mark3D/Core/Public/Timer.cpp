@@ -26,7 +26,7 @@ namespace mark
 	HANDLE timer::highrestimer_create()
 	{
 		//high_res_timer* timer = spool_new<high_res_timer>();
-		high_res_timer * timer = SPOOL_NEW(high_res_timer);
+		high_res_timer * timer = CORE_NEW(high_res_timer);
 
 		if (!timer) return nullptr;
 
@@ -51,7 +51,7 @@ namespace mark
 		}
 
 		//spool_delete<high_res_timer>(timer);
-		SPOOL_DELETE(high_res_timer, timer);
+		CORE_DELETE(high_res_timer, timer);
 	}
 
 	void timer::highrestimer_start(HANDLE handle)

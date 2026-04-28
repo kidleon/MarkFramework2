@@ -31,17 +31,17 @@ namespace mark
 
 		value_type* allocate(std::size_t n)
 		{
-			if (n > static_cast<std::size_t>(-1) / sizeof(T))
+			if (n > static_cast<std::size_t>(-1) / sizeof(value_type))
 				return nullptr; // or throw std::bad_alloc
 
-			void* p = sys_alloc(sizeof(T) * n);
+			void* p = sys_alloc(sizeof(value_type) * n);
 			if (!p)
 				return nullptr; // or throw std::bad_alloc
 
-			return static_cast<T*>(p);
+			return static_cast<value_type*>(p);
 		}
 
-		void deallocate(T* p, std::size_t) noexcept
+		void deallocate(value_type* p, std::size_t) noexcept
 		{
 			sys_free(p);
 		}
@@ -76,17 +76,17 @@ namespace mark
 
 		value_type* allocate(std::size_t n)
 		{
-			if (n > static_cast<std::size_t>(-1) / sizeof(T))
+			if (n > static_cast<std::size_t>(-1) / sizeof(value_type))
 				return nullptr; // or throw std::bad_alloc
 
-			void* p = temp_alloc(sizeof(T) * n);
+			void* p = temp_alloc(sizeof(value_type) * n);
 			if (!p)
 				return nullptr; // or throw std::bad_alloc
 
-			return static_cast<T*>(p);
+			return static_cast<value_type*>(p);
 		}
 
-		void deallocate(T* p, std::size_t) noexcept
+		void deallocate(value_type* p, std::size_t) noexcept
 		{
 			// temp_alloc은 bump-style arena allocator이므로 개별 deallocate는 의도적으로 무시.
 		}
@@ -98,8 +98,8 @@ namespace mark
 		bool operator!=(const temp_allocator<U>&) const noexcept { return false; }
 	};
 
-//	[[nodiscard]] MARKENGINE_API system_allocator* get_default_system_allocator() noexcept;
-//	[[nodiscard]] MARKENGINE_API temp_allocator* get_default_temp_allocator() noexcept;
+//	system_allocator* get_default_system_allocator() noexcept;
+//	temp_allocator* get_default_temp_allocator() noexcept;
 
 	namespace ALLOC
 	{
@@ -187,15 +187,11 @@ namespace mark
 	template<typename _Alloc>
 	using wstring = std::basic_string<wchar_t, std::char_traits<wchar_t>, _Alloc>;
 
-	template<typename _Alloc>
 	using sys_string = std::basic_string<char, std::char_traits<char>, ALLOC::SYS<char>>;
 
-	template<typename _Alloc>
 	using sys_wstring = std::basic_string<wchar_t, std::char_traits<wchar_t>, ALLOC::SYS<wchar_t>>;
 
-	template<typename _Alloc>
 	using temp_string = std::basic_string<char, std::char_traits<char>, ALLOC::TEMP<char>>;
-
-	template<typename _Alloc>
+	
 	using temp_wstring = std::basic_string<wchar_t, std::char_traits<wchar_t>, ALLOC::TEMP<wchar_t>>;
 }

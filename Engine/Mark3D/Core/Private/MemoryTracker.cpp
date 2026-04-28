@@ -4,15 +4,14 @@
 
 namespace mark
 {
-	memory_tracker::memory_tracker(const std::pmr::pool_options& options)
+	memory_tracker::memory_tracker()
 		: m_total_allocated(0)
 		, m_total_deallocated(0)
 		, m_current_usage(0)
 		, m_peak_usage(0)
 		, m_alloc_count(0)
-		, m_pool(options)
-		, m_allocations(&m_pool)
 	{
+		m_allocations.reserve(1024); // 초기 용량을 1024로 설정하여 성능 최적화 (필요에 따라 조정 가능
 	}
 
 	memory_tracker::~memory_tracker()
@@ -35,8 +34,8 @@ namespace mark
 		size_t peak = m_peak_usage.load();
 		while (current > peak && !m_peak_usage.compare_exchange_weak(peak, current)) {}
 
-		printf("[MemoryTracker] Allocated: %d bytes at %p (Alignment: %d) - %s:%d in function %s\n",
-			info.bytes, ptr, info.alignment, info.location.file_name(), info.location.line(), info.location.function_name());
+		//printf("[MemoryTracker] Allocated: %d bytes at %p (Alignment: %d) - %s:%d in function %s\n",
+			//info.bytes, ptr, info.alignment, info.location.file_name(), info.location.line(), info.location.function_name());
 	}
 
 	void memory_tracker::on_deallocate(void* ptr)
@@ -49,8 +48,8 @@ namespace mark
 		{
 			const allocation_info& info = it->second;
 
-			printf("[MemoryTracker] Deallocated: %d bytes at %p (Alignment: %d) - %s:%d in function %s\n",
-				info.bytes, ptr, info.alignment, info.location.file_name(), info.location.line(), info.location.function_name());
+			//printf("[MemoryTracker] Deallocated: %d bytes at %p (Alignment: %d) - %s:%d in function %s\n",
+				//info.bytes, ptr, info.alignment, info.location.file_name(), info.location.line(), info.location.function_name());
 
 			m_total_deallocated += info.bytes;
 			m_current_usage -= info.bytes;
@@ -67,9 +66,8 @@ namespace mark
 		m_peak_usage = 0;
 		m_alloc_count = 0;
 		m_allocations.clear();
-		m_pool.release(); // 풀 리소스의 모든 할당된 메모리를 해제하여 초기 상태로 되돌린다.
 
-		printf("[MemoryTracker] Reset all statistics and records.\n");
+		//printf("[MemoryTracker] Reset all statistics and records.\n");
 	}
 
 	void memory_tracker::print_report(std::function<void(const char*)> func) const

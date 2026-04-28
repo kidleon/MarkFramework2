@@ -1,6 +1,10 @@
 #include "pch.h"
 #include "Unicode.h"
-#include "iconv.h"
+#if defined(__linux__) || defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+#	include <iconv.h>
+#else
+#	include <iconv/iconv.h>
+#endif // __linux__ || __unix__ || (__APPLE__ && __MACH__)
 
 
 namespace mark
@@ -29,7 +33,7 @@ namespace mark
 		size_t outbytesleft = dest_bytes;
 
 		// 변환 수행
-		size_t result = iconv(cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
+		size_t result = iconv(cd, (const char**)&inbuf, &inbytesleft, &outbuf, &outbytesleft);
 
 		iconv_close(cd);
 

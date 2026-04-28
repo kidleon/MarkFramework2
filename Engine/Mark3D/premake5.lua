@@ -54,7 +54,6 @@ do
 		
 		externalincludedirs {
 			"../External/inc",
-			"../External/iconv",
 			"../External/stb",
 		}
 
@@ -83,42 +82,34 @@ do
 		
 		filter { "system:windows", "configurations:Debug" }
 		do
-			defines{"DEBUG", "USE_DLL", "MARKENGINE_EXPORTS", "__LOG_ENABLED__", "__MEMORY_TRACKER_ENABLED__", "__MOMORY_LIMIT_ENABLED__", "_CRT_SECURE_NO_WARNINGS"}
+			defines{"DEBUG", "USE_DLL", "MARKENGINE_EXPORTS", "__LOG_ENABLED__", "__MEMORY_TRACKER_ENABLED__", "_CRT_SECURE_NO_WARNINGS"}
 			optimize "Off"
 			symbols "On"
 			incrementallink "On"
-			libdirs { 
-				"../External/iconv/x64/DebugStatic"
-			}
-			links{"lz4_d", "ufbx_d", "libiconvStaticD", "mimalloc_d", "spdlog" }
+			links{"lz4_d", "ufbx_d", "libiconvd", "mimalloc_d", "spdlog" }
+			
 			targetname("Mark3D_d")
 		end
 		filter {}
 		
 		filter { "system:windows", "configurations:Release" }
 		do
-			defines{"NDEBUG", "RELEASE", "USE_DLL", "MARKENGINE_EXPORTS", "__LOG_ENABLED__", "__MEMORY_TRACKER_ENABLED__", "__MOMORY_LIMIT_ENABLED__", "_CRT_SECURE_NO_WARNINGS"}
+			defines{"NDEBUG", "RELEASE", "USE_DLL", "MARKENGINE_EXPORTS", "__LOG_ENABLED__", "__MEMORY_TRACKER_ENABLED__", "_CRT_SECURE_NO_WARNINGS"}
 			optimize "Full"
 			symbols "On"
 			incrementallink "Off"
-			libdirs { 
-				"../External/iconv/x64/ReleaseStatic"
-			}
-			links{"lz4", "ufbx", "libiconvStatic", "mimalloc_d", "spdlog" }
+			links{"lz4", "ufbx", "libiconv", "mimalloc_d", "spdlog" }
 			targetname("Mark3D")
 		end
 		filter {}
 		
 		filter { "system:windows", "configurations:Master" }
 		do
-			defines{"NDEBUG", "MASTER", "USE_DLL", "MARKENGINE_EXPORTS", "__MOMORY_LIMIT_ENABLED__", "_CRT_SECURE_NO_WARNINGS"}
+			defines{"NDEBUG", "MASTER", "USE_DLL", "MARKENGINE_EXPORTS", "_CRT_SECURE_NO_WARNINGS"}
 			optimize "Full"
 			symbols "On"
 			incrementallink "Off"
-			libdirs { 
-				"../External/iconv/x64/ReleaseStatic"
-			}
-			links{"lz4", "ufbx", "libiconvStatic", "mimalloc"}
+			links{"lz4", "ufbx", "libiconv", "mimalloc"}
 			targetname("Mark3D")
 		end
 		filter {}

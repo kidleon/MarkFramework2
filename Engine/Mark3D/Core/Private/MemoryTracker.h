@@ -1,4 +1,5 @@
 #pragma once
+#include "CoreHeap.h"
 #include <memory_resource>
 #include <unordered_map>
 #include <source_location>
@@ -31,7 +32,7 @@ namespace mark
 			return get;
 		}
 
-		memory_tracker() = default;
+		memory_tracker();
 		virtual ~memory_tracker();
 
 		// 복사 및 이동 생성자/할당 연산자 삭제 (싱글톤 또는 고유 인스턴스 용도)
@@ -39,9 +40,6 @@ namespace mark
 		memory_tracker(memory_tracker&&) = delete;
 		memory_tracker& operator=(const memory_tracker&) = delete;
 		memory_tracker& operator=(memory_tracker&&) = delete;
-
-		// 생성자에서 풀 옵션을 받아 내부 풀 리소스를 초기화
-		memory_tracker(const std::pmr::pool_options& options);
 
 		/**
 		* @brief 메모리 할당 이벤트 핸들러, 이 함수는 메모리 할당이 발생할 때마다 호출되어야 하며, 할당된 메모리에 대한 정보를 기록하고 통계를 업데이트한다.
@@ -120,8 +118,8 @@ namespace mark
 		std::atomic<size_t> m_peak_usage;
 		std::atomic<size_t> m_alloc_count;
 
-		std::pmr::synchronized_pool_resource m_pool;
-		std::pmr::unordered_map<uintptr_t, allocation_info> m_allocations;
+		sys_unordered_map<uintptr_t, allocation_info> m_allocations; // 할당된 메모리 주소를 키로, 할당 정보를 값으로 저장하는 맵
+		
 
 	};
 }

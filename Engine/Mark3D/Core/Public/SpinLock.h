@@ -75,7 +75,7 @@ namespace mark
 	 *   }                               // 소멸 시 자동 release
 	 * @endcode
 	 */
-	struct MARKENGINE_API AUTO_SPIN_LOCK
+	struct AUTO_SPIN_LOCK
 	{
 		/**
 		 * @brief 생성자 – 즉시 잠금을 획득한다.
