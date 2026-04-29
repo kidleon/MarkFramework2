@@ -1,4 +1,4 @@
-project("Mark3D")
+project("RenderSystem_D3D11")
 do
 	language "C++"
 	cppdialect "C++20"
@@ -19,18 +19,17 @@ do
 		"pch.cpp",
 		"Private/**.h",
 		"Private/**.cpp",
-		"Public/**.h",
-		"Public/**.cpp"
 	}
 	
 	includedirs { 
 		"../Common",
-		"../CoreService/Public",
+		"../CoreService/public",
 		".",
-		"Private",
-		"Public"
+		"Private"
 	}
-
+	
+	filter {} 
+	
 	-- =========================================================================
 	-- Windows
 	-- =========================================================================
@@ -52,7 +51,6 @@ do
 		{
 			"{COPY} %{prj.location}../Engine/Common/*.h %{inc_output_dir}",
 			"{COPY} %{prj.location}../Engine/Common/*.inl %{inc_output_dir}",
-			"{COPY} %{prj.location}../Engine/Mark3D/Public/*.h %{inc_output_dir}",
 			"{COPY} %{prj.location}../Output/%{prj.name}/bin/*.dll %{sdk_bin_dir}",
 			"{COPY} %{prj.location}../Output/%{prj.name}/bin/*.lib %{sdk_lib_dir}",
 			"{COPY} %{prj.location}../Output/%{prj.name}/bin/*.pdb %{sdk_sym_dir}",
@@ -76,7 +74,7 @@ do
 			incrementallink "On"
 			links{ "CoreService_d" }
 			
-			targetname("Mark3D_d")
+			targetname("RenderSystem_D3D11d")
 		end
 		filter {}
 		
@@ -87,7 +85,7 @@ do
 			symbols "On"
 			incrementallink "Off"
 			links{ "CoreService" }
-			targetname("Mark3D")
+			targetname("RenderSystem_D3D11")
 		end
 		filter {}
 		
@@ -98,98 +96,11 @@ do
 			symbols "On"
 			incrementallink "Off"
 			links{ "CoreService" }
-			targetname("Mark3D")
+			targetname("RenderSystem_D3D11")
 		end
 		filter {}
 	end
 
 	filter {}  -- Windows 필터 초기화 (macOS 섹션으로 누출 방지)
-
-	-- =========================================================================
-	-- macOS
-	-- =========================================================================
-	filter { "action:xcode*", "system:macosx" }
-	do
-		systemversion "13.3"        -- -target 플래그와 충돌 방지
-		
-		externalincludedirs {
-			"../External/inc",
-			"../External/stb"
-		}
-
-		kind "SharedLib"
-		
-		pchheader ""
-		pchsource ""
-		buildoptions {
-			"-include %{wks.location}/../Engine/Mark3D/pch.h",
-			"-I%{wks.location}/../Common"
-		}
-		
-		buildoptions { "-mmacosx-version-min=13.3" }
-		linkoptions  { "-mmacosx-version-min=13.3" }
-
-		libdirs {
-			"../External/bin/macos/universal",
-			"../../Output/CoreService/bin"
-		}
-
-		links {
-			"CoreFoundation.framework",
-			"CoreServices.framework",
-			"iconv",   -- macOS 시스템 내장 iconv
-		}
-
-		postbuildcommands
-		{
-			-- 출력 디렉토리 사전 생성 (없으면 cp 실패)
-			"mkdir -p %{inc_output_dir}",
-			"mkdir -p %{sdk_bin_dir}",
-			"mkdir -p %{sdk_lib_dir}",
-			"mkdir -p %{sdk_inc_dir}",
-			"mkdir -p %{sample_output_dir}",
-			-- 헤더 복사
-			"cp -Rf %{prj.location}/../Engine/Common/*.h %{inc_output_dir}/",
-			"cp -Rf %{prj.location}/../Engine/Common/*.inl %{inc_output_dir}/",
-			"cp -Rf %{prj.location}/../Engine/Mark3D/Public/*.h %{inc_output_dir}/",
-
-			-- 바이너리 복사
-			"cp -Rf %{output_dir}/*.dylib %{sdk_bin_dir}/",
-			"cp -Rf %{inc_output_dir}/*.h %{sdk_inc_dir}/",
-			"cp -Rf %{inc_output_dir}/*.inl %{sdk_inc_dir}/",
-			"cp -Rf %{output_dir}/*.dylib %{sample_output_dir}/",
-		}
-
-		filter { "system:macosx", "configurations:Debug" }
-		do
-			defines{"DEBUG", "USE_DLL", "MARKENGINE_EXPORTS", "__LOG_ENABLED__", "__MEMORY_TRACKER_ENABLED__", "__MEMORY_LIMIT_ENABLED__"}
-			optimize "Off"
-			symbols "On"
-			links{"CoreService_d"}
-			targetname("Mark3D_d")
-		end
-		filter {}
-
-		filter { "system:macosx", "configurations:Release" }
-		do
-			defines{"NDEBUG", "RELEASE", "USE_DLL", "MARKENGINE_EXPORTS", "__LOG_ENABLED__", "__MEMORY_TRACKER_ENABLED__", "__MEMORY_LIMIT_ENABLED__"}
-			optimize "Full"
-			symbols "On"
-			links{"CoreService"}
-			targetname("Mark3D")
-		end
-		filter {}
-
-		filter { "system:macosx", "configurations:Master" }
-		do
-			defines{"NDEBUG", "MASTER", "USE_DLL", "MARKENGINE_EXPORTS", "__MEMORY_LIMIT_ENABLED__"}
-			optimize "Full"
-			symbols "On"
-			links{"CoreService"}
-			targetname("Mark3D")
-		end
-		filter {}
-	end
-	filter {}
-
+	
 end

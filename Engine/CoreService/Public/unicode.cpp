@@ -32,16 +32,15 @@ namespace mark
 		size_t inbytesleft = src_bytes;
 		size_t outbytesleft = dest_bytes;
 
-		// Some platforms declare iconv() as taking (char **), others as (const char **).
-		// Use a portable approach to satisfy both by using intermediate non-const pointers.
 		char* inptr = inbuf;
 		char* outptr = outbuf;
 
-		size_t result = iconv(cd,
+		size_t result = iconv(
+			cd,
 #if defined(__APPLE__)
 			(char**)&inptr,
 #else
-			(char**)&inptr,
+			(const char**)&inptr,
 #endif
 			&inbytesleft,
 			&outptr,
