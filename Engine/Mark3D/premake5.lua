@@ -154,8 +154,8 @@ do
 			-- 헤더 복사
 			"cp -Rf %{prj.location}/../Engine/Common/*.h %{inc_output_dir}/",
 			"cp -Rf %{prj.location}/../Engine/Common/*.inl %{inc_output_dir}/",
-			"cp -Rf %{prj.location}/../Engine/Mark3D/Core/Public/*.h %{inc_output_dir}/",
-			"cp -Rf %{prj.location}/../Engine/Mark3D/Main/Public/*.h %{inc_output_dir}/",
+			"cp -Rf %{prj.location}/../Engine/Mark3D/Public/*.h %{inc_output_dir}/",
+
 			-- 바이너리 복사
 			"cp -Rf %{output_dir}/*.dylib %{sdk_bin_dir}/",
 			"cp -Rf %{inc_output_dir}/*.h %{sdk_inc_dir}/",
@@ -168,7 +168,7 @@ do
 			defines{"DEBUG", "USE_DLL", "MARKENGINE_EXPORTS", "__LOG_ENABLED__", "__MEMORY_TRACKER_ENABLED__", "__MEMORY_LIMIT_ENABLED__"}
 			optimize "Off"
 			symbols "On"
-			links{"lz4_d", "ufbx_d", "spdlog_d"}
+			links{"CoreService_d"}
 			targetname("Mark3D_d")
 		end
 		filter {}
@@ -178,7 +178,7 @@ do
 			defines{"NDEBUG", "RELEASE", "USE_DLL", "MARKENGINE_EXPORTS", "__LOG_ENABLED__", "__MEMORY_TRACKER_ENABLED__", "__MEMORY_LIMIT_ENABLED__"}
 			optimize "Full"
 			symbols "On"
-			links{"lz4", "ufbx", "spdlog"}
+			links{"CoreService"}
 			targetname("Mark3D")
 		end
 		filter {}
@@ -188,7 +188,7 @@ do
 			defines{"NDEBUG", "MASTER", "USE_DLL", "MARKENGINE_EXPORTS", "__MEMORY_LIMIT_ENABLED__"}
 			optimize "Full"
 			symbols "On"
-			links{"lz4", "ufbx"}
+			links{"CoreService"}
 			targetname("Mark3D")
 		end
 		filter {}

@@ -32,8 +32,23 @@ namespace mark
 		size_t inbytesleft = src_bytes;
 		size_t outbytesleft = dest_bytes;
 
-		// 변환 수행
-		size_t result = iconv(cd, (const char**)&inbuf, &inbytesleft, &outbuf, &outbytesleft);
+		// Some platforms declare iconv() as taking (char **), others as (const char **).
+		// Use a portable approach to satisfy both by using intermediate non-const pointers.
+		char* inptr = inbuf;
+		char* outptr = outbuf;
+
+		size_t result = iconv(cd,
+#if defined(__APPLE__)
+			(char**)&inptr,
+#else
+			(char**)&inptr,
+#endif
+			&inbytesleft,
+			&outptr,
+			&outbytesleft);
+
+		// Update outbuf to current position for null-termination below
+		outbuf = outptr;
 
 		iconv_close(cd);
 
@@ -418,3 +433,4 @@ namespace mark
 		);
 	}
 }
+

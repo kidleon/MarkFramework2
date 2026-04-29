@@ -7,12 +7,6 @@
 #include <format>
 #include <memory_resource>
 
-#include <d3d11_1.h>
-#include <dxgi1_2.h>      // DXGI 1.2 — Flip 모델 스왑체인 (D3D11.1과 짝)
-#include <d3dcompiler.h>  // 셰이더 런타임 컴파일 (D3DCompile)
-#include <dxgidebug.h>
-#include <dxgiformat.h>
-
 #if defined(__MEMORY_TRACKING_ENABLED__)
 #include <source_location>
 #endif // __MEMORY_TRACKING_ENABLED__

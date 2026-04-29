@@ -96,7 +96,7 @@ do
 			symbols "On"
 			incrementallink "Off"
 			links{"lz4", "ufbx", "libiconv", "mimalloc"}
-			targetname("CoreServiced")
+			targetname("CoreService")
 		end
 		filter {}
 	end
@@ -161,8 +161,8 @@ do
 			defines{"DEBUG", "USE_DLL", "MARKENGINE_EXPORTS", "__LOG_ENABLED__", "__MEMORY_TRACKER_ENABLED__", "__MEMORY_LIMIT_ENABLED__"}
 			optimize "Off"
 			symbols "On"
-			links{"lz4_d", "ufbx_d", "spdlog_d"}
-			targetname("CoreServiced")
+			links{"lz4_d", "ufbx_d", "spdlog_d", "mimalloc_d"}
+			targetname("CoreService_d")
 		end
 		filter {}
 
@@ -171,7 +171,7 @@ do
 			defines{"NDEBUG", "RELEASE", "USE_DLL", "MARKENGINE_EXPORTS", "__LOG_ENABLED__", "__MEMORY_TRACKER_ENABLED__", "__MEMORY_LIMIT_ENABLED__"}
 			optimize "Full"
 			symbols "On"
-			links{"lz4", "ufbx", "spdlog"}
+			links{"lz4", "ufbx", "spdlog", "mimalloc"}
 			targetname("CoreService")
 		end
 		filter {}
@@ -181,7 +181,7 @@ do
 			defines{"NDEBUG", "MASTER", "USE_DLL", "MARKENGINE_EXPORTS", "__MEMORY_LIMIT_ENABLED__"}
 			optimize "Full"
 			symbols "On"
-			links{"lz4", "ufbx"}
+			links{"lz4", "ufbx", "mimalloc"}
 			targetname("CoreService")
 		end
 		filter {}

@@ -80,7 +80,7 @@
 #elif defined(__TARGET_OS_LINUX) || defined(__TARGET_OS_MAC) || defined(__TARGET_OS_IOS) || defined(__TARGET_OS_FREEBSD)
 #	if defined(USE_DLL)
 #		if defined(MARKENGINE_EXPORTS)
-#			define __attribute__((visibility("default")))
+#			define MARKENGINE_API __attribute__((visibility("default")))
 #			define MARKENGINE_C_API extern "C" __attribute__((visibility("default")))
 #		else
 #			define MARKENGINE_API
