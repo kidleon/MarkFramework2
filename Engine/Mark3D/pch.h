@@ -18,12 +18,10 @@
 #endif // __MEMORY_TRACKING_ENABLED__
 
 #include "predefine.h"
-//#include "mathlib.h"
-#include "RenderDef.h"
-#include "CoreHeap.h"
-#include "CoreGeneric.h"
-#include "Log.h"
 
+#include "core_heap.h"
+#include "core_generic.h"
+#include "log.h"
 #include "mathlib.h"
 
 

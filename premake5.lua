@@ -20,11 +20,12 @@ do
 
 	sample_output_dir = "%{wks.location}/../Samples/Output"
 
-	include "Engine/Mark3D"
+	--
 	--include "src/Rayun3D"
 	--include "Samples/ECSTestApp"
 	-- include "Engine/Renderer_D3D11"
-
-	include "Samples/ConsoleApp"
+	include "Engine/CoreService"
+	include "Engine/Mark3D"
+	--include "Samples/ConsoleApp"
 
 end

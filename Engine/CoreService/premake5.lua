@@ -1,4 +1,4 @@
-project("Mark3D")
+project("CoreService")
 do
 	language "C++"
 	cppdialect "C++20"
@@ -20,12 +20,11 @@ do
 		"Private/**.h",
 		"Private/**.cpp",
 		"Public/**.h",
-		"Public/**.cpp"
+		"Public/**.cpp",
 	}
 	
 	includedirs { 
 		"../Common",
-		"../CoreService/Public",
 		".",
 		"Private",
 		"Public"
@@ -52,10 +51,7 @@ do
 		{
 			"{COPY} %{prj.location}../Engine/Common/*.h %{inc_output_dir}",
 			"{COPY} %{prj.location}../Engine/Common/*.inl %{inc_output_dir}",
-			"{COPY} %{prj.location}../Engine/Mark3D/Core/Public/*.h %{inc_output_dir}",
-			"{COPY} %{prj.location}../Engine/Mark3D/Core/Public/*.inl %{inc_output_dir}",
-			"{COPY} %{prj.location}../Engine/Mark3D/Main/Public/*.h %{inc_output_dir}",
-			"{COPY} %{prj.location}../Engine/Mark3D/Main/Public/*.inl %{inc_output_dir}",
+			"{COPY} %{prj.location}../Engine/CoreService/Public/*.h %{inc_output_dir}",
 			"{COPY} %{prj.location}../Output/%{prj.name}/bin/*.dll %{sdk_bin_dir}",
 			"{COPY} %{prj.location}../Output/%{prj.name}/bin/*.lib %{sdk_lib_dir}",
 			"{COPY} %{prj.location}../Output/%{prj.name}/bin/*.pdb %{sdk_sym_dir}",
@@ -66,8 +62,7 @@ do
 		}
 		
 		libdirs {
-			"../External/bin/%{cfg.platform}",
-			"../../Output/CoreService/bin"
+			"../External/bin/%{cfg.platform}"
 		}
 		
 		filter { "system:windows", "configurations:Debug" }
@@ -77,9 +72,9 @@ do
 			optimize "Off"
 			symbols "On"
 			incrementallink "On"
-			links{ "CoreService_d" }
+			links{"lz4_d", "ufbx_d", "libiconvd", "mimalloc_d", "spdlog" }
 			
-			targetname("Mark3D_d")
+			targetname("CoreService_d")
 		end
 		filter {}
 		
@@ -89,8 +84,8 @@ do
 			optimize "Full"
 			symbols "On"
 			incrementallink "Off"
-			links{ "CoreService" }
-			targetname("Mark3D")
+			links{"lz4", "ufbx", "libiconv", "mimalloc", "spdlog" }
+			targetname("CoreService")
 		end
 		filter {}
 		
@@ -100,8 +95,8 @@ do
 			optimize "Full"
 			symbols "On"
 			incrementallink "Off"
-			links{ "CoreService" }
-			targetname("Mark3D")
+			links{"lz4", "ufbx", "libiconv", "mimalloc"}
+			targetname("CoreServiced")
 		end
 		filter {}
 	end
@@ -125,7 +120,7 @@ do
 		pchheader ""
 		pchsource ""
 		buildoptions {
-			"-include %{wks.location}/../Engine/Mark3D/pch.h",
+			"-include %{wks.location}/../Engine/CoreService/pch.h",
 			"-I%{wks.location}/../Common"
 		}
 		
@@ -133,8 +128,7 @@ do
 		linkoptions  { "-mmacosx-version-min=13.3" }
 
 		libdirs {
-			"../External/bin/macos/universal",
-			"../../Output/CoreService/bin"
+			"../External/bin/macos/universal"
 		}
 
 		links {
@@ -154,8 +148,7 @@ do
 			-- 헤더 복사
 			"cp -Rf %{prj.location}/../Engine/Common/*.h %{inc_output_dir}/",
 			"cp -Rf %{prj.location}/../Engine/Common/*.inl %{inc_output_dir}/",
-			"cp -Rf %{prj.location}/../Engine/Mark3D/Core/Public/*.h %{inc_output_dir}/",
-			"cp -Rf %{prj.location}/../Engine/Mark3D/Main/Public/*.h %{inc_output_dir}/",
+			"cp -Rf %{prj.location}/../Engine/CoreService/Public/*.h %{inc_output_dir}/",
 			-- 바이너리 복사
 			"cp -Rf %{output_dir}/*.dylib %{sdk_bin_dir}/",
 			"cp -Rf %{inc_output_dir}/*.h %{sdk_inc_dir}/",
@@ -169,7 +162,7 @@ do
 			optimize "Off"
 			symbols "On"
 			links{"lz4_d", "ufbx_d", "spdlog_d"}
-			targetname("Mark3D_d")
+			targetname("CoreServiced")
 		end
 		filter {}
 
@@ -179,7 +172,7 @@ do
 			optimize "Full"
 			symbols "On"
 			links{"lz4", "ufbx", "spdlog"}
-			targetname("Mark3D")
+			targetname("CoreService")
 		end
 		filter {}
 
@@ -189,7 +182,7 @@ do
 			optimize "Full"
 			symbols "On"
 			links{"lz4", "ufbx"}
-			targetname("Mark3D")
+			targetname("CoreService")
 		end
 		filter {}
 	end
