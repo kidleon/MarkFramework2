@@ -13,7 +13,7 @@ BOOL Application::OnInit(HWND hWnd, int width, int height)
 	m_Width = width;
 	m_Height = height;
 
-	m_hRenderSystemModule = LoadLibrary("RenderSystem_D3D11.dll");
+	m_hRenderSystemModule = LoadLibrary("./RenderSystem_D3D11.dll");
 	if (!m_hRenderSystemModule)
 	{
 		SYS_LOG_ERR("Failed to load RenderSystem_D3D11.dll");

@@ -36,10 +36,7 @@ BOOL APIENTRY DllMain(HMODULE g_hModule, DWORD  ul_reason_for_call, LPVOID lpRes
 }
 
 BOOL __stdcall CreateRenderSystem(
-    HWND hWnd,
-    uint32_t ScreenWidth,
-	uint32_t ScreenHeight,
-    BOOL Fullscreen,
+	const PrimitiveBufferCreateDesc& CreateDesc,
     mark::IRenderSystem** ppRenderSystem
 )
 {
@@ -47,6 +44,13 @@ BOOL __stdcall CreateRenderSystem(
         return FALSE;
 
 	D3D11RenderSystem* pRenderSystem = CORE_NEW(D3D11RenderSystem);
+	if (!pRenderSystem->Initialize(CreateDesc))
+	{
+		CORE_DELETE(D3D11RenderSystem, pRenderSystem);
+		return FALSE;
+	}
+
+	return TRUE;
 
 	/*
     D3D11RenderSystem* pRenderSystem = new D3D11RenderSystem();
