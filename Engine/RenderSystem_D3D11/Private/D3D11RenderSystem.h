@@ -10,8 +10,8 @@ namespace mark
 	public:
 		~D3D11RenderSystem() noexcept;
 
-		void addref() final;
-		void release() final;
+		void AddRef() final;
+		void Release() final;
 
 		bool Initialize(const RenderSystemCreateDesc& desc) final;
 		void Shutdown() final;

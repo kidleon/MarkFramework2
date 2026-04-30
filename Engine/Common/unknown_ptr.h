@@ -14,7 +14,7 @@ namespace mark
 	template<typename _T>
 	struct unknown_ptr
 	{
-		static_assert(std::is_base_of<unknown, _T>::value, "unknown_ptr can only be used with types derived from iunknown");
+		static_assert(std::is_base_of<Unknown, _T>::value, "unknown_ptr can only be used with types derived from iunknown");
 		_T* _ptr;
 
 		unknown_ptr() noexcept

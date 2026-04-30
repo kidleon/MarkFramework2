@@ -3,11 +3,9 @@
 
 namespace mark
 {
-	struct unknown
+	struct Unknown
 	{
-		virtual void addref() = 0;
-		virtual void release() = 0;
+		virtual void AddRef() = 0;
+		virtual void Release() = 0;
 	};
-
-	using Unknown = unknown;
 }

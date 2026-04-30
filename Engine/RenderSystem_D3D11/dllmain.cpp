@@ -36,7 +36,7 @@ BOOL APIENTRY DllMain(HMODULE g_hModule, DWORD  ul_reason_for_call, LPVOID lpRes
 }
 
 BOOL __stdcall CreateRenderSystem(
-	const PrimitiveBufferCreateDesc& CreateDesc,
+	const RenderSystemCreateDesc& CreateDesc,
     mark::IRenderSystem** ppRenderSystem
 )
 {

@@ -10,12 +10,12 @@ namespace mark
 		Shutdown();
 	}
 
-	void D3D11RenderSystem::addref()
+	void D3D11RenderSystem::AddRef()
 	{
 		m_RefCount++;
 	}
 
-	void D3D11RenderSystem::release()
+	void D3D11RenderSystem::Release()
 	{
 		if (--m_RefCount == 0)
 		{

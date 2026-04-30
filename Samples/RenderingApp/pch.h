@@ -6,11 +6,6 @@
 #include <memory_resource>
 
 #include "predefine.h"
-
-#include "core_heap.h"
-#include "core_generic.h"
-#include "log.h"
-#include "mathlib.h"
-
+#include "Mark3D.h"
 
 #endif // __PCH_H__
