@@ -25,7 +25,8 @@ namespace mark
 		if (!pEngine->Initialize(CreateDesc))
 		{
 			LOG_ERR("Failed to initialize Mark3D Engine.");
-			CORE_DELETE(Engine, pEngine);
+			CHECK_RELEASE(pEngine);
+
 			return false;
 		}
 

@@ -7,13 +7,14 @@ namespace mark
 	class Engine final : public IMark3D
 	{
 	public:
-		virtual ~Engine() noexcept;
-
 		void AddRef() final;
 		void Release() final;
 
 		bool Initialize(const EngineCreateDesc& CreateDesc) final;
 		void Shutdown() final;
+
+	private:
+		virtual ~Engine() noexcept;
 
 	private:
 		std::atomic<int32_t> m_RefCount{ 1 };
