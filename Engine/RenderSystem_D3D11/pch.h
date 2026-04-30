@@ -11,8 +11,10 @@
 #include <wrl/client.h>  // ComPtr 사용시
 
 #include "predefine.h"
-#include "log.h"
 #include "mathlib.h"
+#include "core_heap.h"
+#include "log.h"
+#include "render_def.h"
 
 
 #endif // __PCH_H__

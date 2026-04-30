@@ -1,6 +1,8 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "D3D11RenderSystem.h"
 
+
+using namespace mark;
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dcompiler.lib")
@@ -33,17 +35,20 @@ BOOL APIENTRY DllMain(HMODULE g_hModule, DWORD  ul_reason_for_call, LPVOID lpRes
     return TRUE;
 }
 
-BOOL __stdcall CreateRendererD3D11(
+BOOL __stdcall CreateRenderSystem(
     HWND hWnd,
-    uint32 ScreenWidth,
-    uint32 ScreenHeight,
+    uint32_t ScreenWidth,
+	uint32_t ScreenHeight,
     BOOL Fullscreen,
-    IRenderSystem** ppRenderSystem
+    mark::IRenderSystem** ppRenderSystem
 )
 {
     if (!ppRenderSystem)
         return FALSE;
 
+	D3D11RenderSystem* pRenderSystem = CORE_NEW(D3D11RenderSystem);
+
+	/*
     D3D11RenderSystem* pRenderSystem = new D3D11RenderSystem();
     if (!pRenderSystem->Init(
         hWnd,
@@ -54,6 +59,7 @@ BOOL __stdcall CreateRendererD3D11(
     {
         return FALSE;
     }
+	*/
 
     *ppRenderSystem = pRenderSystem;
 

@@ -1,6 +1,8 @@
 #pragma once
 #include <source_location>
-
+#include <format>
+#include <string_view>
+#include <string>
 #include "core_generic.h"
 
 

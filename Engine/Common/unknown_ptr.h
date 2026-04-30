@@ -2,16 +2,19 @@
 #include <cstdint>
 #include <atomic>
 #include <type_traits>
+#include "unknown.h"
 
 
 namespace mark
 {
+	
 	/**
 	* @brief unknown_ptr: _T 인터페이스를 위한 스마트 포인터
 	*/
 	template<typename _T>
 	struct unknown_ptr
 	{
+		static_assert(std::is_base_of<unknown, _T>::value, "unknown_ptr can only be used with types derived from iunknown");
 		_T* _ptr;
 
 		unknown_ptr() noexcept
@@ -23,14 +26,14 @@ namespace mark
 			: _ptr(ptr)
 		{
 			if (_ptr)
-				_ptr->add_ref();
+				_ptr->addref();
 		}
 
 		unknown_ptr(const unknown_ptr& other) noexcept
 			: _ptr(other._ptr)
 		{
 			if (_ptr)
-				_ptr->add_ref();
+				_ptr->addref();
 		}
 
 		unknown_ptr(unknown_ptr&& other) noexcept
@@ -50,7 +53,7 @@ namespace mark
 			if (this != &other)
 			{
 				if (other._ptr)
-					other._ptr->add_ref();
+					other._ptr->addref();
 				if (_ptr)
 					_ptr->release();
 				_ptr = other._ptr;
@@ -75,7 +78,7 @@ namespace mark
 			if (_ptr != ptr)
 			{
 				if (ptr)
-					ptr->add_ref();
+					ptr->addref();
 				if (_ptr)
 					_ptr->release();
 				_ptr = ptr;

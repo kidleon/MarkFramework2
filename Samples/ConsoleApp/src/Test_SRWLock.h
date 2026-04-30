@@ -1,5 +1,5 @@
 #pragma once
-#include "SRWLock.h"
+#include "srw_lock.h"
 #include <cstdio>
 #include <thread>
 #include <atomic>

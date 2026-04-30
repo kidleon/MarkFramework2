@@ -27,6 +27,7 @@ do
 	include "Engine/CoreService"
 	include "Engine/Mark3D"
 	include "Engine/RenderSystem_D3D11"
-	--include "Samples/ConsoleApp"
+	include "Samples/ConsoleApp"
+	include "Samples/RenderingApp"
 
 end

@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include "unknown.h"
 
 
 namespace mark
@@ -17,4 +18,15 @@ namespace mark
 	};
 
 	using ResourceHandle = uint64_t;
+	using PrimitiveBufferHandle = ResourceHandle;
+
+
+	struct IRenderSystem : public Unknown
+	{
+		virtual bool Initialize(const RenderSystemCreateDesc& desc) = 0;
+		virtual void Shutdown() = 0;
+
+		virtual PrimitiveBufferHandle CreatePrimitiveBuffer(const PrimitiveBufferCreateDesc& desc) = 0;
+
+	};
 }

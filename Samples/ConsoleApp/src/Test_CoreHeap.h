@@ -2,8 +2,8 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdint>
-#include "CoreHeap.h"
-#include "Timer.h"
+#include "core_heap.h"
+#include "timer.h"
 
 
 namespace mark
@@ -366,7 +366,7 @@ namespace mark
 
 			for (int i = 0; i < iterations; ++i)
 			{
-				CORE_TEMP_ALLOC(64);
+				void* p = CORE_TEMP_ALLOC(64);
 				if ((i & 0xFF) == 0xFF)
 					CORE_TEMP_RESET();
 			}

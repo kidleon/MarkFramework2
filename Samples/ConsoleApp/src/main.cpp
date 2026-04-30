@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "Mark3D.h"
-#include "StringBuffer.h"
 #include "mathlib.h"
-#include "CoreHeap.h"
-#include "CoreGeneric.h"
-#include "Log.h"
+#include "string_buffer.h"
+#include "core_heap.h"
+#include "core_generic.h"
+#include "log.h"
 
 #include "TestMath.h"
 #include "TestMath_Utils.h"
@@ -127,12 +127,6 @@ void TestStringBuffer()
 
 	char buff[256];
 	str_buf.to_buffer(buff, sizeof(buff));
-
-	mark::sys_string s2;
-	str_buf.to_sys_string(s2);
-
-	mark::temp_string tstr;
-	str_buf.to_temp_string(tstr);
 
 	std::string_view view = str_buf.to_string_view();
 

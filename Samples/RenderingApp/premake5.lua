@@ -1,6 +1,6 @@
-project("SampleConsole")
+project("SampleRender")
 do
-	kind "ConsoleApp"
+	kind "WindowedApp"
 	language "C++"
 	cppdialect "C++20"
 	
@@ -64,21 +64,21 @@ do
 
 		filter { "system:windows", "configurations:Debug" }
 		do
-			defines{"DEBUG", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__MEMORY_LIMIT_ENABLED__", "__LOG_ENABLED__"}
+			defines{"DEBUG", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__LOG_ENABLED__"}
 			optimize "Off"
 			symbols "On"
 			links{"Mark3D_d", "CoreService_d"}
-			targetname("SampleConsole_d")
+			targetname("SampleRender_d")
 		end
 		filter {}
 		
 		filter { "system:windows", "configurations:Release" }
 		do
-			defines{"NDEBUG", "RELEASE", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__MEMORY_LIMIT_ENABLED__", "__LOG_ENABLED__"}
+			defines{"NDEBUG", "RELEASE", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__LOG_ENABLED__"}
 			optimize "On"
 			symbols "On"
-			links{"Mark3D"}
-			targetname("SampleConsole", "CoreService")
+			links{"Mark3D", "CoreService"}
+			targetname("SampleRender")
 		end
 		filter {}
 		
@@ -88,7 +88,7 @@ do
 			optimize "On"
 			symbols "On"
 			links{"Mark3D", "CoreService"}
-			targetname("SampleConsole")
+			targetname("SampleRender")
 		end
 		filter {}
 		
@@ -112,10 +112,10 @@ do
 
 		filter { "system:macosx", "configurations:Debug" }
 		do
-			defines{"DEBUG", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__MEMORY_LIMIT_ENABLED__", "__LOG_ENABLED__"}
+			defines{"DEBUG", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__LOG_ENABLED__"}
 			optimize "Off"
 			symbols "On"
-			linkoptions { "-lMark3D_d" }
+			linkoptions { "-lMark3D_d", "-lCoreService_d" }
 			targetname("SampleConsole_d")
 		end
 		filter{}	
@@ -123,10 +123,10 @@ do
 
 		filter { "system:macosx", "configurations:Release" }
 		do
-			defines{"NDEBUG", "RELEASE", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__MEMORY_LIMIT_ENABLED__", "__LOG_ENABLED__"}
+			defines{"NDEBUG", "RELEASE", "USE_DLL", "__MEMORY_TRACKER_ENABLED__", "__LOG_ENABLED__"}
 			optimize "On"
 			symbols "On"
-			linkoptions { "-lMark3D" }
+			linkoptions { "-lMark3D", "-lCoreService" }
 			targetname("SampleConsole")
 		end
 
@@ -137,7 +137,7 @@ do
 			defines{"NDEBUG", "MASTER", "USE_DLL"}
 			optimize "On"
 			symbols "On"
-			linkoptions { "-lMark3D" }
+			linkoptions { "-lMark3D", "-lCoreService" }
 			targetname("SampleConsole")
 		end
 	end

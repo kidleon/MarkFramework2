@@ -1,5 +1,5 @@
 #pragma once
-#include "SpinLock.h"
+#include "spin_lock.h"
 #include <cstdio>
 #include <thread>
 #include <atomic>

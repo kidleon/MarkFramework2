@@ -44,6 +44,11 @@ do
 			"../External/inc",
 			"../External/stb",
 		}
+		
+		files {
+			"dllmain.cpp",
+			"RenderSystem_D3D11.def"
+		}
 
 		buildoptions { "/utf-8", "/Zc:preprocessor" }
 		

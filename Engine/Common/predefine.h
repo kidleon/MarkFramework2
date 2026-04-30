@@ -219,6 +219,8 @@ namespace mark
 	inline constexpr bool always_false = false;
 }
 
+
+
 /* strcpy_s가 없는 플랫폼을 위한 크로스플랫폼 래퍼 */
 #ifndef __TARGET_OS_WINDOWS  /* Windows가 아닌 경우에만 정의 */
 
