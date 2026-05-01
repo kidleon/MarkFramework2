@@ -17,7 +17,6 @@
 #include "core_generic.h"
 #include "log.h"
 #include "mathlib.h"
-
-#include "render_def.h"
+#include "RenderDef.h"
 
 #endif // __PCH_H__

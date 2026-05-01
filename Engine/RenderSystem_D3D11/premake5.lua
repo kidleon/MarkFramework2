@@ -23,7 +23,8 @@ do
 	
 	includedirs { 
 		"../Common",
-		"../CoreService/public",
+		"../CoreService/Public",
+		"../Mark3D/Public",
 		".",
 		"Private"
 	}

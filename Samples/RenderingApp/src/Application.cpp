@@ -22,7 +22,6 @@ BOOL Application::OnInit(HWND hWnd, int width, int height)
 	if (!CreateMark3DEngine(CreateDesc, &m_pMark3D))
 		return FALSE;
 
-
 	return TRUE;
 }
 

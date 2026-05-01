@@ -68,7 +68,19 @@ namespace mark
 #define CORE_NEW_ARRAY(T, Count)					new (CORE_SYS_ALLOC(sizeof(T) * (Count))) T[Count]
 #define CORE_NEW_ARRAY_ALIGNED(T, A, Count)			new (CORE_SYS_ALLOC_ALIGNED(sizeof(T) * (Count), A)) T[Count]
 #define CORE_DELETE(T, Ptr)							(Ptr)->~T(); sys_free(Ptr);
-#define CORE_DELETE_ARRAY(T, Ptr, Count)			for (size_t i = 0; i < (Count); ++i) { (Ptr)[i].~T((Ptr)[i])(); } CORE_SYS_FREE(Ptr); Ptr = nullptr
+#define CORE_DELETE_ARRAY(T, Ptr, Count) \
+{ \
+    T* p = Ptr; \
+    if(p) \
+    { \
+        /* 역순 소멸 — new[]와 대칭을 맞추기 위함 */ \
+        for(size_t i = Count; i > 0; --i) \
+        {\
+            p[i-1].~T();\
+        }\
+        ::mark::sys_free(p); \
+    }\
+}
 
 
 

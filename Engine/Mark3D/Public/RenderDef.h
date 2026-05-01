@@ -14,25 +14,45 @@ namespace mark
 		GLES3
 	};
 
+	enum class BUFFER_USAGE : uint32_t
+	{
+		DEFAULT,
+		IMMUTABLE,
+		DYNAMIC,
+		STAGING,
+
+		EMAX
+	};
+
+	enum class BUFFER_TYPE : uint32_t
+	{
+		VERTEX_BUFFER,
+		INDEX_BUFFER,
+		CONSTANT_BUFFER,
+
+		EMAX
+	};
+
 	struct RenderSystemCreateDesc
 	{
-		uint32_t ScreenWidth = 0;
-		uint32_t ScreenHeight = 0;
+		uint32_t ScreenWidth;
+		uint32_t ScreenHeight;
 
 #if defined(__TARGET_OS_WINDOWS)
-		HWND WindowHandle = nullptr;
+		HWND WindowHandle;
 #endif // #if defined(__TARGET_OS_WINDOWS)
 	};
 
 	struct PrimitiveBufferCreateDesc
 	{
-		uint32_t VertexCount = 0;
-		uint32_t IndexCount = 0;
+		BUFFER_USAGE VertexBufferUsage;
+		BUFFER_USAGE IndexBufferUsage;
+		uint32_t VertexCount;
+		uint32_t IndexCount;
 	};
 
 	using ResourceHandle = uint64_t;
 	using PrimitiveBufferHandle = ResourceHandle;
-
 
 	struct IRenderSystem : public Unknown
 	{

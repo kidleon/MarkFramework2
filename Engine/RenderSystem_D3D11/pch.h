@@ -14,7 +14,8 @@
 #include "mathlib.h"
 #include "core_heap.h"
 #include "log.h"
-#include "render_def.h"
+#include "spin_lock.h"
+#include "RenderDef.h"
 
 
 #endif // __PCH_H__
