@@ -14,8 +14,6 @@ namespace mark
 		GLES3
 	};
 
-	
-
 	struct RenderSystemCreateDesc
 	{
 		uint32_t ScreenWidth = 0;

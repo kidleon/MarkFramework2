@@ -29,7 +29,7 @@ namespace mark
 		{
 			m_pRenderDevice = CORE_NEW(D3D11RenderDevice);
 			if (!m_pRenderDevice->CreateDevice(
-				nullptr, // TODO: 윈도우 핸들
+				desc.WindowHandle, // TODO: 윈도우 핸들
 				desc.ScreenWidth,
 				desc.ScreenHeight,
 				false // DebugDevice

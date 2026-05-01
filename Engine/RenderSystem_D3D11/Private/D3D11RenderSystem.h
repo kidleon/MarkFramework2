@@ -8,7 +8,7 @@ namespace mark
 	class D3D11RenderSystem final : public IRenderSystem
 	{
 	public:
-		~D3D11RenderSystem() noexcept;
+		virtual ~D3D11RenderSystem() noexcept;
 
 		void AddRef() final;
 		void Release() final;

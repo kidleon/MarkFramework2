@@ -16,5 +16,7 @@ private:
 	int m_Width = 0;
 	int m_Height = 0;
 
+	mark::IMark3D* m_pMark3D = nullptr;
+
 };
 

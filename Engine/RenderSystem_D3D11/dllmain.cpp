@@ -46,24 +46,10 @@ BOOL __stdcall CreateRenderSystem(
 	D3D11RenderSystem* pRenderSystem = CORE_NEW(D3D11RenderSystem);
 	if (!pRenderSystem->Initialize(CreateDesc))
 	{
+		(*ppRenderSystem) = nullptr;
 		CORE_DELETE(D3D11RenderSystem, pRenderSystem);
 		return FALSE;
 	}
-
-	return TRUE;
-
-	/*
-    D3D11RenderSystem* pRenderSystem = new D3D11RenderSystem();
-    if (!pRenderSystem->Init(
-        hWnd,
-        ScreenWidth,
-        ScreenHeight,
-        Fullscreen
-    ))
-    {
-        return FALSE;
-    }
-	*/
 
     *ppRenderSystem = pRenderSystem;
 
