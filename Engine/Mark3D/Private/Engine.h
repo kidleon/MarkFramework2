@@ -16,6 +16,8 @@ namespace mark
 	private:
 		virtual ~Engine() noexcept;
 
+		bool InitializeD3D11(const EngineCreateDesc& CreateDesc);
+
 	private:
 		std::atomic<int32_t> m_RefCount{ 1 };
 		BOOL m_Initialized = FALSE;

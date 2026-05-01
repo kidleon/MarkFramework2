@@ -19,6 +19,5 @@
 #include "mathlib.h"
 
 #include "render_def.h"
-#include "EngineDef.h"
 
 #endif // __PCH_H__

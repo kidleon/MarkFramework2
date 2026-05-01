@@ -38,39 +38,60 @@ namespace mark
 
 		LOG("Mark3D core memory initialized.");
 
+		if (CreateDesc.PreferredGraphicsAPI == GraphicsAPI::D3D11)
+		{
+			if (!InitializeD3D11(CreateDesc))
+			{
+				LOG_ERR("Failed to initialize D3D11 render system.");
+				Shutdown();
+				return false;
+			}
+		}
+
+		m_Initialized = TRUE;
+
+		return true;
+	}
+
+	void Engine::Shutdown()
+	{
+		m_Initialized = FALSE;
+
+		CHECK_RELEASE(m_pRenderSystem);
+		if (m_RenderSystemModule)
+		{
+			FreeLibrary(m_RenderSystemModule);
+			m_RenderSystemModule = nullptr;
+		}
+
+		shutdown_core_service();
+	}
+
+	bool Engine::InitializeD3D11(const EngineCreateDesc& CreateDesc)
+	{
 #if defined(__TARGET_OS_WINDOWS)
 		if (!CreateDesc.WindowHandle)
 		{
-			Shutdown();
 			LOG_ERR("Invalid window handle provided in EngineCreateDesc.");
 			return false;
 		}
 
-		if (CreateDesc.PreferredGraphicsAPI == GraphicsAPI::D3D11)
-		{
-			LOG("Initializing Mark3D with Direct3D 11...");
+		LOG("Initializing Mark3D with Direct3D 11...");
 
-			// D3D11 초기화 코드 작성
+		// D3D11 초기화 코드 작성
 #if defined(_DEBUG)
-			HMODULE hModule = LoadLibraryA("./RenderSystem_D3D11d.dll");
+		HMODULE hModule = LoadLibraryA("./RenderSystem_D3D11d.dll");
 #else 
-			HMODULE hModule = LoadLibraryA("./RenderSystem_D3D11.dll");
+		HMODULE hModule = LoadLibraryA("./RenderSystem_D3D11.dll");
 #endif // defined(_DEBUG)
 
-			if (!hModule)
-			{
-				LOG_ERR("Failed to load RenderSystem_D3D11.dll.");
-				Shutdown();
-				return false;
-			}
-
-			m_RenderSystemModule = hModule;
-		}
-		else
+		if (!hModule)
 		{
-			LOG_ERR("Unsupported graphics API specified in EngineCreateDesc.");
+			LOG_ERR("Failed to load RenderSystem_D3D11.dll.");
 			return false;
 		}
+
+		m_RenderSystemModule = hModule;
 
 		PFN_CREATE_RENDERER_D3D11 pfnCreateRendererD3D11 = (PFN_CREATE_RENDERER_D3D11)GetProcAddress(
 			m_RenderSystemModule,
@@ -80,7 +101,6 @@ namespace mark
 		if (!pfnCreateRendererD3D11)
 		{
 			LOG_ERR("Failed to find CreateRenderSystem function in RenderSystem_D3D11.dll.");
-			Shutdown();
 			return FALSE;
 		}
 
@@ -93,34 +113,12 @@ namespace mark
 		if (!pfnCreateRendererD3D11(RenderCreateDesc, &m_pRenderSystem))
 		{
 			LOG_ERR("Failed to create D3D11 render system.");
-			Shutdown();
 			return false;
 		}
 
 #endif // #if defined(__TARGET_OS_WINDOWS)
 
-		m_Initialized = TRUE;
-
 		return true;
-	}
-
-	void Engine::Shutdown()
-	{
-		m_Initialized = FALSE;
-
-		if (m_pRenderSystem)
-		{
-			m_pRenderSystem->Release();
-			m_pRenderSystem = nullptr;
-		}
-
-		if (m_RenderSystemModule)
-		{
-			FreeLibrary(m_RenderSystemModule);
-			m_RenderSystemModule = nullptr;
-		}
-
-		shutdown_core_service();
 	}
 
 }
