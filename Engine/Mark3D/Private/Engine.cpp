@@ -5,14 +5,25 @@
 
 namespace mark
 {
+	Engine* Engine::s_pInstance = nullptr;
+
 	typedef BOOL(__stdcall* PFN_CREATE_RENDERER_D3D11)(
 		const RenderSystemCreateDesc& CreateDesc,
 		IRenderSystem** ppRenderSystem
 	);
 
+	Engine::Engine()
+	{
+		if (!s_pInstance)
+			s_pInstance = this;
+	}
+
 	Engine::~Engine() noexcept
 	{
 		Shutdown();
+
+		if (s_pInstance == this)
+			s_pInstance = nullptr;
 	}
 
 	void Engine::AddRef()

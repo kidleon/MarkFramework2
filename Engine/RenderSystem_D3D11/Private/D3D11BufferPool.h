@@ -3,45 +3,32 @@
 
 namespace mark
 {
-	class D3D11Buffer;
+	class D3D11HardwareBuffer;
 
 	class D3D11BufferPool
 	{
-		struct BufferIndex
-		{
-			uint16_t PageIndex;
-			uint16_t SlotIndex;
-		};
-
-		struct BufferPage
-		{
-			D3D11Buffer* pBufferSlots;
-			uint32_t NumBuffers;
-			uint32_t PageIndex;
-		};
-
 		struct BufferPageGroup
 		{
-			sys_vector<BufferPage> BufferPages;
-			sys_deque<BufferIndex> FreeBuffers;
+			sys_vector<ID3D11Buffer*> OriginalBuffers;
+			sys_deque<ID3D11Buffer*> FreeBuffers;
 			spin_lock_t SpinLock;
 		};
 
 	public:
+		D3D11BufferPool(ID3D11Device* pDevice);
 		~D3D11BufferPool() noexcept;
 
-		void Initialize(ID3D11Device* pDevice) noexcept { m_pD3D11Device = pDevice; }
-
-		bool GetBuffer(
+		ID3D11Buffer* Acquire(
 			BUFFER_TYPE BufferType,
 			BUFFER_USAGE BufferUsage,
-			size_t BufferSize,
-			D3D11Buffer** ppOut
+			size_t BufferSize
 		);
 
-		void ReleaseBuffer(D3D11Buffer* pBuffer);
+		bool Release(ID3D11Buffer* pBuffer);
 
 	private:
+		D3D11BufferPool() = delete;
+
 		bool CreateBufferPage(
 			POOL_BUFFER_TYPE BufferType,
 			POOL_BUFFER_USAGE BufferUsage,
@@ -52,9 +39,9 @@ namespace mark
 
 	private:
 		ID3D11Device* m_pD3D11Device = nullptr;
-		BufferPageGroup m_VBPool[(int)POOL_BUFFER_USAGE::EMAX][(int)POOL_BUFFER_SIZE::EMAX];
-		BufferPageGroup m_IBPool[(int)POOL_BUFFER_USAGE::EMAX][(int)POOL_BUFFER_SIZE::EMAX];
-		BufferPageGroup m_CBPool[(int)POOL_BUFFER_USAGE::EMAX][(int)POOL_BUFFER_SIZE::EMAX];
+		BufferPageGroup m_VBPool[(int)BUFFER_USAGE::EMAX][(int)POOL_BUFFER_SIZE::EMAX];
+		BufferPageGroup m_IBPool[(int)BUFFER_USAGE::EMAX][(int)POOL_BUFFER_SIZE::EMAX];
+		BufferPageGroup m_CBPool[(int)BUFFER_USAGE::EMAX][(int)POOL_BUFFER_SIZE::EMAX];
 
 	};
 }

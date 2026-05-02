@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "D3D11RenderSystem.h"
 #include "D3D11RenderDevice.h"
+#include "D3D11GPUBuffer.h"
 
 
 namespace mark
@@ -12,12 +13,12 @@ namespace mark
 
 	void D3D11RenderSystem::AddRef()
 	{
-		m_RefCount++;
+		m_RefCount.fetch_add(1, std::memory_order_relaxed);
 	}
 
 	void D3D11RenderSystem::Release()
 	{
-		if (--m_RefCount == 0)
+		if (m_RefCount.fetch_sub(1, std::memory_order_acq_rel) == 1)
 		{
 			CORE_DELETE(D3D11RenderSystem, this);
 		}
@@ -56,11 +57,15 @@ namespace mark
 		}
 	}
 
-	PrimitiveBufferHandle D3D11RenderSystem::CreatePrimitiveBuffer(const PrimitiveBufferCreateDesc& desc)
+	IGPUBuffer* D3D11RenderSystem::CreateGPUBuffer(const GPUBufferCreateDesc& desc)
 	{
+		ID3D11Buffer* pD3D11Buffer = m_pRenderDevice->CreateBuffer(desc);
+		if (!pD3D11Buffer)
+		{
+			SYS_LOG_ERR("D3D11RenderSystem::CreateGPUBuffer - Failed to create D3D11 buffer.");
+			return nullptr;
+		}
 
-
-		return 0;
+		return CORE_NEW(D3D11GPUBuffer)(pD3D11Buffer);
 	}
-
 }

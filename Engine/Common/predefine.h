@@ -169,6 +169,10 @@ typedef float FLOAT;
 #	define BOOL8 uint8_t
 #endif // BOOL8
 
+#ifndef BOOL16
+#	define BOOL16 uint16_t
+#endif // BOOL8
+
 #ifndef S_OK
 #	define S_OK ((HRESULT)0L)
 #endif // S_OK

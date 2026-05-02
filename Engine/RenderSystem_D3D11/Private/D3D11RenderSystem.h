@@ -4,19 +4,20 @@
 namespace mark
 {
 	class D3D11RenderDevice;
+	class PagedPointerTable;
 
 	class D3D11RenderSystem final : public IRenderSystem
 	{
 	public:
 		virtual ~D3D11RenderSystem() noexcept;
 
-		void AddRef() final;
-		void Release() final;
+		void AddRef();
+		void Release();
 
-		bool Initialize(const RenderSystemCreateDesc& desc) final;
-		void Shutdown() final;
+		bool Initialize(const RenderSystemCreateDesc& desc);
+		void Shutdown();
 
-		PrimitiveBufferHandle CreatePrimitiveBuffer(const PrimitiveBufferCreateDesc& desc) final;
+		IGPUBuffer* CreateGPUBuffer(const GPUBufferCreateDesc& desc);
 
 	private:
 		mutable std::atomic<int64_t> m_RefCount = 1;

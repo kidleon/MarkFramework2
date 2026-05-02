@@ -3,13 +3,20 @@
 
 namespace mark
 {
+	class D3D11BufferPool;
+
 	class D3D11RenderDevice
 	{
+		static D3D11RenderDevice* s_pInstance;
+
 	public:
-		D3D11RenderDevice() = default;
+		D3D11RenderDevice();
 		~D3D11RenderDevice() noexcept;
 
 		bool CreateDevice(HWND hWnd, uint32_t Width, uint32_t Height, bool DebugDevice);
+
+		ID3D11Buffer* CreateBuffer(const GPUBufferCreateDesc& CreateDesc);
+		void ReleaseBuffer(ID3D11Buffer* pBuffer);
 
 		[[nodiscard]] inline ID3D11Device* INL_GetD3D11Device() const noexcept { return m_pD3D11Device; }
 		[[nodiscard]] inline ID3D11DeviceContext* INL_GetD3D11Context() const noexcept { return m_pImmediateContext; }
@@ -17,6 +24,8 @@ namespace mark
 		[[nodiscard]] inline ID3D11RenderTargetView* INL_GetBackBuffer_RenderTargetView() const noexcept { return m_pRenderTargetView; }
 		[[nodiscard]] inline ID3D11DepthStencilView* INL_GetBackBuffer_DepthStencilView() const noexcept { return m_pDepthStencilView; }
 		[[nodiscard]] inline ID3D11Texture2D* INL_GetBackBuffer_DepthStencilTexture() const noexcept { return m_pDepthStencilTexture; }
+
+		static D3D11RenderDevice& Get() noexcept { return *s_pInstance; }
 
 	private:
 		void DestroyDevice() noexcept;
@@ -38,5 +47,7 @@ namespace mark
 		ID3D11Texture2D* m_pDepthStencilTexture = nullptr;
 		ID3D11DepthStencilView* m_pDepthStencilView = nullptr;
 
+		D3D11BufferPool* m_pD3D11BufferPool = nullptr;
+		
 	};
 }

@@ -1,12 +1,24 @@
 #include "pch.h"
 #include "D3D11RenderDevice.h"
+#include "D3D11BufferPool.h"
 
 
 namespace mark
 {
+	D3D11RenderDevice* D3D11RenderDevice::s_pInstance = nullptr;
+
+	D3D11RenderDevice::D3D11RenderDevice()
+	{
+		if (!s_pInstance)
+			s_pInstance = this;
+	}
+
 	D3D11RenderDevice::~D3D11RenderDevice() noexcept
 	{
 		DestroyDevice();
+
+		if (s_pInstance == this)
+			s_pInstance = nullptr;
 	}
 
 	bool D3D11RenderDevice::CreateDevice(HWND hWnd, uint32_t Width, uint32_t Height, bool DebugDevice)
@@ -172,11 +184,15 @@ namespace mark
 		m_pDepthStencilTexture->AddRef();
 		m_pDepthStencilView->AddRef();
 
+		m_pD3D11BufferPool = CORE_NEW(D3D11BufferPool)(m_pD3D11Device);
+
 		return TRUE;
 	}
 
 	void D3D11RenderDevice::DestroyDevice() noexcept
 	{
+		CORE_DELETE(D3D11BufferPool, m_pD3D11BufferPool);
+
 		if (m_pImmediateContext)
 		{
 			m_pImmediateContext->ClearState();
@@ -237,5 +253,46 @@ namespace mark
 			FreeLibrary(hModule);
 			hModule = nullptr;
 		}
+	}
+
+	//---------------------------------------------------------------------
+	// Resource Methods
+
+	ID3D11Buffer* D3D11RenderDevice::CreateBuffer(const GPUBufferCreateDesc& CreateDesc)
+	{
+		ID3D11Buffer* pD3D11Buffer = m_pD3D11BufferPool->Acquire(
+			CreateDesc.Type,
+			CreateDesc.Usage,
+			CreateDesc.BufferSize
+		);
+
+		if (pD3D11Buffer)
+			return pD3D11Buffer;
+
+		D3D11_BUFFER_DESC BuffDesc = {};
+		BuffDesc.ByteWidth = (UINT)CreateDesc.BufferSize;
+		BuffDesc.BindFlags = D3D11_IMPL_BUFFER_BIND_FLAGS[(int)CreateDesc.Type];
+		BuffDesc.Usage = D3D11_IMPL_BUFFER_USAGE[(int)CreateDesc.Usage];
+		BuffDesc.CPUAccessFlags = (CreateDesc.Usage == BUFFER_USAGE::DYNAMIC) ? D3D11_CPU_ACCESS_WRITE : 0;
+
+		pD3D11Buffer = nullptr;
+		if (FAILED(m_pD3D11Device->CreateBuffer(&BuffDesc, nullptr, &pD3D11Buffer)))
+		{
+			SYS_LOG_ERR_F("Failed to create D3D11 buffer (Type: {}, Usage: {}, Size: {})", (int)CreateDesc.Type, (int)CreateDesc.Usage, CreateDesc.BufferSize);
+			return nullptr;
+		}
+
+		return pD3D11Buffer;
+	}
+
+	void D3D11RenderDevice::ReleaseBuffer(ID3D11Buffer* pBuffer)
+	{
+		if (!pBuffer) [[unlikely]]
+			return;
+
+		if (m_pD3D11BufferPool->Release(pBuffer))
+			return;
+
+		pBuffer->Release();
 	}
 }

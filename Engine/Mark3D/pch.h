@@ -18,5 +18,6 @@
 #include "log.h"
 #include "mathlib.h"
 #include "RenderDef.h"
+#include "Mark3D.h"
 
 #endif // __PCH_H__

@@ -1,0 +1,21 @@
+#pragma once
+#include <d3d11.h>
+#include "RenderDef.h"
+
+
+namespace mark
+{
+	static constexpr D3D11_USAGE D3D11_IMPL_BUFFER_USAGE[(int)BUFFER_USAGE::EMAX] =
+	{
+		D3D11_USAGE_DEFAULT,
+		D3D11_USAGE_DYNAMIC
+	};
+
+	static constexpr D3D11_BIND_FLAG D3D11_IMPL_BUFFER_BIND_FLAGS[(int)BUFFER_TYPE::EMAX] =
+	{
+		D3D11_BIND_VERTEX_BUFFER,
+		D3D11_BIND_INDEX_BUFFER,
+		D3D11_BIND_CONSTANT_BUFFER
+	};
+
+}

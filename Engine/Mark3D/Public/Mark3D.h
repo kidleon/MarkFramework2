@@ -20,6 +20,16 @@ namespace mark
 #endif // #if defined(__TARGET_OS_WINDOWS)
 	};
 
+	struct IModel : public Unknown
+	{
+		// 모델 관련 인터페이스 메서드 선언
+		virtual int32_t AddPrimitive(uint32_t VertexCount, uint32_t IndexCount) = 0;
+		virtual int32_t AddPrimitive(uint32_t VertexCount, uint32_t* IndexCountArray, size_t NumIndexCountArray) = 0;
+
+		virtual int32_t UpdateVeretx(int32_t PrimitiveIndex, VERTEX_FORMAT VertexFormat, const void* pVertexData, size_t DataSize) = 0;
+		virtual int32_t UpdateIndex(int32_t PrimitiveIndex, INDEX_FORMAT IndexFormat, const void* pIndexData, size_t DataSize) = 0;
+	};
+
 	/**
 	 * @brief Mark3D 엔진의 주요 인터페이스
 	 */
@@ -27,6 +37,8 @@ namespace mark
 	{
 		virtual bool Initialize(const EngineCreateDesc& CreateDesc) = 0;
 		virtual void Shutdown() = 0;
+
+		virtual IModel* CreateModel(uint32_t VertexFormats, uint32_t VertexCount, uint32_t IndexCount) = 0;
 
 	};
 

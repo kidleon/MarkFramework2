@@ -67,7 +67,7 @@ namespace mark
 #define CORE_NEW_ALIGNED(T, A)						new (CORE_SYS_ALLOC_ALIGNED(sizeof(T), A)) T
 #define CORE_NEW_ARRAY(T, Count)					new (CORE_SYS_ALLOC(sizeof(T) * (Count))) T[Count]
 #define CORE_NEW_ARRAY_ALIGNED(T, A, Count)			new (CORE_SYS_ALLOC_ALIGNED(sizeof(T) * (Count), A)) T[Count]
-#define CORE_DELETE(T, Ptr)							(Ptr)->~T(); sys_free(Ptr);
+#define CORE_DELETE(T, Ptr)							T* p = Ptr; if(p){ (p)->~T(); sys_free(p); }
 #define CORE_DELETE_ARRAY(T, Ptr, Count) \
 { \
     T* p = Ptr; \

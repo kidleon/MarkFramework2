@@ -16,6 +16,8 @@
 #include "log.h"
 #include "spin_lock.h"
 #include "RenderDef.h"
+#include "D3D11RenderDef.h"
+#include "D3D11Common.h"
 
 
 #endif // __PCH_H__
