@@ -202,9 +202,17 @@ namespace mark
 		[[nodiscard]] virtual BUFFER_TYPE GetBufferType() const = 0;
 		[[nodiscard]] virtual size_t GetBufferSize() const = 0;
 		[[nodiscard]] virtual void* GetNativePointer() const = 0;
+
+		virtual bool UpdateBuffer(const void* pData, size_t DataSize) = 0;
+		virtual void* Lock() = 0;
+		virtual void Unlock() = 0;
 	};
 
-	
+	struct IShaderProgram : public Unknown
+	{
+		// 셰이더 프로그램 관련 인터페이스 메서드 선언
+	};
+
 
 	struct IRenderSystem : public Unknown
 	{

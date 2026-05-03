@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Engine.h"
 #include "core.h"
+#include "Model.h"
 
 
 namespace mark
@@ -132,4 +133,19 @@ namespace mark
 		return true;
 	}
 
+
+	IModel* Engine::CreateModel(uint32_t VertexFormats, uint32_t VertexCount, INDEX_FORMAT IndexFormat, uint32_t IndexCount)
+	{
+		Model* pModel = CORE_NEW(Model);
+
+		if (!pModel->Create(VertexFormats, VertexCount, IndexFormat, IndexCount))
+		{
+			SYS_LOG_ERR("Failed to create model.");
+			pModel->Release();
+
+			return nullptr;
+		}
+
+		return pModel;
+	}
 }

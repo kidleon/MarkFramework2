@@ -1,6 +1,5 @@
 #pragma once
 #include "RenderDef.h"
-#include "PrimitiveBuffer.h"
 
 
 namespace mark
@@ -26,8 +25,19 @@ namespace mark
 		virtual int32_t AddPrimitive(uint32_t VertexCount, uint32_t IndexCount) = 0;
 		virtual int32_t AddPrimitive(uint32_t VertexCount, uint32_t* IndexCountArray, size_t NumIndexCountArray) = 0;
 
-		virtual int32_t UpdateVeretx(int32_t PrimitiveIndex, VERTEX_FORMAT VertexFormat, const void* pVertexData, size_t DataSize) = 0;
-		virtual int32_t UpdateIndex(int32_t PrimitiveIndex, INDEX_FORMAT IndexFormat, const void* pIndexData, size_t DataSize) = 0;
+		virtual bool UpdateVertex(VERTEX_FORMAT VertexFormat, const void* pVertexData, size_t DataSize) = 0;
+		virtual bool UpdateIndex(const void* pIndexData, size_t DataSize) = 0;
+
+	};
+
+	struct ISurfaceMaterial : public Unknown
+	{
+		// 표면 재질 관련 인터페이스 메서드 선언
+		virtual bool SetDiffuseColor(float r, float g, float b, float a) = 0;
+		virtual bool SetSpecularColor(float r, float g, float b, float a) = 0;
+		virtual bool SetDiffuseColor(const FLOAT4& Color) = 0;
+		virtual bool SetSpecularColor(const FLOAT4& Color) = 0;
+
 	};
 
 	/**
@@ -38,7 +48,7 @@ namespace mark
 		virtual bool Initialize(const EngineCreateDesc& CreateDesc) = 0;
 		virtual void Shutdown() = 0;
 
-		virtual IModel* CreateModel(uint32_t VertexFormats, uint32_t VertexCount, uint32_t IndexCount) = 0;
+		virtual IModel* CreateModel(uint32_t VertexFormats, uint32_t VertexCount, INDEX_FORMAT IndexFormat, uint32_t IndexCount) = 0;
 
 	};
 

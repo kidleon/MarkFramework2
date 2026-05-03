@@ -26,14 +26,14 @@ namespace mark
 			: _ptr(ptr)
 		{
 			if (_ptr)
-				_ptr->addref();
+				_ptr->AddRef();
 		}
 
 		unknown_ptr(const unknown_ptr& other) noexcept
 			: _ptr(other._ptr)
 		{
 			if (_ptr)
-				_ptr->addref();
+				_ptr->AddRef();
 		}
 
 		unknown_ptr(unknown_ptr&& other) noexcept
@@ -45,7 +45,7 @@ namespace mark
 		~unknown_ptr() noexcept
 		{
 			if (_ptr)
-				_ptr->release();
+				_ptr->Release();
 		}
 
 		inline unknown_ptr& operator=(const unknown_ptr& other) noexcept
@@ -53,9 +53,9 @@ namespace mark
 			if (this != &other)
 			{
 				if (other._ptr)
-					other._ptr->addref();
+					other._ptr->AddRef();
 				if (_ptr)
-					_ptr->release();
+					_ptr->Release();
 				_ptr = other._ptr;
 			}
 			return *this;
@@ -66,7 +66,7 @@ namespace mark
 			if (this != &other)
 			{
 				if (_ptr)
-					_ptr->release();
+					_ptr->Release();
 				_ptr = other._ptr;
 				other._ptr = nullptr;
 			}
@@ -78,9 +78,9 @@ namespace mark
 			if (_ptr != ptr)
 			{
 				if (ptr)
-					ptr->addref();
+					ptr->AddRef();
 				if (_ptr)
-					_ptr->release();
+					_ptr->Release();
 				_ptr = ptr;
 			}
 			return *this;
@@ -93,7 +93,7 @@ namespace mark
 		{
 			if (_ptr)
 			{
-				_ptr->release();
+				_ptr->Release();
 				_ptr = nullptr;
 			}
 		}
@@ -143,10 +143,15 @@ namespace mark
 		// nullptr 비교 — if (p == nullptr) 형태 지원
 		bool operator==(std::nullptr_t) const noexcept { return _ptr == nullptr; }
 		bool operator!=(std::nullptr_t) const noexcept { return _ptr != nullptr; }
+		
 	};
 
 	// nullptr == p 형태도 지원 (좌우 대칭)
-	inline bool operator==(std::nullptr_t, const unknown_ptr& p) noexcept { return p == nullptr; }
-	inline bool operator!=(std::nullptr_t, const unknown_ptr& p) noexcept { return p != nullptr; }
+	template<typename _T>
+	inline bool operator==(std::nullptr_t, const unknown_ptr<_T>& p) noexcept { return p == nullptr; }
+
+	template<typename _T>
+	inline bool operator!=(std::nullptr_t, const unknown_ptr<_T>& p) noexcept { return p != nullptr; }
+	
 
 };

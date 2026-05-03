@@ -8,12 +8,16 @@ namespace mark
 	public:
 		D3D11GPUBuffer(ID3D11Buffer* pD3D11Buffer) noexcept;
 
-		void AddRef() final;
-		void Release() final;
+		void AddRef();
+		void Release();
 
-		BUFFER_TYPE GetBufferType() const final;
-		size_t GetBufferSize() const final;
-		void* GetNativePointer() const final;
+		BUFFER_TYPE GetBufferType() const;
+		size_t GetBufferSize() const;
+		void* GetNativePointer() const;
+
+		bool UpdateBuffer(const void* pData, size_t DataSize);
+		void* Lock();
+		void Unlock();
 
 		inline ID3D11Buffer* INL_GetD3D11Buffer() const noexcept { return m_pD3D11Buffer; }
 		inline const D3D11_BUFFER_DESC& INL_GetBufferDesc() const noexcept { return m_BufferDesc; }

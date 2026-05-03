@@ -47,7 +47,7 @@ namespace mark
 	};
 
 	enum class POOL_BUFFER_USAGE {
-		DEFAULT, DYNAMIC, STAGING, EMAX
+		DEFAULT, DYNAMIC, EMAX
 	};
 
 	enum class POOL_BUFFER_SIZE : uint8_t {

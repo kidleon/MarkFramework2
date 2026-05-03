@@ -4,6 +4,8 @@
 
 namespace mark
 {
+	interface IModel;
+
 	class Engine final : public IMark3D
 	{
 		static Engine* s_pInstance;
@@ -11,15 +13,16 @@ namespace mark
 	public:
 		Engine();
 
-		void AddRef() final;
-		void Release() final;
+		void AddRef();
+		void Release();
 
-		bool Initialize(const EngineCreateDesc& CreateDesc) final;
-		void Shutdown() final;
+		bool Initialize(const EngineCreateDesc& CreateDesc);
+		void Shutdown();
 
-		IModel* CreateModel(uint32_t VertexFormats, uint32_t VertexCount, uint32_t IndexCount) final;
+		IModel* CreateModel(uint32_t VertexFormats, uint32_t VertexCount, INDEX_FORMAT IndexFormat, uint32_t IndexCount);
 
 		inline static Engine& Get() noexcept { return *s_pInstance; }
+		inline static Engine* GetPtr() noexcept { return s_pInstance; }
 		[[nodiscard]] inline IRenderSystem* INL_GetRenderSystem() const noexcept { return m_pRenderSystem; }
 
 	private:

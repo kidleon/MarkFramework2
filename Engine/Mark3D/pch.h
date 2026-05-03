@@ -12,7 +12,7 @@
 #endif // __MEMORY_TRACKING_ENABLED__
 
 #include "predefine.h"
-
+#include "unknown_ptr.h"
 #include "core_heap.h"
 #include "core_generic.h"
 #include "log.h"
