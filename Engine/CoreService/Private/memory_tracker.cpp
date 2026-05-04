@@ -13,7 +13,7 @@ namespace mark
 		, m_peak_usage(0)
 		, m_alloc_count(0)
 	{
-		m_allocations.reserve(1024); // 초기 용량을 1024로 설정하여 성능 최적화 (필요에 따라 조정 가능
+		m_allocations.reserve(2048); // 초기 용량을 2048로 설정하여 성능 최적화 (필요에 따라 조정 가능)
 	}
 
 	memory_tracker::~memory_tracker()
@@ -26,7 +26,13 @@ namespace mark
 		if (!ptr) [[unlikely]]
 			return;
 
-		allocation_info info{ (uint32_t)bytes, (uint32_t)alignment, location };
+		allocation_info info;
+		info.bytes = static_cast<uint32_t>(bytes);
+		info.alignment = static_cast<uint32_t>(alignment);
+		safe_strcpy(info.file, MAX_FILE_NAME, location.file_name());
+		safe_strcpy(info.function, MAX_FUNCTION_NAME, location.function_name());
+		info.line = static_cast<uint32_t>(location.line());
+
 		m_allocations[reinterpret_cast<uintptr_t>(ptr)] = info;
 
 		m_total_allocated += bytes;
@@ -101,7 +107,7 @@ namespace mark
 			{
 				snprintf(buffer, sizeof(buffer),
 					"[MemoryTracker] Allocated: %d bytes at %p (Alignment: %d) - %s:%d in function %s\n",
-					info.bytes, reinterpret_cast<void*>(key), info.alignment, info.location.file_name(), info.location.line(), info.location.function_name());
+					info.bytes, reinterpret_cast<void*>(key), info.alignment, info.file, info.line, info.function);
 				func(buffer);
 			}	
 		}

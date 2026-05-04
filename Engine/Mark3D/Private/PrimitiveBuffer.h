@@ -32,7 +32,7 @@ namespace mark
 		INDEX_FORMAT m_IndexFormat = INDEX_FORMAT::UINT16;
 		uint32_t m_IndexCount = 0;
 
-		unknown_ptr<IGPUBuffer> m_pVBs[(int)VERTEX_FORMAT_INDEX::MAX] = {};
+		unknown_ptr<IGPUBuffer> m_pVBs[(int)VERTEX_FORMAT_INDEX::EMAX] = {};
 		unknown_ptr<IGPUBuffer> m_pIB = nullptr;
 
 	};

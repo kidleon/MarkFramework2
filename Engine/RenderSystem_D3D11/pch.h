@@ -13,6 +13,7 @@
 #include "predefine.h"
 #include "mathlib.h"
 #include "core_heap.h"
+#include "name_hash.h"
 #include "log.h"
 #include "spin_lock.h"
 #include "RenderDef.h"

@@ -90,7 +90,7 @@ namespace mark
 		CUSTOM0,
 		CUSTOM1,
 
-		MAX
+		EMAX
 	};
 
 	inline VERTEX_FORMAT_INDEX ToVertexFormatIndex(VERTEX_FORMAT Format)
@@ -119,7 +119,7 @@ namespace mark
 				return VERTEX_FORMAT_INDEX::CUSTOM1;
 		}
 
-		return VERTEX_FORMAT_INDEX::MAX; // 유효하지 않은 포맷
+		return VERTEX_FORMAT_INDEX::EMAX; // 유효하지 않은 포맷
 	}
 
 	inline VERTEX_FORMAT ToVertexFormat(VERTEX_FORMAT_INDEX Index)
@@ -154,7 +154,7 @@ namespace mark
 	/**
 	* @brief 버텍스 포맷 스트라이드 열거형
 	*/
-	enum class VERTEX_FORMAT_STRIDE : unsigned int
+	enum class VERTEX_FORMAT_STRIDE : uint32_t
 	{
 		POSITION = sizeof(FLOAT) * 3,
 		NORMAL = sizeof(FLOAT) * 3,
@@ -172,23 +172,35 @@ namespace mark
 		CUSTOM1 = sizeof(FLOAT) * 4,
 	};
 
-	enum class INDEX_FORMAT : UINT32
+	enum class INDEX_FORMAT : uint32_t
 	{
 		UINT16 = 0,
 		UINT32,
-		MAX
+		EMAX
 	};
+
+	enum class SHADER_TYPE : uint32_t
+	{
+		VERTEX_SHADER,
+		PIXEL_SHADER,
+		COMPUTE_SHADER,
+		EMAX
+	};
+
 
 	struct RenderSystemCreateDesc
 	{
 		uint32_t ScreenWidth;
 		uint32_t ScreenHeight;
-
 #if defined(__TARGET_OS_WINDOWS)
 		HWND WindowHandle;
 #endif // #if defined(__TARGET_OS_WINDOWS)
+
+		BOOL DebugMode;
 	};
 
+	//---------------------------------------------------------
+	// GPUBUffers
 	struct GPUBufferCreateDesc
 	{
 		BUFFER_TYPE Type;
@@ -203,14 +215,34 @@ namespace mark
 		[[nodiscard]] virtual size_t GetBufferSize() const = 0;
 		[[nodiscard]] virtual void* GetNativePointer() const = 0;
 
-		virtual bool UpdateBuffer(const void* pData, size_t DataSize) = 0;
-		virtual void* Lock() = 0;
-		virtual void Unlock() = 0;
+		virtual bool UpdateBuffer(const void* pData, size_t DataSize, size_t* pWrittenOffset = nullptr) = 0;
+		
+	};
+
+	//---------------------------------------------------------
+	// Shader Programs
+	constexpr uint32_t MAX_SHADER_DEFINE = 16;
+	constexpr uint32_t MAX_SHADER_DEFINE_LENGTH = 64;
+
+	struct ShaderProgramCreateDesc
+	{
+		char szShaderName[64];
+		SHADER_TYPE ShaderType;
+		uint32_t BytecodeSize;
+		const void* pShaderBytecode;
+
+		char szEntryPoint[64];
+		char szShaderModel[32];
+		char szShaderDefines[MAX_SHADER_DEFINE][MAX_SHADER_DEFINE_LENGTH];
+		uint32_t NumDefines;
+		BOOL DebugMode;
 	};
 
 	struct IShaderProgram : public Unknown
 	{
 		// 셰이더 프로그램 관련 인터페이스 메서드 선언
+		virtual SHADER_TYPE GetShaderType() const = 0;
+
 	};
 
 
@@ -220,6 +252,8 @@ namespace mark
 		virtual void Shutdown() = 0;
 
 		[[nodiscard]] virtual IGPUBuffer* CreateGPUBuffer(const GPUBufferCreateDesc& desc) = 0;
+		[[nodiscard]] virtual IShaderProgram* CreateShaderProgram(const ShaderProgramCreateDesc& desc) = 0;
+		[[nodiscard]] virtual IShaderProgram* GetShaderProgram(SHADER_TYPE ShaderType, const char* szShaderName) = 0;
 
 	};
 

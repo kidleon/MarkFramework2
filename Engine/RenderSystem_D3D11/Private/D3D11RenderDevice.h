@@ -4,6 +4,7 @@
 namespace mark
 {
 	class D3D11BufferPool;
+	class D3D11ShaderProgram;
 
 	class D3D11RenderDevice
 	{
@@ -17,6 +18,8 @@ namespace mark
 
 		ID3D11Buffer* CreateBuffer(const GPUBufferCreateDesc& CreateDesc);
 		void ReleaseBuffer(ID3D11Buffer* pBuffer);
+
+		D3D11ShaderProgram* CompileShaderProgram(const ShaderProgramCreateDesc& CreateDesc);
 
 		[[nodiscard]] inline ID3D11Device* INL_GetD3D11Device() const noexcept { return m_pD3D11Device; }
 		[[nodiscard]] inline ID3D11DeviceContext* INL_GetD3D11Context() const noexcept { return m_pImmediateContext; }

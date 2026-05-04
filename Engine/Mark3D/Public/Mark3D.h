@@ -1,4 +1,5 @@
 #pragma once
+#include "mathlib.h"
 #include "RenderDef.h"
 
 
@@ -47,6 +48,8 @@ namespace mark
 	{
 		virtual bool Initialize(const EngineCreateDesc& CreateDesc) = 0;
 		virtual void Shutdown() = 0;
+
+		virtual bool GetRenderSystemInterface(IRenderSystem** ppOut) = 0;
 
 		virtual IModel* CreateModel(uint32_t VertexFormats, uint32_t VertexCount, INDEX_FORMAT IndexFormat, uint32_t IndexCount) = 0;
 

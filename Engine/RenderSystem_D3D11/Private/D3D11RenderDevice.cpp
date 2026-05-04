@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "D3D11RenderDevice.h"
 #include "D3D11BufferPool.h"
+#include "D3D11ShaderProgram.h"
 
 
 namespace mark
@@ -150,9 +151,10 @@ namespace mark
 			return FALSE;
 
 		hr = m_pD3D11Device->CreateRenderTargetView(pBackBuffer, nullptr, &m_pRenderTargetView);
+		pBackBuffer->Release();
+
 		if (FAILED(hr))
 			return FALSE;
-
 
 		// 깊이-스텐실 텍스처 생성
 		D3D11_TEXTURE2D_DESC descDepth = {};
@@ -179,10 +181,6 @@ namespace mark
 		hr = m_pD3D11Device->CreateDepthStencilView(m_pDepthStencilTexture, &descDSV, &m_pDepthStencilView);
 		if (FAILED(hr))
 			return FALSE;
-
-		m_pRenderTargetView->AddRef();
-		m_pDepthStencilTexture->AddRef();
-		m_pDepthStencilView->AddRef();
 
 		m_pD3D11BufferPool = CORE_NEW(D3D11BufferPool)(m_pD3D11Device);
 
@@ -294,5 +292,11 @@ namespace mark
 			return;
 
 		pBuffer->Release();
+	}
+
+	D3D11ShaderProgram* D3D11RenderDevice::CompileShaderProgram(const ShaderProgramCreateDesc& CreateDesc)
+	{
+
+		return nullptr;
 	}
 }

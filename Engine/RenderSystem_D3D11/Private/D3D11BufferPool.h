@@ -11,7 +11,13 @@ namespace mark
 		{
 			sys_vector<ID3D11Buffer*> OriginalBuffers;
 			sys_deque<ID3D11Buffer*> FreeBuffers;
-			spin_lock_t SpinLock;
+			spin_lock_t SpinLock = { 0 };
+
+			BufferPageGroup()
+			{
+				OriginalBuffers.reserve(1024);
+				SpinLock.stat = 0;
+			}
 		};
 
 	public:

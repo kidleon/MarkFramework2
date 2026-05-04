@@ -60,16 +60,15 @@ namespace mark
 		return static_cast<void*>(m_pD3D11Buffer);
 	}
 
-	bool D3D11GPUBuffer::UpdateBuffer(const void* pData, size_t DataSize)
+	bool D3D11GPUBuffer::UpdateBuffer(const void* pData, size_t DataSize, size_t* pWrittenOffset)
 	{
-		if (!m_pD3D11Buffer)
+		if (!m_pD3D11Buffer || !pData || 0 == DataSize)
 			return false;
 
 		if (m_BufferDesc.ByteWidth < DataSize)
 		{
 			SYS_LOG_ERR_F("Buffer update failed: Buffer size {} is smaller than data size {}",
 				m_BufferDesc.ByteWidth, DataSize);
-
 			return false;
 		}
 
@@ -77,14 +76,42 @@ namespace mark
 
 		if (m_BufferDesc.Usage == D3D11_USAGE_DYNAMIC)
 		{
-			D3D11_MAPPED_SUBRESOURCE mappedResource;
-			HRESULT hr = pDeviceContext->Map(m_pD3D11Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-			if (FAILED(hr))
-				return false;
+			D3D11_MAP   MapType = D3D11_MAP_WRITE_NO_OVERWRITE;
+			size_t      WriteOffset = m_DynamicOffset;
 
-			memcpy(static_cast<uint8_t*>(mappedResource.pData), pData, DataSize);
+			if (WriteOffset + DataSize > static_cast<size_t>(m_BufferDesc.ByteWidth))
+			{
+				MapType = D3D11_MAP_WRITE_DISCARD;
+				WriteOffset = 0;
+			}
+
+			D3D11_MAPPED_SUBRESOURCE MappedResource = {};
+			HRESULT hr = pDeviceContext->Map(
+				m_pD3D11Buffer,
+				0,
+				MapType,
+				0,
+				&MappedResource
+			);
+
+			if (FAILED(hr))
+			{
+				SYS_LOG_ERR_F("Map failed: HRESULT = 0x{:08X}", static_cast<uint32_t>(hr));
+				return false;
+			}
+
+			uint8_t* pDst = static_cast<uint8_t*>(MappedResource.pData) + WriteOffset;
+			memcpy(pDst, pData, DataSize);
 
 			pDeviceContext->Unmap(m_pD3D11Buffer, 0);
+
+			constexpr size_t BUFFER_ALIGNMENT = 256;
+			m_DynamicOffset = WriteOffset + ((DataSize + BUFFER_ALIGNMENT - 1) & ~(BUFFER_ALIGNMENT - 1));
+
+			// 호출자가 실제 쓰인 오프셋을 알아야 할 경우 전달
+			// (IASetVertexBuffers의 offset 인자, VSSetConstantBuffers1의 FirstConstant 등)
+			if (pWrittenOffset)
+				*pWrittenOffset = WriteOffset;
 
 			return true;
 		}
@@ -94,29 +121,5 @@ namespace mark
 		}
 
 		return true;
-	}
-
-	void* D3D11GPUBuffer::Lock()
-	{
-		if (!m_pD3D11Buffer)
-			return nullptr;
-
-		ID3D11DeviceContext* pDeviceContext = D3D11RenderDevice::Get().INL_GetD3D11Context();
-		D3D11_MAPPED_SUBRESOURCE mappedResource;
-		HRESULT hr = pDeviceContext->Map(m_pD3D11Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-
-		if (FAILED(hr))
-			return nullptr;
-
-		return mappedResource.pData;
-	}
-
-	void D3D11GPUBuffer::Unlock()
-	{
-		if (!m_pD3D11Buffer)
-			return;
-
-		ID3D11DeviceContext* pDeviceContext = D3D11RenderDevice::Get().INL_GetD3D11Context();
-		pDeviceContext->Unmap(m_pD3D11Buffer, 0);
 	}
 }

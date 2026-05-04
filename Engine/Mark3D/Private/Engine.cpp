@@ -122,6 +122,12 @@ namespace mark
 		RenderCreateDesc.ScreenWidth = CreateDesc.ScreenWidth;
 		RenderCreateDesc.ScreenHeight = CreateDesc.ScreenHeight;
 		RenderCreateDesc.WindowHandle = CreateDesc.WindowHandle;
+		RenderCreateDesc.DebugMode = FALSE; // TODO: CreateDesc에서 DebugMode 설정 추가
+
+#if defined(_DEBUG)
+		RenderCreateDesc.DebugMode = TRUE;
+#endif // defined(_DEBUG)
+
 		if (!pfnCreateRendererD3D11(RenderCreateDesc, &m_pRenderSystem))
 		{
 			LOG_ERR("Failed to create D3D11 render system.");
@@ -133,6 +139,18 @@ namespace mark
 		return true;
 	}
 
+	bool Engine::GetRenderSystemInterface(IRenderSystem** ppOut)
+	{
+		if (!ppOut)
+			return false;
+
+		(*ppOut) = m_pRenderSystem;
+
+		if(m_pRenderSystem)
+			m_pRenderSystem->AddRef();
+
+		return true;
+	}
 
 	IModel* Engine::CreateModel(uint32_t VertexFormats, uint32_t VertexCount, INDEX_FORMAT IndexFormat, uint32_t IndexCount)
 	{

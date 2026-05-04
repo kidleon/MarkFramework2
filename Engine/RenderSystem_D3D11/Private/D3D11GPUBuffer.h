@@ -15,9 +15,7 @@ namespace mark
 		size_t GetBufferSize() const;
 		void* GetNativePointer() const;
 
-		bool UpdateBuffer(const void* pData, size_t DataSize);
-		void* Lock();
-		void Unlock();
+		bool UpdateBuffer(const void* pData, size_t DataSize, size_t* pWrittenOffset);
 
 		inline ID3D11Buffer* INL_GetD3D11Buffer() const noexcept { return m_pD3D11Buffer; }
 		inline const D3D11_BUFFER_DESC& INL_GetBufferDesc() const noexcept { return m_BufferDesc; }
@@ -29,6 +27,7 @@ namespace mark
 		mutable std::atomic<int64_t> m_RefCount = 1;
 		ID3D11Buffer* m_pD3D11Buffer = nullptr;
 		D3D11_BUFFER_DESC m_BufferDesc = {};
+		size_t m_DynamicOffset = 0;
 		BOOL m_Cached = FALSE;
 
 	};

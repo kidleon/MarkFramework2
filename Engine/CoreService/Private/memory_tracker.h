@@ -13,15 +13,75 @@ namespace mark
 	*/
 	class memory_tracker
 	{
+		static constexpr size_t MAX_FILE_NAME = 256;
+		static constexpr size_t MAX_FUNCTION_NAME = 64;
+
 		/**
 		* @brief 개별 할당에 대한 정보 구조체
 		* @note 이 구조체는 각 할당에 대한 상세 정보를 저장하는 데 사용된다. 할당된 바이트 수, 정렬, 소스 파일, 라인 번호, 함수 이름 등을 포함한다.
 		*/
 		struct allocation_info
 		{
-			uint32_t bytes = 0;
-			uint32_t alignment = 0;
-			std::source_location location = std::source_location::current();
+			uint32_t bytes;
+			uint32_t alignment;
+			char file[MAX_FILE_NAME];
+			char function[MAX_FUNCTION_NAME];
+			uint32_t line;
+
+			allocation_info()
+				: bytes(0)
+				, alignment(0)
+				, line(0)
+			{
+				file[0] = '\0';
+				function[0] = '\0';
+			}
+
+			allocation_info(const allocation_info& other)
+			{
+				bytes = other.bytes;
+				alignment = other.alignment;
+				safe_strcpy(file, MAX_FILE_NAME, other.file);
+				safe_strcpy(function, MAX_FUNCTION_NAME, other.function);
+				line = other.line;
+			}
+
+			allocation_info(allocation_info&& other) noexcept
+			{
+				bytes = other.bytes;
+				alignment = other.alignment;
+				safe_strcpy(file, MAX_FILE_NAME, other.file);
+				safe_strcpy(function, MAX_FUNCTION_NAME, other.function);
+				line = other.line;
+			}
+
+			inline allocation_info& operator=(const allocation_info& other)
+			{
+				if (this != &other)
+				{
+					bytes = other.bytes;
+					alignment = other.alignment;
+					safe_strcpy(file, MAX_FILE_NAME, other.file);
+					safe_strcpy(function, MAX_FUNCTION_NAME, other.function);
+					line = other.line;
+				}
+				return *this;
+			}
+
+			inline allocation_info& operator=(allocation_info&& other) noexcept
+			{
+				if (this != &other)
+				{
+					bytes = other.bytes;
+					alignment = other.alignment;
+					safe_strcpy(file, MAX_FILE_NAME, other.file);
+					safe_strcpy(function, MAX_FUNCTION_NAME, other.function);
+					line = other.line;
+				}
+				return *this;
+			}
+
+
 		};
 
 	public:

@@ -14,7 +14,6 @@
 #include <spdlog/sinks/rotating_file_sink.h>
 
 #include "string_buffer.h"
-#include "core_generic.h"
 
 
 namespace mark
@@ -138,7 +137,8 @@ namespace mark
 		if (!logger)
 			return;
 
-		thread_local string_buffer<4096, ALLOC::SYS<char>> str_buf;
+		//thread_local string_buffer<4096, ALLOC::SYS<char>> str_buf;
+		thread_local string_buffer<4096> str_buf;
 		str_buf.clear();
 		str_buf.format(fmt, args);
 		str_buf.append(" (at ");

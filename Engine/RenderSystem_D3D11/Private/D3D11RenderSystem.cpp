@@ -2,6 +2,8 @@
 #include "D3D11RenderSystem.h"
 #include "D3D11RenderDevice.h"
 #include "D3D11GPUBuffer.h"
+#include "D3D11ShaderProgram.h"
+#include "D3D11ShaderProgramCache.h"
 
 
 namespace mark
@@ -33,7 +35,7 @@ namespace mark
 				desc.WindowHandle, // TODO: 윈도우 핸들
 				desc.ScreenWidth,
 				desc.ScreenHeight,
-				false // DebugDevice
+				desc.DebugMode // DebugDevice
 			))
 			{
 				SYS_LOG_ERR("D3D11RenderSystem::Initialize - Failed to create D3D11 device.");
@@ -45,11 +47,18 @@ namespace mark
 			}
 		}
 
+		if (!m_pShaderProgramCache)
+		{
+			m_pShaderProgramCache = CORE_NEW(D3D11ShaderProgramCache);
+		}
+
 		return true;
 	}
 
 	void D3D11RenderSystem::Shutdown()
 	{
+		CORE_DELETE(D3D11ShaderProgramCache, m_pShaderProgramCache);
+
 		if (m_pRenderDevice)
 		{
 			CORE_DELETE(D3D11RenderDevice, m_pRenderDevice);
@@ -67,5 +76,46 @@ namespace mark
 		}
 
 		return CORE_NEW(D3D11GPUBuffer)(pD3D11Buffer);
+	}
+
+	IShaderProgram* D3D11RenderSystem::CreateShaderProgram(const ShaderProgramCreateDesc& desc)
+	{
+		name_hash NameHash(desc.szShaderName);
+
+		D3D11ShaderProgram* pShaderProgram = m_pShaderProgramCache->Query(desc.ShaderType, desc.szShaderName);
+		if (pShaderProgram)
+		{
+			pShaderProgram->AddRef();
+			return pShaderProgram;
+		}
+
+		if (!desc.pShaderBytecode || 0 == desc.BytecodeSize)
+		{
+			SYS_LOG_ERR("D3D11RenderSystem::CreateShaderProgram - Invalid shader bytecode.");
+			return nullptr;
+		}
+
+
+
+		return nullptr;
+	}
+
+	IShaderProgram* D3D11RenderSystem::GetShaderProgram(
+		SHADER_TYPE ShaderType,
+		const char* szShaderName
+	)
+	{
+		name_hash NameHash(szShaderName);
+
+		D3D11ShaderProgram* pShaderProgram = m_pShaderProgramCache->Query(ShaderType, szShaderName);
+		if (pShaderProgram)
+		{
+			pShaderProgram->AddRef();
+			return pShaderProgram;
+		}
+
+		SYS_LOG_ERR_F("D3D11RenderSystem::GetShaderProgram - Shader program not found: {}", szShaderName);
+
+		return nullptr;
 	}
 }

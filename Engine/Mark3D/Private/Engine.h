@@ -19,6 +19,8 @@ namespace mark
 		bool Initialize(const EngineCreateDesc& CreateDesc);
 		void Shutdown();
 
+		bool GetRenderSystemInterface(IRenderSystem** ppOut);
+
 		IModel* CreateModel(uint32_t VertexFormats, uint32_t VertexCount, INDEX_FORMAT IndexFormat, uint32_t IndexCount);
 
 		inline static Engine& Get() noexcept { return *s_pInstance; }

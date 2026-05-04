@@ -190,7 +190,7 @@ namespace mark
 
 		VERTEX_FORMAT_INDEX FormatIndex = ToVertexFormatIndex(VertexFormat);
 
-		if (FormatIndex == VERTEX_FORMAT_INDEX::MAX)
+		if (FormatIndex == VERTEX_FORMAT_INDEX::EMAX)
 		{
 			SYS_LOG_ERR_F("Invalid vertex format specified for update: {}", (uint32_t)VertexFormat);
 			return false;
@@ -243,7 +243,7 @@ namespace mark
 
 	void PrimitiveBuffer::Cleanup()
 	{
-		for (int i = 0; i < (int)VERTEX_FORMAT_INDEX::MAX; ++i)
+		for (int i = 0; i < (int)VERTEX_FORMAT_INDEX::EMAX; ++i)
 			CHECK_RELEASE(m_pVBs[i]);
 		CHECK_RELEASE(m_pIB);
 

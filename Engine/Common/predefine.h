@@ -213,8 +213,8 @@ static constexpr size_t DEFAULT_ALIGNMENT = sizeof(size_t);
 // ALIGNMENT DEFINES
 #define ALIGN_UP(x, align) (((x) + ((align) - 1)) & ~((align) - 1))
 
-#define CHECK_DELETE(ptr) if (ptr) { delete (ptr); (ptr) = nullptr; }
-#define CHECK_DELETE_ARRAY(ptr) if (ptr) { delete[] (ptr); (ptr) = nullptr; }
+//#define CHECK_DELETE(ptr) if (ptr) { delete (ptr); (ptr) = nullptr; }
+//#define CHECK_DELETE_ARRAY(ptr) if (ptr) { delete[] (ptr); (ptr) = nullptr; }
 #define CHECK_RELEASE(ptr) if (ptr) { (ptr)->Release(); (ptr) = nullptr; }
 
 namespace mark
@@ -263,4 +263,20 @@ static inline size_t safe_strcpy(char* dest, size_t dest_size, const char* src)
 	dest[copy_len] = '\0';
 
 	return src_len;
+}
+
+static inline int safe_strcmp(const char* str1, const char* str2)
+{
+	if (!str1 || !str2)
+		return (str1 == str2) ? 0 : (str1 ? 1 : -1);
+	return strcmp(str1, str2);
+}
+
+static inline int safe_stricmp(const char* lhs, const char* rhs)
+{
+#if defined(_WIN32)
+	return _stricmp(lhs, rhs);
+#else
+	return strcasecmp(lhs, rhs);
+#endif
 }
