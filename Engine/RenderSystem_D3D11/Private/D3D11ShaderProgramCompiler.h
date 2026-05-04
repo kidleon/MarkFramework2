@@ -1,5 +1,4 @@
 #pragma once
-#include "D3D11ShaderProgramReflect.h"
 
 
 namespace mark
@@ -12,7 +11,7 @@ namespace mark
 		D3D11_SHADER_REFLECT_DESC ReflectDesc = {};
 	};
 
-	BOOL CompileShaderProgram(
+	BOOL __CompileShaderProgram(
 		const ShaderProgramCreateDesc& CreateDesc,
 		D3D11_SHADER_COMPILE_RESULT& Result
 	);

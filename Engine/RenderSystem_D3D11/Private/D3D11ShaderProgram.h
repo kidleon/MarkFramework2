@@ -42,7 +42,7 @@ namespace mark
 
 		union
 		{
-			ID3D11DeviceChild* m_pShader = nullptr;
+			ID3D11DeviceChild* m_pBaseShader = nullptr;
 			ID3D11VertexShader* m_pVertexShader;
 			ID3D11PixelShader* m_pPixelShader;
 			ID3D11ComputeShader* m_pComputeShader;

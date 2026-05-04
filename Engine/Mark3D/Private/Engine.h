@@ -4,7 +4,7 @@
 
 namespace mark
 {
-	interface IModel;
+	interface IMesh;
 
 	class Engine final : public IMark3D
 	{
@@ -21,7 +21,9 @@ namespace mark
 
 		bool GetRenderSystemInterface(IRenderSystem** ppOut);
 
-		IModel* CreateModel(uint32_t VertexFormats, uint32_t VertexCount, INDEX_FORMAT IndexFormat, uint32_t IndexCount);
+		IMesh* CreateMesh(uint32_t VertexFormats, uint32_t VertexCount, INDEX_FORMAT IndexFormat, uint32_t IndexCount);
+		IMesh* LoadMesh(const char* szFilePath);
+		IMesh* LoadMeshAsync(const char* szFilePath);
 
 		inline static Engine& Get() noexcept { return *s_pInstance; }
 		inline static Engine* GetPtr() noexcept { return s_pInstance; }

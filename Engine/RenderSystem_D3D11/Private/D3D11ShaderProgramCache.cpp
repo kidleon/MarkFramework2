@@ -56,6 +56,7 @@ namespace mark
 			D3D11ShaderProgram* pShaderProgram = it->second;
 			if (pShaderProgram)
 			{
+				pShaderProgram->AddRef();
 				return pShaderProgram;
 			}
 		}

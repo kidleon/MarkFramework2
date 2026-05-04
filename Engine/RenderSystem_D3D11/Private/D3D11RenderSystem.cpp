@@ -85,8 +85,7 @@ namespace mark
 		D3D11ShaderProgram* pShaderProgram = m_pShaderProgramCache->Query(desc.ShaderType, desc.szShaderName);
 		if (pShaderProgram)
 		{
-			pShaderProgram->AddRef();
-			return pShaderProgram;
+			return static_cast<IShaderProgram*>(pShaderProgram);
 		}
 
 		if (!desc.pShaderBytecode || 0 == desc.BytecodeSize)
@@ -95,9 +94,18 @@ namespace mark
 			return nullptr;
 		}
 
+		pShaderProgram = m_pRenderDevice->CompileShaderProgram(desc);
+		if (!pShaderProgram)
+			return nullptr;
 
+		if (!m_pShaderProgramCache->Register(pShaderProgram))
+		{
+			SYS_LOG_ERR("D3D11RenderSystem::CreateShaderProgram - Failed to register shader program in cache.");
+			pShaderProgram->Release();
+			return nullptr;
+		}
 
-		return nullptr;
+		return static_cast<IShaderProgram*>(pShaderProgram);
 	}
 
 	IShaderProgram* D3D11RenderSystem::GetShaderProgram(
@@ -108,14 +116,12 @@ namespace mark
 		name_hash NameHash(szShaderName);
 
 		D3D11ShaderProgram* pShaderProgram = m_pShaderProgramCache->Query(ShaderType, szShaderName);
-		if (pShaderProgram)
+		if (!pShaderProgram)
 		{
-			pShaderProgram->AddRef();
-			return pShaderProgram;
+			SYS_LOG_ERR_F("D3D11RenderSystem::GetShaderProgram - Shader program not found: {}", szShaderName);
+			return nullptr;
 		}
 
-		SYS_LOG_ERR_F("D3D11RenderSystem::GetShaderProgram - Shader program not found: {}", szShaderName);
-
-		return nullptr;
+		return static_cast<IShaderProgram*>(pShaderProgram);
 	}
 }

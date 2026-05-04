@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Engine.h"
 #include "core.h"
-#include "Model.h"
+#include "Mesh.h"
 
 
 namespace mark
@@ -152,18 +152,30 @@ namespace mark
 		return true;
 	}
 
-	IModel* Engine::CreateModel(uint32_t VertexFormats, uint32_t VertexCount, INDEX_FORMAT IndexFormat, uint32_t IndexCount)
+	IMesh* Engine::CreateMesh(uint32_t VertexFormats, uint32_t VertexCount, INDEX_FORMAT IndexFormat, uint32_t IndexCount)
 	{
-		Model* pModel = CORE_NEW(Model);
+		Mesh* pMesh = CORE_NEW(Mesh);
 
-		if (!pModel->Create(VertexFormats, VertexCount, IndexFormat, IndexCount))
+		if (!pMesh->Create(VertexFormats, VertexCount, IndexFormat, IndexCount))
 		{
-			SYS_LOG_ERR("Failed to create model.");
-			pModel->Release();
+			SYS_LOG_ERR("Failed to create mesh.");
+			pMesh->Release();
 
 			return nullptr;
 		}
 
-		return pModel;
+		return pMesh;
+	}
+
+	IMesh* Engine::LoadMesh(const char* szFilePath)
+	{
+		// TODO: Implement mesh loading from file
+		return nullptr;
+	}
+
+	IMesh* Engine::LoadMeshAsync(const char* szFilePath)
+	{
+		// TODO: Implement asynchronous mesh loading from file
+		return nullptr;
 	}
 }

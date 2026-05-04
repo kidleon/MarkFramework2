@@ -5,7 +5,7 @@ namespace mark
 {
 	class PrimitiveBuffer;
 
-	class Model final : public IModel
+	class Mesh final : public IMesh
 	{
 		constexpr static size_t MAX_SUBSET = 8;
 
@@ -22,7 +22,7 @@ namespace mark
 		};
 
 	public:
-		Model();
+		Mesh();
 
 		void AddRef();
 		void Release();
@@ -31,12 +31,13 @@ namespace mark
 
 		int32_t AddPrimitive(uint32_t VertexCount, uint32_t IndexCount);
 		int32_t AddPrimitive(uint32_t VertexCount, uint32_t* IndexCountArray, size_t NumIndexCountArray);
+		uint32_t GetNumPrimitives() const noexcept;
 
 		bool UpdateVertex(VERTEX_FORMAT VertexFormat, const void* pVertexData, size_t DataSize);
 		bool UpdateIndex(const void* pIndexData, size_t DataSize);
 
 	private:
-		virtual ~Model() noexcept;
+		virtual ~Mesh() noexcept;
 
 	private:
 		mutable std::atomic<uint64_t> m_RefCount{ 1 };

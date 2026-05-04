@@ -2,6 +2,7 @@
 #include "D3D11RenderDevice.h"
 #include "D3D11BufferPool.h"
 #include "D3D11ShaderProgram.h"
+#include "D3D11ShaderProgramCompiler.h"
 
 
 namespace mark
@@ -296,6 +297,68 @@ namespace mark
 
 	D3D11ShaderProgram* D3D11RenderDevice::CompileShaderProgram(const ShaderProgramCreateDesc& CreateDesc)
 	{
+		D3D11_SHADER_COMPILE_RESULT CompileResult = {};
+		BOOL Result = __CompileShaderProgram(CreateDesc, CompileResult);
+		if (!Result || !CompileResult.Success)
+		{
+			SYS_LOG_ERR_F("Failed to compile shader program '{}': {}", CreateDesc.szShaderName, CompileResult.ErrorMessage);
+			return nullptr;
+		}
+
+		if (CreateDesc.ShaderType == SHADER_TYPE::VERTEX_SHADER)
+		{
+			ID3D11VertexShader* pVertexShader = nullptr;
+			HRESULT hr = m_pD3D11Device->CreateVertexShader(
+				CompileResult.pShaderBlob->GetBufferPointer(),
+				CompileResult.pShaderBlob->GetBufferSize(),
+				nullptr,
+				&pVertexShader
+			);
+
+			if (FAILED(hr))
+			{
+				SYS_LOG_ERR_F("Failed to create vertex shader for '{}'", CreateDesc.szShaderName);
+				return nullptr;
+			}
+
+			return CORE_NEW(D3D11ShaderProgram)(CreateDesc.szShaderName, pVertexShader);
+		}
+		else if (CreateDesc.ShaderType == SHADER_TYPE::PIXEL_SHADER)
+		{
+			ID3D11PixelShader* pPixelShader = nullptr;
+			HRESULT hr = m_pD3D11Device->CreatePixelShader(
+				CompileResult.pShaderBlob->GetBufferPointer(),
+				CompileResult.pShaderBlob->GetBufferSize(),
+				nullptr,
+				&pPixelShader
+			);
+
+			if (FAILED(hr))
+			{
+				SYS_LOG_ERR_F("Failed to create pixel shader for '{}'", CreateDesc.szShaderName);
+				return nullptr;
+			}
+
+			return CORE_NEW(D3D11ShaderProgram)(CreateDesc.szShaderName, pPixelShader);
+		}
+		else if (CreateDesc.ShaderType == SHADER_TYPE::COMPUTE_SHADER)
+		{
+			ID3D11ComputeShader* pComputeShader = nullptr;
+			HRESULT hr = m_pD3D11Device->CreateComputeShader(
+				CompileResult.pShaderBlob->GetBufferPointer(),
+				CompileResult.pShaderBlob->GetBufferSize(),
+				nullptr,
+				&pComputeShader
+			);
+
+			if (FAILED(hr))
+			{
+				SYS_LOG_ERR_F("Failed to create compute shader for '{}'", CreateDesc.szShaderName);
+				return nullptr;
+			}
+
+			return CORE_NEW(D3D11ShaderProgram)(CreateDesc.szShaderName, pComputeShader);
+		}
 
 		return nullptr;
 	}

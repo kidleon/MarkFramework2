@@ -10,7 +10,7 @@ namespace mark
 	);
 
 
-	BOOL CompileShaderProgram(
+	BOOL __CompileShaderProgram(
 		const ShaderProgramCreateDesc& CreateDesc,
 		D3D11_SHADER_COMPILE_RESULT& Result
 	)
@@ -30,8 +30,8 @@ namespace mark
 
 		if (CreateDesc.NumDefines)
 		{
-			uint32_t_t MaxDefines = std::min(MAX_SHADER_DEFINE, CreateDesc.NumDefines);
-			for (uint32_t_t i = 0; i < MaxDefines; ++i)
+			uint32_t MaxDefines = std::min(MAX_SHADER_DEFINE, CreateDesc.NumDefines);
+			for (uint32_t i = 0; i < MaxDefines; ++i)
 			{
 				D3D11_SHADER_MACROS[i].Name = CreateDesc.szShaderDefines[i];
 				D3D11_SHADER_MACROS[i].Definition = CreateDesc.szShaderDefines[i];
@@ -70,7 +70,7 @@ namespace mark
 
 		BOOL ReflectResult = D3D11ShaderReflect(
 			pResultBlob,
-			&Result
+			&Result.ReflectDesc
 		);
 
 		if (!ReflectResult)
@@ -189,36 +189,42 @@ namespace mark
 
 		pShaderReflect->InputLayout.VertexFormats = VertexFormats;
 
-		int NumShaderParams = ShaderDesc.BoundResources + ShaderDesc.ConstantBuffers;
-		pShaderReflect->NumShaderParams = NumShaderParams;
-
 		int index = 0;
-		for (uint32_t c = 0; c < ShaderDesc.ConstantBuffers; ++c)
+
+		uint32_t MaxConstantBuffers = std::min((uint32_t)ShaderDesc.ConstantBuffers, MAX_SHADER_PARAMS);
+		for (uint32_t c = 0; c < MaxConstantBuffers; ++c)
 		{
 			ID3D11ShaderReflectionConstantBuffer* pConstBuffer = pReflector->GetConstantBufferByIndex(c);
 			D3D11_SHADER_BUFFER_DESC buffer_desc = {};
 			hr = pConstBuffer->GetDesc(&buffer_desc);
 			if (FAILED(hr))
 			{
-				SYS_LOG_E("D3D11ShaderReflect: GetConstantBufferByIndex failed");
+				SYS_LOG_ERR("D3D11ShaderReflect: GetConstantBufferByIndex failed");
 				continue;
 			}
 
-			if (!buffer_desc.Name || !fstrlen(buffer_desc.Name))
+			if (!buffer_desc.Name || !strlen(buffer_desc.Name))
 			{
-				SYS_LOG_E("D3D11ShaderReflect: Constant buffer has no name");
+				SYS_LOG_ERR("D3D11ShaderReflect: Constant buffer has no name");
 				continue;
 			}
 
 			D3D11_SHADER_INPUT_BIND_DESC bindDesc = {};
 			pReflector->GetResourceBindingDescByName(buffer_desc.Name, &bindDesc);
 
-			pShaderReflect->ShaderParams[index].ParamType = CPARAM_CONSTANT;
-			pShaderReflect->ShaderParams[index].Name = buffer_desc.Name;
-			pShaderReflect->ShaderParams[index].BindPoint = bindDesc.BindPoint;
-			pShaderReflect->ShaderParams[index].Size = buffer_desc.Size;
+			pShaderReflect->Constants[index].Type = D3D11_SHADER_PARAM_TYPE::CONSTANT;
+#if defined(_DEBUG) || defined(DEBUG)
+			safe_strcpy(pShaderReflect->Constants[index].Name, SHADER_PARAM_NAME_SIZE, buffer_desc.Name);
+#endif // _DEBUG
+			pShaderReflect->Constants[index].NameHash = name_hash(buffer_desc.Name);
+			pShaderReflect->Constants[index].BindPoint = bindDesc.BindPoint;
+			pShaderReflect->Constants[index].Size = buffer_desc.Size;
 			index++;
 		}
+
+		uint32_t tindex = 0;
+		uint32_t sindex = 0;
+		uint32_t uindex = 0;
 
 		for (uint32_t r = 0; r < ShaderDesc.BoundResources; ++r)
 		{
@@ -226,31 +232,51 @@ namespace mark
 			hr = pReflector->GetResourceBindingDesc(r, &bindDesc);
 			if (FAILED(hr))
 			{
-				SYS_LOG_E("D3D11ShaderReflect: GetResourceBindingDesc failed");
+				SYS_LOG_ERR("D3D11ShaderReflect: GetResourceBindingDesc failed");
 				continue;
 			}
 
-			D3D11_SHADER_PARAM_TYPE paramType;
 			switch (bindDesc.Type)
 			{
 				case D3D_SIT_TEXTURE:
-					paramType = CPARAM_TEXTURE;
+					{
+						pShaderReflect->Textures[tindex].Type = D3D11_SHADER_PARAM_TYPE::TEXTURE;
+						pShaderReflect->Textures[tindex].NameHash = name_hash(bindDesc.Name);
+						pShaderReflect->Textures[tindex].BindPoint = bindDesc.BindPoint;
+						pShaderReflect->Textures[tindex].Size = bindDesc.BindCount;
+#if defined(_DEBUG) || defined(DEBUG)
+						safe_strcpy(pShaderReflect->Textures[tindex].Name, SHADER_PARAM_NAME_SIZE, bindDesc.Name);
+#endif // _DEBUG
+						tindex++;
+					}
 					break;
 
 				case D3D_SIT_SAMPLER:
-					paramType = CPARAM_SAMPLER;
+					{
+						pShaderReflect->Samplers[sindex].Type = D3D11_SHADER_PARAM_TYPE::SAMPLER;
+						pShaderReflect->Samplers[sindex].NameHash = name_hash(bindDesc.Name);
+						pShaderReflect->Samplers[sindex].BindPoint = bindDesc.BindPoint;
+						pShaderReflect->Samplers[sindex].Size = bindDesc.BindCount;
+#if defined(_DEBUG) || defined(DEBUG)
+						safe_strcpy(pShaderReflect->Samplers[sindex].Name, SHADER_PARAM_NAME_SIZE, bindDesc.Name);
+#endif // _DEBUG
+						sindex++;
+					}
 					break;
 
 				default:
-					paramType = CPARAM_UNKNOWN;
+					{
+						pShaderReflect->Unknowns[uindex].Type = D3D11_SHADER_PARAM_TYPE::UNKNOWN;
+						pShaderReflect->Unknowns[uindex].NameHash = name_hash(bindDesc.Name);
+						pShaderReflect->Unknowns[uindex].BindPoint = bindDesc.BindPoint;
+						pShaderReflect->Unknowns[uindex].Size = bindDesc.BindCount;
+#if defined(_DEBUG) || defined(DEBUG)
+						safe_strcpy(pShaderReflect->Unknowns[uindex].Name, SHADER_PARAM_NAME_SIZE, bindDesc.Name);
+#endif // _DEBUG
+						uindex++;
+					}
 					break;
 			}
-
-			pShaderReflect->ShaderParams[index].ParamType = paramType;
-			pShaderReflect->ShaderParams[index].Name = bindDesc.Name;
-			pShaderReflect->ShaderParams[index].BindPoint = bindDesc.BindPoint;
-			pShaderReflect->ShaderParams[index].Size = bindDesc.BindCount;
-			index++;
 		}
 
 		return TRUE;

@@ -36,7 +36,7 @@ namespace mark
 
 	D3D11ShaderProgram::~D3D11ShaderProgram() noexcept
 	{
-		CHECK_RELEASE(m_pShader);
+		CHECK_RELEASE(m_pBaseShader);
 	}
 
 	void D3D11ShaderProgram::AddRef()

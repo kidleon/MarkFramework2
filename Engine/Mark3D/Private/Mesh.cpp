@@ -1,35 +1,35 @@
 #include "pch.h"
-#include "Model.h"
+#include "Mesh.h"
 #include "PrimitiveBuffer.h"
 
 
 namespace mark
 {
-	Model::Model()
+	Mesh::Mesh()
 	{
 		m_lstPrimitives.reserve(8);
 	}
 
-	Model::~Model() noexcept
+	Mesh::~Mesh() noexcept
 	{
 		CORE_DELETE(PrimitiveBuffer, m_pPrimitiveBuffers);
 		m_lstPrimitives.clear();
 	}
 
-	void Model::AddRef()
+	void Mesh::AddRef()
 	{
 		m_RefCount.fetch_add(1, std::memory_order_relaxed);
 	}
 
-	void Model::Release()
+	void Mesh::Release()
 	{
 		if (m_RefCount.fetch_sub(1, std::memory_order_acq_rel) == 1)
 		{
-			CORE_DELETE(Model, this);
+			CORE_DELETE(Mesh, this);
 		}
 	}
 
-	bool Model::Create(uint32_t VertexFormats, uint32_t VertexCount, INDEX_FORMAT IndexFormat, uint32_t IndexCount)
+	bool Mesh::Create(uint32_t VertexFormats, uint32_t VertexCount, INDEX_FORMAT IndexFormat, uint32_t IndexCount)
 	{
 		m_pPrimitiveBuffers = CORE_NEW(PrimitiveBuffer);
 		if (!m_pPrimitiveBuffers->Create(VertexFormats, VertexCount, IndexFormat, IndexCount))
@@ -42,7 +42,7 @@ namespace mark
 		return true;
 	}
 
-	int32_t Model::AddPrimitive(uint32_t VertexCount, uint32_t IndexCount)
+	int32_t Mesh::AddPrimitive(uint32_t VertexCount, uint32_t IndexCount)
 	{
 		uint32_t UsedVertexCount = 0;
 		uint32_t UsedIndexCount = 0;
@@ -79,7 +79,7 @@ namespace mark
 		return (int32_t)m_lstPrimitives.size() - 1;
 	}
 
-	int32_t Model::AddPrimitive(uint32_t VertexCount, uint32_t* IndexCountArray, size_t NumIndexCountArray)
+	int32_t Mesh::AddPrimitive(uint32_t VertexCount, uint32_t* IndexCountArray, size_t NumIndexCountArray)
 	{
 		if (NumIndexCountArray > MAX_SUBSET)
 		{
@@ -130,12 +130,17 @@ namespace mark
 		return (int32_t)m_lstPrimitives.size() - 1;
 	}
 
-	bool Model::UpdateVertex(VERTEX_FORMAT VertexFormat, const void* pVertexData, size_t DataSize)
+	uint32_t Mesh::GetNumPrimitives() const noexcept
+	{
+		return static_cast<uint32_t>(m_lstPrimitives.size());
+	}
+
+	bool Mesh::UpdateVertex(VERTEX_FORMAT VertexFormat, const void* pVertexData, size_t DataSize)
 	{
 		return m_pPrimitiveBuffers->UpdateVertexDataImmediate(VertexFormat, pVertexData, DataSize);
 	}
 
-	bool Model::UpdateIndex(const void* pIndexData, size_t DataSize)
+	bool Mesh::UpdateIndex(const void* pIndexData, size_t DataSize)
 	{
 		return m_pPrimitiveBuffers->UpdateIndexDataImmediate(pIndexData, DataSize);
 	}

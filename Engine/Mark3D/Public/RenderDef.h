@@ -187,17 +187,176 @@ namespace mark
 		EMAX
 	};
 
-
-	struct RenderSystemCreateDesc
+	/**
+	* @brief 채우기 모드 열거형
+	*/
+	enum class FILL_MODE : uint8_t
 	{
-		uint32_t ScreenWidth;
-		uint32_t ScreenHeight;
-#if defined(__TARGET_OS_WINDOWS)
-		HWND WindowHandle;
-#endif // #if defined(__TARGET_OS_WINDOWS)
+		SOLID = 0,
+		WIREFRAME,
 
-		BOOL DebugMode;
+		EMAX
 	};
+
+	/**
+	* @brief 컬링 모드 열거형
+	*/
+	enum class CULL_MODE : uint8_t
+	{
+		NONE = 0,
+		CW,
+		CCW,
+
+		EMAX
+	};
+
+	// 보수적 래스터화 모드 (D3D12, Vulkan 확장)
+	enum class CONSERVATIVE_RASTER_MODE : uint8_t
+	{
+		OFF = 0,
+		ON = 1,
+	};
+
+	/**
+* @brief 깊이 쓰기 마스크 열거형
+*/
+	enum class DEPTH_WRITE_MASK : uint8_t
+	{
+		ZERO = 0,
+		ALL,
+
+		EMAX
+	};
+
+	/**
+	* @brief 깊이 비교 함수 열거형
+	*/
+	enum class COMPARISON_FUNC : uint8_t
+	{
+		NEVER = 0,
+		LESS,
+		EQUAL,
+		LESS_EQUAL,
+		GREATER,
+		NOT_EQUAL,
+		GREATER_EQUAL,
+		ALWAYS,
+
+		EMAX
+	};
+
+	typedef COMPARISON_FUNC STENCIL_FUNC;
+
+	/**
+	* @brief 스텐실 연산 열거형
+	*/
+	enum class STENCIL_OP : uint8_t
+	{
+		KEEP = 0,
+		ZERO,
+		REPLACE,
+		INCR_SAT,
+		DECR_SAT,
+		INVERT,
+		INCR_WRAP,
+		DECR_WRAP,
+
+		EMAX
+	};
+
+	/**
+* @brief 샘플러 필터 열거형
+*/
+	enum class SAMPLER_FILTER : uint8_t
+	{
+		NONE = 0,
+		NEAREST,
+		LINEAR,
+
+		EMAX
+	};
+
+	/**
+	* @brief 텍스처 주소 모드 열거형
+	*/
+	enum class TEXTURE_ADDRESS_MODE : uint8_t
+	{
+		WRAP = 0,
+		MIRROR,
+		CLAMP,
+		BORDER,
+		MIRROR_ONCE,
+
+		EMAX
+	};
+
+	enum class BORDER_COLOR : uint8_t
+	{
+		TRANSPARENT_BLACK = 0,
+		OPAQUE_BLACK,
+		OPAQUE_WHITE,
+		CUSTOM,
+
+		EMAX
+	};
+
+
+	/**
+	* @brief 블렌드 팩터 열거형
+	*/
+	enum class BLEND_FACTOR : uint8_t
+	{
+		ZERO = 0,
+		ONE,
+		SRC_COLOR,
+		INV_SRC_COLOR,
+		DST_COLOR,
+		INV_DST_COLOR,
+		SRC_ALPHA,
+		INV_SRC_ALPHA,
+		DST_ALPHA,
+		INV_DST_ALPHA,
+		CONSTANT_COLOR,
+		INV_CONSTANT_COLOR,
+		CONSTANT_ALPHA,
+		INV_CONSTANT_ALPHA,
+		SRC_ALPHA_SATURATE,
+
+		SRC1_COLOR, // Dual source blending (D3D11.1+, OpenGL 3.3+, Vulkan)
+		INV_SRC1_COLOR,
+		SRC1_ALPHA,
+		INV_SRC1_ALPHA,
+
+		EMAX
+	};
+
+	/**
+	* @brief 블렌드 연산자 열거형
+	*/
+	enum class BLEND_OP : uint8_t
+	{
+		ADD = 0,
+		SUBTRACT,
+		REV_SUBTRACT,
+		MIN,
+		MAX,
+
+		EMAX
+	};
+
+	// 컬러 쓰기 마스크 (비트 플래그)
+	enum COLOR_WRITE_MASK : uint8_t
+	{
+		DISABLE = 0x00,
+		RED = 0x01,
+		GREEN = 0x02,
+		BLUE = 0x04,
+		ALPHA = 0x08,
+		ALL = RED | GREEN | BLUE | ALPHA,
+	};
+
+	constexpr uint8_t MAX_COLOR_WRITE_MASK = 6;
+
 
 	//---------------------------------------------------------
 	// GPUBUffers
@@ -245,6 +404,119 @@ namespace mark
 
 	};
 
+
+	//---------------------------------------------------------
+	// Render State
+	struct RS_RASTERIZER_STATE
+	{
+		FILL_MODE FillMode;
+		CULL_MODE CullMode;
+		CONSERVATIVE_RASTER_MODE ConservativeRaster;
+		uint8_t Flags;
+
+		// Depth Bias 설정
+		int32_t DepthBias;
+		float DepthBiasClamp;
+		float SlopeScaledDepthBias;
+	};
+
+	struct RS_SAMPLER_STATE
+	{
+		SAMPLER_FILTER MinFilter; // Min 필터
+		SAMPLER_FILTER MagFilter; // Mag 필터
+		SAMPLER_FILTER MipFilter; // Mipmap 필터
+		uint8_t MaxAnisotropy; // 1~16 (0 = 비활성화)
+
+		TEXTURE_ADDRESS_MODE AddressU; // U 축 주소 모드
+		TEXTURE_ADDRESS_MODE AddressV; // V 축 주소 모드
+		TEXTURE_ADDRESS_MODE AddressW; // W 축 주소 모드
+		BORDER_COLOR BorderColor; // Border 색상
+		FLOAT4 CustomBorderColor; // 사용자 정의 Border 색상 (BorderColor가 CUSTOM일 때 사용)
+
+		COMPARISON_FUNC ComparisonFunc; // NEVER = 비활성화
+		uint8_t PADDINGs[3];
+
+		float MipLODBias;	// 기본값: 0.0f
+		float MinLOD;       // 기본값: 0.0f
+		float MaxLOD;       // 기본값: FLT_MAX
+	};
+
+	struct RS_BLEND_TARGET
+	{
+		union
+		{
+			struct
+			{
+				BOOL8 BlendEnable; // 블렌드 활성화
+
+				// RGB 블렌딩
+				BLEND_FACTOR SrcBlend;
+				BLEND_FACTOR DestBlend;
+				BLEND_OP BlendOp;
+
+				// Alpha 블렌딩
+				BLEND_FACTOR SrcBlendAlpha;
+				BLEND_FACTOR DestBlendAlpha;
+				BLEND_OP BlendOpAlpha;
+				uint8_t RenderTargetWriteMask; // 쓰기 마스크
+			};
+
+			uint64_t data; // 전체 데이터를 하나의 64비트 정수로 접근
+		};
+	};
+
+	/**
+	* @brief 블렌드 상태 구조체
+	*/
+	struct RS_BLEND_STATE
+	{
+		static constexpr int32_t MAX_BLEND_TARGET = 8; // 최대 블렌드 타겟 수 (MRT 지원)
+		
+		bool AlphaToCoverageEnable; // 알파 투 커버리지 활성화 여부 
+		bool IndependentBlendEnable; // 독립적 블렌드 활성화 여부 (MRT용..)
+		int8_t NumBlendTargets; // 블렌드 타겟 수
+		RS_BLEND_TARGET BlendTarget[MAX_BLEND_TARGET]; // 블렌드 타겟 배열 (최대 8개:D3D11 기준)
+	};
+
+	struct RS_STENCIL_OP
+	{
+		STENCIL_OP StencilFailOp; // 스텐실 테스트 실패 시
+		STENCIL_OP StencilDepthFailOp; // 스텐실 통과, 깊이 실패 시
+		STENCIL_OP StencilPassOp; // 둘 다 통과 시
+		STENCIL_FUNC StencilFunc; // 스텐실 비교 함수
+	};
+
+	struct RS_DEPTH_STENCIL_STATE
+	{
+		BOOL8 DepthEnable;
+		BOOL8 DepthWriteEnable;
+		COMPARISON_FUNC DepthFunc;
+		DEPTH_WRITE_MASK DepthWriteMask;
+
+		// 스텐실 설정
+		BOOL8 StencilEnable;
+		uint8_t StencilReadMask;
+		uint8_t StencilWriteMask;
+		uint8_t PADDING; // 패딩 (정렬을 위해)
+
+		// 앞면/뒷면 스텐실 연산
+		RS_STENCIL_OP FrontFace;
+		RS_STENCIL_OP BackFace;
+	};
+
+
+	//---------------------------------------------------------
+	// Render System
+	struct RenderSystemCreateDesc
+	{
+		uint32_t ScreenWidth;
+		uint32_t ScreenHeight;
+#if defined(__TARGET_OS_WINDOWS)
+		HWND WindowHandle;
+#endif // #if defined(__TARGET_OS_WINDOWS)
+
+		BOOL DebugMode;
+	};
 
 	struct IRenderSystem : public Unknown
 	{
