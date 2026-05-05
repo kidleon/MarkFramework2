@@ -4,8 +4,6 @@
 
 namespace mark
 {
-	interface IMesh;
-
 	class Engine final : public IMark3D
 	{
 		static Engine* s_pInstance;
@@ -20,10 +18,6 @@ namespace mark
 		void Shutdown();
 
 		bool GetRenderSystemInterface(IRenderSystem** ppOut);
-
-		IMesh* CreateMesh(uint32_t VertexFormats, uint32_t VertexCount, INDEX_FORMAT IndexFormat, uint32_t IndexCount);
-		IMesh* LoadMesh(const char* szFilePath);
-		IMesh* LoadMeshAsync(const char* szFilePath);
 
 		inline static Engine& Get() noexcept { return *s_pInstance; }
 		inline static Engine* GetPtr() noexcept { return s_pInstance; }
@@ -44,5 +38,7 @@ namespace mark
 #endif // #if defined(__TARGET_OS_WINDOWS)
 
 		IRenderSystem* m_pRenderSystem = nullptr;
+		IAssetManager* m_pAssetManager = nullptr;
+
 	};
 }

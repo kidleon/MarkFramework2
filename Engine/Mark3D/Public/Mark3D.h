@@ -1,6 +1,7 @@
 #pragma once
 #include "mathlib.h"
 #include "RenderDef.h"
+#include "AssetDef.h"
 #include "GeomDef.h"
 
 
@@ -16,6 +17,8 @@ namespace mark
 
 		GraphicsAPI PreferredGraphicsAPI = GraphicsAPI::D3D11;
 
+		char szAssetRootPath[256] = "./Assets";
+
 #if defined(__TARGET_OS_WINDOWS)
 		HWND WindowHandle = nullptr;
 #endif // #if defined(__TARGET_OS_WINDOWS)
@@ -30,10 +33,6 @@ namespace mark
 		virtual void Shutdown() = 0;
 
 		virtual bool GetRenderSystemInterface(IRenderSystem** ppOut) = 0;
-
-		[[nodiscard]] virtual IMesh* CreateMesh(uint32_t VertexFormats, uint32_t VertexCount, INDEX_FORMAT IndexFormat, uint32_t IndexCount) = 0;
-		[[nodiscard]] virtual IMesh* LoadMesh(const char* szFilePath) = 0;
-		[[nodiscard]] virtual IMesh* LoadMeshAsync(const char* szFilePath) = 0;
 
 	};
 

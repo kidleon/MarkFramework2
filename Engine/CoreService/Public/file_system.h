@@ -10,6 +10,14 @@ namespace mark
 	class MARKENGINE_API file_system
 	{
 	public:
+		enum class ACESS_MODE : uint32_t
+		{
+			READ = 0x1,
+			WRITE = 0x2,
+			READ_WRITE = 0x3
+		};
+
+	public:
 		/**
 		* @brief  파일 시스템을 초기화합니다.
 		* root_path 는 파일 시스템의 루트 디렉토리를 지정하며,
@@ -78,15 +86,14 @@ namespace mark
 		*/
 		[[nodiscard]] static bool exist_file(const char* path);
 
-
 		/**
 		* @brief  파일을 열고 핸들을 반환
 		* @param path 열 파일의 경로. 루트 디렉토리를 기준으로 한 상대 경로입니다.
-		* @param flags 파일 열기 옵션을 나타내는 플래그입니다. SEEK_SET, SEEK_CUR, SEEK_END 등의 값을 사용할 수 있습니다.
+		* @param access_mode 파일에 대한 액세스 모드를 지정합니다. 읽기, 쓰기, 또는 읽기/쓰기 모드 중 하나를 선택할 수 있습니다。
 		* @return 파일 핸들. 파일을 성공적으로 열면 유효한 핸들을 반환하고, 실패하면 INVALID_HANDLE_VALUE 또는 nullptr을 반환할 수 있습니다.
 			* 반환된 핸들은 사용 후 반드시 close_file 함수를 통해 닫아야 합니다.
 		*/
-		[[nodiscard]] static HANDLE open_file(const char* path, uint32_t flags);
+		[[nodiscard]] static HANDLE open_file(const char* path, ACESS_MODE access_mode);
 
 		/**
 		* @brief  파일 핸들을 닫습니다. open_file 함수를 통해 얻은 핸들을 사용한 후에는 반드시 이 함수를 호출하여 리소스를 해제해야 합니다.
@@ -150,24 +157,19 @@ namespace mark
 		/**
 		* @brief  파일의 모든 내용을 읽어서 버퍼에 저장합니다. 이 함수는 파일의 크기만큼 버퍼를 자동으로 할당하고, 파일의 내용을 그 버퍼에 읽어옵니다。
 		* @param file_handle 읽을 파일의 핸들입니다. open_file 함수를 통해 얻은 유효한 핸들을 전달해야 합니다。
-		* @return 파일의 모든 내용을 읽는 데 성공하면 true를 반환하고, 실패하면 false를 반환합니다。
+		* @param read_size 읽은 데이터의 크기를 반환할 참조 변수입니다。
+		* @return 파일의 모든 내용을 저장한 버퍼가 반환됩니다. 이 버퍼는 사용 후 반드시 CORE_SYS_FREE 함수를 통해 해제해야 합니다。
 		*/
-		static bool read_all(HANDLE file_handle);
+		static void* read_all(HANDLE file_handle, size_t& read_size);
 
 		/**
-		* @brief  read_all 함수를 통해 읽은 파일의 모든 내용을 저장한 버퍼를 반환합니다。
-		* 이 버퍼는 read_all 함수가 성공적으로 파일을 읽은 후에만 유효합니다。
-		* @param file_handle 버퍼를 가져올 파일의 핸들입니다. open_file 함수를 통해 얻은 유효한 핸들을 전달해야 합니다。
-		* @return read_all 함수를 통해 읽은 파일의 모든 내용을 저장한 버퍼입니다。
+		* @brief  파일의 모든 내용을 읽어서 버퍼에 저장합니다. 이 함수는 파일의 크기만큼 버퍼를 자동으로 할당하고, 파일의 내용을 그 버퍼에 읽어옵니다。
+		* @param temppool_handle 임시 버퍼 풀의 핸들입니다. 이 버퍼 풀에서 파일 내용을 저장할 버퍼를 할당합니다。
+		* @param file_handle 읽을 파일의 핸들입니다. open_file 함수를 통해 얻은 유효한 핸들을 전달해야 합니다。
+		* @param read_size 읽은 데이터의 크기를 반환할 참조 변수입니다.
+		* @return temppool_handle에서 할당된 버퍼가 반환됩니다.
 		*/
-		[[nodiscard]] static void* get_read_all_buffer(HANDLE file_handle);
-
-		/**
-		* @brief  read_all 함수를 통해 읽은 파일의 모든 내용의 크기를 반환합니다。
-		* @param file_handle 크기를 가져올 파일의 핸들입니다. open_file 함수를 통해 얻은 유효한 핸들을 전달해야 합니다。
-		* @return read_all 함수를 통해 읽은 파일의 모든 내용의 크기입니다。
-		*/
-		[[nodiscard]] static size_t get_read_all_size(HANDLE file_handle);
+		static void* read_all(HANDLE temppool_handle, HANDLE file_handle, size_t& read_size);
 
 		/**
 		* @brief  파일 경로에서 확장자를 추출하여 out_extension 버퍼에 저장
@@ -235,6 +237,21 @@ namespace mark
 			char* out_directory,
 			size_t out_size,
 			bool without_root
+		);
+
+		/**
+		* @brief  두 개의 파일 경로를 결합하여 out_path 버퍼에 저장
+		* @param path1 결합할 첫 번째 파일 경로. 루트 디렉토리 기준 상대경로
+		* @param path2 결합할 두 번째 파일 경로. 루트 디렉토리 기준 상대경로
+		* @param out_path 결합된 파일 경로를 저장할 버퍼
+		* @param out_size out_path 버퍼의 크기
+		* @return 성공하면 true, 실패하면 false
+		*/
+		static bool combine_path(
+			const char* path1,
+			const char* path2,
+			char* out_path,
+			size_t out_size
 		);
 
 	};

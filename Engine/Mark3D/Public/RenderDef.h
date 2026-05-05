@@ -176,6 +176,7 @@ namespace mark
 	{
 		UINT16 = 0,
 		UINT32,
+		AUTO,
 		EMAX
 	};
 
@@ -502,6 +503,16 @@ namespace mark
 		// 앞면/뒷면 스텐실 연산
 		RS_STENCIL_OP FrontFace;
 		RS_STENCIL_OP BackFace;
+	};
+
+	struct RENDER_STATE
+	{
+		RS_RASTERIZER_STATE RasterizerState;
+		RS_BLEND_STATE BlendState;
+		RS_DEPTH_STENCIL_STATE DepthStencilState;
+		FLOAT4 BlendFactor; // 블렌드 팩터 (상수 블렌드에 사용)
+		UINT32 SampleMask; // 샘플 마스크 (멀티샘플링에 사용)
+		UINT32 StencilRef; // 스텐실 참조값
 	};
 
 

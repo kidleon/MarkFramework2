@@ -17,7 +17,6 @@ namespace mark
 	struct file_handle_info
 	{
 		FILE* fp;
-		char* read_buffer;
 		size_t read_buffer_size;
 	};
 
@@ -177,7 +176,7 @@ namespace mark
 		return std::filesystem::exists(full_path) && std::filesystem::is_regular_file(full_path);
 	}
 
-	HANDLE file_system::open_file(const char* path, uint32_t flags)
+	HANDLE file_system::open_file(const char* path, ACESS_MODE access_mode)
 	{
 		if (!s_file_system_info.initialized || !path || path[0] == '\0')
 			return nullptr;
@@ -185,21 +184,24 @@ namespace mark
 		std::filesystem::path full_path = std::filesystem::path(s_file_system_info.root_path) / path;
 
 		const char* mode = nullptr;
-		switch (flags)
+		switch (access_mode)
 		{
-		case 0: // read
+		case ACESS_MODE::READ:
 			mode = "rb";
 			break;
-		case 1: // write
+
+		case ACESS_MODE::WRITE:
 			mode = "wb";
 			break;
-		case 2: // read/write
+
+		case ACESS_MODE::READ_WRITE:
 			mode = "r+b";
 			break;
+
 		default:
 			return nullptr; // 지원하지 않는 플래그
 		}
-
+			
 		FILE* fp = fopen(full_path.string().c_str(), mode);
 		if (!fp)
 			return nullptr;
@@ -207,7 +209,6 @@ namespace mark
 		file_handle_info* handle = (file_handle_info*)sys_alloc(sizeof(file_handle_info), DEFAULT_ALIGNMENT);
 
 		handle->fp = fp;
-		handle->read_buffer = nullptr;
 		handle->read_buffer_size = 0;
 
 		return handle;
@@ -222,9 +223,6 @@ namespace mark
 
 		if (handle->fp)
 			std::fclose(handle->fp);
-
-		if (handle->read_buffer)
-			sys_free(handle->read_buffer);
 
 		sys_free(handle);
 	}
@@ -310,32 +308,32 @@ namespace mark
 		return static_cast<size_t>(pos);
 	}
 
-	bool file_system::read_all(HANDLE file_handle)
+	void* file_system::read_all(HANDLE temppool_handle, HANDLE file_handle, size_t& read_size)
 	{
+		read_size = 0;
+
 		if (!file_handle)
-			return false;
+			return nullptr;
 
 		file_handle_info* handle = (file_handle_info*)file_handle;
 
 		// 현재 파일 위치 저장
 		long current_pos = ftell(handle->fp);
 		if (current_pos < 0)
-			return false;
+			return nullptr;
 
-		// 파일 크기 계산
 		if (fseek(handle->fp, 0, SEEK_END) != 0)
 		{
-			// 파일 위치를 원래대로 되돌림
 			fseek(handle->fp, current_pos, SEEK_SET);
-			return false;
+			return nullptr;
 		}
 
-		long file_size = ftell(handle->fp);
+		long file_size = ftell(handle->fp); // 파일 크기 계산
 		if (file_size < 0)
 		{
 			// 파일 위치를 원래대로 되돌림
 			fseek(handle->fp, current_pos, SEEK_SET);
-			return false;
+			return nullptr;
 		}
 
 		// 파일 위치를 처음으로 되돌림
@@ -343,54 +341,89 @@ namespace mark
 		{
 			// 파일 위치를 원래대로 되돌림
 			fseek(handle->fp, current_pos, SEEK_SET);
-			return false;
+			return nullptr;
 		}
 
-		// 읽기 버퍼 할당
-		handle->read_buffer = (char*)sys_alloc(file_size, alignof(file_handle_info));
-		if (!handle->read_buffer)
-		{
-			// 파일 위치를 원래대로 되돌림
-			fseek(handle->fp, current_pos, SEEK_SET);
-			return false;
-		}
+		void* buffer = temppool_alloc(temppool_handle, file_size, sizeof(uintptr_t));
 
-		handle->read_buffer_size = file_size;
-		size_t read_bytes = fread(handle->read_buffer, 1, file_size, handle->fp);
-
+		size_t read_bytes = fread(buffer, 1, file_size, handle->fp);
 		if (read_bytes != static_cast<size_t>(file_size))
 		{
-			sys_free(handle->read_buffer);
-			handle->read_buffer = nullptr;
 			handle->read_buffer_size = 0;
-
 			// 파일 위치를 원래대로 되돌림
 			fseek(handle->fp, current_pos, SEEK_SET);
-
-			return false;
+			return nullptr;
 		}
 
-		return true;
+		read_size = read_bytes;
+
+		return buffer;
 	}
 
-	void* file_system::get_read_all_buffer(HANDLE file_handle)
+	void* file_system::read_all(HANDLE file_handle, size_t& read_size)
 	{
+		read_size = 0;
+
 		if (!file_handle)
 			return nullptr;
 
 		file_handle_info* handle = (file_handle_info*)file_handle;
 
-		return handle->read_buffer;
-	}
+		// 현재 파일 위치 저장
+		long current_pos = ftell(handle->fp);
+		if (current_pos < 0)
+			return nullptr;
 
-	size_t file_system::get_read_all_size(HANDLE file_handle)
-	{
-		if (!file_handle)
-			return 0;
+		// 파일 크기 계산
+		if (fseek(handle->fp, 0, SEEK_END) != 0)
+		{
+			// 파일 위치를 원래대로 되돌림
+			fseek(handle->fp, current_pos, SEEK_SET);
+			return nullptr;
+		}
 
-		file_handle_info* handle = (file_handle_info*)file_handle;
+		long file_size = ftell(handle->fp);
+		if (file_size < 0)
+		{
+			// 파일 위치를 원래대로 되돌림
+			fseek(handle->fp, current_pos, SEEK_SET);
+			return nullptr;
+		}
 
-		return handle->read_buffer_size;
+		// 파일 위치를 처음으로 되돌림
+		if (fseek(handle->fp, 0, SEEK_SET) != 0)
+		{
+			// 파일 위치를 원래대로 되돌림
+			fseek(handle->fp, current_pos, SEEK_SET);
+			return nullptr;
+		}
+
+		// 읽기 버퍼 할당
+		char* read_buffer = (char*)sys_alloc(file_size, alignof(file_handle_info));
+		if (!read_buffer)
+		{
+			// 파일 위치를 원래대로 되돌림
+			fseek(handle->fp, current_pos, SEEK_SET);
+			return nullptr;
+		}
+
+		handle->read_buffer_size = file_size;
+		size_t read_bytes = fread(read_buffer, 1, file_size, handle->fp);
+
+		if (read_bytes != static_cast<size_t>(file_size))
+		{
+			sys_free(read_buffer);
+			handle->read_buffer_size = 0;
+
+			// 파일 위치를 원래대로 되돌림
+			fseek(handle->fp, current_pos, SEEK_SET);
+
+			return nullptr;
+		}
+
+		read_size = read_bytes;
+
+		return read_buffer;
 	}
 
 	void file_system::get_file_extension(
@@ -586,4 +619,26 @@ namespace mark
 			}
 		}
 	}
+
+	bool file_system::combine_path(
+		const char* path1,
+		const char* path2,
+		char* out_path,
+		size_t out_size
+	)
+	{
+		if (!path1 || path1[0] == '\0' || !path2 || path2[0] == '\0' || !out_path || out_size == 0)
+		{
+			return false;
+		}
+
+		std::filesystem::path p1(path1);
+		std::filesystem::path p2(path2);
+		std::filesystem::path combined = p1 / p2;
+		safe_strcpy(out_path, out_size, combined.string().c_str());
+
+		return true;
+	}
+
+
 }

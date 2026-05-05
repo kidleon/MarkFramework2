@@ -74,7 +74,7 @@ do
 			optimize "Off"
 			symbols "On"
 			incrementallink "On"
-			links{ "CoreService_d" }
+			links{ "CoreService_d", "ufbx_d" }
 			
 			targetname("Mark3D_d")
 		end
@@ -86,7 +86,7 @@ do
 			optimize "Full"
 			symbols "On"
 			incrementallink "Off"
-			links{ "CoreService" }
+			links{ "CoreService", "ufbx" }
 			targetname("Mark3D")
 		end
 		filter {}
@@ -97,7 +97,7 @@ do
 			optimize "Full"
 			symbols "On"
 			incrementallink "Off"
-			links{ "CoreService" }
+			links{ "CoreService", "ufbx" }
 			targetname("Mark3D")
 		end
 		filter {}

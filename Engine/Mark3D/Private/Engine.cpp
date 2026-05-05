@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "Engine.h"
 #include "core.h"
-#include "Mesh.h"
+#include "AssetManager.h"
+#include "FileAssetProvider.h"
 
 
 namespace mark
@@ -60,6 +61,9 @@ namespace mark
 			}
 		}
 
+		FileAssetProvider* pFileAssetProvider = CORE_NEW(FileAssetProvider)(CreateDesc.szAssetRootPath);
+		m_pAssetManager = CORE_NEW(AssetManager)(pFileAssetProvider);
+
 		m_Initialized = TRUE;
 
 		return true;
@@ -75,6 +79,8 @@ namespace mark
 			FreeLibrary(m_RenderSystemModule);
 			m_RenderSystemModule = nullptr;
 		}
+
+		CHECK_RELEASE(m_pAssetManager);
 
 		shutdown_core_service();
 	}
@@ -152,30 +158,4 @@ namespace mark
 		return true;
 	}
 
-	IMesh* Engine::CreateMesh(uint32_t VertexFormats, uint32_t VertexCount, INDEX_FORMAT IndexFormat, uint32_t IndexCount)
-	{
-		Mesh* pMesh = CORE_NEW(Mesh);
-
-		if (!pMesh->Create(VertexFormats, VertexCount, IndexFormat, IndexCount))
-		{
-			SYS_LOG_ERR("Failed to create mesh.");
-			pMesh->Release();
-
-			return nullptr;
-		}
-
-		return pMesh;
-	}
-
-	IMesh* Engine::LoadMesh(const char* szFilePath)
-	{
-		// TODO: Implement mesh loading from file
-		return nullptr;
-	}
-
-	IMesh* Engine::LoadMeshAsync(const char* szFilePath)
-	{
-		// TODO: Implement asynchronous mesh loading from file
-		return nullptr;
-	}
 }
