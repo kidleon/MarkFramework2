@@ -32,7 +32,7 @@ namespace mark
 			FLOAT2* pTexCoord0;
 			FLOAT2* pTexCoord1;
 			FLOAT4* pColor;
-			FLOAT3* pTangent;
+			FLOAT3* pTangent; // xyz : tangent
 			UINT4* pBoneIndices;
 			FLOAT4* pBoneWeight;
 			void* pIndices;
@@ -62,17 +62,27 @@ namespace mark
 		virtual uint32_t GetNumMeshes() const noexcept;
 		virtual void GetMeshDesc(uint32_t MeshIndex, MESH_DESC& MeshDesc) const;
 
+		void ComputeTangent();
+
 		[[nodiscard]] inline ASSET_TYPE INL_GetType() const noexcept { return ASSET_TYPE::MODEL; }
 		[[nodiscard]] inline uint32_t INL_GetNumMeshes() const noexcept { return GetNumMeshes(); }
+		[[nodiscard]] inline Mesh* INL_GetMesh(uint32_t MeshIndex) const noexcept { return m_lstMesh[MeshIndex]; }
+
+		[[nodiscard]] inline uint32_t INL_GetTotalVertexCount() const noexcept { return m_TotalVertexCount; }
+		[[nodiscard]] inline uint32_t INL_GetTotalIndexCount() const noexcept { return m_TotalIndexCount; }
+
 
 	private:
 		virtual ~ModelAsset() noexcept;
 		void Reset();
 
 	private:
-		std::atomic<int64_t> m_RefCount{ 1 };
+		std::atomic<int32_t> m_RefCount{ 1 };
 
 	public:
+		uint32_t m_VertexFormats = 0;
+		uint32_t m_TotalVertexCount = 0;
+		uint32_t m_TotalIndexCount = 0;
 		sys_vector<Mesh*> m_lstMesh;
 		sys_vector<Material*> m_lstMaterial;
 

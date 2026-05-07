@@ -28,7 +28,7 @@ namespace mark
 		virtual void AddRef();
 		virtual void Release();
 
-		virtual bool Create(IAsset* pModelAsset, GPU_BUFFER_LAYOUT BufferLayout, BOOL HasModelAsset);
+		virtual bool Create(IModelAsset* pModelAsset, GPU_BUFFER_LAYOUT BufferLayout, BOOL HasModelAsset);
 
 	private:
 		virtual ~GPUGeometry();

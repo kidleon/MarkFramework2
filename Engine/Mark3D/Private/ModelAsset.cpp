@@ -1,8 +1,9 @@
 #include "pch.h"
 #include "ModelAsset.h"
-
-#include "ufbx/ufbx.h"
 #include "file_system.h"
+
+#include <ufbx/ufbx.h>
+#include <mikktspace/mikktspace.h>
 
 
 namespace mark
@@ -78,6 +79,143 @@ namespace mark
 
 		m_lstMesh.clear();
 	}
+
+	struct MikkTSpaceContext
+	{
+		ModelAsset::Mesh* pMesh;        // 현재 처리 중인 메시
+		uint32_t TriangleCount;          // 삼각형 개수 (인덱스 / 3)
+	};
+
+	static inline uint32_t GetVertexIndex(const ModelAsset::Mesh* pMesh, int iFace, int iVert)
+	{
+		// 삼각형의 N번째 정점 = (iFace * 3 + iVert) 위치의 인덱스 값
+		const uint32_t indexPos = iFace * 3 + iVert;
+
+		if (pMesh->IndexSize == sizeof(uint16_t))
+		{
+			const uint16_t* pIndices16 = static_cast<const uint16_t*>(pMesh->pIndices);
+			return static_cast<uint32_t>(pIndices16[indexPos]);
+		}
+		else
+		{
+			const uint32_t* pIndices32 = static_cast<const uint32_t*>(pMesh->pIndices);
+			return pIndices32[indexPos];
+		}
+	}
+
+	static int MikkGetNumFaces(const SMikkTSpaceContext* pContext)
+	{
+		const auto* ctx = static_cast<const MikkTSpaceContext*>(pContext->m_pUserData);
+		return static_cast<int>(ctx->TriangleCount);
+	}
+
+	static int MikkGetNumVerticesOfFace(const SMikkTSpaceContext* /*pContext*/, const int /*iFace*/)
+	{
+		return 3;
+	}
+
+	static void MikkGetPosition(const SMikkTSpaceContext* pContext, float fvPosOut[], const int iFace, const int iVert)
+	{
+		const auto* ctx = static_cast<const MikkTSpaceContext*>(pContext->m_pUserData);
+		const uint32_t vertIdx = GetVertexIndex(ctx->pMesh, iFace, iVert);
+
+		const FLOAT3& pos = ctx->pMesh->pPosition[vertIdx];
+		fvPosOut[0] = pos.x;
+		fvPosOut[1] = pos.y;
+		fvPosOut[2] = pos.z;
+	}
+
+	static void MikkGetNormal(const SMikkTSpaceContext* pContext, float fvNormOut[], const int iFace, const int iVert)
+	{
+		const auto* ctx = static_cast<const MikkTSpaceContext*>(pContext->m_pUserData);
+		const uint32_t vertIdx = GetVertexIndex(ctx->pMesh, iFace, iVert);
+
+		const FLOAT3& nrm = ctx->pMesh->pNormal[vertIdx];
+		fvNormOut[0] = nrm.x;
+		fvNormOut[1] = nrm.y;
+		fvNormOut[2] = nrm.z;
+	}
+
+	static void MikkGetTexCoord(const SMikkTSpaceContext* pContext, float fvTexcOut[], const int iFace, const int iVert)
+	{
+		const auto* ctx = static_cast<const MikkTSpaceContext*>(pContext->m_pUserData);
+		const uint32_t vertIdx = GetVertexIndex(ctx->pMesh, iFace, iVert);
+
+		const FLOAT2& uv = ctx->pMesh->pTexCoord0[vertIdx];
+		fvTexcOut[0] = uv.x;
+		fvTexcOut[1] = uv.y;
+	}
+
+	static void MikkSetTSpaceBasic(const SMikkTSpaceContext* pContext, const float fvTangent[], const float fSign, const int iFace, const int iVert)
+	{
+		auto* ctx = static_cast<MikkTSpaceContext*>(pContext->m_pUserData);
+		const uint32_t vertIdx = GetVertexIndex(ctx->pMesh, iFace, iVert);
+
+		// xyz: 탄젠트 방향, w: handedness
+		ctx->pMesh->pTangent[vertIdx].x = fvTangent[0];
+		ctx->pMesh->pTangent[vertIdx].y = fvTangent[1];
+		ctx->pMesh->pTangent[vertIdx].z = fvTangent[2];
+	}
+
+	void ModelAsset::ComputeTangent()
+	{
+		// MikkTSpace 인터페이스 콜백 등록
+		SMikkTSpaceInterface mikkInterface = {};
+		mikkInterface.m_getNumFaces = MikkGetNumFaces;
+		mikkInterface.m_getNumVerticesOfFace = MikkGetNumVerticesOfFace;
+		mikkInterface.m_getPosition = MikkGetPosition;
+		mikkInterface.m_getNormal = MikkGetNormal;
+		mikkInterface.m_getTexCoord = MikkGetTexCoord;
+		mikkInterface.m_setTSpaceBasic = MikkSetTSpaceBasic;
+		mikkInterface.m_setTSpace = nullptr;  // basic 버전만 사용
+
+		// 모든 메시 순회
+		for (Mesh* pMesh : m_lstMesh)
+		{
+			if (pMesh == nullptr)
+				continue;
+
+			// 탄젠트 계산에 필요한 데이터 확인
+			// 위치, 노멀, UV, 인덱스 모두 있어야 함
+			if (pMesh->pPosition == nullptr ||
+				pMesh->pNormal == nullptr ||
+				pMesh->pTexCoord0 == nullptr ||
+				pMesh->pIndices == nullptr ||
+				pMesh->NumVertex == 0 ||
+				pMesh->NumIndex == 0)
+			{
+				continue;
+			}
+
+			// 인덱스 개수가 3의 배수가 아니면 삼각형 메시가 아님
+			if (pMesh->NumIndex % 3 != 0)
+				continue;
+
+			// 탄젠트 버퍼가 아직 없으면 할당
+			if (pMesh->pTangent == nullptr)
+			{
+				pMesh->pTangent = static_cast<FLOAT3*>(
+					CORE_SYS_ALLOC(sizeof(FLOAT3) * pMesh->NumVertex));
+			}
+
+			// 탄젠트 버퍼 0으로 초기화
+			memset(pMesh->pTangent, 0, sizeof(FLOAT3) * pMesh->NumVertex);
+
+			// MikkTSpace 컨텍스트 준비
+			MikkTSpaceContext userContext = {};
+			userContext.pMesh = pMesh;
+			userContext.TriangleCount = pMesh->NumIndex / 3;
+
+			SMikkTSpaceContext mikkContext = {};
+			mikkContext.m_pInterface = &mikkInterface;
+			mikkContext.m_pUserData = &userContext;
+
+			// 탄젠트 생성 실행
+			// 두 번째 인자는 angular threshold (기본값 180.0f, 부드러운 결과)
+			genTangSpaceDefault(&mikkContext);
+		}
+	}
+
 
 	inline static void change_psd_to_tag(const char* filename, char* out_filename, size_t out_size)
 	{
@@ -236,18 +374,7 @@ namespace mark
 					pMesh->pTexCoord0[v].y = (float)uv.y;
 				}
 			}
-
-			if (mesh->vertex_tangent.exists)
-			{
-				pMesh->pTangent = (FLOAT3*)CORE_SYS_ALLOC(sizeof(FLOAT3) * mesh->num_vertices);
-				for (size_t v = 0; v < mesh->num_vertices; ++v)
-				{
-					ufbx_vec3 tangent = ufbx_get_vertex_vec3(&mesh->vertex_tangent, v);
-					pMesh->pTangent[v].x = (float)tangent.x;
-					pMesh->pTangent[v].y = (float)tangent.y;
-					pMesh->pTangent[v].z = (float)tangent.z;
-				}
-			}
+			
 
 			INDEX_FORMAT IndexFormat = (TotalVetexCount > 65500) ? INDEX_FORMAT::UINT32 : INDEX_FORMAT::UINT16;
 

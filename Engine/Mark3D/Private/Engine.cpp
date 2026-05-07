@@ -172,6 +172,6 @@ namespace mark
 		BOOL HasModelAsset
 	)
 	{
-		return true;
+		return nullptr;
 	}
 }

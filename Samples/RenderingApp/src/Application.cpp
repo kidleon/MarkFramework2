@@ -68,7 +68,7 @@ BOOL Application::OnInit(HWND hWnd, int width, int height)
 	size_t MeshCount = pModelAsset->GetNumMeshes();
 	for (size_t i = 0; i < MeshCount; ++i)
 	{
-		pModelAsset->GetMeshDesc(i, MeshDesc);
+		pModelAsset->GetMeshDesc((uint32_t)i, MeshDesc);
 	}
 
 	pModelAsset->Release();
