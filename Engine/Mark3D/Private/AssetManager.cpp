@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "AssetManager.h"
+#include "AssetBlob.h"
+#include "ModelAsset.h"
 
 
 namespace mark
@@ -42,7 +44,20 @@ namespace mark
 			return nullptr;
 		}
 
-		return m_pProvider->LoadAsset(AssetType, szAssetPath);
+		AssetBlob* pBlob = static_cast<AssetBlob*>(m_pProvider->LoadAsset(AssetType, szAssetPath));
+		if (!pBlob)
+			return nullptr;
+
+		const void* pData = pBlob->INL_GetData();
+		size_t DataSize = pBlob->INL_GetDataSize();
+
+		ModelAsset* pModelAsset = CORE_NEW(ModelAsset);
+
+		LoadModelFromFBX(pBlob, pModelAsset);
+
+		pBlob->Release();
+
+		return pModelAsset;
 	}
 
 }

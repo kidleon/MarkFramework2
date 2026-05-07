@@ -47,15 +47,18 @@ namespace mark
 		memory_pool_table tables[NUM_BLOCK];
 	};
 
-	static memory_pool_manager manager;
+	static memory_pool_manager* manager;
 
 	void memory_pool::initialize()
 	{
+		manager = static_cast<memory_pool_manager*>(CORE_SYS_CALLOC(sizeof(memory_pool_manager)));
+		new (manager) memory_pool_manager();
+
 		for (size_t i = 0; i < NUM_BLOCK; ++i)
 		{
-			manager.tables[i].pages.reserve(256);
-			manager.tables[i].free_list = nullptr;
-			manager.tables[i].lock.stat = 0;
+			manager->tables[i].pages.reserve(256);
+			manager->tables[i].free_list = nullptr;
+			manager->tables[i].lock.stat = 0;
 		}
 	}
 
@@ -63,7 +66,7 @@ namespace mark
 	{
 		for (size_t i = 0; i < NUM_BLOCK; ++i)
 		{
-			memory_pool_table& table = manager.tables[i];
+			memory_pool_table& table = manager->tables[i];
 			for (memory_pool_page& page : table.pages)
 			{
 				CORE_SYS_FREE(page.blocks);
@@ -71,6 +74,9 @@ namespace mark
 			table.pages.clear();
 			table.free_list = nullptr;
 		}
+
+		CORE_SYS_FREE(manager);
+		manager = nullptr;
 	}
 
 	inline int32_t get_size_index(size_t size)
@@ -96,7 +102,7 @@ namespace mark
 			return block;
 		}
 
-		memory_pool_table& table = manager.tables[size_index];
+		memory_pool_table& table = manager->tables[size_index];
 
 		AUTO_SPIN_LOCK loc(&table.lock);
 		if (!table.free_list)
@@ -144,7 +150,7 @@ namespace mark
 			return;
 		}
 
-		memory_pool_table& table = manager.tables[size_index];
+		memory_pool_table& table = manager->tables[size_index];
 
 		AUTO_SPIN_LOCK loc(&table.lock);
 		block->next = table.free_list;

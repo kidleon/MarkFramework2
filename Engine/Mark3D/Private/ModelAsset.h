@@ -40,7 +40,7 @@ namespace mark
 			uint32_t NumSubMesh;
 			SubMesh* pSubMesh;
 
-			void Cleanup()
+			void Cleanup() noexcept
 			{
 				CORE_SYS_FREE(pPosition);
 				CORE_SYS_FREE(pNormal);
@@ -78,5 +78,5 @@ namespace mark
 
 	};
 
-	bool LoadModelFromFBX(const void* pData, size_t DataSize, ModelAsset& ModelAssetRef);
+	bool LoadModelFromFBX(IAssetBlob* pBlob, ModelAsset* pModelAsset);
 }

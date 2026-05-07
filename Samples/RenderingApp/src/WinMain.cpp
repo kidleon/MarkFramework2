@@ -60,7 +60,11 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
     g_pApp = new Application();
     if (!g_pApp->OnInit(hWnd, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT))
     {
-        CHECK_DELETE(g_pApp);
+		if (g_pApp)
+		{
+			delete g_pApp;
+			g_pApp = nullptr;
+		}
         return -1;
     }
 
@@ -82,7 +86,11 @@ int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdL
         }
     }
 
-    CHECK_DELETE(g_pApp);
+	if (g_pApp)
+	{
+		delete g_pApp;
+		g_pApp = nullptr;
+	}
 
     return 0;
 }

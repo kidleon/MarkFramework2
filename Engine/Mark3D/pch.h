@@ -18,6 +18,7 @@
 #include "log.h"
 #include "mathlib.h"
 #include "RenderDef.h"
+#include "AssetDef.h"
 #include "GeomDef.h"
 #include "Mark3D.h"
 

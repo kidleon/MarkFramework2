@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "FileAssetProvider.h"
 #include "file_system.h"
-#include "ModelAsset.h"
+#include "AssetBlob.h"
 
 
 namespace mark
@@ -37,7 +37,7 @@ namespace mark
 		}
 	}
 
-	IAsset* FileAssetProvider::LoadAsset(ASSET_TYPE AssetType, const char* szAssetPath)
+	IAssetBlob* FileAssetProvider::LoadAsset(ASSET_TYPE AssetType, const char* szAssetPath)
 	{
 		char szFullPath[_MAX_PATH];
 		file_system::combine_path(m_szRootPath, szAssetPath, szFullPath, _MAX_PATH);
@@ -48,8 +48,6 @@ namespace mark
 			SYS_LOG_ERR_F("Failed to open asset file: {}", szFullPath);
 			return nullptr;
 		}
-
-		temppool_reset(m_hTempPool);
 
 		size_t ReadBytes = 0;
 		void* pBuffer = file_system::read_all(m_hTempPool, file_handle, ReadBytes);
@@ -62,27 +60,34 @@ namespace mark
 
 		file_system::close_file(file_handle);
 
-		switch (AssetType)
+		return CORE_NEW(AssetBlob)(ReadBytes, pBuffer);
+	}
+
+	IAssetBlob* FileAssetProvider::LoadAsset(HANDLE temppool_handle, ASSET_TYPE AssetType, const char* szAssetPath)
+	{
+		char szFullPath[_MAX_PATH];
+		file_system::combine_path(m_szRootPath, szAssetPath, szFullPath, _MAX_PATH);
+
+		HANDLE file_handle = file_system::open_file(szFullPath, file_system::ACESS_MODE::READ);
+		if (!file_handle)
 		{
-			case ASSET_TYPE::MODEL:
-				{
-					ModelAsset* pModelAsset = CORE_NEW(ModelAsset);
-					if (!LoadModelFromFBX(pBuffer, ReadBytes, *pModelAsset))
-					{
-						pModelAsset->Release();
-						return nullptr;
-					}
-
-					return pModelAsset;
-				} break;
-
-			default:
-				{
-					SYS_LOG_ERR_F("Unsupported asset type: {}", static_cast<uint32_t>(AssetType));
-					return nullptr;
-				}
+			SYS_LOG_ERR_F("Failed to open asset file: {}", szFullPath);
+			return nullptr;
 		}
 
-		return nullptr;
+		temppool_reset(temppool_handle);
+
+		size_t ReadBytes = 0;
+		void* pBuffer = file_system::read_all(temppool_handle, file_handle, ReadBytes);
+		if (!pBuffer)
+		{
+			file_system::close_file(file_handle);
+			SYS_LOG_ERR_F("Failed to read asset file: {}", szFullPath);
+			return nullptr;
+		}
+
+		file_system::close_file(file_handle);
+
+		return CORE_NEW(AssetBlob)(ReadBytes, pBuffer, FALSE);
 	}
 }

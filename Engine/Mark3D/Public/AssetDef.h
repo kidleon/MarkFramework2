@@ -38,6 +38,12 @@ namespace mark
 		
 	};
 
+	struct IAssetBlob : public Unknown
+	{
+		[[nodiscard]] virtual size_t GetDataSize() const noexcept = 0;
+		[[nodiscard]] virtual const void* GetData() const noexcept = 0;
+	};
+
 	struct IModelAsset : public IAsset
 	{
 		virtual uint32_t GetNumMeshes() const noexcept = 0;
@@ -46,7 +52,8 @@ namespace mark
 
 	struct IAssetProvider : public Unknown
 	{
-		[[nodiscard]] virtual IAsset* LoadAsset(ASSET_TYPE AssetType, const char* szAssetPath) = 0;
+		[[nodiscard]] virtual IAssetBlob* LoadAsset(ASSET_TYPE AssetType, const char* szAssetPath) = 0;
+		[[nodiscard]] virtual IAssetBlob* LoadAsset(HANDLE temppool_handle, ASSET_TYPE AssetType, const char* szAssetPath) = 0;
 	};
 
 	struct IAssetManager: public Unknown

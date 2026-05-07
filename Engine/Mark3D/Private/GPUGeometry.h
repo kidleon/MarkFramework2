@@ -1,10 +1,10 @@
 #pragma once
 #include "name_hash.h"
+#include "ModelAsset.h"
 
 
 namespace mark
 {
-	struct ModelAsset;
 	class PrimitiveBuffer;
 
 	class GPUGeometry final : public IGPUGeometry
@@ -36,7 +36,7 @@ namespace mark
 	private:
 		std::atomic<int32_t> m_RefCount{ 1 };
 		GPU_BUFFER_LAYOUT m_BufferLayout = GPU_BUFFER_LAYOUT::MERGED;
-		ModelAsset* m_pModelAsset = nullptr;
+		unknown_ptr<ModelAsset> m_pModelAsset;
 
 		sys_vector<PrimitiveBuffer*> m_lstPrimitiveBuffers;
 		

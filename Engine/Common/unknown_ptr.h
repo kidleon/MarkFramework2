@@ -9,20 +9,21 @@ namespace mark
 {
 	
 	/**
-	* @brief unknown_ptr: _T 인터페이스를 위한 스마트 포인터
+	* @brief unknown_ptr: T 인터페이스를 위한 스마트 포인터
 	*/
-	template<typename _T>
+	template<typename T>
 	struct unknown_ptr
 	{
-		static_assert(std::is_base_of<Unknown, _T>::value, "unknown_ptr can only be used with types derived from iunknown");
-		_T* _ptr;
+		static_assert(std::is_base_of_v<Unknown, T>,
+			"unknown_ptr can only be used with types derived from IUnknown");
+		T* _ptr;
 
 		unknown_ptr() noexcept
 			: _ptr(nullptr)
 		{
 		}
 
-		unknown_ptr(_T* ptr) noexcept
+		unknown_ptr(T* ptr) noexcept
 			: _ptr(ptr)
 		{
 			if (_ptr)
@@ -73,7 +74,7 @@ namespace mark
 			return *this;
 		}
 
-		inline unknown_ptr& operator=(_T* ptr) noexcept
+		inline unknown_ptr& operator=(T* ptr) noexcept
 		{
 			if (_ptr != ptr)
 			{
@@ -88,6 +89,13 @@ namespace mark
 
 		inline explicit operator bool() const noexcept { return _ptr != nullptr; }
 
+		inline void attach(T* ptr) noexcept
+		{
+			if (_ptr)
+				_ptr->Release();
+			_ptr = ptr;
+		}
+
 		// 명시적 해제 — Release 후 null로 초기화
 		inline void reset() noexcept
 		{
@@ -98,41 +106,41 @@ namespace mark
 			}
 		}
 
-		inline _T* operator->() noexcept { return _ptr; }
-		inline const _T* operator->() const noexcept { return _ptr; }
-		inline _T& operator*() noexcept { return *_ptr; }
-		inline const _T& operator*() const noexcept { return *_ptr; }
+		inline T* operator->() noexcept { return _ptr; }
+		inline const T* operator->() const noexcept { return _ptr; }
+		inline T& operator*() noexcept { return *_ptr; }
+		inline const T& operator*() const noexcept { return *_ptr; }
 
-		inline _T* ptr() noexcept { return _ptr; }
-		inline const _T* ptr() const noexcept { return _ptr; }
-		inline _T& ref() { return *_ptr; }
-		inline const _T& ref() const { return *_ptr; }
+		inline T* ptr() noexcept { return _ptr; }
+		inline const T* ptr() const noexcept { return _ptr; }
+		inline T& ref() { return *_ptr; }
+		inline const T& ref() const { return *_ptr; }
 
 		template<typename U>
 		inline U* cast() noexcept
 		{
-			static_assert(std::is_base_of<_T, U>::value, "U must inherit from _T");
+			static_assert(std::is_base_of<T, U>::value, "U must inherit from T");
 			return static_cast<U*>(_ptr);
 		}
 
 		template<typename U>
 		inline const U* cast() const noexcept
 		{
-			static_assert(std::is_base_of<_T, U>::value, "U must inherit from _T");
+			static_assert(std::is_base_of<T, U>::value, "U must inherit from T");
 			return static_cast<const U*>(_ptr);
 		}
 
 		template<typename U>
 		U& cast_ref() noexcept
 		{
-			static_assert(std::is_base_of<_T, U>::value, "U must inherit from _T");
+			static_assert(std::is_base_of<T, U>::value, "U must inherit from T");
 			return static_cast<U&>(*_ptr);
 		}
 
 		template<typename U>
 		const U& cast_ref() const noexcept
 		{
-			static_assert(std::is_base_of<_T, U>::value, "U must inherit from _T");
+			static_assert(std::is_base_of<T, U>::value, "U must inherit from T");
 			return static_cast<const U&>(*_ptr);
 		}
 
@@ -147,11 +155,19 @@ namespace mark
 	};
 
 	// nullptr == p 형태도 지원 (좌우 대칭)
-	template<typename _T>
-	inline bool operator==(std::nullptr_t, const unknown_ptr<_T>& p) noexcept { return p == nullptr; }
+	template<typename T>
+	inline bool operator==(std::nullptr_t, const unknown_ptr<T>& p) noexcept { return p == nullptr; }
 
-	template<typename _T>
-	inline bool operator!=(std::nullptr_t, const unknown_ptr<_T>& p) noexcept { return p != nullptr; }
-	
+	template<typename T>
+	inline bool operator!=(std::nullptr_t, const unknown_ptr<T>& p) noexcept { return p != nullptr; }
+
+	template<typename T>
+	inline unknown_ptr<T> make_unknown(T* ptr) noexcept
+	{
+		unknown_ptr<T> uptr;
+		uptr.attach(ptr);
+		return uptr;
+	}
+
 
 };

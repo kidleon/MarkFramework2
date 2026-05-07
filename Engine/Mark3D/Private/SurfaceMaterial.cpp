@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "SurfaceMaterial.h"
+/*
 #include "SurfaceMaterialFactory.h"
 #include "SurfaceMaterialBlock.h"
 
@@ -65,3 +66,4 @@ namespace mark
 		m_pBlocks[Pass]->pPixelShader = pPixelShader;
 	}
 }
+*/

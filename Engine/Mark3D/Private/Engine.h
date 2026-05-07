@@ -11,17 +11,26 @@ namespace mark
 	public:
 		Engine();
 
-		void AddRef();
-		void Release();
+		virtual void AddRef();
+		virtual void Release();
 
-		bool Initialize(const EngineCreateDesc& CreateDesc);
-		void Shutdown();
+		virtual bool Initialize(const EngineCreateDesc& CreateDesc);
+		virtual void Shutdown();
 
-		bool GetRenderSystemInterface(IRenderSystem** ppOut);
+		virtual bool GetRenderSystemInterface(IRenderSystem** ppOut);
+		virtual bool GetAssetManagerInterface(IAssetManager** ppOut);
+
+		virtual IGPUGeometry* CreateGeometry(
+			IModelAsset* pModelAsset,
+			GPU_BUFFER_LAYOUT BufferLayout,
+			BOOL HasModelAsset
+		);
 
 		inline static Engine& Get() noexcept { return *s_pInstance; }
 		inline static Engine* GetPtr() noexcept { return s_pInstance; }
+
 		[[nodiscard]] inline IRenderSystem* INL_GetRenderSystem() const noexcept { return m_pRenderSystem; }
+		[[nodiscard]] inline IAssetManager* INL_GetAssetManager() const noexcept { return m_pAssetManager; }
 
 	private:
 		virtual ~Engine() noexcept;

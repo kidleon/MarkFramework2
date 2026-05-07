@@ -7,6 +7,7 @@ namespace mark
 {
 	struct SurfaceMaterialBlock;
 
+	/*
 	class SurfaceMaterial final : public ISurfaceMaterial
 	{
 		static constexpr size_t MAX_PASS = 8;
@@ -29,9 +30,10 @@ namespace mark
 		friend class SurfaceMaterialFactory;
 
 	private:
-		std::atomic<int32_t> m_RefCount = 1;
+		std::atomic<int32_t> m_RefCount{ 1 };
 
 		uint32_t m_NumPasses = 0;
 		SurfaceMaterialBlock* m_pBlocks[MAX_PASS] = { nullptr };
 	};
+	*/
 }

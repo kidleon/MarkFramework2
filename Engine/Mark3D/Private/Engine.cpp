@@ -12,7 +12,7 @@ namespace mark
 	typedef BOOL(__stdcall* PFN_CREATE_RENDERER_D3D11)(
 		const RenderSystemCreateDesc& CreateDesc,
 		IRenderSystem** ppRenderSystem
-	);
+		);
 
 	Engine::Engine()
 	{
@@ -30,12 +30,12 @@ namespace mark
 
 	void Engine::AddRef()
 	{
-		m_RefCount++;
+		m_RefCount.fetch_add(1, std::memory_order_relaxed);
 	}
 
 	void Engine::Release()
 	{
-		if (--m_RefCount == 0)
+		if (m_RefCount.fetch_sub(1, std::memory_order_acq_rel) == 1)
 		{
 			CORE_DELETE(Engine, this);
 		}
@@ -44,10 +44,6 @@ namespace mark
 	bool Engine::Initialize(const EngineCreateDesc& CreateDesc)
 	{
 		if (m_Initialized) return true;
-
-		initialaize_core_service(
-			1024 * 1024 * 32 // 32MB 임시 버퍼
-		);
 
 		LOG("Mark3D core memory initialized.");
 
@@ -81,8 +77,7 @@ namespace mark
 		}
 
 		CHECK_RELEASE(m_pAssetManager);
-
-		shutdown_core_service();
+//		shutdown_core_service();
 	}
 
 	bool Engine::InitializeD3D11(const EngineCreateDesc& CreateDesc)
@@ -152,10 +147,31 @@ namespace mark
 
 		(*ppOut) = m_pRenderSystem;
 
-		if(m_pRenderSystem)
+		if (m_pRenderSystem)
 			m_pRenderSystem->AddRef();
 
 		return true;
 	}
 
+	bool Engine::GetAssetManagerInterface(IAssetManager** ppOut)
+	{
+		if (!ppOut)
+			return false;
+
+		(*ppOut) = m_pAssetManager;
+
+		if (m_pAssetManager)
+			m_pAssetManager->AddRef();
+
+		return true;
+	}
+
+	IGPUGeometry* Engine::CreateGeometry(
+		IModelAsset* pModelAsset,
+		GPU_BUFFER_LAYOUT BufferLayout,
+		BOOL HasModelAsset
+	)
+	{
+		return true;
+	}
 }

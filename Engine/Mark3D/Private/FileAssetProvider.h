@@ -11,7 +11,8 @@ namespace mark
 		virtual void AddRef();
 		virtual void Release();
 
-		virtual IAsset* LoadAsset(ASSET_TYPE AssetType, const char* szAssetPath);
+		virtual IAssetBlob* LoadAsset(ASSET_TYPE AssetType, const char* szAssetPath);
+		virtual IAssetBlob* LoadAsset(HANDLE temppool_handle, ASSET_TYPE AssetType, const char* szAssetPath);
 
 	private:
 		virtual ~FileAssetProvider() noexcept;

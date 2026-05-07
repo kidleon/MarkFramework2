@@ -24,7 +24,7 @@ namespace mark
 		virtual ~D3D11GPUBuffer() noexcept;
 
 	private:
-		mutable std::atomic<int64_t> m_RefCount = 1;
+		mutable std::atomic<int64_t> m_RefCount{ 1 };
 		ID3D11Buffer* m_pD3D11Buffer = nullptr;
 		D3D11_BUFFER_DESC m_BufferDesc = {};
 		size_t m_DynamicOffset = 0;

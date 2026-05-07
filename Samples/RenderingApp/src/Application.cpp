@@ -20,12 +20,14 @@ BOOL Application::OnInit(HWND hWnd, int width, int height)
 	CreateDesc.ScreenWidth = static_cast<uint32_t>(width);
 	CreateDesc.ScreenHeight = static_cast<uint32_t>(height);
 	CreateDesc.WindowHandle = m_hWnd;
+	safe_strcpy(CreateDesc.szAssetRootPath, _MAX_PATH, "../Assets/");
 
 	if (!CreateMark3DEngine(CreateDesc, &m_pMark3D))
 		return FALSE;
 
 	IRenderSystem* pRenderSystem = nullptr;
 	m_pMark3D->GetRenderSystemInterface(&pRenderSystem);
+
 
 	GPUBufferCreateDesc BufferDesc = {};
 	BufferDesc.Type = BUFFER_TYPE::VERTEX_BUFFER;
@@ -52,10 +54,25 @@ BOOL Application::OnInit(HWND hWnd, int width, int height)
 
 	size_t WrittenOffset = 0;
 	result = pGPUBuffer->UpdateBuffer(Pos, sizeof(VERTEX) * 4, &WrittenOffset);
-
 	pGPUBuffer->Release();
 	pRenderSystem->Release();
 
+	
+	IAssetManager* pAssetManager = nullptr;
+	m_pMark3D->GetAssetManagerInterface(&pAssetManager);
+
+	IModelAsset* pModelAsset = static_cast<IModelAsset*>(pAssetManager->LoadAsset(ASSET_TYPE::MODEL, "Model/ogre/m_ogre00.FBX"));
+
+	MESH_DESC MeshDesc = {};
+
+	size_t MeshCount = pModelAsset->GetNumMeshes();
+	for (size_t i = 0; i < MeshCount; ++i)
+	{
+		pModelAsset->GetMeshDesc(i, MeshDesc);
+	}
+
+	pModelAsset->Release();
+	pAssetManager->Release();
 
 	return TRUE;
 }
@@ -66,5 +83,9 @@ void Application::OnUpdate()
 
 void Application::OnDestroy()
 {
-	CHECK_RELEASE(m_pMark3D);
+	if (m_pMark3D)
+	{
+		DestroyMark3DEngine(m_pMark3D);
+		m_pMark3D = nullptr;
+	}
 }

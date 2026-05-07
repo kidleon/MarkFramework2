@@ -43,7 +43,8 @@ namespace mark
 
 		void deallocate(value_type* p, std::size_t) noexcept
 		{
-			sys_free(p);
+			if (p)
+				sys_free(p);
 		}
 
 		template <typename U>

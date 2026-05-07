@@ -22,7 +22,7 @@ namespace mark
 		IShaderProgram* GetShaderProgram(SHADER_TYPE ShaderType, const char* szShaderName);
 
 	private:
-		mutable std::atomic<int64_t> m_RefCount = 1;
+		mutable std::atomic<int64_t> m_RefCount{ 1 };
 		D3D11RenderDevice* m_pRenderDevice = nullptr;
 		D3D11ShaderProgramCache* m_pShaderProgramCache = nullptr;
 

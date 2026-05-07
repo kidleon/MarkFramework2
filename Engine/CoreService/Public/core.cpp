@@ -46,7 +46,7 @@ namespace mark
 		);
 
 		initialize_core_memory(
-			1024 * 1024 * 32 // 32MB 임시 버퍼
+			1024 * 1024 * 16 // 16MB 임시 버퍼
 		);
 	}
 

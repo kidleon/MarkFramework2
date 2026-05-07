@@ -83,19 +83,22 @@ namespace mark
 	{
 		char extension[16];
 		file_system::get_file_extension(filename, extension, sizeof(extension));
-		if (!_strcmpi(extension, "psd"))
+		if (!_strcmpi(extension, ".psd"))
 		{
 			file_system::change_extension(
 				filename,
-				"tga",
+				".tga",
 				out_filename,
 				out_size
 			);
 		}
 	}
 
-	bool LoadModelFromFBX(const void* pData, size_t DataSize, ModelAsset& ModelAssetRef)
+	bool LoadModelFromFBX(IAssetBlob* pBlob, ModelAsset* pModelAsset)
 	{
+		pBlob->AddRef();
+		pModelAsset->AddRef();
+
 		ufbx_load_opts load_opts = {};
 		load_opts.obj_axes = ufbx_axes_left_handed_y_up;
 		load_opts.obj_unit_meters = 1.0f;
@@ -103,9 +106,13 @@ namespace mark
 		load_opts.normalize_normals = true;
 
 		ufbx_error error = {};
-		ufbx_scene* scene = ufbx_load_memory(pData, DataSize, &load_opts, &error);
+		ufbx_scene* scene = ufbx_load_memory(pBlob->GetData(), pBlob->GetDataSize(), &load_opts, &error);
 		if (!scene)
+		{
+			pBlob->Release();
+			pModelAsset->Release();
 			return false;
+		}
 
 		char szTempPath[MAX_TEXTURE_FILENAME] = {};
 
@@ -177,11 +184,11 @@ namespace mark
 				);
 			}
 
-			ModelAssetRef.m_lstMaterial.push_back(pMaterial);
+			pModelAsset->m_lstMaterial.push_back(pMaterial);
 		}
 
 		// Load meshes
-		ModelAssetRef.m_lstMesh.reserve(scene->meshes.count);
+		pModelAsset->m_lstMesh.reserve(scene->meshes.count);
 
 		uint32_t TotalVetexCount = 0;
 		for (size_t i = 0; i < scene->meshes.count; ++i)
@@ -331,8 +338,14 @@ namespace mark
 			pMesh->pIndices = CORE_SYS_ALLOC(IndexSize * IndexCount);
 			memcpy(pMesh->pIndices, (IndexFormat == INDEX_FORMAT::UINT32) ? (void*)Indices32.data() : (void*)Indices16.data(), IndexSize * IndexCount);
 
-			ModelAssetRef.m_lstMesh.push_back(pMesh);
+			pModelAsset->m_lstMesh.push_back(pMesh);
 		}
+
+		if (scene)
+			ufbx_free_scene(scene);
+
+		pModelAsset->Release();
+		pBlob->Release();
 
 		return true;
 	}

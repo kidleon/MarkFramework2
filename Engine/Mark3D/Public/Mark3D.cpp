@@ -1,10 +1,13 @@
 #include "pch.h"
 #include "Mark3D.h"
 #include "Engine.h"
+#include "core.h"
 
 
 namespace mark
 {
+	static bool s_CoreServiceInitialized = false;
+
 	bool CreateMark3DEngine(
 		const EngineCreateDesc& CreateDesc,
 		IMark3D** ppOut
@@ -14,6 +17,14 @@ namespace mark
 		{
 			LOG_ERR("Output pointer is null in CreateMark3DEngine.");
 			return false;
+		}
+
+		if (!s_CoreServiceInitialized)
+		{
+			initialaize_core_service(
+				1024 * 1024 * 32 // 32MB 임시 버퍼
+			);
+			s_CoreServiceInitialized = true;
 		}
 
 		Engine* pEngine = CORE_NEW(Engine);
@@ -34,5 +45,16 @@ namespace mark
 		*ppOut = pEngine;
 
 		return true;
+	}
+
+	void DestroyMark3DEngine(IMark3D* pEngine)
+	{
+		if (pEngine)
+		{
+			pEngine->Release();
+			pEngine = nullptr;
+		}
+
+		shutdown_core_service();
 	}
 }

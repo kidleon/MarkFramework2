@@ -634,7 +634,14 @@ namespace mark
 
 		std::filesystem::path p1(path1);
 		std::filesystem::path p2(path2);
-		std::filesystem::path combined = p1 / p2;
+		std::filesystem::path combined;
+
+		// p2가 절대 경로이거나 루트 디렉토리를 포함하는 경우, p1과 p2의 상대 경로를 결합
+		if (p2.is_absolute() || p2.has_root_directory())
+			combined = p1 / p2.relative_path();
+		else
+			combined = p1 / p2;
+
 		safe_strcpy(out_path, out_size, combined.string().c_str());
 
 		return true;

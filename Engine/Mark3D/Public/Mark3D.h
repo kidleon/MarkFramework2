@@ -10,14 +10,14 @@ namespace mark
 	/**
 	 * @brief Mark3D 엔진을 생성할 때 필요한 설정을 담는 구조체
 	 */
-	struct EngineCreateDesc
+	struct MARKENGINE_API EngineCreateDesc
 	{
 		uint32_t ScreenWidth = 0;
 		uint32_t ScreenHeight = 0;
 
 		GraphicsAPI PreferredGraphicsAPI = GraphicsAPI::D3D11;
 
-		char szAssetRootPath[256] = "./Assets";
+		char szAssetRootPath[_MAX_PATH];
 
 #if defined(__TARGET_OS_WINDOWS)
 		HWND WindowHandle = nullptr;
@@ -33,6 +33,13 @@ namespace mark
 		virtual void Shutdown() = 0;
 
 		virtual bool GetRenderSystemInterface(IRenderSystem** ppOut) = 0;
+		virtual bool GetAssetManagerInterface(IAssetManager** ppOut) = 0;
+
+		virtual IGPUGeometry* CreateGeometry(
+			IModelAsset* pModelAsset,
+			GPU_BUFFER_LAYOUT BufferLayout,
+			BOOL HasModelAsset
+		) = 0;
 
 	};
 
@@ -46,5 +53,7 @@ namespace mark
 		const EngineCreateDesc& CreateDesc,
 		IMark3D** ppOut
 	);
+
+	MARKENGINE_API void DestroyMark3DEngine(IMark3D* pEngine);
 
 }
