@@ -43,6 +43,13 @@ namespace mark
 
 	struct IModelAsset;
 
+	struct MedelCreateDesc
+	{
+		char szFilePath[_MAX_PATH] = { 0 };
+		GPU_BUFFER_LAYOUT BufferLayout = GPU_BUFFER_LAYOUT::MERGED;
+		BOOL HasModelAsset = FALSE;
+	};
+
 	struct IGPUGeometry : public Unknown
 	{
 		virtual bool Create(IModelAsset* pModelAsset, GPU_BUFFER_LAYOUT BufferLayout, BOOL HasModelAsset) = 0;
