@@ -57,7 +57,6 @@ BOOL Application::OnInit(HWND hWnd, int width, int height)
 	pGPUBuffer->Release();
 	pRenderSystem->Release();
 
-	
 	IAssetManager* pAssetManager = nullptr;
 	m_pMark3D->GetAssetManagerInterface(&pAssetManager);
 

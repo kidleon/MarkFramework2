@@ -54,6 +54,11 @@ namespace mark
 		IMark3D** ppOut
 	);
 
+	/**
+	 * @brief Mark3D 엔진을 파괴하는 함수입니다. pEngine->Release()를 호출하여 삭제하면 안되고 반드시 이 함수를 통해 삭제해야 합니다.
+	 * @param pEngine 파괴할 Mark3D 엔진 인터페이스 포인터입니다.
+	 * @return 없음
+	 */
 	MARKENGINE_API void DestroyMark3DEngine(IMark3D* pEngine);
 
 }

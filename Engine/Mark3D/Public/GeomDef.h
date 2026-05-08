@@ -52,7 +52,13 @@ namespace mark
 
 	struct IGPUGeometry : public Unknown
 	{
-		virtual bool Create(IModelAsset* pModelAsset, GPU_BUFFER_LAYOUT BufferLayout, BOOL HasModelAsset) = 0;
+		virtual bool Create(
+			uint32_t VertexFormats,
+			IModelAsset* pModelAsset,
+			GPU_BUFFER_LAYOUT BufferLayout,
+			BOOL HasModelAsset,
+			BOOL ImmediateUploadToGPU
+		) = 0;
 	};
 
 	struct IModelInstance : public Unknown

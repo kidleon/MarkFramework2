@@ -28,7 +28,13 @@ namespace mark
 		virtual void AddRef();
 		virtual void Release();
 
-		virtual bool Create(IModelAsset* pModelAsset, GPU_BUFFER_LAYOUT BufferLayout, BOOL HasModelAsset);
+		virtual bool Create(
+			uint32_t VertexFormats,
+			IModelAsset* pModelAsset,
+			GPU_BUFFER_LAYOUT BufferLayout,
+			BOOL HasModelAsset,
+			BOOL ImmediateUploadToGPU
+		);
 
 	private:
 		virtual ~GPUGeometry();
@@ -37,7 +43,7 @@ namespace mark
 		std::atomic<int32_t> m_RefCount{ 1 };
 		GPU_BUFFER_LAYOUT m_BufferLayout = GPU_BUFFER_LAYOUT::MERGED;
 		unknown_ptr<ModelAsset> m_pModelAsset;
-
+		sys_vector<MeshDesc> m_lstMeshDescs;
 		sys_vector<PrimitiveBuffer*> m_lstPrimitiveBuffers;
 		
 	};

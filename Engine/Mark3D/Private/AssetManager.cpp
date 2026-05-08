@@ -51,7 +51,7 @@ namespace mark
 		const void* pData = pBlob->INL_GetData();
 		size_t DataSize = pBlob->INL_GetDataSize();
 
-		ModelAsset* pModelAsset = CORE_NEW(ModelAsset);
+		ModelAsset* pModelAsset = CORE_NEW(ModelAsset)(szAssetPath);
 
 		LoadModelFromFBX(pBlob, pModelAsset);
 

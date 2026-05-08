@@ -13,10 +13,12 @@ namespace mark
 	struct IAsset : public Unknown
 	{
 		[[nodiscard]] virtual ASSET_TYPE GetType() const noexcept = 0;
+		[[nodiscard]] virtual const char* GetAssetPath() const noexcept = 0;
 	};
 
 	static constexpr size_t MAX_TEXTURE_FILENAME = 128;
 	static constexpr size_t MESH_NAME_SIZE = 64;
+	constexpr static size_t MAX_SUBMESH_COUNT = 8;
 
 	struct MESH_DESC
 	{
@@ -24,7 +26,7 @@ namespace mark
 		
 		FLOAT3* pPosition = nullptr;
 		FLOAT3* pNormal = nullptr;
-		FLOAT3* pTangent = nullptr;
+		FLOAT4* pTangent = nullptr;
 		FLOAT2* pTexCoord0 = nullptr;
 		FLOAT4* pColor = nullptr;
 		uint32_t NumVertex = 0;
@@ -33,8 +35,8 @@ namespace mark
 		void* pIndices = { nullptr };
 		uint32_t NumIndex = 0;
 		uint32_t NumSubset = 0;
-		uint32_t SubsetIndexCount[8] = { 0 };
-		uint32_t SubsetIndexStart[8] = { 0 };
+		uint32_t SubsetIndexCount[MAX_SUBMESH_COUNT] = { 0 };
+		uint32_t SubsetIndexStart[MAX_SUBMESH_COUNT] = { 0 };
 		
 	};
 
