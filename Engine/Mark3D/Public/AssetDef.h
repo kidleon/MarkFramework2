@@ -14,6 +14,7 @@ namespace mark
 	{
 		[[nodiscard]] virtual ASSET_TYPE GetType() const noexcept = 0;
 		[[nodiscard]] virtual const char* GetAssetPath() const noexcept = 0;
+		[[nodiscard]] virtual bool IsLoaded() const noexcept = 0;
 	};
 
 	static constexpr size_t MAX_TEXTURE_FILENAME = 128;
@@ -29,10 +30,9 @@ namespace mark
 		FLOAT4* pTangent = nullptr;
 		FLOAT2* pTexCoord0 = nullptr;
 		FLOAT4* pColor = nullptr;
-		uint32_t NumVertex = 0;
-
+		void* pIndices = nullptr;
 		INDEX_FORMAT IndexFormat = INDEX_FORMAT::UINT16;
-		void* pIndices = { nullptr };
+		uint32_t NumVertex = 0;
 		uint32_t NumIndex = 0;
 		uint32_t NumSubset = 0;
 		uint32_t SubsetIndexCount[MAX_SUBMESH_COUNT] = { 0 };

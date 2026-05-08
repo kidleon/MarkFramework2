@@ -171,7 +171,20 @@ namespace mark
 		GPUBufferCreateDesc CreateDesc = {};
 		CreateDesc.Type = BUFFER_TYPE::INDEX_BUFFER;
 		CreateDesc.Usage = BUFFER_USAGE::DEFAULT;
-		CreateDesc.BufferSize = (IndexCount * ((IndexFormat == INDEX_FORMAT::UINT16) ? sizeof(uint16_t) : sizeof(uint32_t)));
+
+		uint32_t IndexSize = sizeof(uint16_t);
+		if(IndexFormat == INDEX_FORMAT::AUTO)
+		{
+			IndexSize = (VertexCount > 65500) ? sizeof(uint32_t) : sizeof(uint16_t);
+			m_IndexFormat = (IndexSize == sizeof(uint32_t)) ? INDEX_FORMAT::UINT32 : INDEX_FORMAT::UINT16;
+		}
+		else
+		{
+			m_IndexFormat = IndexFormat;
+			IndexSize = (IndexFormat == INDEX_FORMAT::UINT32) ? sizeof(uint32_t) : sizeof(uint16_t);
+		}
+
+		CreateDesc.BufferSize = IndexCount * IndexSize;
 		m_pIB = pRenderSys->CreateGPUBuffer(CreateDesc);
 		if (!m_pIB)
 		{

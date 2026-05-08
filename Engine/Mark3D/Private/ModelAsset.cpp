@@ -174,7 +174,6 @@ namespace mark
 			!m_MeshData.pIndices)
 			return;
 
-
 		// MikkTSpace 인터페이스 콜백 등록
 		SMikkTSpaceInterface mikkInterface = {};
 		mikkInterface.m_getNumFaces = MikkGetNumFaces;
@@ -548,6 +547,8 @@ namespace mark
 
 		pModelAsset->Release();
 		pBlob->Release();
+
+		pModelAsset->INL_SetLoaded(TRUE);
 
 		return true;
 	}

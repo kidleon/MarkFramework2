@@ -65,6 +65,7 @@ namespace mark
 
 		virtual ASSET_TYPE GetType() const noexcept { return ASSET_TYPE::MODEL; }
 		virtual const char* GetAssetPath() const noexcept { return m_AssetPath.c_str(); }
+		virtual bool IsLoaded() const noexcept { return m_IsLoaded.load(std::memory_order_acquire); }
 
 		virtual uint32_t GetNumMeshes() const noexcept;
 		virtual void GetMeshDesc(uint32_t MeshIndex, MESH_DESC& MeshDesc) const;
@@ -76,12 +77,26 @@ namespace mark
 
 		[[nodiscard]] inline ASSET_TYPE INL_GetType() const noexcept { return ASSET_TYPE::MODEL; }
 		[[nodiscard]] inline uint32_t INL_GetNumMeshes() const noexcept { return GetNumMeshes(); }
-		[[nodiscard]] inline Mesh* INL_GetMesh(uint32_t MeshIndex)  noexcept { return &m_lstMesh[MeshIndex]; }
+		[[nodiscard]] inline const Mesh* INL_GetMesh(uint32_t MeshIndex) const noexcept { return &m_lstMesh[MeshIndex]; }
+		[[nodiscard]] inline const MeshData& INL_GetMeshData() const noexcept { return m_MeshData; }
 
 		[[nodiscard]] inline uint32_t INL_GetTotalVertexCount() const noexcept { return m_MeshData.TotalVertexCount; }
 		[[nodiscard]] inline uint32_t INL_GetTotalIndexCount() const noexcept { return m_MeshData.TotalIndexCount; }
 		[[nodiscard]] inline uint32_t INL_GetVertexFormats() const noexcept { return m_MeshData.VertexFormats; }
 		[[nodiscard]] inline BOOL INL_HasComputedTangent() const noexcept { return m_ComputedTangent; }
+
+		[[nodiscard]] inline const FLOAT3* INL_GetPosition(int32_t MeshIndex) const noexcept { return m_MeshData.pPosition + m_lstMesh[MeshIndex].StartVertex; }
+		[[nodiscard]] inline const FLOAT3* INL_GetNormal(int32_t MeshIndex) const noexcept { return m_MeshData.pNormal + m_lstMesh[MeshIndex].StartVertex; }
+		[[nodiscard]] inline const FLOAT2* INL_GetTexCoord0(int32_t MeshIndex) const noexcept { return m_MeshData.pTexCoord0 + m_lstMesh[MeshIndex].StartVertex; }
+		[[nodiscard]] inline const FLOAT4* INL_GetColor(int32_t MeshIndex) const noexcept { return m_MeshData.pColor + m_lstMesh[MeshIndex].StartVertex; }
+		[[nodiscard]] inline const FLOAT4* INL_GetTangent(int32_t MeshIndex) const noexcept { return m_MeshData.pTangent + m_lstMesh[MeshIndex].StartVertex; }
+		[[nodiscard]] inline const void* INL_GetIndices(int32_t MeshIndex) const noexcept
+		{
+			const size_t IndexSize = (m_MeshData.IndexFormat == INDEX_FORMAT::UINT16) ? sizeof(uint16_t) : sizeof(uint32_t);
+			return static_cast<const uint8_t*>(m_MeshData.pIndices) + m_lstMesh[MeshIndex].StartIndex * IndexSize;
+		}
+
+		inline void INL_SetLoaded(BOOL isLoaded) noexcept { m_IsLoaded.store(isLoaded, std::memory_order_release); }
 
 	private:
 		ModelAsset() = delete;
@@ -90,7 +105,10 @@ namespace mark
 
 	private:
 		std::atomic<int32_t> m_RefCount{ 1 };
+		std::atomic<BOOL> m_IsLoaded{ FALSE };
 		BOOL m_ComputedTangent = FALSE;
+		uint32_t PADDING = 0;
+
 		sys_string m_AssetPath;
 
 	public:

@@ -50,7 +50,12 @@ namespace mark
 		BOOL HasModelAsset = FALSE;
 	};
 
-	struct IGPUGeometry : public Unknown
+	struct IResource : public Unknown
+	{
+		virtual bool IsLoaded() const noexcept = 0;
+	};
+
+	struct IGPUGeometry : public IResource
 	{
 		virtual bool Create(
 			uint32_t VertexFormats,

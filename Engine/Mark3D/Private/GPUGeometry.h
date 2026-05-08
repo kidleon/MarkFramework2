@@ -28,6 +28,8 @@ namespace mark
 		virtual void AddRef();
 		virtual void Release();
 
+		virtual bool IsLoaded() const noexcept { return m_IsLoaded; }
+
 		virtual bool Create(
 			uint32_t VertexFormats,
 			IModelAsset* pModelAsset,
@@ -36,11 +38,14 @@ namespace mark
 			BOOL ImmediateUploadToGPU
 		);
 
+		inline BOOL INL_IsLoaded() const noexcept { return m_IsLoaded; }
+
 	private:
 		virtual ~GPUGeometry();
 
 	private:
-		std::atomic<int32_t> m_RefCount{ 1 };
+		std::atomic<int64_t> m_RefCount{ 1 };
+		BOOL m_IsLoaded = FALSE;
 		GPU_BUFFER_LAYOUT m_BufferLayout = GPU_BUFFER_LAYOUT::MERGED;
 		unknown_ptr<ModelAsset> m_pModelAsset;
 		sys_vector<MeshDesc> m_lstMeshDescs;

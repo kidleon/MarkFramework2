@@ -17,7 +17,7 @@ namespace mark
 
 		GraphicsAPI PreferredGraphicsAPI = GraphicsAPI::D3D11;
 
-		char szAssetRootPath[_MAX_PATH];
+		char szAssetRootPath[_MAX_PATH] = { 0 };
 
 #if defined(__TARGET_OS_WINDOWS)
 		HWND WindowHandle = nullptr;
