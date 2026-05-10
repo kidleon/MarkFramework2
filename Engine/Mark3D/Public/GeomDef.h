@@ -1,4 +1,5 @@
 #pragma once
+#include "unknown_ptr.h"
 
 
 namespace mark
@@ -43,11 +44,14 @@ namespace mark
 
 	struct IModelAsset;
 
-	struct MedelCreateDesc
+	struct GPUGeometryCreateDesc
 	{
-		char szFilePath[_MAX_PATH] = { 0 };
+		unknown_ptr<IModelAsset> pModelAsset;
 		GPU_BUFFER_LAYOUT BufferLayout = GPU_BUFFER_LAYOUT::MERGED;
+		uint32_t VertexFormats = 0;
 		BOOL HasModelAsset = FALSE;
+		BOOL AsyncLoad = FALSE;
+		BOOL GenerateTangent = FALSE;
 	};
 
 	struct IResource : public Unknown
@@ -57,13 +61,6 @@ namespace mark
 
 	struct IGPUGeometry : public IResource
 	{
-		virtual bool Create(
-			uint32_t VertexFormats,
-			IModelAsset* pModelAsset,
-			GPU_BUFFER_LAYOUT BufferLayout,
-			BOOL HasModelAsset,
-			BOOL ImmediateUploadToGPU
-		) = 0;
 	};
 
 	struct IModelInstance : public Unknown

@@ -35,11 +35,7 @@ namespace mark
 		virtual bool GetRenderSystemInterface(IRenderSystem** ppOut) = 0;
 		virtual bool GetAssetManagerInterface(IAssetManager** ppOut) = 0;
 
-		virtual IGPUGeometry* CreateGeometry(
-			IModelAsset* pModelAsset,
-			GPU_BUFFER_LAYOUT BufferLayout,
-			BOOL HasModelAsset
-		) = 0;
+		virtual IGPUGeometry* CreateGPUGeometry(const GPUGeometryCreateDesc& CreateDesc) = 0;
 
 	};
 

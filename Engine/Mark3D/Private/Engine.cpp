@@ -3,6 +3,8 @@
 #include "core.h"
 #include "AssetManager.h"
 #include "FileAssetProvider.h"
+#include "GPUGeometry.h"
+#include "GPUGeometryFactory.h"
 
 
 namespace mark
@@ -166,12 +168,15 @@ namespace mark
 		return true;
 	}
 
-	IGPUGeometry* Engine::CreateGeometry(
-		IModelAsset* pModelAsset,
-		GPU_BUFFER_LAYOUT BufferLayout,
-		BOOL HasModelAsset
-	)
+	IGPUGeometry* Engine::CreateGPUGeometry(const GPUGeometryCreateDesc& CreateDesc)
 	{
-		return nullptr;
+		GPUGeometry* pGeometry = CORE_NEW(GPUGeometry);
+		if (!GPUGeometryFactory::CreateGeometry(CreateDesc, pGeometry))
+		{
+			pGeometry->Release();
+			return nullptr;
+		}
+
+		return pGeometry;
 	}
 }

@@ -9,6 +9,7 @@ namespace mark
 
 	class GPUGeometry final : public IGPUGeometry
 	{
+	public:
 		constexpr static uint32_t MAX_SUBSET_COUNT = 8;
 		struct MeshDesc
 		{
@@ -30,15 +31,18 @@ namespace mark
 
 		virtual bool IsLoaded() const noexcept { return m_IsLoaded; }
 
-		virtual bool Create(
-			uint32_t VertexFormats,
-			IModelAsset* pModelAsset,
-			GPU_BUFFER_LAYOUT BufferLayout,
-			BOOL HasModelAsset,
-			BOOL ImmediateUploadToGPU
-		);
-
 		inline BOOL INL_IsLoaded() const noexcept { return m_IsLoaded; }
+		inline void INL_SetLoaded(BOOL Loaded) { m_IsLoaded = Loaded; }
+		inline GPU_BUFFER_LAYOUT INL_GetBufferLayout() const noexcept { return m_BufferLayout; }
+		inline void INL_SetBufferLayout(GPU_BUFFER_LAYOUT BufferLayout) { m_BufferLayout = BufferLayout; }
+		inline void INL_AddPrimitiveBuffer(const PrimitiveBuffer* pBuffer) { m_lstPrimitiveBuffers.push_back(const_cast<PrimitiveBuffer*>(pBuffer)); }
+		inline void INL_SetModelAsset(const unknown_ptr<ModelAsset>& pModelAsset) { m_pModelAsset = pModelAsset; }
+		inline MeshDesc& INL_AddAndGetMeshDesc()
+		{
+			MeshDesc Desc = {};
+			m_lstMeshDescs.push_back(Desc);
+			return m_lstMeshDescs.back();
+		}
 
 	private:
 		virtual ~GPUGeometry();

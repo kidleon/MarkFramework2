@@ -20,11 +20,7 @@ namespace mark
 		virtual bool GetRenderSystemInterface(IRenderSystem** ppOut);
 		virtual bool GetAssetManagerInterface(IAssetManager** ppOut);
 
-		virtual IGPUGeometry* CreateGeometry(
-			IModelAsset* pModelAsset,
-			GPU_BUFFER_LAYOUT BufferLayout,
-			BOOL HasModelAsset
-		);
+		virtual IGPUGeometry* CreateGPUGeometry(const GPUGeometryCreateDesc& CreateDesc);
 
 		inline static Engine& Get() noexcept { return *s_pInstance; }
 		inline static Engine* GetPtr() noexcept { return s_pInstance; }

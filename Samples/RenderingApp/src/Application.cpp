@@ -70,6 +70,17 @@ BOOL Application::OnInit(HWND hWnd, int width, int height)
 		pModelAsset->GetMeshDesc((uint32_t)i, MeshDesc);
 	}
 
+	{
+		GPUGeometryCreateDesc GeoCreateDesc = {};
+		GeoCreateDesc.AsyncLoad = FALSE;
+		GeoCreateDesc.pModelAsset = pModelAsset;
+		GeoCreateDesc.VertexFormats = 0;
+		GeoCreateDesc.GenerateTangent = TRUE;
+		GeoCreateDesc.BufferLayout = GPU_BUFFER_LAYOUT::MERGED;
+		IGPUGeometry* pGPUGeometry = m_pMark3D->CreateGPUGeometry(GeoCreateDesc);
+		pGPUGeometry->Release();
+	}
+
 	pModelAsset->Release();
 	pAssetManager->Release();
 

@@ -382,8 +382,6 @@ namespace mark
 							continue;
 
 						uint32_t num_face_indices = (uint32_t)(face.num_indices - 2) * 3; // 삼각형으로 분할된 인덱스 개수
-
-						Mesh.SubMesh[s].IndexCount += num_face_indices;
 						SubsetIndexCount += num_face_indices;
 					}
 
@@ -394,6 +392,8 @@ namespace mark
 				Mesh.NumIndex = MeshIndexCount;
 			}
 
+			pModelAsset->m_lstMesh.push_back(Mesh);
+
 			TotalVetexCount += Mesh.NumVertex;
 			TotalIndexCount += Mesh.NumIndex;
 		}
@@ -401,7 +401,8 @@ namespace mark
 		// 메시 데이터 버퍼 할당
 		pModelAsset->m_MeshData.TotalVertexCount = TotalVetexCount;
 		pModelAsset->m_MeshData.VertexFormats = VertexFormats;
-		pModelAsset->m_MeshData.IndexFormat = (TotalVetexCount > 65500) ? INDEX_FORMAT::UINT32 : INDEX_FORMAT::UINT16;
+		pModelAsset->m_MeshData.TotalIndexCount = TotalIndexCount;
+		pModelAsset->m_MeshData.IndexFormat = (TotalIndexCount > 65500) ? INDEX_FORMAT::UINT32 : INDEX_FORMAT::UINT16;
 
 		if (VertexFormats & (uint32_t)VERTEX_FORMAT::POSITION)
 			pModelAsset->m_MeshData.pPosition = (FLOAT3*)CORE_SYS_ALLOC(sizeof(FLOAT3) * TotalVetexCount);
