@@ -248,13 +248,11 @@ namespace mark
 			} break;
 		}
 
-		if (CreateDesc.HasModelAsset)
+		if ((CreateDesc.CreateFlags & (uint32_t)GPUGEOMETRY_CREATE_FLAGS::HAS_MODEL_ASSET) != 0)
 		{
 			pGPUGeometry->INL_SetModelAsset(pModelAssetRef);
 		}
 
-		pGPUGeometry->INL_SetLoaded(TRUE);
-
-		return true;;
+		return true;
 	}
 }

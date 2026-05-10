@@ -28,7 +28,6 @@ BOOL Application::OnInit(HWND hWnd, int width, int height)
 	IRenderSystem* pRenderSystem = nullptr;
 	m_pMark3D->GetRenderSystemInterface(&pRenderSystem);
 
-
 	GPUBufferCreateDesc BufferDesc = {};
 	BufferDesc.Type = BUFFER_TYPE::VERTEX_BUFFER;
 	BufferDesc.Usage = BUFFER_USAGE::DEFAULT;
@@ -72,11 +71,9 @@ BOOL Application::OnInit(HWND hWnd, int width, int height)
 
 	{
 		GPUGeometryCreateDesc GeoCreateDesc = {};
-		GeoCreateDesc.AsyncLoad = FALSE;
 		GeoCreateDesc.pModelAsset = pModelAsset;
-		GeoCreateDesc.VertexFormats = 0;
-		GeoCreateDesc.GenerateTangent = TRUE;
 		GeoCreateDesc.BufferLayout = GPU_BUFFER_LAYOUT::MERGED;
+		GeoCreateDesc.CreateFlags = (uint32_t)GPUGEOMETRY_CREATE_FLAGS::HAS_MODEL_ASSET;
 		IGPUGeometry* pGPUGeometry = m_pMark3D->CreateGPUGeometry(GeoCreateDesc);
 		pGPUGeometry->Release();
 	}
