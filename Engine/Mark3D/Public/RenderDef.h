@@ -5,7 +5,7 @@
 
 namespace mark
 {
-	enum class GraphicsAPI : uint8_t
+	enum class GRAPHICS_API : uint8_t
 	{
 		D3D11,
 		D3D12,
@@ -33,6 +33,7 @@ namespace mark
 
 	enum class BUFFER_ACCESS : uint8_t
 	{
+		NONE = 0x0,
 		READ = 0x01,
 		WRITE = 0x02,
 		READ_WRITE = READ | WRITE
@@ -371,9 +372,10 @@ namespace mark
 
 	struct IGPUBuffer : public Unknown
 	{
-		[[nodiscard]] virtual BUFFER_TYPE GetBufferType() const = 0;
-		[[nodiscard]] virtual size_t GetBufferSize() const = 0;
-		[[nodiscard]] virtual void* GetNativePointer() const = 0;
+		[[nodiscard]] virtual BUFFER_TYPE GetBufferType() const noexcept = 0;
+		[[nodiscard]] virtual BUFFER_USAGE GetBufferUsage() const noexcept = 0;
+		[[nodiscard]] virtual size_t GetBufferSize() const noexcept = 0;
+		[[nodiscard]] virtual void* GetNativePointer() const noexcept = 0;
 
 		virtual bool UpdateBuffer(const void* pData, size_t DataSize, size_t* pWrittenOffset = nullptr) = 0;
 		
@@ -402,6 +404,7 @@ namespace mark
 	{
 		// 셰이더 프로그램 관련 인터페이스 메서드 선언
 		virtual SHADER_TYPE GetShaderType() const = 0;
+		virtual NameHash GetShaderNameHash() const = 0;
 
 	};
 
@@ -515,11 +518,18 @@ namespace mark
 		UINT32 StencilRef; // 스텐실 참조값
 	};
 
+	struct IHardwareGraphicsLayer : public Unknown
+	{
+		// 하드웨어 그래픽스 레이어 관련 인터페이스 메서드 선언
+		[[nodiscard]] virtual IGPUBuffer* CreateGPUBuffer(const GPUBufferCreateDesc& desc) = 0;
+		[[nodiscard]] virtual IShaderProgram* CreateShaderProgram(const ShaderProgramCreateDesc& desc) = 0;
+	};
 
 	//---------------------------------------------------------
 	// Render System
 	struct RenderSystemCreateDesc
 	{
+		GRAPHICS_API PreferredGraphicsAPI;
 		uint32_t ScreenWidth;
 		uint32_t ScreenHeight;
 #if defined(__TARGET_OS_WINDOWS)
@@ -528,16 +538,11 @@ namespace mark
 
 		BOOL DebugMode;
 	};
-
+	
 	struct IRenderSystem : public Unknown
 	{
-		virtual bool Initialize(const RenderSystemCreateDesc& desc) = 0;
-		virtual void Shutdown() = 0;
-
-		[[nodiscard]] virtual IGPUBuffer* CreateGPUBuffer(const GPUBufferCreateDesc& desc) = 0;
-		[[nodiscard]] virtual IShaderProgram* CreateShaderProgram(const ShaderProgramCreateDesc& desc) = 0;
+		[[nodiscard]] virtual IGPUBuffer* CreateGPUBuffer(const GPUBufferCreateDesc& CreateDesc) = 0;
+		[[nodiscard]] virtual IShaderProgram* CreateShaderProgram(const ShaderProgramCreateDesc& CreateDesc) = 0;
 		[[nodiscard]] virtual IShaderProgram* GetShaderProgram(SHADER_TYPE ShaderType, const char* szShaderName) = 0;
-
 	};
-
 }

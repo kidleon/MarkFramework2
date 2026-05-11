@@ -26,7 +26,7 @@ do
 	-- include "Engine/Renderer_D3D11"
 	include "Engine/CoreService"
 	include "Engine/Mark3D"
-	include "Engine/RenderSystem_D3D11"
+	include "Engine/HardwareGraphicsLayer_D3D11"
 	include "Samples/ConsoleApp"
 	include "Samples/RenderingApp"
 

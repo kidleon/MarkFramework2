@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "D3D11RenderSystem.h"
+#include "D3D11HardwareGraphicsLayer.h"
 
 
 using namespace mark;
@@ -35,23 +35,24 @@ BOOL APIENTRY DllMain(HMODULE g_hModule, DWORD  ul_reason_for_call, LPVOID lpRes
     return TRUE;
 }
 
-BOOL __stdcall CreateRenderSystem(
+BOOL __stdcall CreateHardwareGraphicsLayer(
 	const RenderSystemCreateDesc& CreateDesc,
-    mark::IRenderSystem** ppRenderSystem
+	mark::IHardwareGraphicsLayer** ppHardwareGraphicsLayer
 )
 {
-    if (!ppRenderSystem)
-        return FALSE;
+	if (!ppHardwareGraphicsLayer)
+		return FALSE;
 
-	D3D11RenderSystem* pRenderSystem = CORE_NEW(D3D11RenderSystem);
-	if (!pRenderSystem->Initialize(CreateDesc))
+	D3D11HardwareGraphicsLayer* pHardwareGraphicsLayer = CORE_NEW(D3D11HardwareGraphicsLayer);
+	if (!pHardwareGraphicsLayer->Initialize(CreateDesc))
 	{
-		(*ppRenderSystem) = nullptr;
-		CORE_DELETE(D3D11RenderSystem, pRenderSystem);
+		(*ppHardwareGraphicsLayer) = nullptr;
+		pHardwareGraphicsLayer->Release();
+
 		return FALSE;
 	}
 
-    *ppRenderSystem = pRenderSystem;
+	*ppHardwareGraphicsLayer = pHardwareGraphicsLayer;
 
-    return TRUE;
+	return TRUE;
 }

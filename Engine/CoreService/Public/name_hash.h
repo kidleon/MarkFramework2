@@ -26,6 +26,8 @@ namespace mark
 		uint32_t hash_value = 0;
 
 	};
+
+	using NameHash = name_hash;
 }
 
 template<>

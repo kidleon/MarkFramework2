@@ -16,6 +16,7 @@ namespace mark
 		void Release();
 
 		SHADER_TYPE GetShaderType() const noexcept;
+		name_hash GetShaderNameHash() const noexcept;
 
 #if defined(_DEBUG)
 		inline const char* INL_GetShaderName() const noexcept { return m_szShaderName; }

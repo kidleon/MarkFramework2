@@ -11,9 +11,10 @@ namespace mark
 		void AddRef();
 		void Release();
 
-		BUFFER_TYPE GetBufferType() const;
-		size_t GetBufferSize() const;
-		void* GetNativePointer() const;
+		BUFFER_TYPE GetBufferType() const noexcept;
+		BUFFER_USAGE GetBufferUsage() const noexcept;
+		size_t GetBufferSize() const noexcept;
+		void* GetNativePointer() const noexcept;
 
 		bool UpdateBuffer(const void* pData, size_t DataSize, size_t* pWrittenOffset);
 

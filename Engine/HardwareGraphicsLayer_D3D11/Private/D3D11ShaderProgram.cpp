@@ -56,4 +56,9 @@ namespace mark
 	{
 		return m_ShaderType;
 	}
+
+	name_hash D3D11ShaderProgram::GetShaderNameHash() const noexcept
+	{
+		return m_HashName;
+	}
 }

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "PrimitiveBuffer.h"
 #include "Engine.h"
+#include "RenderSystem.h"
 
 
 namespace mark
@@ -15,7 +16,7 @@ namespace mark
 		if (!VertexCount || !IndexCount || !VertexFormats)
 			return false;
 
-		IRenderSystem* pRenderSys = Engine::Get().INL_GetRenderSystem();
+		RenderSystem* pRenderSys = Engine::Get().INL_GetRenderSystem();
 
 		if ((VertexFormats & (uint32_t)VERTEX_FORMAT::POSITION) != 0)
 		{

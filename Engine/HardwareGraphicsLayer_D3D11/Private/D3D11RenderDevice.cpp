@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "D3D11RenderDevice.h"
-#include "D3D11BufferPool.h"
 #include "D3D11ShaderProgram.h"
 #include "D3D11ShaderProgramCompiler.h"
 
@@ -183,15 +182,11 @@ namespace mark
 		if (FAILED(hr))
 			return FALSE;
 
-		m_pD3D11BufferPool = CORE_NEW(D3D11BufferPool)(m_pD3D11Device);
-
 		return TRUE;
 	}
 
 	void D3D11RenderDevice::DestroyDevice() noexcept
 	{
-		CORE_DELETE(D3D11BufferPool, m_pD3D11BufferPool);
-
 		if (m_pImmediateContext)
 		{
 			m_pImmediateContext->ClearState();
@@ -259,15 +254,7 @@ namespace mark
 
 	ID3D11Buffer* D3D11RenderDevice::CreateBuffer(const GPUBufferCreateDesc& CreateDesc)
 	{
-		ID3D11Buffer* pD3D11Buffer = m_pD3D11BufferPool->Acquire(
-			CreateDesc.Type,
-			CreateDesc.Usage,
-			CreateDesc.BufferSize
-		);
-
-		if (pD3D11Buffer)
-			return pD3D11Buffer;
-
+		ID3D11Buffer* pD3D11Buffer = nullptr;
 		D3D11_BUFFER_DESC BuffDesc = {};
 		BuffDesc.ByteWidth = (UINT)CreateDesc.BufferSize;
 		BuffDesc.BindFlags = D3D11_IMPL_BUFFER_BIND_FLAGS[(int)CreateDesc.Type];
@@ -282,17 +269,6 @@ namespace mark
 		}
 
 		return pD3D11Buffer;
-	}
-
-	void D3D11RenderDevice::ReleaseBuffer(ID3D11Buffer* pBuffer)
-	{
-		if (!pBuffer) [[unlikely]]
-			return;
-
-		if (m_pD3D11BufferPool->Release(pBuffer))
-			return;
-
-		pBuffer->Release();
 	}
 
 	D3D11ShaderProgram* D3D11RenderDevice::CompileShaderProgram(const ShaderProgramCreateDesc& CreateDesc)

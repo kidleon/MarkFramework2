@@ -1,5 +1,6 @@
 #pragma once
 #include "mathlib.h"
+#include "name_hash.h"
 #include "RenderDef.h"
 #include "AssetDef.h"
 #include "GeomDef.h"
@@ -15,7 +16,7 @@ namespace mark
 		uint32_t ScreenWidth = 0;
 		uint32_t ScreenHeight = 0;
 
-		GraphicsAPI PreferredGraphicsAPI = GraphicsAPI::D3D11;
+		GRAPHICS_API PreferredGraphicsAPI = GRAPHICS_API::D3D11;
 
 		char szAssetRootPath[_MAX_PATH] = { 0 };
 

@@ -3,7 +3,6 @@
 
 namespace mark
 {
-	class D3D11BufferPool;
 	class D3D11ShaderProgram;
 
 	class D3D11RenderDevice
@@ -17,7 +16,6 @@ namespace mark
 		bool CreateDevice(HWND hWnd, uint32_t Width, uint32_t Height, bool DebugDevice);
 
 		ID3D11Buffer* CreateBuffer(const GPUBufferCreateDesc& CreateDesc);
-		void ReleaseBuffer(ID3D11Buffer* pBuffer);
 
 		D3D11ShaderProgram* CompileShaderProgram(const ShaderProgramCreateDesc& CreateDesc);
 
@@ -49,8 +47,6 @@ namespace mark
 		ID3D11RenderTargetView* m_pRenderTargetView = nullptr;
 		ID3D11Texture2D* m_pDepthStencilTexture = nullptr;
 		ID3D11DepthStencilView* m_pDepthStencilView = nullptr;
-
-		D3D11BufferPool* m_pD3D11BufferPool = nullptr;
 		
 	};
 }

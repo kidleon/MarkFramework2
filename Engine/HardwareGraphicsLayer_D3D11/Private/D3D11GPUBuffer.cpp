@@ -13,11 +13,7 @@ namespace mark
 
 	D3D11GPUBuffer::~D3D11GPUBuffer() noexcept
 	{
-		if (m_pD3D11Buffer)
-		{
-			D3D11RenderDevice::Get().ReleaseBuffer(m_pD3D11Buffer);
-			m_pD3D11Buffer = nullptr;
-		}
+		CHECK_RELEASE(m_pD3D11Buffer);
 	}
 
 	void D3D11GPUBuffer::AddRef()
@@ -33,7 +29,7 @@ namespace mark
 		}
 	}
 
-	BUFFER_TYPE D3D11GPUBuffer::GetBufferType() const
+	BUFFER_TYPE D3D11GPUBuffer::GetBufferType() const noexcept
 	{
 		switch (m_BufferDesc.BindFlags)
 		{
@@ -50,12 +46,24 @@ namespace mark
 		return BUFFER_TYPE::EMAX;
 	}
 
-	size_t D3D11GPUBuffer::GetBufferSize() const
+	BUFFER_USAGE D3D11GPUBuffer::GetBufferUsage() const noexcept
+	{
+		switch (m_BufferDesc.Usage)
+		{
+			case D3D11_USAGE_DYNAMIC:
+				return BUFFER_USAGE::DYNAMIC;
+			case D3D11_USAGE_DEFAULT:
+				return BUFFER_USAGE::DEFAULT;
+		}
+		return BUFFER_USAGE::EMAX;
+	}
+
+	size_t D3D11GPUBuffer::GetBufferSize() const noexcept
 	{
 		return m_BufferDesc.ByteWidth;
 	}
 
-	void* D3D11GPUBuffer::GetNativePointer() const
+	void* D3D11GPUBuffer::GetNativePointer() const noexcept
 	{
 		return static_cast<void*>(m_pD3D11Buffer);
 	}

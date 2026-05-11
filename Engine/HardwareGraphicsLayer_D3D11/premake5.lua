@@ -1,4 +1,4 @@
-project("RenderSystem_D3D11")
+project("HardwareGraphicsLayer_D3D11")
 do
 	language "C++"
 	cppdialect "C++20"
@@ -48,7 +48,7 @@ do
 		
 		files {
 			"dllmain.cpp",
-			"RenderSystem_D3D11.def"
+			"HardwareGraphicsLayer_D3D11.def"
 		}
 
 		buildoptions { "/utf-8", "/Zc:preprocessor" }
@@ -80,7 +80,7 @@ do
 			incrementallink "On"
 			links{ "CoreService_d" }
 			
-			targetname("RenderSystem_D3D11d")
+			targetname("HardwareGraphicsLayer_D3D11d")
 		end
 		filter {}
 		
@@ -91,7 +91,7 @@ do
 			symbols "On"
 			incrementallink "Off"
 			links{ "CoreService" }
-			targetname("RenderSystem_D3D11")
+			targetname("HardwareGraphicsLayer_D3D11")
 		end
 		filter {}
 		
@@ -102,7 +102,7 @@ do
 			symbols "On"
 			incrementallink "Off"
 			links{ "CoreService" }
-			targetname("RenderSystem_D3D11")
+			targetname("HardwareGraphicsLayer_D3D11")
 		end
 		filter {}
 	end

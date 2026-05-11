@@ -13,8 +13,10 @@
 
 #include "predefine.h"
 #include "unknown_ptr.h"
+#include "name_hash.h"
 #include "core_heap.h"
 #include "core_generic.h"
+#include "spin_lock.h"
 #include "log.h"
 #include "mathlib.h"
 #include "RenderDef.h"

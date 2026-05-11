@@ -215,7 +215,7 @@ static constexpr size_t DEFAULT_ALIGNMENT = sizeof(size_t);
 
 //#define CHECK_DELETE(ptr) if (ptr) { delete (ptr); (ptr) = nullptr; }
 //#define CHECK_DELETE_ARRAY(ptr) if (ptr) { delete[] (ptr); (ptr) = nullptr; }
-#define CHECK_RELEASE(ptr) if (ptr) { (ptr)->Release(); (ptr) = nullptr; }
+#define CHECK_RELEASE(ptr) { if (ptr) { (ptr)->Release(); (ptr) = nullptr; } }
 
 namespace mark
 {
