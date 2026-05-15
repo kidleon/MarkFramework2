@@ -7,7 +7,7 @@
 #include <string_view>
 #include <cassert>
 
-namespace mark
+namespace mtl
 {
 	template<size_t InitialCapacity = 1024, typename Alloc = std::allocator<char>>
 	class string_buffer

@@ -1,20 +1,20 @@
 #pragma once
-#include <cstddef>           // size_t, ptrdiff_t
-#include <new>               // placement new
-#include <utility>           // std::move, std::forward, std::swap
-#include <iterator>          // std::reverse_iterator
-#include <initializer_list>  // std::initializer_list
-#include <type_traits>       // std::is_trivially_destructible_v 등
-#include <memory>            // std::uninitialized_move, uninitialized_copy 등
-#include <algorithm>         // std::move, std::move_backward, std::equal 등
-#include <cassert>           // assert
+#include <cstddef>
+#include <new>
+#include <utility>
+#include <iterator>
+#include <initializer_list>
+#include <type_traits>
+#include <memory>
+#include <algorithm>
+#include <cassert>
 
 
 #ifndef GTL_FIXED_MAX_OBJECT_BYTES
 #define GTL_FIXED_MAX_OBJECT_BYTES (64u * 1024u)  // 64 KB
 #endif
 
-namespace mark
+namespace mtl
 {
 	/**
 	* @brief 고정 크기 벡터 컨테이너. 런타임에 크기가 변경되지 않는 배열과 유사하지만, STL 스타일의 인터페이스를 제공합니다.
@@ -51,14 +51,14 @@ namespace mark
 		static constexpr size_type kAlignment = Alignment;
 
 	private:
-		alignas(Alignment) unsigned char _buffer[sizeof(T) * N];
+		alignas(Alignment) std::byte _buffer[sizeof(T) * N];
 
 		pointer _end;
 
-		inline pointer buffer_ptr() noexcept { return reinterpret_cast<pointer>(_buffer); }
-		inline const_pointer buffer_ptr() const noexcept { return reinterpret_cast<const_pointer>(_buffer); }
+		pointer buffer_ptr() noexcept { return reinterpret_cast<pointer>(_buffer); }
+		const_pointer buffer_ptr() const noexcept { return reinterpret_cast<const_pointer>(_buffer); }
 
-		inline static void destroy_range(pointer first, pointer last) noexcept
+		static void destroy_range(pointer first, pointer last) noexcept
 		{
 			if constexpr (!std::is_trivially_destructible_v<T>)
 			{
@@ -71,12 +71,6 @@ namespace mark
 		fixed_vector() noexcept
 			: _end(reinterpret_cast<pointer>(_buffer))
 		{
-		}
-
-		explicit fixed_vector(size_type n)
-			: _end(reinterpret_cast<pointer>(_buffer))
-		{
-			resize(n);
 		}
 
 		fixed_vector(size_type n, const T& value)
@@ -116,7 +110,7 @@ namespace mark
 			destroy_range(buffer_ptr(), _end);
 		}
 
-		inline fixed_vector& operator=(const fixed_vector& other)
+		fixed_vector& operator=(const fixed_vector& other)
 		{
 			if (this != &other) {
 				assign(other.begin(), other.end());
@@ -124,7 +118,7 @@ namespace mark
 			return *this;
 		}
 
-		inline fixed_vector& operator=(fixed_vector&& other) 
+		fixed_vector& operator=(fixed_vector&& other) 
 			noexcept(std::is_nothrow_move_assignable_v<T> && std::is_nothrow_move_constructible_v<T>)
 		{
 			if (this == &other) return *this;
@@ -134,7 +128,7 @@ namespace mark
 			return *this;
 		}
 
-		inline fixed_vector& operator=(std::initializer_list<T> il)
+		fixed_vector& operator=(std::initializer_list<T> il)
 		{
 			assign(il.begin(), il.end());
 			return *this;
@@ -158,11 +152,7 @@ namespace mark
 			{
 				const size_type n = static_cast<size_type>(std::distance(first, last));
 				assert(n <= N && "fixed_vector::assign: overflow");
-				for (; first != last; ++first)
-				{
-					::new (static_cast<void*>(_end)) T(*first);
-					++_end;
-				}
+				_end = std::uninitialized_copy(first, last, buffer_ptr());
 			}
 			else
 			{
@@ -192,7 +182,7 @@ namespace mark
 		const_reverse_iterator  rend()    const noexcept { return const_reverse_iterator(buffer_ptr()); }
 		const_reverse_iterator  crend()   const noexcept { return const_reverse_iterator(buffer_ptr()); }
 
-		inline size_type size() const noexcept
+		size_type size() const noexcept
 		{
 			return static_cast<size_type>(_end - buffer_ptr());
 		}
@@ -203,16 +193,16 @@ namespace mark
 		bool empty() const noexcept { return _end == buffer_ptr(); }
 		bool full()  const noexcept { return size() == N; }  // 고정 컨테이너에 유용
 
-		inline reference       operator[](size_type i)       noexcept { assert(i < size()); return buffer_ptr()[i]; }
-		inline const_reference operator[](size_type i) const noexcept { assert(i < size()); return buffer_ptr()[i]; }
+		reference       operator[](size_type i)       noexcept { assert(i < size()); return buffer_ptr()[i]; }
+		const_reference operator[](size_type i) const noexcept { assert(i < size()); return buffer_ptr()[i]; }
 
-		inline reference at(size_type i)
+		reference at(size_type i)
 		{
 			assert(i < size() && "fixed_vector::at: index out of range");
 			return buffer_ptr()[i];
 		}
 
-		inline const_reference at(size_type i) const
+		const_reference at(size_type i) const
 		{
 			assert(i < size() && "fixed_vector::at: index out of range");
 			return buffer_ptr()[i];
@@ -268,6 +258,82 @@ namespace mark
 
 		iterator insert(const_iterator pos, const T& value) { return emplace(pos, value); }
 		iterator insert(const_iterator pos, T&& value) { return emplace(pos, std::move(value)); }
+
+		iterator insert(const_iterator pos, size_type count, const T& value)
+		{
+			assert(pos >= buffer_ptr() && pos <= _end);
+			assert(size() + count <= N && "fixed_vector::insert: 용량 초과");
+
+			pointer p = const_cast<pointer>(pos);
+			if (count == 0) return p;
+
+			const size_type tail = static_cast<size_type>(_end - p);
+
+			if (count <= tail)
+			{
+				std::uninitialized_move(_end - count, _end, _end);
+				std::move_backward(p, _end - count, _end);
+				std::fill_n(p, count, value);
+			}
+			else
+			{
+				std::uninitialized_move(p, _end, p + count);
+				std::fill_n(p, tail, value);
+				std::uninitialized_fill_n(p + tail, count - tail, value);
+			}
+			_end += count;
+			return p;
+		}
+
+		template <typename InputIt, typename = std::enable_if_t<!std::is_integral_v<InputIt>>>
+		iterator insert(const_iterator pos, InputIt first, InputIt last)
+		{
+			assert(pos >= buffer_ptr() && pos <= _end);
+			pointer p = const_cast<pointer>(pos);
+
+			if constexpr (std::is_base_of_v<std::random_access_iterator_tag,
+				typename std::iterator_traits<InputIt>::iterator_category>)
+			{
+				const size_type count = static_cast<size_type>(std::distance(first, last));
+				assert(size() + count <= N && "fixed_vector::insert: 용량 초과");
+				if (count == 0) return p;
+
+				const size_type tail = static_cast<size_type>(_end - p);
+
+				if (count <= tail)
+				{
+					std::uninitialized_move(_end - count, _end, _end);
+					std::move_backward(p, _end - count, _end);
+					std::copy(first, last, p);
+				}
+				else
+				{
+					std::uninitialized_move(p, _end, p + count);
+					InputIt mid = first;
+					std::advance(mid, tail);
+					std::copy(first, mid, p);
+					std::uninitialized_copy(mid, last, p + tail);
+				}
+				_end += count;
+				return p;
+			}
+			else
+			{
+				const size_type offset = static_cast<size_type>(p - buffer_ptr());
+				size_type inserted = 0;
+				for (; first != last; ++first, ++inserted)
+				{
+					assert(size() < N && "fixed_vector::insert: 용량 초과");
+					emplace(buffer_ptr() + offset + inserted, *first);
+				}
+				return buffer_ptr() + offset;
+			}
+		}
+
+		iterator insert(const_iterator pos, std::initializer_list<T> il)
+		{
+			return insert(pos, il.begin(), il.end());
+		}
 
 		template <typename... Args>
 		iterator emplace(const_iterator pos, Args&&... args)
@@ -369,46 +435,43 @@ namespace mark
 
 	// 비교 연산자: N, Alignment가 달라도 원소 타입만 같으면 비교 가능
 	template <typename T, size_t N1, size_t N2, size_t A1, size_t A2>
-	bool operator==(const fixed_vector<T, N1, A1>& a,
-		const fixed_vector<T, N2, A2>& b)
+	bool operator==(const fixed_vector<T, N1, A1>& a, const fixed_vector<T, N2, A2>& b)
 	{
 		return a.size() == b.size() && std::equal(a.begin(), a.end(), b.begin());
 	}
 
 	template <typename T, size_t N1, size_t N2, size_t A1, size_t A2>
-	bool operator!=(const fixed_vector<T, N1, A1>& a,
-		const fixed_vector<T, N2, A2>& b) {
+	bool operator!=(const fixed_vector<T, N1, A1>& a, const fixed_vector<T, N2, A2>& b)
+	{
 		return !(a == b);
 	}
 
 	template <typename T, size_t N1, size_t N2, size_t A1, size_t A2>
-	bool operator<(const fixed_vector<T, N1, A1>& a,
-		const fixed_vector<T, N2, A2>& b)
+	bool operator<(const fixed_vector<T, N1, A1>& a, const fixed_vector<T, N2, A2>& b)
 	{
 		return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end());
 	}
 
 	template <typename T, size_t N1, size_t N2, size_t A1, size_t A2>
-	bool operator>(const fixed_vector<T, N1, A1>& a,
-		const fixed_vector<T, N2, A2>& b) {
+	bool operator>(const fixed_vector<T, N1, A1>& a, const fixed_vector<T, N2, A2>& b)
+	{
 		return b < a;
 	}
 
 	template <typename T, size_t N1, size_t N2, size_t A1, size_t A2>
-	bool operator<=(const fixed_vector<T, N1, A1>& a,
-		const fixed_vector<T, N2, A2>& b) {
+	bool operator<=(const fixed_vector<T, N1, A1>& a, const fixed_vector<T, N2, A2>& b)
+	{
 		return !(b < a);
 	}
 
 	template <typename T, size_t N1, size_t N2, size_t A1, size_t A2>
-	bool operator>=(const fixed_vector<T, N1, A1>& a,
-		const fixed_vector<T, N2, A2>& b) {
+	bool operator>=(const fixed_vector<T, N1, A1>& a, const fixed_vector<T, N2, A2>& b)
+	{
 		return !(a < b);
 	}
 
 	template <typename T, size_t N, size_t A>
-	void swap(fixed_vector<T, N, A>& a, fixed_vector<T, N, A>& b)
-		noexcept(noexcept(a.swap(b)))
+	void swap(fixed_vector<T, N, A>& a, fixed_vector<T, N, A>& b) noexcept(noexcept(a.swap(b)))
 	{
 		a.swap(b);
 	}
