@@ -1,6 +1,6 @@
 #pragma once
 
-#if defined(__TARGET_OS_WINDOWS)
+#if defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 #	if defined(USE_DLL)
 #		if defined(MTL_EXPORT)
 #			define MTL_API __declspec(dllexport)
@@ -10,7 +10,7 @@
 #	else
 #		define MTL_API
 #	endif // #if defined(USE_DLL)
-#elif defined(__TARGET_OS_LINUX) || defined(__TARGET_OS_MAC) || defined(__TARGET_OS_IOS) || defined(__TARGET_OS_FREEBSD)
+#elif defined(__GNUC__) || defined(__clang__)
 #	if defined(USE_DLL)
 #		if defined(MTL_EXPORT)
 #			define MTL_API __attribute__((visibility("default")))
