@@ -1,7 +1,9 @@
 #pragma once
+#include <algorithm>
 #include <charconv>
 #include <format>
 #include <memory>    // std::allocator
+#include <type_traits>
 #include <vector>
 #include <string>
 #include <string_view>
@@ -99,22 +101,14 @@ namespace mtl
 		}
 
 		// 정수/부동소수점 → std::to_chars로 고속 변환
-		inline string_buffer& append(int value)
-		{
-			return append_numeric(value);
-		}
-
-		inline string_buffer& append(unsigned int value)
-		{
-			return append_numeric(value);
-		}
-
-		inline string_buffer& append(float value)
-		{
-			return append_numeric(value);
-		}
-
-		inline string_buffer& append(double value)
+		// char/bool은 위쪽 전용 오버로드가 가져감 (exact match가 템플릿보다 우선).
+		template<typename T>
+		inline std::enable_if_t<
+			std::is_arithmetic_v<T>
+			&& !std::is_same_v<std::remove_cv_t<T>, bool>
+			&& !std::is_same_v<std::remove_cv_t<T>, char>,
+			string_buffer&>
+		append(T value)
 		{
 			return append_numeric(value);
 		}

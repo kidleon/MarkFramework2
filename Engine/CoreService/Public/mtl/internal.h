@@ -20,8 +20,6 @@
 #	else
 #		define MTL_API
 #	endif // #if defined(USE_DLL)
-#endif // #if defined(__TARGET_OS_WINDOWS)
-
-namespace mtl
-{
-}
+#else
+#	define MTL_API
+#endif

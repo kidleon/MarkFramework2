@@ -10,18 +10,44 @@
 #include <cassert>
 
 
-#ifndef GTL_FIXED_MAX_OBJECT_BYTES
-#define GTL_FIXED_MAX_OBJECT_BYTES (64u * 1024u)  // 64 KB
+#ifndef MTL_FIXED_MAX_OBJECT_BYTES
+#define MTL_FIXED_MAX_OBJECT_BYTES (64u * 1024u)  // 64 KB
 #endif
+
+
+// ----------------------------------------------------------------------------
+// mtl::fixed_vector<T, N, Alignment> — 인플레이스 버퍼를 가진 고정 용량 벡터.
+//
+// 사용 용도:
+//   - 함수 지역/멤버로 두는 짧은 수명의 컬렉션 (수십~수백 개).
+//   - 매 프레임 잠깐 모았다 비우는 임시 컨테이너
+//     (수집한 충돌체, 가시 객체, 컬링 결과 등).
+//   - 동적 할당이 부담스러운 핫 패스에서 std::vector 대체.
+//   - 컴포넌트 작은 리스트 (Player의 buff 리스트, Mesh의 sub-mesh 인덱스 등).
+//   - 임의 접근이 필요하면서 N이 예측 가능한 경우.
+//
+// 안 쓰는 게 좋은 경우:
+//   - 크기 상한을 예측하기 어려운 경우 → std::vector.
+//   - N * sizeof(T)가 64KB 이상으로 큰 경우 (스택 오버플로 위험.
+//     MTL_FIXED_MAX_OBJECT_BYTES static_assert가 막아줌).
+//   - 빈번한 중간 삽입/삭제가 필요 → fixed_list 고려.
+//
+// 특성:
+//   - 연속 메모리, 캐시 친화.
+//   - push_back / emplace_back / pop_back : O(1).
+//   - 중간 insert / erase                  : O(N).
+//   - erase_unsorted                       : O(1) (순서 보존 안 함, 게임코드 핵심 패턴).
+//   - 동적 할당 없음.
+//
+// 사용 예:
+//   mtl::fixed_vector<int, 16> v;
+//   v.push_back(1);
+//   v.emplace_back(2);
+//   for (int n : v) { ... }
+// ----------------------------------------------------------------------------
 
 namespace mtl
 {
-	/**
-	* @brief 고정 크기 벡터 컨테이너. 런타임에 크기가 변경되지 않는 배열과 유사하지만, STL 스타일의 인터페이스를 제공합니다.
-	* @tparam T 요소 타입
-	* @tparam N 최대 요소 수 (용량)
-	* @tparam Alignment 요소의 정렬 요구사항 (기본값은 alignof(T))
-	*/
 	template <typename T, size_t N, size_t Alignment = alignof(T)>
 	class fixed_vector
 	{
@@ -31,8 +57,8 @@ namespace mtl
 		static_assert((Alignment& (Alignment - 1)) == 0,
 			"fixed_vector: Alignment must be a power of 2.");
 
-		static_assert(sizeof(T)* N <= GTL_FIXED_MAX_OBJECT_BYTES,
-			"fixed_vector: The size of the object exceeds GTL_FIXED_MAX_OBJECT_BYTES.");
+		static_assert(sizeof(T)* N <= MTL_FIXED_MAX_OBJECT_BYTES,
+			"fixed_vector: The size of the object exceeds MTL_FIXED_MAX_OBJECT_BYTES.");
 
 		using value_type = T;
 		using size_type = size_t;
@@ -51,63 +77,63 @@ namespace mtl
 		static constexpr size_type kAlignment = Alignment;
 
 	private:
-		alignas(Alignment) std::byte _buffer[sizeof(T) * N];
+		alignas(Alignment) std::byte m_buffer[sizeof(T) * N];
 
-		pointer _end;
+		pointer m_end;
 
-		pointer buffer_ptr() noexcept { return reinterpret_cast<pointer>(_buffer); }
-		const_pointer buffer_ptr() const noexcept { return reinterpret_cast<const_pointer>(_buffer); }
+		pointer buffer_ptr() noexcept { return reinterpret_cast<pointer>(m_buffer); }
+		const_pointer buffer_ptr() const noexcept { return reinterpret_cast<const_pointer>(m_buffer); }
 
 		static void destroy_range(pointer first, pointer last) noexcept
 		{
 			if constexpr (!std::is_trivially_destructible_v<T>)
 			{
-				for (; first != last; ++first) 
+				for (; first != last; ++first)
 					first->~T();
 			}
 		}
 
 	public:
 		fixed_vector() noexcept
-			: _end(reinterpret_cast<pointer>(_buffer))
+			: m_end(reinterpret_cast<pointer>(m_buffer))
 		{
 		}
 
 		fixed_vector(size_type n, const T& value)
-			: _end(reinterpret_cast<pointer>(_buffer))
+			: m_end(reinterpret_cast<pointer>(m_buffer))
 		{
 			assign(n, value);
 		}
 
 		template <typename InputIt, typename = std::enable_if_t<!std::is_integral_v<InputIt>>>
 		fixed_vector(InputIt first, InputIt last)
-			: _end(reinterpret_cast<pointer>(_buffer))
+			: m_end(reinterpret_cast<pointer>(m_buffer))
 		{
 			assign(first, last);
 		}
 
 		fixed_vector(std::initializer_list<T> il)
-			: _end(reinterpret_cast<pointer>(_buffer))
+			: m_end(reinterpret_cast<pointer>(m_buffer))
 		{
 			assign(il.begin(), il.end());
 		}
 
 		fixed_vector(const fixed_vector& other)
-			: _end(reinterpret_cast<pointer>(_buffer))
+			: m_end(reinterpret_cast<pointer>(m_buffer))
 		{
 			assign(other.begin(), other.end());
 		}
 
 		fixed_vector(fixed_vector&& other) noexcept(std::is_nothrow_move_constructible_v<T>)
-			: _end(reinterpret_cast<pointer>(_buffer))
+			: m_end(reinterpret_cast<pointer>(m_buffer))
 		{
-			_end = std::uninitialized_move(other.begin(), other.end(), buffer_ptr());
+			m_end = std::uninitialized_move(other.begin(), other.end(), buffer_ptr());
 			other.clear();
 		}
 
 		~fixed_vector()
 		{
-			destroy_range(buffer_ptr(), _end);
+			destroy_range(buffer_ptr(), m_end);
 		}
 
 		fixed_vector& operator=(const fixed_vector& other)
@@ -118,12 +144,12 @@ namespace mtl
 			return *this;
 		}
 
-		fixed_vector& operator=(fixed_vector&& other) 
+		fixed_vector& operator=(fixed_vector&& other)
 			noexcept(std::is_nothrow_move_assignable_v<T> && std::is_nothrow_move_constructible_v<T>)
 		{
 			if (this == &other) return *this;
 			clear();
-			_end = std::uninitialized_move(other.begin(), other.end(), buffer_ptr());
+			m_end = std::uninitialized_move(other.begin(), other.end(), buffer_ptr());
 			other.clear();
 			return *this;
 		}
@@ -139,7 +165,7 @@ namespace mtl
 			assert(n <= N && "fixed_vector::assign: n이 용량 N을 초과");
 			clear();
 			std::uninitialized_fill_n(buffer_ptr(), n, value);
-			_end = buffer_ptr() + n;
+			m_end = buffer_ptr() + n;
 		}
 
 		template <typename InputIt, typename = std::enable_if_t<!std::is_integral_v<InputIt>>>
@@ -152,11 +178,11 @@ namespace mtl
 			{
 				const size_type n = static_cast<size_type>(std::distance(first, last));
 				assert(n <= N && "fixed_vector::assign: overflow");
-				_end = std::uninitialized_copy(first, last, buffer_ptr());
+				m_end = std::uninitialized_copy(first, last, buffer_ptr());
 			}
 			else
 			{
-				for (; first != last; ++first) 
+				for (; first != last; ++first)
 					push_back(*first);
 			}
 		}
@@ -170,13 +196,13 @@ namespace mtl
 		const_iterator  begin()  const noexcept { return buffer_ptr(); }
 		const_iterator  cbegin() const noexcept { return buffer_ptr(); }
 
-		iterator        end()          noexcept { return _end; }
-		const_iterator  end()    const noexcept { return _end; }
-		const_iterator  cend()   const noexcept { return _end; }
+		iterator        end()          noexcept { return m_end; }
+		const_iterator  end()    const noexcept { return m_end; }
+		const_iterator  cend()   const noexcept { return m_end; }
 
-		reverse_iterator        rbegin()        noexcept { return reverse_iterator(_end); }
-		const_reverse_iterator  rbegin()  const noexcept { return const_reverse_iterator(_end); }
-		const_reverse_iterator  crbegin() const noexcept { return const_reverse_iterator(_end); }
+		reverse_iterator        rbegin()        noexcept { return reverse_iterator(m_end); }
+		const_reverse_iterator  rbegin()  const noexcept { return const_reverse_iterator(m_end); }
+		const_reverse_iterator  crbegin() const noexcept { return const_reverse_iterator(m_end); }
 
 		reverse_iterator        rend()          noexcept { return reverse_iterator(buffer_ptr()); }
 		const_reverse_iterator  rend()    const noexcept { return const_reverse_iterator(buffer_ptr()); }
@@ -184,13 +210,13 @@ namespace mtl
 
 		size_type size() const noexcept
 		{
-			return static_cast<size_type>(_end - buffer_ptr());
+			return static_cast<size_type>(m_end - buffer_ptr());
 		}
 
 		static constexpr size_type capacity() noexcept { return N; }
 		static constexpr size_type max_size() noexcept { return N; }
 
-		bool empty() const noexcept { return _end == buffer_ptr(); }
+		bool empty() const noexcept { return m_end == buffer_ptr(); }
 		bool full()  const noexcept { return size() == N; }  // 고정 컨테이너에 유용
 
 		reference       operator[](size_type i)       noexcept { assert(i < size()); return buffer_ptr()[i]; }
@@ -210,30 +236,30 @@ namespace mtl
 
 		reference       front()       noexcept { assert(!empty()); return buffer_ptr()[0]; }
 		const_reference front() const noexcept { assert(!empty()); return buffer_ptr()[0]; }
-		reference       back()        noexcept { assert(!empty()); return *(_end - 1); }
-		const_reference back()  const noexcept { assert(!empty()); return *(_end - 1); }
+		reference       back()        noexcept { assert(!empty()); return *(m_end - 1); }
+		const_reference back()  const noexcept { assert(!empty()); return *(m_end - 1); }
 
 		pointer         data()        noexcept { return buffer_ptr(); }
 		const_pointer   data()  const noexcept { return buffer_ptr(); }
 
 		void clear() noexcept
 		{
-			destroy_range(buffer_ptr(), _end);
-			_end = buffer_ptr();
+			destroy_range(buffer_ptr(), m_end);
+			m_end = buffer_ptr();
 		}
 
 		void push_back(const T& value)
 		{
 			assert(size() < N && "fixed_vector::push_back: 용량 초과");
-			::new (static_cast<void*>(_end)) T(value);
-			++_end;
+			::new (static_cast<void*>(m_end)) T(value);
+			++m_end;
 		}
 
 		void push_back(T&& value)
 		{
 			assert(size() < N && "fixed_vector::push_back: 용량 초과");
-			::new (static_cast<void*>(_end)) T(std::move(value));
-			++_end;
+			::new (static_cast<void*>(m_end)) T(std::move(value));
+			++m_end;
 		}
 
 		// 임시 객체 생성을 피하는 in-place 구성 (게임 코드에서 핵심)
@@ -241,18 +267,18 @@ namespace mtl
 		reference emplace_back(Args&&... args)
 		{
 			assert(size() < N && "fixed_vector::emplace_back: 용량 초과");
-			pointer p = _end;
+			pointer p = m_end;
 			::new (static_cast<void*>(p)) T(std::forward<Args>(args)...);
-			++_end;
+			++m_end;
 			return *p;
 		}
 
 		void pop_back() noexcept
 		{
 			assert(!empty());
-			--_end;
+			--m_end;
 			if constexpr (!std::is_trivially_destructible_v<T>) {
-				_end->~T();
+				m_end->~T();
 			}
 		}
 
@@ -261,34 +287,34 @@ namespace mtl
 
 		iterator insert(const_iterator pos, size_type count, const T& value)
 		{
-			assert(pos >= buffer_ptr() && pos <= _end);
+			assert(pos >= buffer_ptr() && pos <= m_end);
 			assert(size() + count <= N && "fixed_vector::insert: 용량 초과");
 
 			pointer p = const_cast<pointer>(pos);
 			if (count == 0) return p;
 
-			const size_type tail = static_cast<size_type>(_end - p);
+			const size_type tail = static_cast<size_type>(m_end - p);
 
 			if (count <= tail)
 			{
-				std::uninitialized_move(_end - count, _end, _end);
-				std::move_backward(p, _end - count, _end);
+				std::uninitialized_move(m_end - count, m_end, m_end);
+				std::move_backward(p, m_end - count, m_end);
 				std::fill_n(p, count, value);
 			}
 			else
 			{
-				std::uninitialized_move(p, _end, p + count);
+				std::uninitialized_move(p, m_end, p + count);
 				std::fill_n(p, tail, value);
 				std::uninitialized_fill_n(p + tail, count - tail, value);
 			}
-			_end += count;
+			m_end += count;
 			return p;
 		}
 
 		template <typename InputIt, typename = std::enable_if_t<!std::is_integral_v<InputIt>>>
 		iterator insert(const_iterator pos, InputIt first, InputIt last)
 		{
-			assert(pos >= buffer_ptr() && pos <= _end);
+			assert(pos >= buffer_ptr() && pos <= m_end);
 			pointer p = const_cast<pointer>(pos);
 
 			if constexpr (std::is_base_of_v<std::random_access_iterator_tag,
@@ -298,23 +324,23 @@ namespace mtl
 				assert(size() + count <= N && "fixed_vector::insert: 용량 초과");
 				if (count == 0) return p;
 
-				const size_type tail = static_cast<size_type>(_end - p);
+				const size_type tail = static_cast<size_type>(m_end - p);
 
 				if (count <= tail)
 				{
-					std::uninitialized_move(_end - count, _end, _end);
-					std::move_backward(p, _end - count, _end);
+					std::uninitialized_move(m_end - count, m_end, m_end);
+					std::move_backward(p, m_end - count, m_end);
 					std::copy(first, last, p);
 				}
 				else
 				{
-					std::uninitialized_move(p, _end, p + count);
+					std::uninitialized_move(p, m_end, p + count);
 					InputIt mid = first;
 					std::advance(mid, tail);
 					std::copy(first, mid, p);
 					std::uninitialized_copy(mid, last, p + tail);
 				}
-				_end += count;
+				m_end += count;
 				return p;
 			}
 			else
@@ -338,61 +364,61 @@ namespace mtl
 		template <typename... Args>
 		iterator emplace(const_iterator pos, Args&&... args)
 		{
-			assert(pos >= buffer_ptr() && pos <= _end);
+			assert(pos >= buffer_ptr() && pos <= m_end);
 			assert(size() < N && "fixed_vector::emplace: 용량 초과");
 
 			pointer p = const_cast<pointer>(pos);
 
-			if (p == _end)
+			if (p == m_end)
 			{
 				::new (static_cast<void*>(p)) T(std::forward<Args>(args)...);
 			}
 			else
 			{
-				::new (static_cast<void*>(_end)) T(std::move(*(_end - 1)));
-				std::move_backward(p, _end - 1, _end);
+				::new (static_cast<void*>(m_end)) T(std::move(*(m_end - 1)));
+				std::move_backward(p, m_end - 1, m_end);
 				p->~T();
 				::new (static_cast<void*>(p)) T(std::forward<Args>(args)...);
 			}
-			++_end;
+			++m_end;
 			return p;
 		}
 
 		iterator erase(const_iterator pos)
 		{
-			assert(pos >= buffer_ptr() && pos < _end);
+			assert(pos >= buffer_ptr() && pos < m_end);
 			pointer p = const_cast<pointer>(pos);
-			std::move(p + 1, _end, p);
-			--_end;
+			std::move(p + 1, m_end, p);
+			--m_end;
 			if constexpr (!std::is_trivially_destructible_v<T>) {
-				_end->~T();
+				m_end->~T();
 			}
 			return p;
 		}
 
 		iterator erase(const_iterator first, const_iterator last)
 		{
-			assert(first >= buffer_ptr() && last <= _end && first <= last);
+			assert(first >= buffer_ptr() && last <= m_end && first <= last);
 			pointer pf = const_cast<pointer>(first);
 			pointer pl = const_cast<pointer>(last);
 			if (pf == pl) return pf;
 
-			pointer new_end = std::move(pl, _end, pf);
-			destroy_range(new_end, _end);
-			_end = new_end;
+			pointer new_end = std::move(pl, m_end, pf);
+			destroy_range(new_end, m_end);
+			m_end = new_end;
 			return pf;
 		}
 
 		iterator erase_unsorted(const_iterator pos)
 		{
-			assert(pos >= buffer_ptr() && pos < _end);
+			assert(pos >= buffer_ptr() && pos < m_end);
 			pointer p = const_cast<pointer>(pos);
-			if (p != _end - 1) {
-				*p = std::move(*(_end - 1));
+			if (p != m_end - 1) {
+				*p = std::move(*(m_end - 1));
 			}
-			--_end;
+			--m_end;
 			if constexpr (!std::is_trivially_destructible_v<T>) {
-				_end->~T();
+				m_end->~T();
 			}
 			return p;
 		}
@@ -412,24 +438,24 @@ namespace mtl
 			{
 				std::uninitialized_move(
 					other.buffer_ptr() + common,
-					other._end,
-					_end
+					other.m_end,
+					m_end
 				);
 
-				destroy_range(other.buffer_ptr() + common, other._end);
+				destroy_range(other.buffer_ptr() + common, other.m_end);
 			}
 			else if (sb < sa)
 			{
 				std::uninitialized_move(
 					buffer_ptr() + common,
-					_end,
-					other._end
+					m_end,
+					other.m_end
 				);
-				destroy_range(buffer_ptr() + common, _end);
+				destroy_range(buffer_ptr() + common, m_end);
 			}
 
-			_end = buffer_ptr() + sb;
-			other._end = other.buffer_ptr() + sa;
+			m_end = buffer_ptr() + sb;
+			other.m_end = other.buffer_ptr() + sa;
 		}
 	};
 
@@ -476,4 +502,4 @@ namespace mtl
 		a.swap(b);
 	}
 
-} // namespace mark
+} // namespace mtl

@@ -1,63 +1,97 @@
 #pragma once
+
+#include <cstddef>
 #include "internal.h"
+#include "allocator_malloc.h"
 
 
 namespace mtl
 {
-	constexpr const char* DEFAULT_ALLOCATOR_NAME = "default_allocator";
-
-	//----------------------------------------------------------------------------------
-	/**
-	* @brief 시스템의 기본 할당자. mtl의 기본 할당자.
-	*/
-	class MTL_API allocator
+	// ------------------------------------------------------------------------
+	// mallocator — sys_malloc / sys_free 기반의 기본 할당자.
+	//
+	// - 사실상 무상태(name만 보유). 복사·이동 자유.
+	// - 모든 인스턴스가 같은 시스템 힙(mi_malloc)을 공유하므로 operator== 는 항상 true.
+	// - 이름(name)은 추적/디버깅용 라벨이며 동등성 비교나 동작에 영향을 주지 않음.
+	//
+	// 사용:
+	//   mtl::mallocator a;                       // 이름 "mallocator"
+	//   mtl::mallocator b{"Renderer"};            // 이름 "Renderer"
+	//   void* p = a.allocate(1024);
+	//   a.deallocate(p);
+	// ------------------------------------------------------------------------
+	class mallocator final
 	{
 	public:
-		explicit allocator(const char* name = DEFAULT_ALLOCATOR_NAME);
-		allocator(const allocator& other);
-		allocator(const allocator& other, const char* name);
+		constexpr mallocator() noexcept = default;
+		constexpr explicit mallocator(const char* name) noexcept
+			: m_name(name ? name : "mallocator")
+		{
+		}
 
-		allocator& operator=(const allocator& other);
+		void* allocate(std::size_t n) const
+		{
+			return sys_malloc(n);
+		}
 
-		void* allocate(size_t n);
-		void* allocate(size_t n, size_t alignment, size_t offset);
-		void deallocate(void* p, size_t n);
+		void* allocate(std::size_t n, std::size_t alignment) const
+		{
+			return sys_malloc(n, alignment);
+		}
 
-		const char* get_name() const;
-		void set_name(const char* name);
+		void* allocate(std::size_t n, std::size_t alignment, std::size_t offset) const
+		{
+			return sys_malloc(n, alignment, offset);
+		}
 
-	protected:
-		const char* m_name;
+		void deallocate(void* p, std::size_t /*n*/ = 0) const noexcept
+		{
+			sys_free(p);
+		}
 
+		constexpr const char* name() const noexcept { return m_name; }
+		void                  set_name(const char* name) noexcept { m_name = name ? name : "mallocator"; }
+
+	private:
+		const char* m_name = "mallocator";
 	};
 
-	bool operator==(const allocator& a, const allocator& b);
-	bool operator!=(const allocator& a, const allocator& b);
+	inline bool operator==(const mallocator&, const mallocator&) noexcept { return true; }
+	inline bool operator!=(const mallocator&, const mallocator&) noexcept { return false; }
 
 
-	//----------------------------------------------------------------------------------
-	class MTL_API dummy_allocator
+	// ------------------------------------------------------------------------
+	// dummy_allocator — 항상 nullptr 반환 / 해제는 no-op. 테스트/스텁용.
+	// ------------------------------------------------------------------------
+	class dummy_allocator final
 	{
 	public:
-		explicit dummy_allocator(const char* name = nullptr) {}
-		dummy_allocator(const dummy_allocator& other) {}
-		dummy_allocator(const dummy_allocator& other, const char* name) {}
+		constexpr dummy_allocator() noexcept = default;
+		constexpr explicit dummy_allocator(const char*) noexcept {}
 
-		dummy_allocator& operator=(const dummy_allocator& other) {}
+		void* allocate(std::size_t)                           const noexcept { return nullptr; }
+		void* allocate(std::size_t, std::size_t)              const noexcept { return nullptr; }
+		void* allocate(std::size_t, std::size_t, std::size_t) const noexcept { return nullptr; }
+		void  deallocate(void*, std::size_t = 0)              const noexcept {}
 
-		void* allocate(size_t n) { return nullptr; }
-		void* allocate(size_t n, size_t alignment, size_t offset) { return nullptr; }
-		void deallocate(void* p, size_t n) {}
-
-		const char* get_name() const { return ""; }
-		void set_name(const char* name) {}
-
+		constexpr const char* name() const noexcept { return "dummy"; }
+		void                  set_name(const char*) noexcept {}
 	};
 
-	inline bool operator==(const dummy_allocator&, const dummy_allocator&) { return true; }
-	inline bool operator!=(const dummy_allocator&, const dummy_allocator&) { return false; }
+	inline bool operator==(const dummy_allocator&, const dummy_allocator&) noexcept { return true; }
+	inline bool operator!=(const dummy_allocator&, const dummy_allocator&) noexcept { return false; }
 
-	MTL_API allocator* get_default_mtlallocator(const allocator*);
-	MTL_API void set_default_allocator(allocator* alloc);
 
+	// ------------------------------------------------------------------------
+	// default_allocator — 컨테이너의 Allocator 템플릿 디폴트 인자로 사용.
+	// 새 할당자(linear, stack, pool, …)가 추가돼도 컨테이너 디폴트는 여기로 통일.
+	// ------------------------------------------------------------------------
+	using default_allocator = mallocator;
+
+
+	// ------------------------------------------------------------------------
+	// 시스템 전역 mallocator 인스턴스. DLL 경계 너머에서도 동일 인스턴스 공유.
+	// 이름 설정·조회 외에는 굳이 이걸 거치지 않아도 됨 (mallocator{}로 직접 생성해도 OK).
+	// ------------------------------------------------------------------------
+	MTL_API mallocator& get_default_allocator() noexcept;
 }
