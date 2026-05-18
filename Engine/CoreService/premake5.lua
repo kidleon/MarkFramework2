@@ -52,6 +52,7 @@ do
 			"{COPY} %{prj.location}../Engine/Common/*.h %{inc_output_dir}",
 			"{COPY} %{prj.location}../Engine/Common/*.inl %{inc_output_dir}",
 			"{COPY} %{prj.location}../Engine/CoreService/Public/*.h %{inc_output_dir}",
+			"{COPY} %{prj.location}../Engine/CoreService/Public/mtl/*.h %{inc_output_dir}",
 			"{COPY} %{prj.location}../Output/%{prj.name}/bin/*.dll %{sdk_bin_dir}",
 			"{COPY} %{prj.location}../Output/%{prj.name}/bin/*.lib %{sdk_lib_dir}",
 			"{COPY} %{prj.location}../Output/%{prj.name}/bin/*.pdb %{sdk_sym_dir}",
