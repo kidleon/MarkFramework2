@@ -1,7 +1,5 @@
 #pragma once
-
 #include <cstddef>
-#include "internal.h"
 #include "allocator_malloc.h"
 
 
@@ -93,5 +91,5 @@ namespace mtl
 	// 시스템 전역 mallocator 인스턴스. DLL 경계 너머에서도 동일 인스턴스 공유.
 	// 이름 설정·조회 외에는 굳이 이걸 거치지 않아도 됨 (mallocator{}로 직접 생성해도 OK).
 	// ------------------------------------------------------------------------
-	MTL_API mallocator& get_default_allocator() noexcept;
+	MARKENGINE_API mallocator& get_default_allocator() noexcept;
 }
