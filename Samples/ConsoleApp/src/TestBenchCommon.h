@@ -111,6 +111,8 @@ void run_test_fixed_hash_set();
 void run_test_fixed_bitset();
 void run_test_fixed_ring_buffer();
 void run_test_fixed_pool();
+void run_test_intrusive_list();
+void run_test_random();
 
 void run_bench_fixed_vector();
 void run_bench_fixed_string();
@@ -122,3 +124,4 @@ void run_bench_fixed_hash_set();
 void run_bench_fixed_bitset();
 void run_bench_fixed_ring_buffer();
 void run_bench_fixed_pool();
+void run_bench_intrusive_list();

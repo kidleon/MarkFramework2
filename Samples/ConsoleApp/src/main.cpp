@@ -2,6 +2,11 @@
 #include "core.h"
 #include "TestBenchCommon.h"
 
+#if defined(_WIN32)
+#include <windows.h>
+#include <io.h>
+#include <fcntl.h>
+#endif
 
 
 int main()
@@ -9,6 +14,11 @@ int main()
 #if defined(__MEMORY_TRACKER_ENABLED__) && defined(__TARGET_OS_WINDOWS)
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif // __MEMORY_TRACKER_ENABLED__ && __TARGET_OS_WINDOWS
+
+#if defined(_WIN32)
+	// 콘솔 출력 코드페이지를 UTF-8 로 강제하여 멀티바이트 문자 깨짐 방지.
+	::SetConsoleOutputCP(CP_UTF8);
+#endif
 
 	mark::initialaize_core_service(1024 * 1024 * 10);
 
@@ -23,6 +33,8 @@ int main()
 	run_test_fixed_bitset();
 	run_test_fixed_ring_buffer();
 	run_test_fixed_pool();
+	run_test_intrusive_list();
+	run_test_random();
 
 	mtl_tb::summary();
 
@@ -37,6 +49,7 @@ int main()
 	run_bench_fixed_bitset();
 	run_bench_fixed_ring_buffer();
 	run_bench_fixed_pool();
+	run_bench_intrusive_list();
 
 
 	mark::shutdown_core_service();
