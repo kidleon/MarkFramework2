@@ -290,10 +290,19 @@ namespace mtl
 		void push_front(const T& value) { emplace_after(before_begin(), value); }
 		void push_front(T&& value) { emplace_after(before_begin(), std::move(value)); }
 
+		bool try_push_front(const T& value) { return try_emplace_after(before_begin(), value); }
+		bool try_push_front(T&& value) { return try_emplace_after(before_begin(), std::move(value)); }
+
 		template <typename... Args>
 		reference emplace_front(Args&&... args)
 		{
 			return *emplace_after(before_begin(), std::forward<Args>(args)...);
+		}
+
+		template <typename... Args>
+		bool try_emplace_front(Args&&... args)
+		{
+			return try_emplace_after(before_begin(), std::forward<Args>(args)...);
 		}
 
 		// pos 뒤에 새 노드를 삽입한다. pos는 before_begin() 또는 임의의 dereference 가능 iterator.
@@ -302,10 +311,22 @@ namespace mtl
 		{
 			node* n = construct_node(std::forward<Args>(args)...);
 			assert(n && "fixed_slist: 풀이 가득 차고 overflow도 실패");
+			if (!n) return iterator(pos.m_node);  // release-safe: 삽입 실패 시 pos 그대로 반환
 			n->next = pos.m_node->next;
 			pos.m_node->next = n;
 			++m_size;
 			return iterator(n);
+		}
+
+		template <typename... Args>
+		bool try_emplace_after(const_iterator pos, Args&&... args)
+		{
+			node* n = construct_node(std::forward<Args>(args)...);
+			if (!n) return false;
+			n->next = pos.m_node->next;
+			pos.m_node->next = n;
+			++m_size;
+			return true;
 		}
 
 		iterator insert_after(const_iterator pos, const T& value) { return emplace_after(pos, value); }

@@ -223,8 +223,10 @@ namespace mtl
 		}
 
 		// pos 이후의 첫 set 비트 인덱스. 없으면 npos.
+		// pos가 N 이상(npos 포함)이면 ++의 unsigned wrap을 피하기 위해 먼저 차단.
 		size_type find_next(size_type pos) const noexcept
 		{
+			if (pos >= N) return npos;
 			++pos;
 			if (pos >= N) return npos;
 
@@ -259,6 +261,7 @@ namespace mtl
 
 		size_type find_next_unset(size_type pos) const noexcept
 		{
+			if (pos >= N) return npos;  // npos 포함 out-of-range 차단
 			++pos;
 			if (pos >= N) return npos;
 

@@ -11,23 +11,25 @@ void run_bench_fixed_wstring()
 
 	constexpr std::size_t kIter = 200000;
 
-	mtl_tb::bench_ns("std::wstring construct+append", kIter, []{
+	auto std_short = mtl_tb::bench_ns("std::wstring construct+append", kIter, []{
 		std::wstring s = L"hello";
 		s += L" world";
 		mtl_tb::do_not_optimize(s);
 	});
-	mtl_tb::bench_ns("mtl::fixed_wstring<32> construct+append", kIter, []{
+	auto fixed_short = mtl_tb::bench_ns("mtl::fixed_wstring<32> construct+append", kIter, []{
 		mtl::fixed_wstring<32> s = L"hello";
 		s += L" world";
 		mtl_tb::do_not_optimize(s);
 	});
+	mtl_tb::bench_compare("mtl::fixed_wstring append", fixed_short, "std::wstring append", std_short);
 
-	mtl_tb::bench_ns("std::wstring format", kIter, []{
+	auto std_fmt = mtl_tb::bench_ns("std::wstring format", kIter, []{
 		auto s = std::format(L"path/{}/{}", 12345, L"asset");
 		mtl_tb::do_not_optimize(s);
 	});
-	mtl_tb::bench_ns("mtl::fixed_wstring<64> format", kIter, []{
+	auto fixed_fmt = mtl_tb::bench_ns("mtl::fixed_wstring<64> format", kIter, []{
 		auto s = mtl::fixed_wstring<64>::from_format(L"path/{}/{}", 12345, L"asset");
 		mtl_tb::do_not_optimize(s);
 	});
+	mtl_tb::bench_compare("mtl::fixed_wstring format", fixed_fmt, "std::wstring format", std_fmt);
 }

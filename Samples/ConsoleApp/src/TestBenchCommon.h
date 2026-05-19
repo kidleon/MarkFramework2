@@ -68,6 +68,24 @@ namespace mtl_tb
 		return per_iter;
 	}
 
+	inline void bench_compare(const char* lhs_label, double lhs_ns, const char* rhs_label, double rhs_ns)
+	{
+		if (lhs_ns <= 0.0 || rhs_ns <= 0.0) return;
+
+		if (lhs_ns < rhs_ns)
+		{
+			std::printf("      -> %s is %.2fx faster than %s\n", lhs_label, rhs_ns / lhs_ns, rhs_label);
+		}
+		else if (rhs_ns < lhs_ns)
+		{
+			std::printf("      -> %s is %.2fx faster than %s\n", rhs_label, lhs_ns / rhs_ns, lhs_label);
+		}
+		else
+		{
+			std::printf("      -> %s and %s are equal speed\n", lhs_label, rhs_label);
+		}
+	}
+
 	// 컴파일러가 결과를 버리지 않도록 강제 (간단 버전)
 	template <typename T>
 	inline void do_not_optimize(T const& v)

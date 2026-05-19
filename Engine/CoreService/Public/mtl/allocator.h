@@ -27,6 +27,22 @@ namespace mtl
 		{
 		}
 
+#if defined(__MEMORY_TRACKER_ENABLED__)
+		void* allocate(std::size_t n, std::source_location location) const
+		{
+			return sys_malloc(n, location);
+		}
+
+		void* allocate(std::size_t n, std::size_t alignment, std::source_location location) const
+		{
+			return sys_malloc(n, alignment, location);
+		}
+
+		void* allocate(std::size_t n, std::size_t alignment, std::size_t offset, std::source_location location) const
+		{
+			return sys_malloc(n, alignment, offset, location);
+		}
+#else
 		void* allocate(std::size_t n) const
 		{
 			return sys_malloc(n);
@@ -41,11 +57,13 @@ namespace mtl
 		{
 			return sys_malloc(n, alignment, offset);
 		}
-
+		
+#endif // __MEMORY_TRACKER_ENABLED__
 		void deallocate(void* p, std::size_t /*n*/ = 0) const noexcept
 		{
 			sys_free(p);
 		}
+		
 
 		constexpr const char* name() const noexcept { return m_name; }
 		void                  set_name(const char* name) noexcept { m_name = name ? name : "mallocator"; }
@@ -67,9 +85,16 @@ namespace mtl
 		constexpr dummy_allocator() noexcept = default;
 		constexpr explicit dummy_allocator(const char*) noexcept {}
 
+#if defined(__MEMORY_TRACKER_ENABLED__)
+		void* allocate(std::size_t, std::source_location) const noexcept { return nullptr; }
+		void* allocate(std::size_t, std::size_t, std::source_location) const noexcept { return nullptr; }
+		void* allocate(std::size_t, std::size_t, std::size_t, std::source_location) const noexcept { return nullptr; }
+#else
 		void* allocate(std::size_t)                           const noexcept { return nullptr; }
 		void* allocate(std::size_t, std::size_t)              const noexcept { return nullptr; }
 		void* allocate(std::size_t, std::size_t, std::size_t) const noexcept { return nullptr; }
+#endif // __MEMORY_TRACKER_ENABLED__
+
 		void  deallocate(void*, std::size_t = 0)              const noexcept {}
 
 		constexpr const char* name() const noexcept { return "dummy"; }

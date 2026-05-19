@@ -11,34 +11,37 @@ void run_bench_fixed_string()
 
 	constexpr std::size_t kIter = 200000;
 
-	mtl_tb::bench_ns("std::string short construct+append", kIter, []{
+	auto std_short = mtl_tb::bench_ns("std::string short construct+append", kIter, []{
 		std::string s = "hello";
 		s += " world";
 		mtl_tb::do_not_optimize(s);
 	});
-	mtl_tb::bench_ns("mtl::fixed_string<32> short construct+append", kIter, []{
+	auto fixed_short = mtl_tb::bench_ns("mtl::fixed_string<32> short construct+append", kIter, []{
 		mtl::fixed_string<32> s = "hello";
 		s += " world";
 		mtl_tb::do_not_optimize(s);
 	});
+	mtl_tb::bench_compare("mtl::fixed_string short append", fixed_short, "std::string short append", std_short);
 
-	mtl_tb::bench_ns("std::string format", kIter, []{
+	auto std_fmt = mtl_tb::bench_ns("std::string format", kIter, []{
 		auto s = std::format("frame={} dt={:.3f}", 12345, 0.01666);
 		mtl_tb::do_not_optimize(s);
 	});
-	mtl_tb::bench_ns("mtl::fixed_string<64> format_append", kIter, []{
+	auto fixed_fmt = mtl_tb::bench_ns("mtl::fixed_string<64> format_append", kIter, []{
 		auto s = mtl::fixed_string<64>::from_format("frame={} dt={:.3f}", 12345, 0.01666);
 		mtl_tb::do_not_optimize(s);
 	});
+	mtl_tb::bench_compare("mtl::fixed_string format", fixed_fmt, "std::string format", std_fmt);
 
-	mtl_tb::bench_ns("std::string find substr", kIter, []{
+	auto std_find = mtl_tb::bench_ns("std::string find substr", kIter, []{
 		std::string s = "hello world hello world hello";
 		auto p = s.find("world", 6);
 		mtl_tb::do_not_optimize(p);
 	});
-	mtl_tb::bench_ns("mtl::fixed_string<64> find substr", kIter, []{
+	auto fixed_find = mtl_tb::bench_ns("mtl::fixed_string<64> find substr", kIter, []{
 		mtl::fixed_string<64> s = "hello world hello world hello";
 		auto p = s.find("world", 6);
 		mtl_tb::do_not_optimize(p);
 	});
+	mtl_tb::bench_compare("mtl::fixed_string find", fixed_find, "std::string find", std_find);
 }

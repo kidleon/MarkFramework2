@@ -144,8 +144,12 @@ namespace mtl
 			iterator_t& operator++()    noexcept { ++m_offset; return *this; }
 			iterator_t  operator++(int) noexcept { iterator_t t(*this); ++(*this); return t; }
 
-			friend bool operator==(const iterator_t& a, const iterator_t& b) noexcept { return a.m_offset == b.m_offset; }
-			friend bool operator!=(const iterator_t& a, const iterator_t& b) noexcept { return a.m_offset != b.m_offset; }
+			friend bool operator==(const iterator_t& a, const iterator_t& b) noexcept
+			{
+				assert(a.m_buf == b.m_buf && "fixed_ring_buffer: 서로 다른 버퍼의 iterator 비교");
+				return a.m_offset == b.m_offset;
+			}
+			friend bool operator!=(const iterator_t& a, const iterator_t& b) noexcept { return !(a == b); }
 		};
 
 		using iterator       = iterator_t<false>;

@@ -149,6 +149,7 @@ namespace mtl
 
 		size_type first_occupied() const noexcept
 		{
+			if (m_size == 0) return kBucketCount;   // 빈 맵에서 전체 스캔 회피
 			size_type i = 0;
 			while (i < kBucketCount && m_state[i] == kEmpty) ++i;
 			return i;
@@ -222,8 +223,12 @@ namespace mtl
 			iterator_t& operator++()    noexcept { ++m_index; skip_empty(); return *this; }
 			iterator_t  operator++(int) noexcept { iterator_t t(*this); ++(*this); return t; }
 
-			friend bool operator==(const iterator_t& a, const iterator_t& b) noexcept { return a.m_index == b.m_index; }
-			friend bool operator!=(const iterator_t& a, const iterator_t& b) noexcept { return a.m_index != b.m_index; }
+			friend bool operator==(const iterator_t& a, const iterator_t& b) noexcept
+			{
+				assert(a.m_map == b.m_map && "fixed_hash_map: 서로 다른 맵의 iterator 비교");
+				return a.m_index == b.m_index;
+			}
+			friend bool operator!=(const iterator_t& a, const iterator_t& b) noexcept { return !(a == b); }
 		};
 
 		using iterator       = iterator_t<false>;
@@ -354,7 +359,12 @@ namespace mtl
 			return found ? const_iterator(this, idx) : end();
 		}
 
-		bool contains(const Key& key) const noexcept { return find(key) != end(); }
+		bool contains(const Key& key) const noexcept
+		{
+			if (m_size == 0) return false;
+			return probe(key).second;
+		}
+
 		size_type count(const Key& key) const noexcept { return contains(key) ? 1 : 0; }
 
 		Value& at(const Key& key)

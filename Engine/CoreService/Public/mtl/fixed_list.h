@@ -289,10 +289,21 @@ namespace mtl
 		void push_front(const T& value) { emplace(begin(), value); }
 		void push_front(T&& value) { emplace(begin(), std::move(value)); }
 
+		bool try_push_back(const T& value) { return try_emplace(end(), value); }
+		bool try_push_back(T&& value) { return try_emplace(end(), std::move(value)); }
+		bool try_push_front(const T& value) { return try_emplace(begin(), value); }
+		bool try_push_front(T&& value) { return try_emplace(begin(), std::move(value)); }
+
 		template <typename... Args>
 		reference emplace_back(Args&&... args)
 		{
 			return *emplace(end(), std::forward<Args>(args)...);
+		}
+
+		template <typename... Args>
+		bool try_emplace_back(Args&&... args)
+		{
+			return try_emplace(end(), std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>
@@ -302,13 +313,30 @@ namespace mtl
 		}
 
 		template <typename... Args>
+		bool try_emplace_front(Args&&... args)
+		{
+			return try_emplace(begin(), std::forward<Args>(args)...);
+		}
+
+		template <typename... Args>
 		iterator emplace(const_iterator pos, Args&&... args)
 		{
 			node* n = construct_node(std::forward<Args>(args)...);
 			assert(n && "fixed_list: 풀이 가득 차고 overflow도 실패");
+			if (!n) return iterator(pos.m_node);  // release-safe: 삽입 실패 시 pos 그대로 반환
 			link_before(pos.m_node, n);
 			++m_size;
 			return iterator(n);
+		}
+
+		template <typename... Args>
+		bool try_emplace(const_iterator pos, Args&&... args)
+		{
+			node* n = construct_node(std::forward<Args>(args)...);
+			if (!n) return false;
+			link_before(pos.m_node, n);
+			++m_size;
+			return true;
 		}
 
 		iterator insert(const_iterator pos, const T& value) { return emplace(pos, value); }

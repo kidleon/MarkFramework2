@@ -63,6 +63,16 @@ namespace mtl
 	class default_overflow_allocator
 	{
 	public:
+#if defined(__MEMORY_TRACKER_ENABLED__)
+		void* allocate(
+			std::size_t n,
+			std::size_t alignment = alignof(std::max_align_t),
+			std::source_location location = std::source_location::current()
+		)
+		{
+			return sys_malloc(n, alignment, location);
+		}
+#else
 		void* allocate(
 			std::size_t n,
 			std::size_t alignment = alignof(std::max_align_t)
@@ -70,6 +80,7 @@ namespace mtl
 		{
 			return sys_malloc(n, alignment);
 		}
+#endif // __MEMORY_TRACKER_ENABLED__
 
 		void deallocate(
 			void* p,
@@ -106,6 +117,8 @@ namespace mtl
 			assert(memory != nullptr);
 			assert(node_size >= sizeof(Link));
 			assert(alignment > 0 && (alignment & (alignment - 1)) == 0);
+			// 활성 할당이 있는 상태에서 init() 재호출은 outstanding 노드를 silent 무효화하므로 금지.
+			assert(m_current_size == 0 && "fixed_pool::init: outstanding 할당이 있는 상태에서 재초기화 금지");
 
 			const std::uintptr_t base = reinterpret_cast<std::uintptr_t>(memory);
 			const std::uintptr_t aligned = (base + alignment_offset + alignment - 1) & ~(alignment - 1);
@@ -184,10 +197,24 @@ namespace mtl
 			return link;
 		}
 
+	#if defined(__MEMORY_TRACKER_ENABLED__)
+		void* allocate(std::source_location) noexcept
+		{
+			return allocate();
+		}
+	#endif
+
 		void* allocate(std::size_t) noexcept
 		{
 			return allocate();
 		}
+
+	#if defined(__MEMORY_TRACKER_ENABLED__)
+		void* allocate(std::size_t, std::source_location) noexcept
+		{
+			return allocate();
+		}
+	#endif
 
 		void deallocate(void* p) noexcept
 		{
@@ -230,16 +257,65 @@ namespace mtl
 			std::size_t alignment_offset = 0
 		)
 		{
+			assert(m_overflow_current == 0 && "fixed_pool_with_overflow::init: 활성 overflow 할당이 있는 상태에서 재초기화 금지");
 			m_pool_begin = memory;
 			m_pool_end = static_cast<std::byte*>(memory) + memory_size;
 			fixed_pool_base::init(memory, memory_size, node_size, alignment, alignment_offset);
+			m_overflow_current = 0;
+			m_overflow_peak = 0;
 		}
 
 		void* allocate()
 		{
+	#if defined(__MEMORY_TRACKER_ENABLED__)
+			return allocate(alignof(std::max_align_t), std::source_location::current());
+	#else
 			return allocate(alignof(std::max_align_t));
+	#endif
 		}
 
+	#if defined(__MEMORY_TRACKER_ENABLED__)
+		void* allocate(std::size_t alignment, std::source_location location)
+		{
+			Link* link;
+			bool from_overflow = false;
+
+			if (m_head)
+			{
+				link = m_head;
+				m_head = link->next;
+			}
+			else if (m_next != m_capacity)
+			{
+				link = m_next;
+				m_next = reinterpret_cast<Link*>(reinterpret_cast<std::byte*>(m_next) + m_node_size);
+			}
+			else
+			{
+				link = static_cast<Link*>(m_overflow_allocator.allocate(m_node_size, alignment, location));
+				from_overflow = true;
+			}
+
+			if (link)
+			{
+				if (++m_current_size > m_peak_size)
+					m_peak_size = m_current_size;
+
+				if (from_overflow)
+				{
+					if (++m_overflow_current > m_overflow_peak)
+						m_overflow_peak = m_overflow_current;
+				}
+			}
+
+			return link;
+		}
+
+		void* allocate(std::size_t alignment)
+		{
+			return allocate(alignment, std::source_location::current());
+		}
+	#else
 		void* allocate(std::size_t alignment)
 		{
 			Link* link;
@@ -275,6 +351,7 @@ namespace mtl
 
 			return link;
 		}
+	#endif
 
 		// overflow가 있으면 풀이 가득 차도 추가 할당이 가능하므로 항상 true.
 		bool can_allocate() const noexcept { return true; }
@@ -299,16 +376,37 @@ namespace mtl
 		}
 
 		bool is_in_pool(const void* p) const noexcept {
-			return p >= m_pool_begin && p < m_pool_end;
+			const auto addr = reinterpret_cast<std::uintptr_t>(p);
+			const auto begin = reinterpret_cast<std::uintptr_t>(m_pool_begin);
+			const auto end = reinterpret_cast<std::uintptr_t>(m_pool_end);
+			return addr >= begin && addr < end;
 		}
 
 		bool has_overflowed() const noexcept { return m_overflow_peak > 0; }
 		std::size_t overflow_current() const noexcept { return m_overflow_current; }
 		std::size_t overflow_peak() const noexcept { return m_overflow_peak; }
 
+		// 베이스의 memory_in_use() / peak_memory_in_use() 는 풀+오버플로 합계.
+		// 아래는 풀/오버플로 분리 진단용.
+		std::size_t pool_memory_in_use() const noexcept
+		{
+			return (m_current_size - m_overflow_current) * m_node_size;
+		}
+		std::size_t overflow_memory_in_use() const noexcept
+		{
+			return m_overflow_current * m_node_size;
+		}
+
 		overflow_allocator_type& get_overflow_allocator() noexcept { return m_overflow_allocator; }
 		const overflow_allocator_type& get_overflow_allocator() const noexcept { return m_overflow_allocator; }
-		void set_overflow_allocator(const overflow_allocator_type& a) { m_overflow_allocator = a; }
+
+		// 활성 overflow 할당이 있는 상태에서 allocator를 교체하면 기존 노드를
+		// 새 allocator로 deallocate 시도해 누수/UB 발생. 반드시 모두 해제된 상태에서 호출할 것.
+		void set_overflow_allocator(const overflow_allocator_type& a)
+		{
+			assert(m_overflow_current == 0 && "fixed_pool_with_overflow::set_overflow_allocator: 활성 overflow 할당이 있는 상태에서 교체 금지");
+			m_overflow_allocator = a;
+		}
 
 	private:
 		void* m_pool_begin = nullptr;
@@ -339,7 +437,7 @@ namespace mtl
 		static constexpr std::size_t kNodeSize = NodeSize;
 		static constexpr std::size_t kNodeCount = NodeCount;
 		static constexpr std::size_t kNodesSize = NodeCount * NodeSize;
-		static constexpr std::size_t kBufferSize = kNodesSize + ((NodeAlignment > 1) ? (NodeSize - 1) : 0) + NodeAlignmentOffset;
+		static constexpr std::size_t kBufferSize = kNodesSize + ((NodeAlignment > 1) ? (NodeAlignment - 1) : 0) + NodeAlignmentOffset;
 		static constexpr std::size_t kNodeAlignment = NodeAlignment;
 		static constexpr std::size_t kNodeAlignmentOffset = NodeAlignmentOffset;
 		static constexpr bool        kEnableOverflow = EnableOverflow;
@@ -355,8 +453,21 @@ namespace mtl
 		{
 			assert(n == kNodeSize);
 			(void)n;
+	#if defined(__MEMORY_TRACKER_ENABLED__)
+			return m_pool.allocate(std::source_location::current());
+	#else
 			return m_pool.allocate();
+	#endif
 		}
+
+	#if defined(__MEMORY_TRACKER_ENABLED__)
+		void* allocate(std::size_t n, std::source_location location)
+		{
+			assert(n == kNodeSize);
+			(void)n;
+			return m_pool.allocate(location);
+		}
+	#endif
 
 		void* allocate(std::size_t n, std::size_t alignment)
 		{
@@ -365,14 +476,40 @@ namespace mtl
 
 			if constexpr (EnableOverflow)
 			{
+	#if defined(__MEMORY_TRACKER_ENABLED__)
+				return m_pool.allocate(alignment, std::source_location::current());
+	#else
 				return m_pool.allocate(alignment);
+	#endif
 			}
 			else
 			{
 				(void)alignment;
+	#if defined(__MEMORY_TRACKER_ENABLED__)
+				return m_pool.allocate(std::source_location::current());
+	#else
 				return m_pool.allocate();
+	#endif
 			}
 		}
+
+	#if defined(__MEMORY_TRACKER_ENABLED__)
+		void* allocate(std::size_t n, std::size_t alignment, std::source_location location)
+		{
+			assert(n == kNodeSize);
+			(void)n;
+
+			if constexpr (EnableOverflow)
+			{
+				return m_pool.allocate(alignment, location);
+			}
+			else
+			{
+				(void)alignment;
+				return m_pool.allocate(location);
+			}
+		}
+	#endif
 
 		void deallocate(void* p, std::size_t /*n*/ = 0)
 		{

@@ -209,7 +209,7 @@ void run_test_fixed_string()
 		MTL_CHECK(s.find(std::string_view("hello"), 1) == 12);
 		MTL_CHECK(s.find('z') == fixed_string<32>::npos);
 
-		MTL_CHECK(s.rfind('o') == 7);
+		MTL_CHECK(s.rfind('o') == 16);
 		MTL_CHECK(s.rfind(std::string_view("hello")) == 12);
 
 		MTL_CHECK(s.contains('w'));

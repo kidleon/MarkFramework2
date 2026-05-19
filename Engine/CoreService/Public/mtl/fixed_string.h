@@ -319,7 +319,8 @@ namespace mtl
 		{
 			auto out = std::format_to_n(m_buffer + m_size, static_cast<difference_type>(N - m_size),
 				fmt, std::forward<Args>(args)...);
-			assert(static_cast<size_type>(out.size) <= N - m_size && "fixed_basic_string::format_append: 용량 초과");
+			// Debug: 출력 truncate 감지. Release: out.out 까지만 기록되어 자동 잘림.
+			assert(static_cast<size_type>(out.size) <= N - m_size && "fixed_basic_string::format_append: 출력이 잘림 (truncated)");
 			m_size = static_cast<size_type>(out.out - m_buffer);
 			m_buffer[m_size] = CharT();
 			return *this;

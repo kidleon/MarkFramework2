@@ -255,11 +255,27 @@ namespace mtl
 			++m_end;
 		}
 
+		bool try_push_back(const T& value)
+		{
+			if (size() >= N) return false;
+			::new (static_cast<void*>(m_end)) T(value);
+			++m_end;
+			return true;
+		}
+
 		void push_back(T&& value)
 		{
 			assert(size() < N && "fixed_vector::push_back: 용량 초과");
 			::new (static_cast<void*>(m_end)) T(std::move(value));
 			++m_end;
+		}
+
+		bool try_push_back(T&& value)
+		{
+			if (size() >= N) return false;
+			::new (static_cast<void*>(m_end)) T(std::move(value));
+			++m_end;
+			return true;
 		}
 
 		// 임시 객체 생성을 피하는 in-place 구성 (게임 코드에서 핵심)
@@ -271,6 +287,15 @@ namespace mtl
 			::new (static_cast<void*>(p)) T(std::forward<Args>(args)...);
 			++m_end;
 			return *p;
+		}
+
+		template <typename... Args>
+		bool try_emplace_back(Args&&... args)
+		{
+			if (size() >= N) return false;
+			::new (static_cast<void*>(m_end)) T(std::forward<Args>(args)...);
+			++m_end;
+			return true;
 		}
 
 		void pop_back() noexcept
@@ -421,6 +446,28 @@ namespace mtl
 				m_end->~T();
 			}
 			return p;
+		}
+
+		void resize(size_type new_size)
+		{
+			assert(new_size <= N && "fixed_vector::resize: 용량 초과");
+			pointer p = buffer_ptr() + new_size;
+			if (new_size > size())
+				std::uninitialized_value_construct(m_end, p);
+			else
+				destroy_range(p, m_end);
+			m_end = p;
+		}
+
+		void resize(size_type new_size, const T& value)
+		{
+			assert(new_size <= N && "fixed_vector::resize: 용량 초과");
+			pointer p = buffer_ptr() + new_size;
+			if (new_size > size())
+				std::uninitialized_fill(m_end, p, value);
+			else
+				destroy_range(p, m_end);
+			m_end = p;
 		}
 
 		void swap(fixed_vector& other)
