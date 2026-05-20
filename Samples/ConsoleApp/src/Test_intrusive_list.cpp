@@ -17,7 +17,7 @@
 namespace
 {
 	// 테스트용 노드 타입 — 값 비교/정렬을 위해 operator<, operator==를 정의.
-	struct Item : public mtl::intrusive_list_node
+	struct Item : public mtl::intrusive_list_node<>
 	{
 		int value;
 

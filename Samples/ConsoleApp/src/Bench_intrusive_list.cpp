@@ -23,7 +23,7 @@
 
 namespace
 {
-	struct Item : public mtl::intrusive_list_node
+	struct Item : public mtl::intrusive_list_node<>
 	{
 		int value;
 		Item() : value(0) {}

@@ -9,7 +9,7 @@
 
 
 // ----------------------------------------------------------------------------
-// mtl::intrusive_list<T>
+// mtl::intrusive_list<T, Tag>
 //
 // 노드(prev/next 포인터)가 원소 자체에 임베드된 양방향 연결 리스트.
 // 컨테이너는 메모리를 할당/소유하지 않는다 — T 객체의 수명은 호출자 책임.
@@ -25,13 +25,24 @@
 //
 // 안 쓰는 게 좋은 경우:
 //   - 원소의 수명을 컨테이너가 관리해주길 원할 때 → fixed_list 사용.
-//   - 한 객체가 동시에 여러 리스트의 멤버여야 하지만 prev/next가 하나뿐일
-//     때. (현재 버전은 1개 리스트 멤버십만 지원. 다중 멤버십은 사용자가
-//     원하는 만큼 intrusive_list_node를 멤버/베이스로 추가하고 별도 Tag 기반
-//     컨테이너를 만드는 식으로 확장 — 향후 후보.)
 //
-// 사용 예:
-//   struct task : mtl::intrusive_list_node { int priority; };
+// 다중 멤버십 (한 객체가 동시에 여러 리스트에 등록):
+//   `Tag`로 prev/next 포인터 쌍을 구분한다. 사용자 T가 서로 다른 Tag의
+//   intrusive_list_node를 여러 개 상속하면 각 리스트가 독립된 link를 사용.
+//
+//     struct active_tag {};
+//     struct dirty_tag  {};
+//     struct task : mtl::intrusive_list_node<active_tag>,
+//                   mtl::intrusive_list_node<dirty_tag> { ... };
+//
+//     mtl::intrusive_list<task, active_tag> active;
+//     mtl::intrusive_list<task, dirty_tag>  dirty;
+//
+//   Tag는 phantom type — 런타임 비용은 0. Tag=void가 기본값이므로 단일
+//   멤버십 케이스는 `intrusive_list_node<>`, `intrusive_list<task>`로 그대로.
+//
+// 사용 예 (단일 멤버십):
+//   struct task : mtl::intrusive_list_node<> { int priority; };
 //
 //   mtl::intrusive_list<task> active;
 //   task a, b, c;
@@ -50,7 +61,7 @@
 //   - splice도 단일/전체는 O(1), 구간 splice만 O(거리) (size 카운터 갱신용).
 //
 // 주의:
-//   - T는 mtl::intrusive_list_node를 **public 상속**해야 한다 (static_assert).
+//   - T는 mtl::intrusive_list_node<Tag>를 **public 상속**해야 한다 (static_assert).
 //   - 동일 노드를 이미 어떤 리스트의 멤버인 상태에서 다시 push_*하면 UB.
 //     디버그 빌드에서는 is_linked 체크로 즉시 assert.
 //   - 컨테이너 파괴 시 남아있는 노드들의 link는 자동으로 끊긴다(clear). 그
@@ -60,16 +71,21 @@
 namespace mtl
 {
 	// ------------------------------------------------------------------------
-	// intrusive_list_node
+	// intrusive_list_node<Tag>
 	//
 	// 컨테이너의 멤버가 되고 싶은 타입이 public 상속해야 하는 노드. 두 개의
 	// 포인터로 구성된 단순 본체.
+	//
+	// Tag는 다중 멤버십 구분용 phantom type. 같은 객체가 동시에 여러 리스트에
+	// 등록되려면 prev/next 쌍이 각각 필요한데, Tag로 그걸 타입 시스템에서
+	// 분리한다. 단일 멤버십이면 Tag=void(기본)로 신경 쓰지 않아도 된다.
 	//
 	// 복사/이동 의미: 노드는 주소가 곧 정체성이다. 복사 시 새 객체는 어떤
 	// 리스트에도 속하지 않은 상태로 시작하고, 대입은 자신의 link 상태에
 	// 영향을 주지 않는다(no-op). 이 의미 덕분에 사용자 정의 T가 기본 복사/이동
 	// 연산을 자유롭게 가질 수 있다.
 	// ------------------------------------------------------------------------
+	template <typename Tag = void>
 	struct intrusive_list_node
 	{
 		intrusive_list_node* m_next;
@@ -90,17 +106,19 @@ namespace mtl
 
 	namespace detail
 	{
-		template <typename T>
+		template <typename T, typename Tag>
 		inline constexpr bool is_intrusive_list_compatible_v =
-			std::is_base_of_v<intrusive_list_node, T>;
+			std::is_base_of_v<intrusive_list_node<Tag>, T>;
 	}
 
 
-	template <typename T = intrusive_list_node>
+	template <typename T = intrusive_list_node<>, typename Tag = void>
 	class intrusive_list
 	{
-		static_assert(detail::is_intrusive_list_compatible_v<T>,
-			"intrusive_list<T>: T는 mtl::intrusive_list_node를 public 상속해야 합니다");
+		static_assert(detail::is_intrusive_list_compatible_v<T, Tag>,
+			"intrusive_list<T, Tag>: T는 mtl::intrusive_list_node<Tag>를 public 상속해야 합니다");
+
+		using node_type = intrusive_list_node<Tag>;
 
 	public:
 		using value_type      = T;
@@ -125,7 +143,7 @@ namespace mtl
 			using pointer           = std::conditional_t<IsConst, const T*, T*>;
 
 			iterator_t() noexcept : m_node(nullptr) {}
-			explicit iterator_t(intrusive_list_node* n) noexcept : m_node(n) {}
+			explicit iterator_t(node_type* n) noexcept : m_node(n) {}
 
 			// non-const → const 변환만 허용
 			template <bool C = IsConst, typename = std::enable_if_t<C>>
@@ -143,7 +161,7 @@ namespace mtl
 			friend bool operator!=(const iterator_t& a, const iterator_t& b) noexcept { return a.m_node != b.m_node; }
 
 		private:
-			intrusive_list_node* m_node;
+			node_type* m_node;
 			friend class intrusive_list;
 			template <bool> friend class iterator_t;
 		};
@@ -220,29 +238,29 @@ namespace mtl
 		iterator iterator_to(reference v) noexcept
 		{
 			assert(is_linked(v) && "intrusive_list::iterator_to: 노드가 어떤 리스트에도 속해있지 않음");
-			return iterator(static_cast<intrusive_list_node*>(&v));
+			return iterator(static_cast<node_type*>(&v));
 		}
 
 		const_iterator iterator_to(const_reference v) const noexcept
 		{
 			assert(is_linked(v) && "intrusive_list::iterator_to: 노드가 어떤 리스트에도 속해있지 않음");
-			return const_iterator(const_cast<intrusive_list_node*>(
-				static_cast<const intrusive_list_node*>(&v)));
+			return const_iterator(const_cast<node_type*>(
+				static_cast<const node_type*>(&v)));
 		}
 
 		// 노드가 어떤 리스트에 등록되어 있는지 — 정확히 어느 리스트인지는 알
 		// 수 없고, 등록 여부만 알 수 있다 (O(1)). 컨테이너 인스턴스 없이도
-		// 호출 가능한 static 헬퍼.
+		// 호출 가능한 static 헬퍼. Tag별로 독립.
 		static bool is_linked(const_reference v) noexcept
 		{
-			return static_cast<const intrusive_list_node*>(&v)->m_next != nullptr;
+			return static_cast<const node_type*>(&v)->m_next != nullptr;
 		}
 
 		// 노드가 *this*의 멤버인지 선형 탐색. 디버그/검증용. O(n).
 		bool contains(const_reference v) const noexcept
 		{
-			const intrusive_list_node* needle = &v;
-			for (const intrusive_list_node* p = m_sentinel.m_next; p != &m_sentinel; p = p->m_next)
+			const node_type* needle = static_cast<const node_type*>(&v);
+			for (const node_type* p = m_sentinel.m_next; p != &m_sentinel; p = p->m_next)
 				if (p == needle) return true;
 			return false;
 		}
@@ -252,10 +270,10 @@ namespace mtl
 		// --------------------------------------------------------------------
 		void clear() noexcept
 		{
-			intrusive_list_node* cur = m_sentinel.m_next;
+			node_type* cur = m_sentinel.m_next;
 			while (cur != &m_sentinel)
 			{
-				intrusive_list_node* next = cur->m_next;
+				node_type* next = cur->m_next;
 				cur->m_next = nullptr;
 				cur->m_prev = nullptr;
 				cur = next;
@@ -267,14 +285,14 @@ namespace mtl
 		void push_back(reference v) noexcept
 		{
 			assert(!is_linked(v) && "intrusive_list::push_back: 노드가 이미 다른 리스트의 멤버");
-			link_before(&m_sentinel, &v);
+			link_before(&m_sentinel, static_cast<node_type*>(&v));
 			++m_size;
 		}
 
 		void push_front(reference v) noexcept
 		{
 			assert(!is_linked(v) && "intrusive_list::push_front: 노드가 이미 다른 리스트의 멤버");
-			link_before(m_sentinel.m_next, &v);
+			link_before(m_sentinel.m_next, static_cast<node_type*>(&v));
 			++m_size;
 		}
 
@@ -284,7 +302,7 @@ namespace mtl
 		iterator insert(const_iterator pos, reference v) noexcept
 		{
 			assert(!is_linked(v) && "intrusive_list::insert: 노드가 이미 다른 리스트의 멤버");
-			intrusive_list_node* n = &v;
+			node_type* n = static_cast<node_type*>(&v);
 			link_before(pos.m_node, n);
 			++m_size;
 			return iterator(n);
@@ -293,8 +311,8 @@ namespace mtl
 		iterator erase(const_iterator pos) noexcept
 		{
 			assert(pos.m_node != &m_sentinel && "intrusive_list::erase: end() 삭제 불가");
-			intrusive_list_node* target = pos.m_node;
-			intrusive_list_node* next   = target->m_next;
+			node_type* target = pos.m_node;
+			node_type* next   = target->m_next;
 			unlink_node(target);
 			--m_size;
 			return iterator(next);
@@ -362,8 +380,8 @@ namespace mtl
 		void splice(const_iterator pos, intrusive_list& other, const_iterator it) noexcept
 		{
 			assert(it.m_node != &other.m_sentinel && "intrusive_list::splice: end() 이동 불가");
-			intrusive_list_node* node = it.m_node;
-			intrusive_list_node* next = node->m_next;
+			node_type* node = it.m_node;
+			node_type* next = node->m_next;
 			if (pos.m_node == node || pos.m_node == next) return;  // 같은 자리 이동 = no-op
 			transfer_range(pos.m_node, node, next);
 			if (this != &other) {
@@ -413,7 +431,7 @@ namespace mtl
 
 		void reverse() noexcept
 		{
-			intrusive_list_node* cur = &m_sentinel;
+			node_type* cur = &m_sentinel;
 			do
 			{
 				std::swap(cur->m_next, cur->m_prev);
@@ -499,9 +517,9 @@ namespace mtl
 		// --------------------------------------------------------------------
 		// internal helpers
 		// --------------------------------------------------------------------
-		intrusive_list_node* sentinel_ptr() const noexcept
+		node_type* sentinel_ptr() const noexcept
 		{
-			return const_cast<intrusive_list_node*>(&m_sentinel);
+			return const_cast<node_type*>(&m_sentinel);
 		}
 
 		void init_sentinel() noexcept
@@ -511,7 +529,7 @@ namespace mtl
 		}
 
 		// pos 앞에 n을 끼워넣는다.
-		static void link_before(intrusive_list_node* pos, intrusive_list_node* n) noexcept
+		static void link_before(node_type* pos, node_type* n) noexcept
 		{
 			n->m_prev = pos->m_prev;
 			n->m_next = pos;
@@ -520,7 +538,7 @@ namespace mtl
 		}
 
 		// 노드를 리스트에서 떼어내고 prev/next를 nullptr로 (is_linked invariant).
-		static void unlink_node(intrusive_list_node* n) noexcept
+		static void unlink_node(node_type* n) noexcept
 		{
 			n->m_prev->m_next = n->m_next;
 			n->m_next->m_prev = n->m_prev;
@@ -529,12 +547,12 @@ namespace mtl
 		}
 
 		// [first, last) 구간을 pos 앞으로 옮긴다. 포인터 6개 갱신으로 끝.
-		static void transfer_range(intrusive_list_node* pos,
-		                           intrusive_list_node* first,
-		                           intrusive_list_node* last) noexcept
+		static void transfer_range(node_type* pos,
+		                           node_type* first,
+		                           node_type* last) noexcept
 		{
 			if (pos == first || first == last) return;
-			intrusive_list_node* last_in = last->m_prev;
+			node_type* last_in = last->m_prev;
 
 			// 원래 위치에서 구간 분리
 			first->m_prev->m_next = last;
@@ -550,12 +568,12 @@ namespace mtl
 		// --------------------------------------------------------------------
 		// data
 		// --------------------------------------------------------------------
-		intrusive_list_node m_sentinel{};
-		size_type           m_size = 0;
+		node_type m_sentinel{};
+		size_type m_size = 0;
 	};
 
-	template <typename T>
-	void swap(intrusive_list<T>& a, intrusive_list<T>& b) noexcept
+	template <typename T, typename Tag>
+	void swap(intrusive_list<T, Tag>& a, intrusive_list<T, Tag>& b) noexcept
 	{
 		a.swap(b);
 	}

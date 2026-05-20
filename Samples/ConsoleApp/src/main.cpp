@@ -34,6 +34,8 @@ int main()
 	run_test_fixed_ring_buffer();
 	run_test_fixed_pool();
 	run_test_intrusive_list();
+	run_test_intrusive_hash_map();
+	run_test_intrusive_hash_set();
 	run_test_random();
 
 	mtl_tb::summary();
@@ -50,6 +52,8 @@ int main()
 	run_bench_fixed_ring_buffer();
 	run_bench_fixed_pool();
 	run_bench_intrusive_list();
+	run_bench_intrusive_hash_map();
+	run_bench_intrusive_hash_set();
 
 
 	mark::shutdown_core_service();
