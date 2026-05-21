@@ -233,9 +233,6 @@ namespace mark
 
 	bool LoadModelFromFBX(IAssetBlob* pBlob, ModelAsset* pModelAsset)
 	{
-		pBlob->AddRef();
-		pModelAsset->AddRef();
-
 		ufbx_load_opts load_opts = {};
 		load_opts.obj_axes = ufbx_axes_left_handed_y_up;
 		load_opts.obj_unit_meters = 1.0f;
@@ -246,8 +243,6 @@ namespace mark
 		ufbx_scene* scene = ufbx_load_memory(pBlob->GetData(), pBlob->GetDataSize(), &load_opts, &error);
 		if (!scene)
 		{
-			pBlob->Release();
-			pModelAsset->Release();
 			return false;
 		}
 
@@ -545,9 +540,6 @@ namespace mark
 
 		if (scene)
 			ufbx_free_scene(scene);
-
-		pModelAsset->Release();
-		pBlob->Release();
 
 		pModelAsset->INL_SetLoaded(TRUE);
 

@@ -6,20 +6,13 @@
 
 namespace mark
 {
-	D3D11RenderDevice* D3D11RenderDevice::s_pInstance = nullptr;
-
 	D3D11RenderDevice::D3D11RenderDevice()
 	{
-		if (!s_pInstance)
-			s_pInstance = this;
 	}
 
 	D3D11RenderDevice::~D3D11RenderDevice() noexcept
 	{
 		DestroyDevice();
-
-		if (s_pInstance == this)
-			s_pInstance = nullptr;
 	}
 
 	bool D3D11RenderDevice::CreateDevice(HWND hWnd, uint32_t Width, uint32_t Height, bool DebugDevice)

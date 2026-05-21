@@ -28,13 +28,37 @@ namespace mark
 
 		D3D_SHADER_MACRO D3D11_SHADER_MACROS[MAX_SHADER_DEFINE + 1] = {};
 
+		// szShaderDefines는 const이므로 '='로 분리하려면 mutable 사본이 필요하다.
+		// D3DCompile 호출이 끝날 때까지 살아있어야 한다 (Name/Definition 포인터가 여기를 가리킴).
+		char ScratchDefines[MAX_SHADER_DEFINE][MAX_SHADER_DEFINE_LENGTH] = {};
+		uint32_t NumValidDefines = 0;
+
 		if (CreateDesc.NumDefines)
 		{
 			uint32_t MaxDefines = std::min(MAX_SHADER_DEFINE, CreateDesc.NumDefines);
 			for (uint32_t i = 0; i < MaxDefines; ++i)
 			{
-				D3D11_SHADER_MACROS[i].Name = CreateDesc.szShaderDefines[i];
-				D3D11_SHADER_MACROS[i].Definition = CreateDesc.szShaderDefines[i];
+				safe_strcpy(ScratchDefines[i], MAX_SHADER_DEFINE_LENGTH, CreateDesc.szShaderDefines[i]);
+
+				if ('\0' == ScratchDefines[i][0])
+					continue; // 빈 정의는 스킵
+
+				// "NAME=VALUE" 형태이면 '='을 NUL로 바꿔 Name과 Definition을 분리.
+				// "NAME"만 있으면 Definition은 D3D11 관례에 따라 "1".
+				char* pDefinition = nullptr;
+				for (uint32_t c = 0; c < MAX_SHADER_DEFINE_LENGTH && ScratchDefines[i][c] != '\0'; ++c)
+				{
+					if (ScratchDefines[i][c] == '=')
+					{
+						ScratchDefines[i][c] = '\0';
+						pDefinition = &ScratchDefines[i][c + 1];
+						break;
+					}
+				}
+
+				D3D11_SHADER_MACROS[NumValidDefines].Name = ScratchDefines[i];
+				D3D11_SHADER_MACROS[NumValidDefines].Definition = pDefinition ? pDefinition : "1";
+				++NumValidDefines;
 			}
 		}
 
@@ -42,7 +66,7 @@ namespace mark
 			CreateDesc.pShaderBytecode,
 			CreateDesc.BytecodeSize,
 			nullptr,
-			(CreateDesc.NumDefines == 0) ? nullptr : D3D11_SHADER_MACROS,
+			(NumValidDefines == 0) ? nullptr : D3D11_SHADER_MACROS,
 			D3D_COMPILE_STANDARD_FILE_INCLUDE,
 			CreateDesc.szEntryPoint,
 			CreateDesc.szShaderModel,

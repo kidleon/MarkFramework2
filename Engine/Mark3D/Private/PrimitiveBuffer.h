@@ -3,12 +3,14 @@
 
 namespace mark
 {
+	class RenderSystem;
+
 	class PrimitiveBuffer
 	{
 	public:
 		~PrimitiveBuffer() noexcept;
 
-		bool Create(uint32_t VertexFormats, uint32_t VertexCount, INDEX_FORMAT IndexFormat, uint32_t IndexCount);
+		bool Create(RenderSystem* pRenderSystem, uint32_t VertexFormats, uint32_t VertexCount, INDEX_FORMAT IndexFormat, uint32_t IndexCount);
 
 		bool UpdateVertexDataImmediate(VERTEX_FORMAT VertexFormat, const void* pData, size_t DataSize);
 		bool UpdateVertexData(VERTEX_FORMAT VertexFormat, const void* pData, size_t DataSize);

@@ -54,12 +54,28 @@ namespace mark
 
 	struct IAssetProvider : public Unknown
 	{
+		/**
+		 * @brief 에셋 데이터를 로드합니다.
+		 * @return [Owning] 반환된 포인터는 AddRef된 상태입니다. 호출자가 Release()를 책임지거나
+		 *         unknown_ptr<IAssetBlob>::attach()로 takeover 하세요. 실패 시 nullptr.
+		 */
 		[[nodiscard]] virtual IAssetBlob* LoadAsset(ASSET_TYPE AssetType, const char* szAssetPath) = 0;
+
+		/**
+		 * @brief 호출자 제공 temppool 위에 에셋 데이터를 로드합니다 (zero-copy 경로).
+		 * @return [Owning] 위와 동일. 데이터 버퍼 자체의 소유권은 temppool에 있으므로
+		 *         AssetBlob 해제 시에도 buffer는 풀에 머무릅니다.
+		 */
 		[[nodiscard]] virtual IAssetBlob* LoadAsset(HANDLE temppool_handle, ASSET_TYPE AssetType, const char* szAssetPath) = 0;
 	};
 
 	struct IAssetManager: public Unknown
 	{
+		/**
+		 * @brief 지정 타입의 에셋을 로드합니다.
+		 * @return [Owning] 반환된 포인터는 AddRef된 상태입니다. 호출자가 Release()를 책임지거나
+		 *         unknown_ptr<IAsset>::attach()로 takeover 하세요. 실패 시 nullptr.
+		 */
 		[[nodiscard]] virtual IAsset* LoadAsset(ASSET_TYPE AssetType, const char* szAssetPath) = 0;
 	};
 }

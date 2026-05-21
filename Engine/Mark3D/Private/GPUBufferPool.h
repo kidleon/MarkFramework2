@@ -52,12 +52,23 @@ namespace mark
 
 		void Initialize(IHardwareGraphicsLayer* pHardwareGraphicsLayer);
 
-		IGPUBuffer* Acquire(
+		/**
+		 * @brief 풀에서 GPU 버퍼를 꺼냅니다 (없으면 새 페이지 생성).
+		 * @return [Pool-owned] 반환된 포인터는 AddRef된 상태입니다. 호출자는 다 쓰고 나면
+		 *         반드시 GPUBufferPool::Release(pBuffer)로 풀에 반납해야 합니다.
+		 *         (IGPUBuffer::Release()를 직접 호출하면 풀의 OriginalBuffers에 stale 엔트리가 남아
+		 *         사실상 leak이 됩니다.) 실패 시 nullptr.
+		 */
+		[[nodiscard]] IGPUBuffer* Acquire(
 			BUFFER_TYPE BufferType,
 			BUFFER_USAGE BufferUsage,
 			size_t BufferSize
 		);
 
+		/**
+		 * @brief Acquire()로 받은 GPU 버퍼를 풀로 반납합니다.
+		 *        호출 후 pBuffer는 풀 내부의 FreeBuffers에 들어가며 호출자는 더 이상 접근하면 안 됩니다.
+		 */
 		void Release(IGPUBuffer* pBuffer);
 
 	private:

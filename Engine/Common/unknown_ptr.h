@@ -9,7 +9,24 @@ namespace mark
 {
 	
 	/**
-	* @brief unknown_ptr: T 인터페이스를 위한 스마트 포인터
+	* @brief unknown_ptr: Unknown 기반 인터페이스를 위한 RAII 스마트 포인터.
+	*
+	* 두 가지 인계 방식이 있습니다:
+	*
+	*   1) 생성자 `unknown_ptr<T>(rawPtr)` / `operator=(rawPtr)`:
+	*      AddRef를 호출하여 *새 owning ref*를 만듭니다.
+	*      이미 borrowed 포인터(예: 인자로 받은 raw 포인터)를 안전히 보유할 때 사용.
+	*
+	*   2) `attach(rawPtr)` / `make_unknown(rawPtr)`:
+	*      AddRef를 호출하지 *않습니다*. 이미 AddRef된 owning ref를 takeover할 때 사용.
+	*      예: ShaderProgramCache::Query(), GPUBufferPool::Acquire(),
+	*          IRenderSystem::CreateGPUBuffer() 등 [Owning] 컨벤션 함수의 반환값.
+	*
+	*      auto buffer = make_unknown(pRenderSystem->CreateGPUBuffer(desc));
+	*      // buffer가 스코프를 벗어나면 자동으로 Release 호출.
+	*
+	* 인터페이스 함수의 ownership 컨벤션은 헤더 주석의 `[Owning]` / `[Borrowed]` /
+	* `[Pool-owned]` 태그를 참고하세요.
 	*/
 	template<typename T>
 	struct unknown_ptr

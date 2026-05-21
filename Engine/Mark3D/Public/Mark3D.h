@@ -33,10 +33,28 @@ namespace mark
 		virtual bool Initialize(const EngineCreateDesc& CreateDesc) = 0;
 		virtual void Shutdown() = 0;
 
+		/**
+		 * @brief RenderSystem 인터페이스를 출력 인자에 반환합니다.
+		 * @param ppOut [Owning out-param] *ppOut은 AddRef된 상태로 반환됩니다.
+		 *              호출자가 Release()를 책임지거나 unknown_ptr<IRenderSystem>::attach()로 받으세요.
+		 * @return ppOut이 nullptr이면 false, 그 외 true (RenderSystem이 미초기화면 *ppOut에 nullptr).
+		 */
 		virtual bool GetRenderSystemInterface(IRenderSystem** ppOut) = 0;
+
+		/**
+		 * @brief AssetManager 인터페이스를 출력 인자에 반환합니다.
+		 * @param ppOut [Owning out-param] *ppOut은 AddRef된 상태로 반환됩니다.
+		 *              호출자가 Release()를 책임지거나 unknown_ptr<IAssetManager>::attach()로 받으세요.
+		 * @return ppOut이 nullptr이면 false, 그 외 true (AssetManager가 미초기화면 *ppOut에 nullptr).
+		 */
 		virtual bool GetAssetManagerInterface(IAssetManager** ppOut) = 0;
 
-		virtual IGPUGeometry* CreateGPUGeometry(const GPUGeometryCreateDesc& CreateDesc) = 0;
+		/**
+		 * @brief GPU 지오메트리를 생성합니다.
+		 * @return [Owning] 반환된 포인터는 AddRef된 상태입니다. 호출자가 Release()를 책임지거나
+		 *         unknown_ptr<IGPUGeometry>::attach()로 takeover 하세요. 실패 시 nullptr.
+		 */
+		[[nodiscard]] virtual IGPUGeometry* CreateGPUGeometry(const GPUGeometryCreateDesc& CreateDesc) = 0;
 
 	};
 

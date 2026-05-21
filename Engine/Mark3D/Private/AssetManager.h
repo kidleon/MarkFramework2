@@ -5,8 +5,6 @@ namespace mark
 {
 	class AssetManager final : public IAssetManager
 	{
-		static AssetManager* s_pInstance;
-
 	public:
 		AssetManager(IAssetProvider* pProvider);
 
@@ -14,9 +12,6 @@ namespace mark
 		virtual void Release();
 
 		virtual IAsset* LoadAsset(ASSET_TYPE AssetType, const char* szAssetPath);
-
-		static AssetManager& Get() noexcept { return *s_pInstance; }
-		static AssetManager* GetPtr() noexcept { return s_pInstance; }
 
 	private:
 		virtual ~AssetManager() noexcept;

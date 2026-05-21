@@ -7,8 +7,6 @@ namespace mark
 
 	class D3D11RenderDevice
 	{
-		static D3D11RenderDevice* s_pInstance;
-
 	public:
 		D3D11RenderDevice();
 		~D3D11RenderDevice() noexcept;
@@ -25,8 +23,6 @@ namespace mark
 		[[nodiscard]] inline ID3D11RenderTargetView* INL_GetBackBuffer_RenderTargetView() const noexcept { return m_pRenderTargetView; }
 		[[nodiscard]] inline ID3D11DepthStencilView* INL_GetBackBuffer_DepthStencilView() const noexcept { return m_pDepthStencilView; }
 		[[nodiscard]] inline ID3D11Texture2D* INL_GetBackBuffer_DepthStencilTexture() const noexcept { return m_pDepthStencilTexture; }
-
-		static D3D11RenderDevice& Get() noexcept { return *s_pInstance; }
 
 	private:
 		void DestroyDevice() noexcept;

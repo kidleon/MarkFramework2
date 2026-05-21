@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "PrimitiveBuffer.h"
-#include "Engine.h"
 #include "RenderSystem.h"
 
 
@@ -11,12 +10,12 @@ namespace mark
 		Cleanup();
 	}
 
-	bool PrimitiveBuffer::Create(uint32_t VertexFormats, uint32_t VertexCount, INDEX_FORMAT IndexFormat, uint32_t IndexCount)
+	bool PrimitiveBuffer::Create(RenderSystem* pRenderSystem, uint32_t VertexFormats, uint32_t VertexCount, INDEX_FORMAT IndexFormat, uint32_t IndexCount)
 	{
-		if (!VertexCount || !IndexCount || !VertexFormats)
+		if (!pRenderSystem || !VertexCount || !IndexCount || !VertexFormats)
 			return false;
 
-		RenderSystem* pRenderSys = Engine::Get().INL_GetRenderSystem();
+		RenderSystem* pRenderSys = pRenderSystem;
 
 		if ((VertexFormats & (uint32_t)VERTEX_FORMAT::POSITION) != 0)
 		{
@@ -227,7 +226,7 @@ namespace mark
 
 	bool PrimitiveBuffer::UpdateVertexData(VERTEX_FORMAT VertexFormat, const void* pData, size_t DataSize)
 	{
-		return true;
+		return UpdateVertexDataImmediate(VertexFormat, pData, DataSize);
 	}
 
 	bool PrimitiveBuffer::UpdateIndexDataImmediate(const void* pData, size_t DataSize)
@@ -252,7 +251,7 @@ namespace mark
 
 	bool PrimitiveBuffer::UpdateIndexData(const void* pData, size_t DataSize)
 	{
-		return true;
+		return UpdateIndexDataImmediate(pData, DataSize);
 	}
 
 	void PrimitiveBuffer::Cleanup()

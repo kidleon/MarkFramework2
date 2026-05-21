@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git diff *)",
+      "Bash(git -C /e/MyWork/MarkFramework2 diff Engine/Mark3D/Private/ModelAsset.cpp Engine/Mark3D/Private/AssetManager.cpp)",
+      "Bash(git -C /e/MyWork/MarkFramework2 diff --stat Engine/Mark3D/)",
+      "Bash(\"/c/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe\" Mark3D.vcxproj //p:Configuration=Debug //p:Platform=x64 //v:minimal //nologo)",
+      "Bash(\"/c/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe\" HardwareGraphicsLayer_D3D11.vcxproj //p:Configuration=Debug //p:Platform=x64 //v:minimal //nologo)",
+      "Bash(git -C /e/MyWork/MarkFramework2 diff Engine/HardwareGraphicsLayer_D3D11/Private/D3D11ShaderProgramCompiler.cpp)",
+      "Bash(\"/c/Program Files/Microsoft Visual Studio/18/Community/MSBuild/Current/Bin/MSBuild.exe\" SampleRender.vcxproj //p:Configuration=Debug //p:Platform=x64 //v:minimal //nologo)",
+      "Bash(git -C /e/MyWork/MarkFramework2 diff Engine/HardwareGraphicsLayer_D3D11/Private/D3D11GPUBuffer.cpp)",
+      "Bash(git -C /e/MyWork/MarkFramework2 diff --stat)",
+      "Bash(git -C /e/MyWork/MarkFramework2 status)"
+    ]
+  }
+}

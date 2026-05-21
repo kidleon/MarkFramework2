@@ -67,7 +67,7 @@ namespace mark
 			return nullptr;
 		}
 
-		return CORE_NEW(D3D11GPUBuffer)(pD3D11Buffer);
+		return CORE_NEW(D3D11GPUBuffer)(m_pRenderDevice->INL_GetD3D11Context(), pD3D11Buffer);
 	}
 
 	IShaderProgram* D3D11HardwareGraphicsLayer::CreateShaderProgram(const ShaderProgramCreateDesc& desc)

@@ -8,8 +8,6 @@ namespace mark
 
 	class Engine final : public IMark3D
 	{
-		static Engine* s_pInstance;
-
 	public:
 		Engine();
 
@@ -23,9 +21,6 @@ namespace mark
 		virtual bool GetAssetManagerInterface(IAssetManager** ppOut);
 
 		virtual IGPUGeometry* CreateGPUGeometry(const GPUGeometryCreateDesc& CreateDesc);
-
-		inline static Engine& Get() noexcept { return *s_pInstance; }
-		inline static Engine* GetPtr() noexcept { return s_pInstance; }
 
 		[[nodiscard]] inline RenderSystem* INL_GetRenderSystem() const noexcept { return m_pRenderSystem; }
 		[[nodiscard]] inline IAssetManager* INL_GetAssetManager() const noexcept { return m_pAssetManager; }

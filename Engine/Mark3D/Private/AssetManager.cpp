@@ -6,20 +6,13 @@
 
 namespace mark
 {
-	AssetManager* AssetManager::s_pInstance = nullptr;
-
 	AssetManager::AssetManager(IAssetProvider* pProvider)
 		: m_pProvider(pProvider)
 	{
-		if (!s_pInstance)
-			s_pInstance = this;
 	}
 
 	AssetManager::~AssetManager() noexcept
 	{
-		if (s_pInstance == this)
-			s_pInstance = nullptr;
-
 		CHECK_RELEASE(m_pProvider);
 	}
 
@@ -48,12 +41,15 @@ namespace mark
 		if (!pBlob)
 			return nullptr;
 
-		const void* pData = pBlob->INL_GetData();
-		size_t DataSize = pBlob->INL_GetDataSize();
-
 		ModelAsset* pModelAsset = CORE_NEW(ModelAsset)(szAssetPath);
 
-		LoadModelFromFBX(pBlob, pModelAsset);
+		if (!LoadModelFromFBX(pBlob, pModelAsset))
+		{
+			SYS_LOG_ERR_F("Failed to load model asset: {}", szAssetPath);
+			pModelAsset->Release();
+			pBlob->Release();
+			return nullptr;
+		}
 
 		pBlob->Release();
 

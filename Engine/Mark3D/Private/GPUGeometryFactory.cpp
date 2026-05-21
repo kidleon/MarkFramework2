@@ -7,8 +7,14 @@
 
 namespace mark
 {
-	bool GPUGeometryFactory::CreateGeometry(const GPUGeometryCreateDesc& CreateDesc, unknown_ptr<GPUGeometry> pGPUGeometry)
+	bool GPUGeometryFactory::CreateGeometry(RenderSystem* pRenderSystem, const GPUGeometryCreateDesc& CreateDesc, unknown_ptr<GPUGeometry> pGPUGeometry)
 	{
+		if (!pRenderSystem)
+		{
+			LOG_ERR("RenderSystem is null. Cannot create GPU geometry.");
+			return false;
+		}
+
 		if (!CreateDesc.pModelAsset.ptr())
 		{
 			LOG_ERR("Model asset is null in GPUGeometryCreateDesc. Cannot create GPU geometry.");
@@ -77,6 +83,7 @@ namespace mark
 				pGPUGeometry->INL_AddPrimitiveBuffer(pMergedBuffer);
 
 				if (!pMergedBuffer->Create(
+					pRenderSystem,
 					CreateVertexFormats,
 					TotalVertexCount,
 					INDEX_FORMAT::AUTO,
@@ -191,7 +198,7 @@ namespace mark
 					PrimitiveBuffer* pPrimitiveBuffer = CORE_NEW(PrimitiveBuffer);
 					pGPUGeometry->INL_AddPrimitiveBuffer(pPrimitiveBuffer);
 
-					pPrimitiveBuffer->Create(CreateVertexFormats, pMesh->NumVertex, INDEX_FORMAT::AUTO, pMesh->NumIndex);
+					pPrimitiveBuffer->Create(pRenderSystem, CreateVertexFormats, pMesh->NumVertex, INDEX_FORMAT::AUTO, pMesh->NumIndex);
 
 					if ((CreateVertexFormats & (uint32_t)VERTEX_FORMAT::POSITION) != 0)
 					{

@@ -1,12 +1,12 @@
 #include "pch.h"
 #include "D3D11GPUBuffer.h"
-#include "D3D11RenderDevice.h"
 
 
 namespace mark
 {
-	D3D11GPUBuffer::D3D11GPUBuffer(ID3D11Buffer* pD3D11Buffer) noexcept
-		: m_pD3D11Buffer(pD3D11Buffer)
+	D3D11GPUBuffer::D3D11GPUBuffer(ID3D11DeviceContext* pDeviceContext, ID3D11Buffer* pD3D11Buffer) noexcept
+		: m_pDeviceContext(pDeviceContext)
+		, m_pD3D11Buffer(pD3D11Buffer)
 	{
 		m_pD3D11Buffer->GetDesc(&m_BufferDesc);
 	}
@@ -70,7 +70,7 @@ namespace mark
 
 	bool D3D11GPUBuffer::UpdateBuffer(const void* pData, size_t DataSize, size_t* pWrittenOffset)
 	{
-		if (!m_pD3D11Buffer || !pData || 0 == DataSize)
+		if (!m_pD3D11Buffer || !m_pDeviceContext || !pData || 0 == DataSize)
 			return false;
 
 		if (m_BufferDesc.ByteWidth < DataSize)
@@ -80,7 +80,7 @@ namespace mark
 			return false;
 		}
 
-		ID3D11DeviceContext* pDeviceContext = D3D11RenderDevice::Get().INL_GetD3D11Context();
+		ID3D11DeviceContext* pDeviceContext = m_pDeviceContext;
 
 		if (m_BufferDesc.Usage == D3D11_USAGE_DYNAMIC)
 		{
@@ -113,8 +113,15 @@ namespace mark
 
 			pDeviceContext->Unmap(m_pD3D11Buffer, 0);
 
-			constexpr size_t BUFFER_ALIGNMENT = 256;
-			m_DynamicOffset = WriteOffset + ((DataSize + BUFFER_ALIGNMENT - 1) & ~(BUFFER_ALIGNMENT - 1));
+			if (m_BufferDesc.BindFlags & D3D11_BIND_CONSTANT_BUFFER)
+			{
+				constexpr size_t BUFFER_ALIGNMENT = 256;
+				m_DynamicOffset = WriteOffset + ((DataSize + BUFFER_ALIGNMENT - 1) & ~(BUFFER_ALIGNMENT - 1));
+			}
+			else
+			{
+				m_DynamicOffset = WriteOffset + DataSize;
+			}
 
 			// 호출자가 실제 쓰인 오프셋을 알아야 할 경우 전달
 			// (IASetVertexBuffers의 offset 인자, VSSetConstantBuffers1의 FirstConstant 등)
@@ -125,9 +132,18 @@ namespace mark
 		}
 		else if (m_BufferDesc.Usage == D3D11_USAGE_DEFAULT)
 		{
+			// UpdateSubresource는 void 반환 — 실패는 D3D11 Debug Layer / InfoQueue를 통해서만 관찰 가능.
+			// 따라서 호출 전 검증을 충실히 한 후 진행하고, DEFAULT는 항상 buffer 시작에 기록한다.
 			pDeviceContext->UpdateSubresource(m_pD3D11Buffer, 0, nullptr, pData, 0, 0);
+
+			if (pWrittenOffset)
+				*pWrittenOffset = 0;
+
+			return true;
 		}
 
-		return true;
+		// IMMUTABLE / STAGING 등 — UpdateBuffer로는 업데이트할 수 없는 Usage.
+		SYS_LOG_ERR_F("Buffer update failed: unsupported D3D11_USAGE = {}", (int)m_BufferDesc.Usage);
+		return false;
 	}
 }

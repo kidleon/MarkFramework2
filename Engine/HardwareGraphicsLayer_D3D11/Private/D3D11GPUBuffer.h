@@ -6,7 +6,7 @@ namespace mark
 	class D3D11GPUBuffer final : public IGPUBuffer
 	{
 	public:
-		D3D11GPUBuffer(ID3D11Buffer* pD3D11Buffer) noexcept;
+		D3D11GPUBuffer(ID3D11DeviceContext* pDeviceContext, ID3D11Buffer* pD3D11Buffer) noexcept;
 
 		void AddRef();
 		void Release();
@@ -26,6 +26,7 @@ namespace mark
 
 	private:
 		mutable std::atomic<int64_t> m_RefCount{ 1 };
+		ID3D11DeviceContext* m_pDeviceContext = nullptr;
 		ID3D11Buffer* m_pD3D11Buffer = nullptr;
 		D3D11_BUFFER_DESC m_BufferDesc = {};
 		size_t m_DynamicOffset = 0;

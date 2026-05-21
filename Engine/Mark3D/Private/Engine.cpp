@@ -10,8 +10,6 @@
 
 namespace mark
 {
-	Engine* Engine::s_pInstance = nullptr;
-
 	typedef BOOL(__stdcall* PFN_CREATE_HARDWARE_GRAPHICS_LAYER)(
 		const RenderSystemCreateDesc& CreateDesc,
 		IHardwareGraphicsLayer** ppHardwareGraphicsLayer
@@ -19,16 +17,11 @@ namespace mark
 
 	Engine::Engine()
 	{
-		if (!s_pInstance)
-			s_pInstance = this;
 	}
 
 	Engine::~Engine() noexcept
 	{
 		Shutdown();
-
-		if (s_pInstance == this)
-			s_pInstance = nullptr;
 	}
 
 	void Engine::AddRef()
@@ -126,7 +119,7 @@ namespace mark
 	IGPUGeometry* Engine::CreateGPUGeometry(const GPUGeometryCreateDesc& CreateDesc)
 	{
 		GPUGeometry* pGeometry = CORE_NEW(GPUGeometry);
-		if (!GPUGeometryFactory::CreateGeometry(CreateDesc, pGeometry))
+		if (!GPUGeometryFactory::CreateGeometry(m_pRenderSystem, CreateDesc, pGeometry))
 		{
 			pGeometry->Release();
 			return nullptr;

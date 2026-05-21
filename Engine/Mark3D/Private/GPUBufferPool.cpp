@@ -243,6 +243,7 @@ namespace mark
 		CreateDesc.Access = (BufferUsage == GPU_BUFFER_USAGE::DYNAMIC) ? BUFFER_ACCESS::WRITE : BUFFER_ACCESS::NONE;
 		CreateDesc.BufferSize = BufferBytes;
 
+		uint32_t Created = 0;
 		for (uint32_t i = 0; i < NumBuffers; ++i)
 		{
 			IGPUBuffer* pBuffer = m_pHardwareGraphicsLayer->CreateGPUBuffer(CreateDesc);
@@ -251,8 +252,16 @@ namespace mark
 
 			pGroup->OriginalBuffers.push_back(pBuffer);
 			pGroup->FreeBuffers.push_back(pBuffer);
+			++Created;
 		}
-		
+
+		if (0 == Created) [[unlikely]]
+		{
+			SYS_LOG_ERR_F("GPUBufferPool::CreateBufferPage - Failed to create any buffer (Type: {}, Usage: {}, Size: {})",
+				(int)BufferType, (int)BufferUsage, BufferBytes);
+			return false;
+		}
+
 		return true;
 	}
 }
