@@ -33,6 +33,7 @@ int main()
 	run_test_fixed_bitset();
 	run_test_fixed_ring_buffer();
 	run_test_fixed_pool();
+	run_test_memory_block_pool();
 	run_test_intrusive_list();
 	run_test_intrusive_hash_map();
 	run_test_intrusive_hash_set();
@@ -51,6 +52,7 @@ int main()
 	run_bench_fixed_bitset();
 	run_bench_fixed_ring_buffer();
 	run_bench_fixed_pool();
+	run_bench_memory_block_pool();
 	run_bench_intrusive_list();
 	run_bench_intrusive_hash_map();
 	run_bench_intrusive_hash_set();

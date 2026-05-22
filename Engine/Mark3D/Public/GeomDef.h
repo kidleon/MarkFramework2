@@ -26,6 +26,7 @@ namespace mark
 		virtual uint32_t RS_GetStencilRef(int32_t Pass) = 0;
 	};
 
+
 	struct ISurfaceMaterial : public Unknown
 	{
 		virtual void SetVertexShader(int32_t Pass, IShaderProgram* pVertexShader) = 0;

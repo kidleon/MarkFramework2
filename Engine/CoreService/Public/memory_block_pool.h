@@ -4,14 +4,9 @@
 
 namespace mark
 {
-	// 페이지 최대 512장, 페이지당 블록 최대 256개.
-	// page_index는 uint16_t(0..511), block_index는 uint8_t(0..255).
 	static constexpr uint16_t MEMORY_BLOCK_POOL_MAX_PAGES = 512;
 	static constexpr uint16_t MEMORY_BLOCK_POOL_MAX_BLOCKS_PER_PAGE = 256;
 
-	// generation == 0 은 invalid 핸들 (zero-init 호환).
-	// release할 때마다 슬롯 generation이 증가하므로, 해제된 슬롯의 옛 핸들은
-	// 같은 슬롯이 재할당되어도 generation 불일치로 stale 판정됨.
 	struct memory_block_id
 	{
 		uint16_t page_index;
