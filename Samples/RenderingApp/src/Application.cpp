@@ -81,6 +81,12 @@ BOOL Application::OnInit(HWND hWnd, int width, int height)
 	pModelAsset->Release();
 	pAssetManager->Release();
 
+	ISurfaceMaterial* pSurfaceMaterial = m_pMark3D->CreateSurfaceMaterial();
+	if (pSurfaceMaterial)
+	{
+		pSurfaceMaterial->Release();
+	}
+
 	return TRUE;
 }
 

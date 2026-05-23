@@ -518,6 +518,30 @@ namespace mark
 		UINT32 StencilRef; // 스텐실 참조값
 	};
 
+	struct RENDER_PASS
+	{
+		IShaderProgram* pVertexShader;
+		IShaderProgram* pPixelShader;
+		RENDER_STATE State; // 렌더 상태
+	};
+
+
+	struct ISurfaceMaterial : public Unknown
+	{
+		virtual void SetVertexShader(int32_t Pass, IShaderProgram* pVertexShader) = 0;
+		virtual void SetPixelShader(int32_t Pass, IShaderProgram* pPixelShader) = 0;
+
+		virtual void RS_SetRasterizerState(int32_t Pass, const RS_RASTERIZER_STATE& RasterizerState) = 0;
+		virtual void RS_SetBlendState(int32_t Pass, const RS_BLEND_STATE& BlendState) = 0;
+		virtual void RS_SetDepthStencilState(int32_t Pass, const RS_DEPTH_STENCIL_STATE& DepthStencilState) = 0;
+		virtual void RS_SetBlendFactor(int32_t Pass, const FLOAT4& BlendFactor) = 0;
+		virtual void RS_SetSampleMask(int32_t Pass, uint32_t SampleMask) = 0;
+		virtual void RS_SetStencilRef(int32_t Pass, uint32_t StencilRef) = 0;
+
+		virtual void CB_SetConstant(int32_t Pass, uint32_t Slot, const void* pData, size_t DataSize) = 0;
+
+	};
+
 
 	struct IHardwareGraphicsLayer : public Unknown
 	{
@@ -572,5 +596,12 @@ namespace mark
 		 *         unknown_ptr<IShaderProgram>::attach()로 takeover 하세요. 없으면 nullptr.
 		 */
 		[[nodiscard]] virtual IShaderProgram* GetShaderProgram(SHADER_TYPE ShaderType, const char* szShaderName) = 0;
+
+		/**
+		 * @brief 표면 재질을 생성합니다 (내부적으로 재질 풀에서 acquire).
+		 * @return [Owning] 반환된 포인터는 AddRef된 상태입니다. 호출자가 Release()를 책임지거나
+		 *         unknown_ptr<ISurfaceMaterial>::attach()로 takeover 하세요. 실패 시 nullptr.
+		 */
+		[[nodiscard]] virtual ISurfaceMaterial* CreateSurfaceMaterial() = 0;
 	};
 }

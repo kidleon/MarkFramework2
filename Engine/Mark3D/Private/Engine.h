@@ -21,6 +21,7 @@ namespace mark
 		virtual bool GetAssetManagerInterface(IAssetManager** ppOut);
 
 		virtual IGPUGeometry* CreateGPUGeometry(const GPUGeometryCreateDesc& CreateDesc);
+		virtual ISurfaceMaterial* CreateSurfaceMaterial();
 
 		[[nodiscard]] inline RenderSystem* INL_GetRenderSystem() const noexcept { return m_pRenderSystem; }
 		[[nodiscard]] inline IAssetManager* INL_GetAssetManager() const noexcept { return m_pAssetManager; }

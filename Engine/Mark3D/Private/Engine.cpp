@@ -127,4 +127,9 @@ namespace mark
 
 		return pGeometry;
 	}
+
+	ISurfaceMaterial* Engine::CreateSurfaceMaterial()
+	{
+		return m_pRenderSystem->CreateSurfaceMaterial();
+	}
 }

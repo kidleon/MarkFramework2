@@ -5,6 +5,7 @@ namespace mark
 {
 	class GPUBufferPool;
 	class ShaderProgramCache;
+	class SurfaceMaterialPool;
 
 	class RenderSystem final : public IRenderSystem
 	{
@@ -17,6 +18,7 @@ namespace mark
 		virtual IGPUBuffer* CreateGPUBuffer(const GPUBufferCreateDesc& CreateDesc);
 		virtual IShaderProgram* CreateShaderProgram(const ShaderProgramCreateDesc& CreateDesc);
 		virtual IShaderProgram* GetShaderProgram(SHADER_TYPE ShaderType, const char* szShaderName);
+		virtual ISurfaceMaterial* CreateSurfaceMaterial();
 
 	private:
 		virtual ~RenderSystem() noexcept;
@@ -29,7 +31,7 @@ namespace mark
 		IHardwareGraphicsLayer* m_pHardwareGraphicsLayer = nullptr;
 		GPUBufferPool* m_pGPUBufferPool = nullptr;
 		ShaderProgramCache* m_pShaderProgramCache = nullptr;
-
+		SurfaceMaterialPool* m_pSurfaceMaterialPool = nullptr;
 
 #if defined(__TARGET_OS_WINDOWS)
 		HMODULE m_hHardwareGraphicsLayer = nullptr;
