@@ -33,11 +33,38 @@ namespace mark
 		virtual bool IsLoaded() const noexcept = 0;
 	};
 
+
+	struct ITransform : public Unknown
+	{
+	};
+
+	struct ISceneNode : public Unknown
+	{
+	};
+
+	struct ISceneObject : public Unknown
+	{
+	};
+
 	struct IGPUGeometry : public IResource
 	{
 	};
 
+
+
 	struct IModelInstance : public Unknown
+	{
+	};
+
+	struct ISkeleton : public Unknown
+	{
+	};
+
+	struct ISkeletonPose : public Unknown
+	{
+	};
+
+	struct ISkinnedModelInstance : public IModelInstance
 	{
 	};
 
