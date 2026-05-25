@@ -1,4 +1,5 @@
 #pragma once
+#include "TMemoryBlockPool.h"
 
 
 namespace mark
@@ -6,6 +7,7 @@ namespace mark
 	class GPUBufferPool;
 	class ShaderProgramCache;
 	class SurfaceMaterialPool;
+	class SurfaceMaterial;
 
 	class RenderSystem final : public IRenderSystem
 	{
@@ -32,6 +34,8 @@ namespace mark
 		GPUBufferPool* m_pGPUBufferPool = nullptr;
 		ShaderProgramCache* m_pShaderProgramCache = nullptr;
 		SurfaceMaterialPool* m_pSurfaceMaterialPool = nullptr;
+
+		TMemoryBlockPool<SurfaceMaterial> m_SurfaceMaterialPool;
 
 #if defined(__TARGET_OS_WINDOWS)
 		HMODULE m_hHardwareGraphicsLayer = nullptr;

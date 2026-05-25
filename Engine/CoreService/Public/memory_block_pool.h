@@ -4,7 +4,7 @@
 
 namespace mark
 {
-	static constexpr uint16_t MEMORY_BLOCK_POOL_MAX_PAGES = 512;
+	static constexpr uint16_t MEMORY_BLOCK_POOL_MAX_PAGES = 1024;
 	static constexpr uint16_t MEMORY_BLOCK_POOL_MAX_BLOCKS_PER_PAGE = 256;
 
 	struct memory_block_id

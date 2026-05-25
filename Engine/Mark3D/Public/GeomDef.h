@@ -1,4 +1,5 @@
 #pragma once
+#include "Transform.h"
 #include "unknown_ptr.h"
 
 
@@ -30,33 +31,61 @@ namespace mark
 
 	struct IResource : public Unknown
 	{
-		virtual bool IsLoaded() const noexcept = 0;
-	};
-
-
-	struct ITransform : public Unknown
-	{
-	};
-
-	struct ISceneNode : public Unknown
-	{
-	};
-
-	struct ISceneObject : public Unknown
-	{
+		[[nodiscard]] virtual bool IsLoaded() const noexcept = 0;
 	};
 
 	struct IGPUGeometry : public IResource
+	{};
+
+	struct ISceneObject;
+
+	struct ISceneNode : public PrivateUnknown
+	{
+		virtual void SetParent(ISceneNode* pParent, bool KeepWorldTransform = true) noexcept = 0;
+		[[nodiscard]] virtual ISceneNode* GetParent() const noexcept = 0;
+
+		virtual bool AttachChild(ISceneNode* pChild, bool KeepWorldTransform = true) noexcept = 0;
+		virtual bool DetachChild(ISceneNode* pChild, bool KeepWorldTransform = true) noexcept = 0;
+		virtual bool DetachChildAt(uint32_t ChildIndex, bool KeepWorldTransform = true) noexcept = 0;
+		virtual void DetachAllChildren(bool KeepWorldTransform = true) noexcept = 0;
+
+		[[nodiscard]] virtual uint32_t GetChildCount() const noexcept = 0;
+		[[nodiscard]] virtual ISceneNode* GetChild(uint32_t ChildIndex) const noexcept = 0;
+		[[nodiscard]] virtual int32_t GetChildIndex(const ISceneNode* pChild) const noexcept = 0;
+
+		[[nodiscard]] virtual Transform& GetTransform() noexcept = 0;
+		[[nodiscard]] virtual const Transform& GetTransform() const noexcept = 0;
+
+		virtual bool AttachObject(ISceneObject* pObject) noexcept = 0;
+		virtual bool DetachObject(ISceneObject* pObject) noexcept = 0;
+		virtual bool DetachObjectAt(uint32_t ObjectIndex) noexcept = 0;
+		virtual void DetachAllObjects() noexcept = 0;
+
+		[[nodiscard]] virtual uint32_t GetObjectCount() const noexcept = 0;
+		[[nodiscard]] virtual ISceneObject* GetObject(uint32_t ObjectIndex) const noexcept = 0;
+		[[nodiscard]] virtual int32_t GetObjectIndex(const ISceneObject* pObject) const noexcept = 0;
+
+		virtual void SetEnabled(bool Enabled) noexcept = 0;
+		[[nodiscard]] virtual bool IsEnabled() const noexcept = 0;
+		
+	};
+
+	struct ISceneObject : public IResource
+	{
+		virtual void SetEnable(bool Enable) noexcept = 0;
+		[[nodiscard]] virtual bool IsEnable() const noexcept = 0;
+
+		virtual void SetVisible(bool Visible) noexcept = 0;
+		[[nodiscard]] virtual bool IsVisible() const noexcept = 0;
+
+		[[nodiscard]] virtual ISceneNode* GetSceneNode() const noexcept = 0;
+	};
+
+	struct IModelInstance : public ISceneObject
 	{
 	};
 
-
-
-	struct IModelInstance : public Unknown
-	{
-	};
-
-	struct ISkeleton : public Unknown
+	struct ISkeleton : public IResource
 	{
 	};
 
@@ -66,6 +95,49 @@ namespace mark
 
 	struct ISkinnedModelInstance : public IModelInstance
 	{
+	};
+
+
+	struct IWorld;
+
+	struct IScene : public Unknown
+	{
+		virtual void SetName(const char* Name) noexcept = 0;
+		[[nodiscard]] virtual const char* GetName() const noexcept = 0;
+
+		virtual void SetOrder(int32_t Order) noexcept = 0;
+		[[nodiscard]] virtual int32_t GetOrder() const noexcept = 0;
+
+		virtual void SetActive(bool Active) noexcept = 0;
+		[[nodiscard]] virtual bool IsActive() const noexcept = 0;
+
+		virtual void SetVisible(bool Visible) noexcept = 0;
+		[[nodiscard]] virtual bool IsVisible() const noexcept = 0;
+
+		virtual IWorld* GetWorld() const noexcept = 0;
+
+		virtual ISceneNode* CreateSceneNode() noexcept = 0;
+		virtual void DestroySceneNode(ISceneNode* pNode) noexcept = 0;
+
+		virtual int32_t GetNumSceneNode() const noexcept = 0;
+		virtual ISceneNode* GetSceneNode(const char* Name) const noexcept = 0;
+		virtual ISceneNode* GetSceneNode(uint32_t NodeID) const noexcept = 0;
+		virtual ISceneNode* GetSceneNodeByIndex(int32_t Index) const noexcept = 0;
+		virtual ISceneNode* GetRootSceneNode() const noexcept = 0;
+		
+	};
+
+
+	struct IWorld : public Unknown
+	{
+		virtual void BigBang(const char* Name) noexcept = 0;
+		virtual void BigRip(const char* Name) noexcept = 0;
+
+		[[nodiscard]] virtual IScene* CreateScene(const char* Name) noexcept = 0;
+		[[nodiscard]] virtual IScene* LoadScene(const char* FilePath, bool Additive, bool Async) noexcept = 0;
+		virtual void DestroyScene(const char* Name) noexcept = 0;
+		[[nodiscard]] virtual IScene* GetScene(const char* Name) const noexcept = 0;
+
 	};
 
 }

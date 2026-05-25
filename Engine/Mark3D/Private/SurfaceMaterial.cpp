@@ -1,13 +1,11 @@
 #include "pch.h"
 #include "SurfaceMaterial.h"
-#include "SurfaceMaterialPool.h"
 
 
 namespace mark
 {
-	SurfaceMaterial::SurfaceMaterial(SurfaceMaterialPool* pPool, memory_block_id BlockId)
+	SurfaceMaterial::SurfaceMaterial(TMemoryBlockPool<SurfaceMaterial>* pPool)
 		: m_pPool(pPool)
-		, m_BlockId(BlockId)
 	{
 	}
 

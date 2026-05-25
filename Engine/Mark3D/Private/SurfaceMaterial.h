@@ -1,17 +1,15 @@
 #pragma once
-#include "memory_block_pool.h"
+#include "TMemoryBlockPool.h"
 
 
 namespace mark
 {
-	class SurfaceMaterialPool;
-
 	class SurfaceMaterial final : public ISurfaceMaterial
 	{
-		friend class SurfaceMaterialPool;
+		friend class TMemoryBlockPool<SurfaceMaterial>;
 
 	public:
-		SurfaceMaterial(SurfaceMaterialPool* pPool, memory_block_id BlockId);
+		SurfaceMaterial(TMemoryBlockPool<SurfaceMaterial>* pPool);
 
 		virtual void AddRef();
 		virtual void Release();
@@ -28,7 +26,8 @@ namespace mark
 
 		virtual void CB_SetConstant(int32_t Pass, uint32_t Slot, const void* pData, size_t DataSize);
 
-		inline memory_block_id INL_GetBlockId() const { return m_BlockId; }
+		inline void SetMemoryBlockId(memory_block_id blockId) { m_BlockId = blockId; }
+		inline memory_block_id GetMemoryBlockId() const { return m_BlockId; }
 
 	private:
 		SurfaceMaterial() = delete;
@@ -36,9 +35,9 @@ namespace mark
 
 	private:
 		std::atomic<int32_t> m_RefCnt{ 1 };
-		SurfaceMaterialPool* m_pPool{ nullptr };
+		TMemoryBlockPool<SurfaceMaterial>* m_pPool = nullptr;
+		
 		memory_block_id m_BlockId{};
-
 
 	};
 }

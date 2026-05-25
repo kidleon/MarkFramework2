@@ -49,10 +49,10 @@ namespace mark
 		m_pGPUBufferPool->Initialize(m_pHardwareGraphicsLayer);
 
 		m_pShaderProgramCache = CORE_NEW(ShaderProgramCache);
-		m_pSurfaceMaterialPool = CORE_NEW(SurfaceMaterialPool);
-		if (!m_pSurfaceMaterialPool->Initialize())
+
+		if (!m_SurfaceMaterialPool.Initialize())
 		{
-			SYS_LOG_ERR("Failed to initialize SurfaceMaterialPool.");
+			SYS_LOG_ERR("Failed to initialize SurfaceMaterial memory block pool.");
 			return false;
 		}
 
@@ -61,8 +61,7 @@ namespace mark
 
 	void RenderSystem::Shutdown()
 	{
-		CORE_DELETE(SurfaceMaterialPool, m_pSurfaceMaterialPool);
-		m_pSurfaceMaterialPool = nullptr;
+		m_SurfaceMaterialPool.Shutdown();
 
 		CORE_DELETE(ShaderProgramCache, m_pShaderProgramCache);
 		m_pShaderProgramCache = nullptr;
@@ -126,7 +125,11 @@ namespace mark
 	ISurfaceMaterial* RenderSystem::CreateSurfaceMaterial()
 	{
 		// SurfaceMaterial 생성 로직
-		return static_cast<ISurfaceMaterial*>(m_pSurfaceMaterialPool->Acquire());
+		SurfaceMaterial* pSurfaceMaterial = m_SurfaceMaterialPool.Acquire();
+		
+
+
+		return static_cast<ISurfaceMaterial*>(pSurfaceMaterial);
 	}
 
 	bool RenderSystem::PlugIn_CreateHardwareGraphicsLayer_D3D11(const RenderSystemCreateDesc& CreateDesc)
