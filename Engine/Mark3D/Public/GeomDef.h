@@ -130,7 +130,16 @@ namespace mark
 
 	struct IWorld : public Unknown
 	{
+		/**
+		* @brief 월드를 생성 합니다. 월드는 씬을 포함하는 최상위 컨테이너입니다. 일반적으로 게임에서 하나의 월드가 존재하며, 여러 씬을 관리할 수 있습니다.
+		* @param Name 월드의 이름을 지정합니다. 이 이름은 월드를 식별하는 데 사용됩니다.
+		*/
 		virtual void BigBang(const char* Name) noexcept = 0;
+
+		/**
+		 * @brief 월드를 파괴 합니다. 월드가 파괴되면 해당 월드에 포함된 모든 씬과 씬 노드, 씬 오브젝트도 함께 파괴됩니다. 이 메서드는 월드의 생명주기를 관리하는 데 사용됩니다.
+		 * @param Name 
+		 */
 		virtual void BigRip(const char* Name) noexcept = 0;
 
 		[[nodiscard]] virtual IScene* CreateScene(const char* Name) noexcept = 0;
