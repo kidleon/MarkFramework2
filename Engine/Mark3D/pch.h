@@ -12,6 +12,9 @@
 #endif // __MEMORY_TRACKING_ENABLED__
 
 #include "predefine.h"
+#include "mtl/fixed_vector.h"
+#include "mtl/fixed_list.h"
+
 #include "unknown_ptr.h"
 #include "name_hash.h"
 #include "core_heap.h"
@@ -22,6 +25,7 @@
 #include "RenderDef.h"
 #include "AssetDef.h"
 #include "GeomDef.h"
+#include "TMemoryBlockPool.h"
 #include "Mark3D.h"
 
 #endif // __PCH_H__

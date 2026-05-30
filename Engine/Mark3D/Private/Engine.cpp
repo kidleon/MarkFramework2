@@ -6,6 +6,7 @@
 #include "GPUGeometry.h"
 #include "GPUGeometryFactory.h"
 #include "RenderSystem.h"
+#include "World.h"
 
 
 namespace mark
@@ -79,6 +80,18 @@ namespace mark
 	{
 		m_Initialized = FALSE;
 
+		while (!m_lstWorlds.empty())
+		{
+			World* pWorld = m_lstWorlds.back();
+			m_lstWorlds.pop_back();
+
+			if (pWorld)
+			{
+				pWorld->BigRip();
+				pWorld->Release();
+			}
+		}
+
 		CHECK_RELEASE(m_pRenderSystem);
 		if (m_HardwareGraphicsLayerHandle)
 		{
@@ -131,5 +144,46 @@ namespace mark
 	ISurfaceMaterial* Engine::CreateSurfaceMaterial()
 	{
 		return m_pRenderSystem->CreateSurfaceMaterial();
+	}
+
+	IWorld* Engine::CreateWorld(const char* Name)
+	{
+		if (!Name || !Name[0])
+			return nullptr;
+
+		for (World* pWorld : m_lstWorlds)
+		{
+			if (pWorld && safe_strcmp(pWorld->INL_GetName(), Name) == 0)
+				return nullptr;
+		}
+
+		World* pWorld = CORE_NEW(World);
+		if (!pWorld)
+			return nullptr;
+
+		pWorld->BigBang(Name);
+		pWorld->AddRef();
+		m_lstWorlds.push_back(pWorld);
+
+		return pWorld;
+	}
+
+	void Engine::DestroyWorld(IWorld* pWorld)
+	{
+		World* pTargetWorld = static_cast<World*>(pWorld);
+		if (!pTargetWorld)
+			return;
+
+		for (auto it = m_lstWorlds.begin(); it != m_lstWorlds.end(); ++it)
+		{
+			if (*it == pTargetWorld)
+			{
+				m_lstWorlds.erase(it);
+				pTargetWorld->BigRip();
+				pTargetWorld->Release();
+				pTargetWorld->Release();
+				return;
+			}
+		}
 	}
 }

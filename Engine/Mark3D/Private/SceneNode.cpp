@@ -1,22 +1,13 @@
 #include "pch.h"
 #include "SceneNode.h"
+#include "Scene.h"
 
 
 namespace mark
 {
-	namespace
+	SceneNode::SceneNode(TMemoryBlockPool<SceneNode>* pPool) noexcept
+		: m_pPool(pPool)
 	{
-		template<typename T>
-		int32_t FindPointerIndex(const sys_vector<T*>& Items, const T* pItem) noexcept
-		{
-			for (uint32_t i = 0; i < Items.size(); ++i)
-			{
-				if (Items[i] == pItem)
-					return static_cast<int32_t>(i);
-			}
-
-			return -1;
-		}
 	}
 
 	SceneNode::~SceneNode() noexcept
@@ -34,6 +25,26 @@ namespace mark
 		m_pParent = nullptr;
 	}
 
+	void SceneNode::SetName(const char* Name) noexcept
+	{
+		safe_strcpy(m_Name, sizeof(m_Name), Name ? Name : "");
+	}
+
+	const char* SceneNode::GetName() const noexcept
+	{
+		return m_Name;
+	}
+
+	uint32_t SceneNode::GetNodeID() const noexcept
+	{
+		return m_NodeID;
+	}
+
+	IScene* SceneNode::GetScene() const noexcept
+	{
+		return m_pScene;
+	}
+
 	void SceneNode::SetParent(ISceneNode* pParent, bool KeepWorldTransform) noexcept
 	{
 		if (m_pParent == pParent)
@@ -41,6 +52,8 @@ namespace mark
 
 		SceneNode* pNewParent = INL_AsSceneNode(pParent);
 		if (pParent && (!pNewParent || pParent == this || INL_IsAncestorOf(pNewParent)))
+			return;
+		if (pNewParent && pNewParent->GetScene() != m_pScene)
 			return;
 
 		INL_UpdateWorldTransform();
@@ -92,7 +105,9 @@ namespace mark
 	bool SceneNode::AttachChild(ISceneNode* pChild, bool KeepWorldTransform) noexcept
 	{
 		SceneNode* pChildNode = INL_AsSceneNode(pChild);
-		if (!pChildNode || pChildNode == this || INL_IsAncestorOf(pChildNode))
+		if (!pChildNode || pChildNode == this || pChildNode->INL_IsAncestorOf(this))
+			return false;
+		if (pChildNode->GetScene() != m_pScene)
 			return false;
 
 		if (pChildNode->GetParent() == this)
@@ -150,7 +165,7 @@ namespace mark
 
 	int32_t SceneNode::GetChildIndex(const ISceneNode* pChild) const noexcept
 	{
-		return FindPointerIndex(m_lstChildren, pChild);
+		return m_lstChildren.find_index(const_cast<ISceneNode*>(pChild));
 	}
 
 	Transform& SceneNode::GetTransform() noexcept
@@ -211,7 +226,7 @@ namespace mark
 
 	int32_t SceneNode::GetObjectIndex(const ISceneObject* pObject) const noexcept
 	{
-		return FindPointerIndex(m_lstObjects, pObject);
+		return m_lstObjects.find_index(const_cast<ISceneObject*>(pObject));
 	}
 
 	void SceneNode::SetEnabled(bool Enabled) noexcept
@@ -222,6 +237,18 @@ namespace mark
 	bool SceneNode::IsEnabled() const noexcept
 	{
 		return m_Enabled;
+	}
+
+	void SceneNode::SetDirty(bool Dirty) noexcept
+	{
+		m_Dirty = Dirty;
+		if (Dirty)
+			m_Transform.MarkDirty();
+	}
+
+	bool SceneNode::IsDirty() const noexcept
+	{
+		return m_Dirty || m_Transform.IsDirty();
 	}
 
 	void SceneNode::INL_UpdateWorldTransform() noexcept
@@ -241,6 +268,8 @@ namespace mark
 			if (SceneNode* pChildNode = INL_AsSceneNode(pChild))
 				pChildNode->INL_UpdateWorldTransform();
 		}
+
+		m_Dirty = false;
 	}
 
 	void SceneNode::INL_MarkTransformDirtyRecursive() noexcept
@@ -252,6 +281,8 @@ namespace mark
 			if (SceneNode* pChildNode = INL_AsSceneNode(pChild))
 				pChildNode->INL_MarkTransformDirtyRecursive();
 		}
+
+		m_Dirty = true;
 	}
 
 	void SceneNode::AddRef()
@@ -263,15 +294,38 @@ namespace mark
 	{
 		if (m_RefCount.fetch_sub(1, std::memory_order_acq_rel) == 1)
 		{
-			CORE_DELETE(SceneNode, this);
+			if (m_pPool)
+				m_pPool->Release(this);
 		}
+	}
+
+	void SceneNode::INL_Reset(Scene* pScene, uint32_t NodeID, const char* Name) noexcept
+	{
+		m_RefCount.store(0, std::memory_order_relaxed);
+		m_pScene = pScene;
+		m_NodeID = NodeID;
+		SetName(Name);
+		m_pParent = nullptr;
+		m_lstChildren.clear();
+		m_lstObjects.clear();
+		m_Transform.Reset();
+		m_Enabled = true;
+		m_Dirty = true;
+	}
+
+	void SceneNode::INL_SetScene(Scene* pScene) noexcept
+	{
+		m_pScene = pScene;
 	}
 
 	bool SceneNode::INL_IsAncestorOf(const SceneNode* pNode) const noexcept
 	{
-		for (const SceneNode* pParent = INL_AsSceneNode(m_pParent); pParent; pParent = INL_AsSceneNode(pParent->m_pParent))
+		if (!pNode)
+			return false;
+
+		for (const SceneNode* pParent = INL_AsSceneNode(pNode->m_pParent); pParent; pParent = INL_AsSceneNode(pParent->m_pParent))
 		{
-			if (pParent == pNode)
+			if (pParent == this)
 				return true;
 		}
 

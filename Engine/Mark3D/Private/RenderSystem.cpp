@@ -2,7 +2,6 @@
 #include "RenderSystem.h"
 #include "GPUBufferPool.h"
 #include "ShaderProgramCache.h"
-#include "SurfaceMaterialPool.h"
 #include "SurfaceMaterial.h"
 
 

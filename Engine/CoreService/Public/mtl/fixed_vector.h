@@ -248,6 +248,17 @@ namespace mtl
 			m_end = buffer_ptr();
 		}
 
+		int32_t find_index(const T& value) const noexcept
+		{
+			for (size_type i = 0; i < size(); ++i)
+			{
+				if (buffer_ptr()[i] == value)
+					return static_cast<int32_t>(i);
+			}
+
+			return -1; // not found
+		}
+
 		void push_back(const T& value)
 		{
 			assert(size() < N && "fixed_vector::push_back: 용량 초과");

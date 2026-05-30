@@ -37,9 +37,7 @@ namespace mark
 	struct IGPUGeometry : public IResource
 	{};
 
-	struct ISceneObject;
-
-	
+	struct ISceneNode;
 
 	struct ISceneObject : public IResource
 	{
@@ -70,9 +68,15 @@ namespace mark
 
 
 	struct IWorld;
+	struct IScene;
 
 	struct ISceneNode : public PrivateUnknown
 	{
+		virtual void SetName(const char* Name) noexcept = 0;
+		[[nodiscard]] virtual const char* GetName() const noexcept = 0;
+		[[nodiscard]] virtual uint32_t GetNodeID() const noexcept = 0;
+		[[nodiscard]] virtual IScene* GetScene() const noexcept = 0;
+
 		virtual void SetParent(ISceneNode* pParent, bool KeepWorldTransform = true) noexcept = 0;
 		[[nodiscard]] virtual ISceneNode* GetParent() const noexcept = 0;
 
