@@ -4,14 +4,12 @@
 
 namespace mark
 {
+	class Engine;
+
 	class World final : public IWorld
 	{
 	public:
 		World() noexcept = default;
-		~World() noexcept;
-
-		void AddRef() override;
-		void Release() override;
 
 		void BigBang(const char* Name) noexcept override;
 		void BigRip() noexcept override;
@@ -22,6 +20,13 @@ namespace mark
 		[[nodiscard]] IScene* GetScene(const char* Name) const noexcept override;
 
 		[[nodiscard]] inline const char* INL_GetName() const noexcept { return m_Name; }
+
+	private:
+		~World() noexcept;
+		void AddRef() override;
+		void Release() override;
+		
+		friend class Engine;
 
 	private:
 		std::atomic<int64_t> m_RefCount{ 1 };

@@ -10,7 +10,7 @@ namespace mark
 	public:
 		bool Initialize()
 		{
-			m_hMemoryBlockPool = create_memory_block_pool(sizeof(T), MEMORY_BLOCK_POOL_MAX_PAGES);
+			m_hMemoryBlockPool = create_memory_block_pool(sizeof(T), 256);
 			if (!m_hMemoryBlockPool)
 				return false;
 

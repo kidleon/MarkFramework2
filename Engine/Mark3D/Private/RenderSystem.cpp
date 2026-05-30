@@ -125,9 +125,6 @@ namespace mark
 	{
 		// SurfaceMaterial 생성 로직
 		SurfaceMaterial* pSurfaceMaterial = m_SurfaceMaterialPool.Acquire();
-		
-
-
 		return static_cast<ISurfaceMaterial*>(pSurfaceMaterial);
 	}
 

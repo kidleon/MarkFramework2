@@ -87,6 +87,12 @@ BOOL Application::OnInit(HWND hWnd, int width, int height)
 		pSurfaceMaterial->Release();
 	}
 
+	IWorld* pWorld = m_pMark3D->CreateWorld("DefaultWorld");
+	if (pWorld)
+	{
+		m_pMark3D->DestroyWorld(pWorld);
+	}
+
 	return TRUE;
 }
 

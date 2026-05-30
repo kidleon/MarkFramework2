@@ -201,6 +201,7 @@ namespace mark
 	{
 		if (block_size == 0)
 			return nullptr;
+
 		if (blocks_per_page == 0 || blocks_per_page > MEMORY_BLOCK_POOL_MAX_BLOCKS_PER_PAGE)
 			return nullptr;
 

@@ -137,7 +137,7 @@ namespace mark
 	};
 
 
-	struct IWorld : public Unknown
+	struct IWorld : public PrivateUnknown
 	{
 		virtual void BigBang(const char* Name) noexcept = 0;
 		virtual void BigRip() noexcept = 0;

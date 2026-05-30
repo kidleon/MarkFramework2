@@ -162,7 +162,6 @@ namespace mark
 			return nullptr;
 
 		pWorld->BigBang(Name);
-		pWorld->AddRef();
 		m_lstWorlds.push_back(pWorld);
 
 		return pWorld;
@@ -180,7 +179,6 @@ namespace mark
 			{
 				m_lstWorlds.erase(it);
 				pTargetWorld->BigRip();
-				pTargetWorld->Release();
 				pTargetWorld->Release();
 				return;
 			}
