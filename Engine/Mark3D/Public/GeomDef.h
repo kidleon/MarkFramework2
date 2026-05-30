@@ -39,36 +39,7 @@ namespace mark
 
 	struct ISceneObject;
 
-	struct ISceneNode : public PrivateUnknown
-	{
-		virtual void SetParent(ISceneNode* pParent, bool KeepWorldTransform = true) noexcept = 0;
-		[[nodiscard]] virtual ISceneNode* GetParent() const noexcept = 0;
-
-		virtual bool AttachChild(ISceneNode* pChild, bool KeepWorldTransform = true) noexcept = 0;
-		virtual bool DetachChild(ISceneNode* pChild, bool KeepWorldTransform = true) noexcept = 0;
-		virtual bool DetachChildAt(uint32_t ChildIndex, bool KeepWorldTransform = true) noexcept = 0;
-		virtual void DetachAllChildren(bool KeepWorldTransform = true) noexcept = 0;
-
-		[[nodiscard]] virtual uint32_t GetChildCount() const noexcept = 0;
-		[[nodiscard]] virtual ISceneNode* GetChild(uint32_t ChildIndex) const noexcept = 0;
-		[[nodiscard]] virtual int32_t GetChildIndex(const ISceneNode* pChild) const noexcept = 0;
-
-		[[nodiscard]] virtual Transform& GetTransform() noexcept = 0;
-		[[nodiscard]] virtual const Transform& GetTransform() const noexcept = 0;
-
-		virtual bool AttachObject(ISceneObject* pObject) noexcept = 0;
-		virtual bool DetachObject(ISceneObject* pObject) noexcept = 0;
-		virtual bool DetachObjectAt(uint32_t ObjectIndex) noexcept = 0;
-		virtual void DetachAllObjects() noexcept = 0;
-
-		[[nodiscard]] virtual uint32_t GetObjectCount() const noexcept = 0;
-		[[nodiscard]] virtual ISceneObject* GetObject(uint32_t ObjectIndex) const noexcept = 0;
-		[[nodiscard]] virtual int32_t GetObjectIndex(const ISceneObject* pObject) const noexcept = 0;
-
-		virtual void SetEnabled(bool Enabled) noexcept = 0;
-		[[nodiscard]] virtual bool IsEnabled() const noexcept = 0;
-		
-	};
+	
 
 	struct ISceneObject : public IResource
 	{
@@ -99,6 +70,40 @@ namespace mark
 
 
 	struct IWorld;
+
+	struct ISceneNode : public PrivateUnknown
+	{
+		virtual void SetParent(ISceneNode* pParent, bool KeepWorldTransform = true) noexcept = 0;
+		[[nodiscard]] virtual ISceneNode* GetParent() const noexcept = 0;
+
+		virtual bool AttachChild(ISceneNode* pChild, bool KeepWorldTransform = true) noexcept = 0;
+		virtual bool DetachChild(ISceneNode* pChild, bool KeepWorldTransform = true) noexcept = 0;
+		virtual bool DetachChildAt(uint32_t ChildIndex, bool KeepWorldTransform = true) noexcept = 0;
+		virtual void DetachAllChildren(bool KeepWorldTransform = true) noexcept = 0;
+
+		[[nodiscard]] virtual uint32_t GetChildCount() const noexcept = 0;
+		[[nodiscard]] virtual ISceneNode* GetChild(uint32_t ChildIndex) const noexcept = 0;
+		[[nodiscard]] virtual int32_t GetChildIndex(const ISceneNode* pChild) const noexcept = 0;
+
+		[[nodiscard]] virtual Transform& GetTransform() noexcept = 0;
+		[[nodiscard]] virtual const Transform& GetTransform() const noexcept = 0;
+
+		virtual bool AttachObject(ISceneObject* pObject) noexcept = 0;
+		virtual bool DetachObject(ISceneObject* pObject) noexcept = 0;
+		virtual bool DetachObjectAt(uint32_t ObjectIndex) noexcept = 0;
+		virtual void DetachAllObjects() noexcept = 0;
+
+		[[nodiscard]] virtual uint32_t GetObjectCount() const noexcept = 0;
+		[[nodiscard]] virtual ISceneObject* GetObject(uint32_t ObjectIndex) const noexcept = 0;
+		[[nodiscard]] virtual int32_t GetObjectIndex(const ISceneObject* pObject) const noexcept = 0;
+
+		virtual void SetEnabled(bool Enabled) noexcept = 0;
+		[[nodiscard]] virtual bool IsEnabled() const noexcept = 0;
+
+		virtual void SetDirty(bool Dirty) noexcept = 0;
+		[[nodiscard]] virtual bool IsDirty() const noexcept = 0;
+
+	};
 
 	struct IScene : public Unknown
 	{
@@ -131,7 +136,7 @@ namespace mark
 	struct IWorld : public Unknown
 	{
 		virtual void BigBang(const char* Name) noexcept = 0;
-		virtual void BigRip(const char* Name) noexcept = 0;
+		virtual void BigRip() noexcept = 0;
 
 		[[nodiscard]] virtual IScene* CreateScene(const char* Name) noexcept = 0;
 		[[nodiscard]] virtual IScene* LoadScene(const char* FilePath, bool Additive, bool Async) noexcept = 0;
