@@ -90,6 +90,12 @@ BOOL Application::OnInit(HWND hWnd, int width, int height)
 	IWorld* pWorld = m_pMark3D->CreateWorld("DefaultWorld");
 	if (pWorld)
 	{
+		IScene* pScene = pWorld->CreateScene("DefaultScene");
+		if (pScene)
+		{
+			pWorld->DestroyScene(pScene);
+		}
+
 		m_pMark3D->DestroyWorld(pWorld);
 	}
 

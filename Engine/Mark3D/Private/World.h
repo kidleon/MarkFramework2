@@ -17,6 +17,7 @@ namespace mark
 		[[nodiscard]] IScene* CreateScene(const char* Name) noexcept override;
 		[[nodiscard]] IScene* LoadScene(const char* FilePath, bool Additive, bool Async) noexcept override;
 		void DestroyScene(const char* Name) noexcept override;
+		void DestroyScene(IScene* pScene) noexcept override;
 		[[nodiscard]] IScene* GetScene(const char* Name) const noexcept override;
 
 		[[nodiscard]] inline const char* INL_GetName() const noexcept { return m_Name; }

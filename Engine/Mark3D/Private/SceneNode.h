@@ -12,8 +12,6 @@ namespace mark
 		friend class TMemoryBlockPool<SceneNode>;
 
 	public:
-		~SceneNode() noexcept;
-
 		void SetName(const char* Name) noexcept override;
 		[[nodiscard]] const char* GetName() const noexcept override;
 		[[nodiscard]] uint32_t GetNodeID() const noexcept override;
@@ -54,6 +52,7 @@ namespace mark
 
 	private:
 		SceneNode(TMemoryBlockPool<SceneNode>* pPool) noexcept;
+		virtual ~SceneNode() noexcept;
 
 		void AddRef() override;
 		void Release() override;

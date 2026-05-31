@@ -9,10 +9,6 @@ namespace mark
 	{
 	public:
 		Scene(IWorld* pWorld = nullptr, const char* Name = nullptr) noexcept;
-		~Scene() noexcept;
-
-		void AddRef() override;
-		void Release() override;
 
 		void SetName(const char* Name) noexcept override;
 		[[nodiscard]] const char* GetName() const noexcept override;
@@ -38,9 +34,15 @@ namespace mark
 		ISceneNode* GetRootSceneNode() const noexcept override;
 
 	private:
+		~Scene() noexcept;
+		void AddRef() override;
+		void Release() override;
+
 		SceneNode* INL_CreateSceneNode(const char* Name) noexcept;
 		void INL_DestroySceneNodeRecursive(SceneNode* pNode) noexcept;
 		void INL_RemoveSceneNode(SceneNode* pNode) noexcept;
+
+		friend class World;
 
 	private:
 		std::atomic<int64_t> m_RefCount{ 1 };

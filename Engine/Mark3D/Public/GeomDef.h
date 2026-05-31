@@ -38,6 +38,13 @@ namespace mark
 	{};
 
 	struct ISceneNode;
+	struct ISurfaceMaterial;
+
+	struct ModelInstanceCreateDesc
+	{
+		unknown_ptr<IGPUGeometry> pGeometry;
+		ISceneNode* pSceneNode = nullptr;
+	};
 
 	struct ISceneObject : public IResource
 	{
@@ -52,6 +59,19 @@ namespace mark
 
 	struct IModelInstance : public ISceneObject
 	{
+		virtual void SetGeometry(IGPUGeometry* pGeometry) noexcept = 0;
+		[[nodiscard]] virtual IGPUGeometry* GetGeometry() const noexcept = 0;
+
+		virtual void SetSurfaceMaterial(uint32_t MaterialSlot, ISurfaceMaterial* pMaterial) noexcept = 0;
+		[[nodiscard]] virtual ISurfaceMaterial* GetSurfaceMaterial(uint32_t MaterialSlot) const noexcept = 0;
+		[[nodiscard]] virtual uint32_t GetSurfaceMaterialCount() const noexcept = 0;
+
+		virtual void SetMeshVisible(uint32_t MeshIndex, bool Visible) noexcept = 0;
+		[[nodiscard]] virtual bool IsMeshVisible(uint32_t MeshIndex) const noexcept = 0;
+		[[nodiscard]] virtual uint32_t GetMeshCount() const noexcept = 0;
+
+		virtual void SetSubsetSurfaceMaterial(uint32_t MeshIndex, uint32_t SubsetIndex, ISurfaceMaterial* pMaterial) noexcept = 0;
+		[[nodiscard]] virtual ISurfaceMaterial* GetSubsetSurfaceMaterial(uint32_t MeshIndex, uint32_t SubsetIndex) const noexcept = 0;
 	};
 
 	struct ISkeleton : public IResource
@@ -109,7 +129,7 @@ namespace mark
 
 	};
 
-	struct IScene : public Unknown
+	struct IScene : public PrivateUnknown
 	{
 		virtual void SetName(const char* Name) noexcept = 0;
 		[[nodiscard]] virtual const char* GetName() const noexcept = 0;
@@ -145,6 +165,8 @@ namespace mark
 		[[nodiscard]] virtual IScene* CreateScene(const char* Name) noexcept = 0;
 		[[nodiscard]] virtual IScene* LoadScene(const char* FilePath, bool Additive, bool Async) noexcept = 0;
 		virtual void DestroyScene(const char* Name) noexcept = 0;
+		virtual void DestroyScene(IScene* pScene) noexcept = 0;
+
 		[[nodiscard]] virtual IScene* GetScene(const char* Name) const noexcept = 0;
 
 	};

@@ -44,16 +44,12 @@ namespace mark
 	IScene* World::CreateScene(const char* Name) noexcept
 	{
 		if (IScene* pExistingScene = GetScene(Name))
-		{
-			pExistingScene->AddRef();
 			return pExistingScene;
-		}
 
 		Scene* pScene = CORE_NEW(Scene)(this, Name);
 		if (!pScene)
 			return nullptr;
 
-		pScene->AddRef();
 		m_lstScenes.push_back(pScene);
 
 		return pScene;
@@ -72,13 +68,21 @@ namespace mark
 		if (!Name || !Name[0])
 			return;
 
+		DestroyScene(GetScene(Name));
+	}
+
+	void World::DestroyScene(IScene* pScene) noexcept
+	{
+		if (!pScene)
+			return;
+
 		for (auto it = m_lstScenes.begin(); it != m_lstScenes.end(); ++it)
 		{
-			Scene* pScene = *it;
-			if (pScene && safe_strcmp(pScene->GetName(), Name) == 0)
+			Scene* pOwnedScene = *it;
+			if (pOwnedScene == pScene)
 			{
 				m_lstScenes.erase(it);
-				pScene->Release();
+				pOwnedScene->Release();
 				return;
 			}
 		}
