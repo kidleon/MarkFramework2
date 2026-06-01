@@ -42,8 +42,12 @@ namespace mark
 
 	struct ModelInstanceCreateDesc
 	{
-		unknown_ptr<IGPUGeometry> pGeometry;
-		ISceneNode* pSceneNode = nullptr;
+		uint32_t VertexBufferSize = 0;
+		uint32_t IndexBufferSize = 0;
+		uint32_t VertexFormats = 0;
+
+		GPUGeometryCreateDesc GPUGeometryDesc;
+
 	};
 
 	struct ISceneObject : public IResource

@@ -64,6 +64,13 @@ namespace mark
 		[[nodiscard]] virtual ISurfaceMaterial* CreateSurfaceMaterial() = 0;
 
 		/**
+		 * @brief 모델 인스턴스를 생성합니다.
+		 * @return [Owning] 반환된 포인터는 AddRef된 상태입니다. 호출자가 Release()를 책임지거나
+		 *         unknown_ptr<IModelInstance>::attach()로 takeover 하세요. 실패 시 nullptr.
+		 */
+		[[nodiscard]] virtual IModelInstance* CreateModelInstance(const ModelInstanceCreateDesc& CreateDesc) = 0;
+
+		/**
 		 * @brief 새로운 월드를 생성합니다. 월드는 씬과 씬 노드, 씬 오브젝트를 관리하는 최상위 컨테이너입니다.
 		 * @param Name 생성할 월드의 이름입니다. 월드 이름은 고유해야 합니다. 이미 존재하는 이름을 사용하면 nullptr이 반환됩니다.
 		 * @return [Owning] 반환된 포인터는 AddRef된 상태입니다. 호출자가 Release()를 책임지거나
