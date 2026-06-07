@@ -31,6 +31,11 @@ namespace mark
 
 		virtual bool IsLoaded() const noexcept { return m_IsLoaded; }
 
+		void AddSubset(
+			uint32_t VertexCount,
+			uint32_t IndexCount
+		) noexcept;
+
 		inline BOOL INL_IsLoaded() const noexcept { return m_IsLoaded; }
 		inline void INL_SetLoaded(BOOL Loaded) { m_IsLoaded = Loaded; }
 		inline GPU_BUFFER_LAYOUT INL_GetBufferLayout() const noexcept { return m_BufferLayout; }

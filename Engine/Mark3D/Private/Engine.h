@@ -23,6 +23,9 @@ namespace mark
 
 		virtual IGPUGeometry* CreateGPUGeometry(const GPUGeometryCreateDesc& CreateDesc);
 		virtual ISurfaceMaterial* CreateSurfaceMaterial();
+
+		virtual IModel* CreateModel(const ModelCreateDesc& CreateDesc);
+
 		[[nodiscard]] virtual IWorld* CreateWorld(const char* Name);
 		virtual void DestroyWorld(IWorld* pWorld);
 

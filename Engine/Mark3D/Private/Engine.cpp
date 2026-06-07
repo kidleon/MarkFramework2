@@ -6,7 +6,9 @@
 #include "GPUGeometry.h"
 #include "GPUGeometryFactory.h"
 #include "RenderSystem.h"
+#include "PrimitiveBuffer.h"
 #include "World.h"
+#include "Model.h"
 
 
 namespace mark
@@ -144,6 +146,27 @@ namespace mark
 	ISurfaceMaterial* Engine::CreateSurfaceMaterial()
 	{
 		return m_pRenderSystem->CreateSurfaceMaterial();
+	}
+
+	IModel* Engine::CreateModel(const ModelCreateDesc& CreateDesc)
+	{
+		// Implement model creation logic here
+		PrimitiveBuffer* pPrimitiveBuffer = CORE_NEW(PrimitiveBuffer);
+
+		if (!pPrimitiveBuffer->Create(
+			m_pRenderSystem,
+			CreateDesc.VertexFormats,
+			CreateDesc.VertexBufferSize,
+			CreateDesc.IndexFormat,
+			CreateDesc.IndexBufferSize
+		))
+		{
+			CORE_DELETE(PrimitiveBuffer, pPrimitiveBuffer);
+			return nullptr;
+		}
+
+		Model* pModel = CORE_NEW(Model)(pPrimitiveBuffer);
+		return pModel;
 	}
 
 	IWorld* Engine::CreateWorld(const char* Name)

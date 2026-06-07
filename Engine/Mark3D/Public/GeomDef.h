@@ -35,19 +35,18 @@ namespace mark
 	};
 
 	struct IGPUGeometry : public IResource
-	{};
+	{
+	};
 
 	struct ISceneNode;
 	struct ISurfaceMaterial;
 
-	struct ModelInstanceCreateDesc
+	struct ModelCreateDesc
 	{
 		uint32_t VertexBufferSize = 0;
 		uint32_t IndexBufferSize = 0;
 		uint32_t VertexFormats = 0;
-
-		GPUGeometryCreateDesc GPUGeometryDesc;
-
+		INDEX_FORMAT IndexFormat = INDEX_FORMAT::UINT16;
 	};
 
 	struct ISceneObject : public IResource
@@ -61,21 +60,39 @@ namespace mark
 		[[nodiscard]] virtual ISceneNode* GetSceneNode() const noexcept = 0;
 	};
 
-	struct IModelInstance : public ISceneObject
+	struct IModel : public ISceneObject
 	{
-		virtual void SetGeometry(IGPUGeometry* pGeometry) noexcept = 0;
-		[[nodiscard]] virtual IGPUGeometry* GetGeometry() const noexcept = 0;
+		virtual int32_t AddPrimitive(
+			PRIMITIVE_TYPE PrimitiveType,
+			uint32_t VertexCount,
+			uint32_t IndexCount,
+			uint32_t MaterialSlot
+		) noexcept = 0;
 
-		virtual void SetSurfaceMaterial(uint32_t MaterialSlot, ISurfaceMaterial* pMaterial) noexcept = 0;
-		[[nodiscard]] virtual ISurfaceMaterial* GetSurfaceMaterial(uint32_t MaterialSlot) const noexcept = 0;
-		[[nodiscard]] virtual uint32_t GetSurfaceMaterialCount() const noexcept = 0;
+		[[nodiscard]] virtual int32_t GetPrimitiveCount() const noexcept = 0;
+		virtual void ClearPrimitive() noexcept = 0;
 
-		virtual void SetMeshVisible(uint32_t MeshIndex, bool Visible) noexcept = 0;
-		[[nodiscard]] virtual bool IsMeshVisible(uint32_t MeshIndex) const noexcept = 0;
-		[[nodiscard]] virtual uint32_t GetMeshCount() const noexcept = 0;
+		virtual bool UpdateVertexData(
+			int32_t PrimitiveIndex,
+			uint32_t VertexFormat,
+			const void* pData,
+			size_t DataSize
+		) noexcept = 0;
 
-		virtual void SetSubsetSurfaceMaterial(uint32_t MeshIndex, uint32_t SubsetIndex, ISurfaceMaterial* pMaterial) noexcept = 0;
-		[[nodiscard]] virtual ISurfaceMaterial* GetSubsetSurfaceMaterial(uint32_t MeshIndex, uint32_t SubsetIndex) const noexcept = 0;
+		virtual bool UpdateIndexData(
+			int32_t PrimitiveIndex,
+			const void* pData,
+			size_t DataSize
+		) noexcept = 0;
+
+		virtual void SetSurfaceMaterial(
+			uint32_t MaterialSlot,
+			ISurfaceMaterial* pMaterial
+		) noexcept = 0;
+
+		[[nodiscard]] virtual ISurfaceMaterial* GetSurfaceMaterial(
+			uint32_t MaterialSlot
+		) const noexcept = 0;
 	};
 
 	struct ISkeleton : public IResource
@@ -83,10 +100,6 @@ namespace mark
 	};
 
 	struct ISkeletonPose : public Unknown
-	{
-	};
-
-	struct ISkinnedModelInstance : public IModelInstance
 	{
 	};
 
