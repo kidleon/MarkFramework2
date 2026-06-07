@@ -165,8 +165,7 @@ namespace mark
 			return nullptr;
 		}
 
-		Model* pModel = CORE_NEW(Model)(pPrimitiveBuffer);
-		return pModel;
+		return static_cast<IModel*>(CORE_NEW(Model)(pPrimitiveBuffer));
 	}
 
 	IWorld* Engine::CreateWorld(const char* Name)

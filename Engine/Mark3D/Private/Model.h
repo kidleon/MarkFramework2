@@ -1,20 +1,24 @@
 #pragma once
+#include "PrimitiveBuffer.h"
 
 
 namespace mark
 {
-	class PrimitiveBuffer;
-
 	class Model : public IModel
 	{
 	public:
 		Model(PrimitiveBuffer* pPrimitiveBuffer);
 
-		virtual void SetEnable(bool Enable) noexcept override;
-		virtual bool IsEnable() const noexcept override;
+		virtual void AddRef() override;
+		virtual void Release() override;
 
-		virtual void SetVisible(bool Visible) noexcept override;
-		virtual bool IsVisible() const noexcept override;
+		virtual bool IsLoaded() const noexcept override;
+
+		virtual void SetEnable(bool Enable) noexcept final;
+		virtual bool IsEnable() const noexcept final;
+
+		virtual void SetVisible(bool Visible) noexcept final;
+		virtual bool IsVisible() const noexcept final;
 
 		virtual ISceneNode* GetSceneNode() const noexcept override;
 
@@ -30,7 +34,7 @@ namespace mark
 
 		virtual bool UpdateVertexData(
 			int32_t PrimitiveIndex,
-			uint32_t VertexFormat,
+			VERTEX_FORMAT VertexFormat,
 			const void* pData,
 			size_t DataSize
 		) noexcept override;
@@ -50,12 +54,49 @@ namespace mark
 			uint32_t MaterialSlot
 		) const noexcept override;
 
+		inline void INL_CompleteLoading() noexcept { m_Loaded.store(TRUE, std::memory_order_release); }
+		inline ISceneNode* INL_GetSceneNode() const noexcept { return m_pSceneNode; }
+		inline BOOL INL_IsEnable() const noexcept { return m_Enable; }
+		inline BOOL INL_IsVisible() const noexcept { return m_Visible; }
+
 	private:
 		Model() = delete;
 		virtual ~Model() noexcept;
 
+		inline bool IsValidPrimitiveIndex(int32_t PrimitiveIndex) const noexcept
+		{
+			return PrimitiveIndex >= 0 && static_cast<size_t>(PrimitiveIndex) < m_lstPrimitives.size();
+		}
+
+		inline bool IsValidMaterialSlotIndex(uint32_t MaterialSlot) const noexcept
+		{
+			return MaterialSlot < m_lstMaterialSlots.size();
+		}
+
+		struct PRIMITIVE
+		{
+			PRIMITIVE_TYPE Type;
+			uint32_t VertexCount;
+			uint32_t IndexCount;
+			uint32_t MaterialSlot;
+		};
+
+		struct MATERIAL_SLOT
+		{
+			ISurfaceMaterial* pMaterial;
+		};
+
 	private:
+		std::atomic<int32_t> m_RefCount{ 1 };
+		std::atomic<BOOL> m_Loaded{ FALSE };
+
+		BOOL m_Enable = TRUE;
+		BOOL m_Visible = TRUE;
 		PrimitiveBuffer* m_pPrimitiveBuffer = nullptr;
+		ISceneNode* m_pSceneNode = nullptr;
+
+		mtl::fixed_vector<PRIMITIVE, 8> m_lstPrimitives;
+		mtl::fixed_vector<MATERIAL_SLOT, 8> m_lstMaterialSlots;
 
 	};
 }

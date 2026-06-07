@@ -74,7 +74,7 @@ namespace mark
 
 		virtual bool UpdateVertexData(
 			int32_t PrimitiveIndex,
-			uint32_t VertexFormat,
+			VERTEX_FORMAT VertexFormat,
 			const void* pData,
 			size_t DataSize
 		) noexcept = 0;

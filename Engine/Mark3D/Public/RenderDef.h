@@ -173,6 +173,44 @@ namespace mark
 		CUSTOM1 = sizeof(FLOAT) * 4,
 	};
 
+	inline uint32_t GetVertexSizeFromFormat(VERTEX_FORMAT Format) noexcept
+	{
+		switch (Format)
+		{
+			case VERTEX_FORMAT::POSITION:
+				return (uint32_t)VERTEX_FORMAT_STRIDE::POSITION;
+
+			case VERTEX_FORMAT::NORMAL:
+				return (uint32_t)VERTEX_FORMAT_STRIDE::NORMAL;
+
+			case VERTEX_FORMAT::COLOR:
+				return (uint32_t)VERTEX_FORMAT_STRIDE::COLOR;
+
+			case VERTEX_FORMAT::TANGENT:
+				return (uint32_t)VERTEX_FORMAT_STRIDE::TANGENT;
+
+			case VERTEX_FORMAT::BONE:
+				return (uint32_t)VERTEX_FORMAT_STRIDE::BONE;
+
+			case VERTEX_FORMAT::WEIGHT:
+				return (uint32_t)VERTEX_FORMAT_STRIDE::WEIGHT;
+
+			case VERTEX_FORMAT::TEXCOORD0:
+				return (uint32_t)VERTEX_FORMAT_STRIDE::TEXCOORD0;
+
+			case VERTEX_FORMAT::TEXCOORD1:
+				return (uint32_t)VERTEX_FORMAT_STRIDE::TEXCOORD1;
+
+			case VERTEX_FORMAT::CUSTOM0:
+				return (uint32_t)VERTEX_FORMAT_STRIDE::CUSTOM0;
+
+			case VERTEX_FORMAT::CUSTOM1:
+				return (uint32_t)VERTEX_FORMAT_STRIDE::CUSTOM1;
+		}
+
+		return 0; // 유효하지 않은 포맷
+	}
+
 	enum class INDEX_FORMAT : uint32_t
 	{
 		UINT16 = 0,

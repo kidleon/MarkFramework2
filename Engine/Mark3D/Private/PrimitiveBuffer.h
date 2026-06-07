@@ -11,6 +11,7 @@ namespace mark
 		~PrimitiveBuffer() noexcept;
 
 		bool Create(RenderSystem* pRenderSystem, uint32_t VertexFormats, uint32_t VertexCount, INDEX_FORMAT IndexFormat, uint32_t IndexCount);
+		void Cleanup();
 
 		bool UpdateVertexDataImmediate(VERTEX_FORMAT VertexFormat, const void* pData, size_t DataSize);
 		bool UpdateVertexData(VERTEX_FORMAT VertexFormat, const void* pData, size_t DataSize);
@@ -23,9 +24,6 @@ namespace mark
 
 		inline uint32_t INL_GetVertexCount() const { return m_VertexCount; }
 		inline uint32_t INL_GetIndexCount() const { return m_IndexCount; }
-
-	private:
-		void Cleanup();
 
 	private:
 		uint32_t m_VertexFormat = 0;
