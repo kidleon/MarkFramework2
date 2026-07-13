@@ -3,7 +3,10 @@
 
 namespace mark
 {
-	class GPUBufferPool
+	class D3D11GPUBuffer;
+	class D3D11HardwareGraphicsLayer;
+
+	class D3D11GPUBufferPool
 	{
 		enum class GPU_BUFFER_TYPE {
 			VERTEX_BUFFER, INDEX_BUFFER, CONSTANT_BUFFER, EMAX
@@ -36,8 +39,8 @@ namespace mark
 
 		struct GPUBufferPageGroup
 		{
-			sys_vector<IGPUBuffer*> OriginalBuffers;
-			sys_deque<IGPUBuffer*> FreeBuffers;
+			sys_vector<D3D11GPUBuffer*> OriginalBuffers;
+			sys_deque<D3D11GPUBuffer*> FreeBuffers;
 			spin_lock_t SpinLock = { 0 };
 
 			GPUBufferPageGroup()
@@ -48,18 +51,18 @@ namespace mark
 		};
 
 	public:
-		~GPUBufferPool() noexcept;
+		~D3D11GPUBufferPool() noexcept;
 
-		void Initialize(IHardwareGraphicsLayer* pHardwareGraphicsLayer);
+		void Initialize(D3D11HardwareGraphicsLayer* pHardwareGraphicsLayer);
 
 		/**
 		 * @brief 풀에서 GPU 버퍼를 꺼냅니다 (없으면 새 페이지 생성).
 		 * @return [Pool-owned] 반환된 포인터는 AddRef된 상태입니다. 호출자는 다 쓰고 나면
-		 *         반드시 GPUBufferPool::Release(pBuffer)로 풀에 반납해야 합니다.
+		 *         반드시 D3D11GPUBufferPool::Release(pBuffer)로 풀에 반납해야 합니다.
 		 *         (IGPUBuffer::Release()를 직접 호출하면 풀의 OriginalBuffers에 stale 엔트리가 남아
 		 *         사실상 leak이 됩니다.) 실패 시 nullptr.
 		 */
-		[[nodiscard]] IGPUBuffer* Acquire(
+		[[nodiscard]] D3D11GPUBuffer* Acquire(
 			BUFFER_TYPE BufferType,
 			BUFFER_USAGE BufferUsage,
 			size_t BufferSize
@@ -69,7 +72,7 @@ namespace mark
 		 * @brief Acquire()로 받은 GPU 버퍼를 풀로 반납합니다.
 		 *        호출 후 pBuffer는 풀 내부의 FreeBuffers에 들어가며 호출자는 더 이상 접근하면 안 됩니다.
 		 */
-		void Release(IGPUBuffer* pBuffer);
+		void Release(D3D11GPUBuffer* pBuffer);
 
 	private:
 		void Shutdown();
@@ -82,7 +85,7 @@ namespace mark
 		int32_t MapBufferSize(size_t BufferSize);
 
 	private:
-		IHardwareGraphicsLayer* m_pHardwareGraphicsLayer = nullptr;
+		D3D11HardwareGraphicsLayer* m_pHardwareGraphicsLayer = nullptr;
 
 		GPUBufferPageGroup m_VBPool[(int)BUFFER_USAGE::EMAX][(int)GPU_BUFFER_SIZE::EMAX];
 		GPUBufferPageGroup m_IBPool[(int)BUFFER_USAGE::EMAX][(int)GPU_BUFFER_SIZE::EMAX];

@@ -4,7 +4,6 @@
 
 namespace mark
 {
-	class GPUBufferPool;
 	class ShaderProgramCache;
 	class SurfaceMaterialPool;
 	class SurfaceMaterial;
@@ -31,7 +30,6 @@ namespace mark
 	private:
 		std::atomic<int64_t> m_RefCount{ 1 };
 		IHardwareGraphicsLayer* m_pHardwareGraphicsLayer = nullptr;
-		GPUBufferPool* m_pGPUBufferPool = nullptr;
 		ShaderProgramCache* m_pShaderProgramCache = nullptr;
 		SurfaceMaterialPool* m_pSurfaceMaterialPool = nullptr;
 

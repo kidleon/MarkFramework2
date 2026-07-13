@@ -2,6 +2,7 @@
 #include "D3D11HardwareGraphicsLayer.h"
 #include "D3D11RenderDevice.h"
 #include "D3D11GPUBuffer.h"
+#include "D3D11GPUBufferPool.h"
 #include "D3D11ShaderProgram.h"
 
 
@@ -60,6 +61,15 @@ namespace mark
 
 	IGPUBuffer* D3D11HardwareGraphicsLayer::CreateGPUBuffer(const GPUBufferCreateDesc& desc)
 	{
+		D3D11GPUBuffer* pGPUBuffer = m_pGPUBufferPool->Acquire(
+			desc.Type,
+			desc.Usage,
+			desc.BufferSize
+		);
+
+		if (pGPUBuffer)
+			return static_cast<IGPUBuffer*>(pGPUBuffer);
+
 		ID3D11Buffer* pD3D11Buffer = m_pRenderDevice->CreateBuffer(desc);
 		if (!pD3D11Buffer)
 		{

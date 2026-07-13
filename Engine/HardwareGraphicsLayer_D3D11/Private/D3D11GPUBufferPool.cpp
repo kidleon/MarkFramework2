@@ -1,20 +1,23 @@
 #include "pch.h"
-#include "GPUBufferPool.h"
+#include "D3D11GPUBufferPool.h"
+#include "D3D11HardwareGraphicsLayer.h"
+#include "D3D11GPUBuffer.h"
+#include "D3D11RenderDevice.h"
 
 
 namespace mark
 {
-	GPUBufferPool::~GPUBufferPool() noexcept
+	D3D11GPUBufferPool::~D3D11GPUBufferPool() noexcept
 	{
 		Shutdown();
 	}
 
-	void GPUBufferPool::Initialize(IHardwareGraphicsLayer* pHardwareGraphicsLayer)
+	void D3D11GPUBufferPool::Initialize(D3D11HardwareGraphicsLayer* pHardwareGraphicsLayer)
 	{
 		m_pHardwareGraphicsLayer = pHardwareGraphicsLayer;
 	}
 
-	void GPUBufferPool::Shutdown()
+	void D3D11GPUBufferPool::Shutdown()
 	{
 		for (int usage = 0; usage < (int)BUFFER_USAGE::EMAX; ++usage)
 		{
@@ -47,7 +50,7 @@ namespace mark
 		}
 	}
 
-	int32_t GPUBufferPool::MapBufferSize(size_t BufferSize)
+	int32_t D3D11GPUBufferPool::MapBufferSize(size_t BufferSize)
 	{
 		for (int32_t i = 0; i < (int32_t)GPU_BUFFER_SIZE::EMAX; ++i)
 		{
@@ -57,7 +60,7 @@ namespace mark
 		return -1;
 	}
 
-	IGPUBuffer* GPUBufferPool::Acquire(
+	D3D11GPUBuffer* D3D11GPUBufferPool::Acquire(
 		BUFFER_TYPE BufferType,
 		BUFFER_USAGE BufferUsage,
 		size_t BufferSize
@@ -70,85 +73,85 @@ namespace mark
 		switch (BufferType)
 		{
 			case BUFFER_TYPE::VERTEX_BUFFER:
-			{
-				auto pGroup = &m_VBPool[(int)BufferUsage][SizeIndex];
-
-				AUTO_SPIN_LOCK Guard(&pGroup->SpinLock);
-				if (pGroup->FreeBuffers.empty())
 				{
-					if (!CreateBufferPage(
-						GPU_BUFFER_TYPE::VERTEX_BUFFER,
-						(GPU_BUFFER_USAGE)BufferUsage,
-						(GPU_BUFFER_SIZE)SizeIndex))
+					auto pGroup = &m_VBPool[(int)BufferUsage][SizeIndex];
+
+					AUTO_SPIN_LOCK Guard(&pGroup->SpinLock);
+					if (pGroup->FreeBuffers.empty())
 					{
-						SYS_LOG_ERR_F("GPUBufferPool::Acquire - Failed to create buffer page for vertex buffer (Usage: {}, Size: {})", (int)BufferUsage, GPU_BUFFER_SIZES[SizeIndex]);
-						return nullptr;
+						if (!CreateBufferPage(
+							GPU_BUFFER_TYPE::VERTEX_BUFFER,
+							(GPU_BUFFER_USAGE)BufferUsage,
+							(GPU_BUFFER_SIZE)SizeIndex))
+						{
+							SYS_LOG_ERR_F("GPUBufferPool::Acquire - Failed to create buffer page for vertex buffer (Usage: {}, Size: {})", (int)BufferUsage, GPU_BUFFER_SIZES[SizeIndex]);
+							return nullptr;
+						}
 					}
-				}
 
-				IGPUBuffer* pBuffer = pGroup->FreeBuffers.front();
-				pGroup->FreeBuffers.pop_front();
-				pBuffer->AddRef();
+					D3D11GPUBuffer* pBuffer = pGroup->FreeBuffers.front();
+					pGroup->FreeBuffers.pop_front();
+					pBuffer->AddRef();
 
-				return pBuffer;
+					return pBuffer;
 
-			} break;
+				} break;
 
 			case BUFFER_TYPE::INDEX_BUFFER:
-			{
-				auto pGroup = &m_IBPool[(int)BufferUsage][SizeIndex];
-
-				AUTO_SPIN_LOCK Guard(&pGroup->SpinLock);
-				if (pGroup->FreeBuffers.empty())
 				{
-					if (!CreateBufferPage(
-						GPU_BUFFER_TYPE::INDEX_BUFFER,
-						(GPU_BUFFER_USAGE)BufferUsage,
-						(GPU_BUFFER_SIZE)SizeIndex))
+					auto pGroup = &m_IBPool[(int)BufferUsage][SizeIndex];
+
+					AUTO_SPIN_LOCK Guard(&pGroup->SpinLock);
+					if (pGroup->FreeBuffers.empty())
 					{
-						SYS_LOG_ERR_F("GPUBufferPool::Acquire - Failed to create buffer page for index buffer (Usage: {}, Size: {})", (int)BufferUsage, GPU_BUFFER_SIZES[SizeIndex]);
-						return nullptr;
+						if (!CreateBufferPage(
+							GPU_BUFFER_TYPE::INDEX_BUFFER,
+							(GPU_BUFFER_USAGE)BufferUsage,
+							(GPU_BUFFER_SIZE)SizeIndex))
+						{
+							SYS_LOG_ERR_F("GPUBufferPool::Acquire - Failed to create buffer page for index buffer (Usage: {}, Size: {})", (int)BufferUsage, GPU_BUFFER_SIZES[SizeIndex]);
+							return nullptr;
+						}
 					}
-				}
 
-				IGPUBuffer* pBuffer = pGroup->FreeBuffers.front();
-				pGroup->FreeBuffers.pop_front();
-				pBuffer->AddRef();
+					D3D11GPUBuffer* pBuffer = pGroup->FreeBuffers.front();
+					pGroup->FreeBuffers.pop_front();
+					pBuffer->AddRef();
 
-				return pBuffer;
+					return pBuffer;
 
-			} break;
+				} break;
 
 			case BUFFER_TYPE::CONSTANT_BUFFER:
-			{
-				auto pGroup = &m_CBPool[(int)BufferUsage][SizeIndex];
-
-				AUTO_SPIN_LOCK Guard(&pGroup->SpinLock);
-				if (pGroup->FreeBuffers.empty())
 				{
-					if (!CreateBufferPage(
-						GPU_BUFFER_TYPE::CONSTANT_BUFFER,
-						(GPU_BUFFER_USAGE)BufferUsage,
-						(GPU_BUFFER_SIZE)SizeIndex))
+					auto pGroup = &m_CBPool[(int)BufferUsage][SizeIndex];
+
+					AUTO_SPIN_LOCK Guard(&pGroup->SpinLock);
+					if (pGroup->FreeBuffers.empty())
 					{
-						SYS_LOG_ERR_F("GPUBufferPool::Acquire - Failed to create buffer page for constant buffer (Usage: {}, Size: {})", (int)BufferUsage, GPU_BUFFER_SIZES[SizeIndex]);
-						return nullptr;
+						if (!CreateBufferPage(
+							GPU_BUFFER_TYPE::CONSTANT_BUFFER,
+							(GPU_BUFFER_USAGE)BufferUsage,
+							(GPU_BUFFER_SIZE)SizeIndex))
+						{
+							SYS_LOG_ERR_F("GPUBufferPool::Acquire - Failed to create buffer page for constant buffer (Usage: {}, Size: {})", (int)BufferUsage, GPU_BUFFER_SIZES[SizeIndex]);
+							return nullptr;
+						}
 					}
-				}
 
-				IGPUBuffer* pBuffer = pGroup->FreeBuffers.front();
-				pGroup->FreeBuffers.pop_front();
-				pBuffer->AddRef();
+					D3D11GPUBuffer* pBuffer = pGroup->FreeBuffers.front();
+					pGroup->FreeBuffers.pop_front();
+					pBuffer->AddRef();
 
-				return pBuffer;
-			} break;
+					return pBuffer;
+				} break;
 
 			default:
 				return nullptr;
 		}
 	}
 
-	void GPUBufferPool::Release(IGPUBuffer* pBuffer)
+	void D3D11GPUBufferPool::Release(D3D11GPUBuffer* pBuffer)
 	{
 		if (!pBuffer)
 			return;
@@ -164,32 +167,32 @@ namespace mark
 		switch (BufferType)
 		{
 			case BUFFER_TYPE::VERTEX_BUFFER:
-			{
-				auto pGroup = &m_VBPool[(int)BufferUsage][SizeIndex]; // Usage는 버퍼 생성 시 고정이므로 0으로 접근
-				AUTO_SPIN_LOCK Guard(&pGroup->SpinLock);
-				pGroup->FreeBuffers.push_front(pBuffer);
-			} break;
+				{
+					auto pGroup = &m_VBPool[(int)BufferUsage][SizeIndex]; // Usage는 버퍼 생성 시 고정이므로 0으로 접근
+					AUTO_SPIN_LOCK Guard(&pGroup->SpinLock);
+					pGroup->FreeBuffers.push_front(pBuffer);
+				} break;
 
 			case BUFFER_TYPE::INDEX_BUFFER:
-			{
-				auto pGroup = &m_IBPool[(int)BufferUsage][SizeIndex]; // Usage는 버퍼 생성 시 고정이므로 0으로 접근
-				AUTO_SPIN_LOCK Guard(&pGroup->SpinLock);
-				pGroup->FreeBuffers.push_front(pBuffer);
-			} break;
+				{
+					auto pGroup = &m_IBPool[(int)BufferUsage][SizeIndex]; // Usage는 버퍼 생성 시 고정이므로 0으로 접근
+					AUTO_SPIN_LOCK Guard(&pGroup->SpinLock);
+					pGroup->FreeBuffers.push_front(pBuffer);
+				} break;
 
 			case BUFFER_TYPE::CONSTANT_BUFFER:
-			{
-				auto pGroup = &m_CBPool[(int)BufferUsage][SizeIndex]; // Usage는 버퍼 생성 시 고정이므로 0으로 접근
-				AUTO_SPIN_LOCK Guard(&pGroup->SpinLock);
-				pGroup->FreeBuffers.push_front(pBuffer);
-			} break;
+				{
+					auto pGroup = &m_CBPool[(int)BufferUsage][SizeIndex]; // Usage는 버퍼 생성 시 고정이므로 0으로 접근
+					AUTO_SPIN_LOCK Guard(&pGroup->SpinLock);
+					pGroup->FreeBuffers.push_front(pBuffer);
+				} break;
 
 			default:
 				return;
 		}
 	}
 
-	bool GPUBufferPool::CreateBufferPage(
+	bool D3D11GPUBufferPool::CreateBufferPage(
 		GPU_BUFFER_TYPE BufferType,
 		GPU_BUFFER_USAGE BufferUsage,
 		GPU_BUFFER_SIZE BufferSize
@@ -243,15 +246,19 @@ namespace mark
 		CreateDesc.Access = (BufferUsage == GPU_BUFFER_USAGE::DYNAMIC) ? BUFFER_ACCESS::WRITE : BUFFER_ACCESS::NONE;
 		CreateDesc.BufferSize = BufferBytes;
 
+		D3D11RenderDevice* pRenderDevice = m_pHardwareGraphicsLayer->INL_GetRenderDevice();
+
 		uint32_t Created = 0;
 		for (uint32_t i = 0; i < NumBuffers; ++i)
 		{
-			IGPUBuffer* pBuffer = m_pHardwareGraphicsLayer->CreateGPUBuffer(CreateDesc);
-			if (!pBuffer) [[unlikely]]
+			ID3D11Buffer * pD3D11Buffer = pRenderDevice->CreateBuffer(CreateDesc);
+			D3D11GPUBuffer* pGPUBuffer = CORE_NEW(D3D11GPUBuffer)(pRenderDevice->INL_GetD3D11Context(), pD3D11Buffer);
+			if (!pGPUBuffer) [[unlikely]]
 				continue;
 
-			pGroup->OriginalBuffers.push_back(pBuffer);
-			pGroup->FreeBuffers.push_back(pBuffer);
+			pGroup->OriginalBuffers.push_back(pGPUBuffer);
+			pGroup->FreeBuffers.push_back(pGPUBuffer);
+
 			++Created;
 		}
 

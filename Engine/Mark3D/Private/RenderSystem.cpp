@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "RenderSystem.h"
-#include "GPUBufferPool.h"
 #include "ShaderProgramCache.h"
 #include "SurfaceMaterial.h"
 
@@ -44,9 +43,6 @@ namespace mark
 		}
 #endif // #if defined(__TARGET_OS_WINDOWS)
 
-		m_pGPUBufferPool = CORE_NEW(GPUBufferPool);
-		m_pGPUBufferPool->Initialize(m_pHardwareGraphicsLayer);
-
 		m_pShaderProgramCache = CORE_NEW(ShaderProgramCache);
 
 		if (!m_SurfaceMaterialPool.Initialize())
@@ -65,9 +61,6 @@ namespace mark
 		CORE_DELETE(ShaderProgramCache, m_pShaderProgramCache);
 		m_pShaderProgramCache = nullptr;
 
-		CORE_DELETE(GPUBufferPool, m_pGPUBufferPool);
-		m_pGPUBufferPool = nullptr;
-
 		CHECK_RELEASE(m_pHardwareGraphicsLayer);
 
 		if (m_hHardwareGraphicsLayer)
@@ -79,15 +72,6 @@ namespace mark
 
 	IGPUBuffer* RenderSystem::CreateGPUBuffer(const GPUBufferCreateDesc& CreateDesc)
 	{
-		IGPUBuffer* pGPUBuffer = m_pGPUBufferPool->Acquire(
-			CreateDesc.Type,
-			CreateDesc.Usage,
-			CreateDesc.BufferSize
-		);
-
-		if (pGPUBuffer)
-			return pGPUBuffer; // 풀에서 버퍼를 성공적으로 획득한 경우 반환
-
 		return m_pHardwareGraphicsLayer->CreateGPUBuffer(CreateDesc);
 	}
 
