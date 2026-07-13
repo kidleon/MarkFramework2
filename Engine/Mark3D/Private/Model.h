@@ -83,6 +83,7 @@ namespace mark
 
 		struct MATERIAL_SLOT
 		{
+			uint32_t SlotIndex;
 			ISurfaceMaterial* pMaterial;
 		};
 

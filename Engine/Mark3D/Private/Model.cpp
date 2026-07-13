@@ -76,6 +76,26 @@ namespace mark
 			}
 		);
 
+		bool MaterialSlotExists = false;
+		for (size_t i = m_lstMaterialSlots.size(); i <= MaterialSlot; ++i)
+		{
+			if (m_lstMaterialSlots[i].SlotIndex == MaterialSlot)
+			{
+				MaterialSlotExists = true;
+				break;
+			}
+		}
+
+		if (!MaterialSlotExists)
+		{
+			m_lstMaterialSlots.emplace_back(
+				MATERIAL_SLOT{
+					MaterialSlot,
+					nullptr
+				}
+			);
+		}
+
 		return (int32_t)m_lstPrimitives.size() - 1;
 	}
 
@@ -102,6 +122,9 @@ namespace mark
 			return false;
 		}
 
+		if (!m_pPrimitiveBuffer->UpdateVertexDataImmediate(VertexFormat, pData, DataSize))
+			return false;
+
 		return true;
 	}
 
@@ -111,7 +134,16 @@ namespace mark
 		size_t DataSize
 	) noexcept
 	{
-		return false;
+		if (!IsValidPrimitiveIndex(PrimitiveIndex))
+		{
+			SYS_LOG_ERR_F("Invalid PrimitiveIndex: {}", PrimitiveIndex);
+			return false;
+		}
+
+		if (!m_pPrimitiveBuffer->UpdateIndexDataImmediate(pData, DataSize))
+			return false;
+
+		return true;
 	}
 
 	void Model::SetSurfaceMaterial(
@@ -119,21 +151,37 @@ namespace mark
 		ISurfaceMaterial* pMaterial
 	) noexcept
 	{
-		if (!pMaterial)
+		if (!IsValidMaterialSlotIndex(MaterialSlot))
 		{
+			SYS_LOG_ERR_F("Invalid MaterialSlot: {}", MaterialSlot);
+			return;
 		}
-		
-		m_lstMaterialSlots.emplace_back(
-			MATERIAL_SLOT{
-				pMaterial
-			}
-		);
+
+		if (m_lstMaterialSlots[MaterialSlot].pMaterial)
+		{
+			m_lstMaterialSlots[MaterialSlot].pMaterial->Release();
+			m_lstMaterialSlots[MaterialSlot].pMaterial = nullptr;
+		}
+
+		if (pMaterial)
+			pMaterial->AddRef();
+
+		m_lstMaterialSlots[MaterialSlot].pMaterial = pMaterial;
 	}
 
 	ISurfaceMaterial* Model::GetSurfaceMaterial(
 		uint32_t MaterialSlot
 	) const noexcept
 	{
-		return nullptr;
+		if (!IsValidMaterialSlotIndex(MaterialSlot))
+		{
+			SYS_LOG_ERR_F("Invalid MaterialSlot: {}", MaterialSlot);
+			return nullptr;
+		}
+
+		if (m_lstMaterialSlots[MaterialSlot].pMaterial)
+			m_lstMaterialSlots[MaterialSlot].pMaterial->AddRef();
+
+		return m_lstMaterialSlots[MaterialSlot].pMaterial;
 	}
 }
