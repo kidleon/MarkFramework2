@@ -62,37 +62,129 @@ namespace mark
 
 	struct IModel : public ISceneObject
 	{
-		virtual int32_t AddPrimitive(
+		virtual int32_t CreateMesh(
 			PRIMITIVE_TYPE PrimitiveType,
-			uint32_t VertexCount,
-			uint32_t IndexCount,
-			uint32_t MaterialSlot
+			uint32_t VertexFormats,
+			uint32_t VertexSize,
+			uint32_t IndexSize
+		) = 0;
+
+		virtual int32_t CreateMesh(
+			NameHash MeshName,
+			PRIMITIVE_TYPE PrimitiveType,
+			uint32_t VertexFormats,
+			uint32_t VertexSize,
+			uint32_t IndexSize
+		) = 0;
+
+		virtual int32_t CreateSubMesh(
+			int32_t MeshIndex,
+			uint32_t VertexSize,
+			uint32_t IndexSize
+		) = 0;
+
+		virtual int32_t CreateSubMesh(
+			NameHash MeshName,
+			uint32_t VertexSize,
+			uint32_t IndexSize
+		) = 0;
+
+		virtual void SetVisible(
+			int32_t MeshIndex,
+			bool Visible
 		) noexcept = 0;
 
-		[[nodiscard]] virtual int32_t GetPrimitiveCount() const noexcept = 0;
-		virtual void ClearPrimitive() noexcept = 0;
+		virtual void SetVisible(
+			NameHash MeshName,
+			bool Visible
+		) noexcept = 0;
 
-		virtual bool UpdateVertexData(
-			int32_t PrimitiveIndex,
+		virtual void UpdateVertex(
+			int32_t MeshIndex,
 			VERTEX_FORMAT VertexFormat,
 			const void* pData,
 			size_t DataSize
-		) noexcept = 0;
+		) = 0;
 
-		virtual bool UpdateIndexData(
-			int32_t PrimitiveIndex,
+		virtual void UpdateVertex(
+			NameHash MeshName,
+			VERTEX_FORMAT VertexFormat,
 			const void* pData,
 			size_t DataSize
-		) noexcept = 0;
+		) = 0;
+
+		virtual void UpdateIndex(
+			int32_t MeshIndex,
+			const void* pData,
+			size_t DataSize
+		) = 0;
+
+		virtual void UpdateIndex(
+			NameHash MeshName,
+			const void* pData,
+			size_t DataSize
+		) = 0;
+
+		virtual void UpdateIndex(
+			int32_t MeshIndex,
+			int32_t SubMeshIndex,
+			const void* pData,
+			size_t DataSize
+		) = 0;
+
+		virtual void UpdateIndex(
+			NameHash MeshName,
+			int32_t SubMeshIndex,
+			const void* pData,
+			size_t DataSize
+		) = 0;
+
+		virtual void LinkMeshToMaterial(
+			int32_t MeshIndex,
+			int32_t MaterialSlot
+		) = 0;
+
+		virtual void LinkMeshToMaterial(
+			NameHash MeshName,
+			int32_t MaterialSlot
+		) = 0;
+
+		virtual void LinkMeshToMaterial(
+			int32_t MeshIndex,
+			int32_t SubMeshIndex,
+			int32_t MaterialSlot
+		) = 0;
+
+		virtual void LinkMeshToMaterial(
+			NameHash MeshName,
+			int32_t SubMeshIndex,
+			int32_t MaterialSlot
+		) = 0;
 
 		virtual void SetSurfaceMaterial(
-			uint32_t MaterialSlot,
+			int32_t MaterialSlot,
 			ISurfaceMaterial* pMaterial
-		) noexcept = 0;
+		) = 0;
 
 		[[nodiscard]] virtual ISurfaceMaterial* GetSurfaceMaterial(
-			uint32_t MaterialSlot
+			int32_t MaterialSlot
 		) const noexcept = 0;
+
+		[[nodiscard]] virtual int32_t GetMeshIndexByName(
+			NameHash MeshName
+		) const noexcept = 0;
+
+		[[nodiscard]] virtual int32_t GetNumSubMesh() const noexcept = 0;
+
+		[[nodiscard]] virtual int32_t GetNumSubMeshByName(
+			NameHash MeshName
+		) const noexcept = 0;
+
+		[[nodiscard]] virtual int32_t GetNumSubMeshByIndex(
+			int32_t MeshIndex
+		) const noexcept = 0;
+
+		[[nodiscard]] virtual int32_t GetMaterialSlotCount() const = 0;
 	};
 
 	struct ISkeleton : public IResource

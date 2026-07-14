@@ -3,17 +3,19 @@
 
 namespace mark
 {
-	class ShaderProgramCache
+	class D3D11ShaderProgram;
+
+	class D3D11ShaderProgramCache
 	{
 		struct ShaderProgramGroup
 		{
-			sys_unordered_map<NameHash, IShaderProgram*> ShaderProgramMap;
+			sys_unordered_map<NameHash, D3D11ShaderProgram*> ShaderProgramMap;
 			spin_lock_t SpinLock;
 		};
 
 	public:
-		ShaderProgramCache();
-		~ShaderProgramCache() noexcept;
+		D3D11ShaderProgramCache();
+		~D3D11ShaderProgramCache() noexcept;
 
 		/**
 		 * @brief 셰이더 프로그램을 캐시에 등록합니다.
@@ -21,14 +23,14 @@ namespace mark
 		 *                       독립적인 owning ref를 보유합니다. 등록 후에도 호출자는 자기 ref를 유지/Release 합니다.
 		 * @return 등록 성공 시 true. 동일 이름 해시가 이미 존재하면 false (이중 등록 차단).
 		 */
-		bool Register(IShaderProgram* pShaderProgram);
+		bool Register(D3D11ShaderProgram* pShaderProgram);
 
 		/**
 		 * @brief 셰이더 이름으로 캐시를 조회합니다.
 		 * @return [Owning] 반환된 포인터는 AddRef된 상태입니다. 호출자가 Release()를 책임지거나
-		 *         unknown_ptr<IShaderProgram>::attach()로 소유권을 넘겨받으세요. 없으면 nullptr.
+		 *         unknown_ptr<D3D11ShaderProgram>::attach()로 소유권을 넘겨받으세요. 없으면 nullptr.
 		 */
-		[[nodiscard]] IShaderProgram* Query(
+		[[nodiscard]] D3D11ShaderProgram* Query(
 			SHADER_TYPE ShaderType,
 			const char* szShaderName
 		);
@@ -36,9 +38,9 @@ namespace mark
 		/**
 		 * @brief 셰이더 이름 해시로 캐시를 조회합니다.
 		 * @return [Owning] 반환된 포인터는 AddRef된 상태입니다. 호출자가 Release()를 책임지거나
-		 *         unknown_ptr<IShaderProgram>::attach()로 소유권을 넘겨받으세요. 없으면 nullptr.
+		 *         unknown_ptr<D3D11ShaderProgram>::attach()로 소유권을 넘겨받으세요. 없으면 nullptr.
 		 */
-		[[nodiscard]] IShaderProgram* Query(
+		[[nodiscard]] D3D11ShaderProgram* Query(
 			SHADER_TYPE ShaderType,
 			NameHash ShaderNameHash
 		);

@@ -193,6 +193,10 @@ namespace mark
 			return false;
 		}
 
+		m_VertexFormat = VertexFormats;
+		m_VertexCount = VertexCount;
+		m_IndexCount = IndexCount;
+
 		return true;
 	}
 
@@ -252,6 +256,61 @@ namespace mark
 	bool PrimitiveBuffer::UpdateIndexData(const void* pData, size_t DataSize)
 	{
 		return UpdateIndexDataImmediate(pData, DataSize);
+	}
+
+	bool PrimitiveBuffer::UpdateVertexDataAtVertex(VERTEX_FORMAT VertexFormat, const void* pData, size_t DataSize, uint32_t StartVertex)
+	{
+		if (VERTEX_FORMAT::NONE == VertexFormat || !DataSize || !pData)
+			return false;
+
+		VERTEX_FORMAT_INDEX FormatIndex = ToVertexFormatIndex(VertexFormat);
+		if (FormatIndex == VERTEX_FORMAT_INDEX::EMAX)
+		{
+			SYS_LOG_ERR_F("Invalid vertex format specified for region update: {}", (uint32_t)VertexFormat);
+			return false;
+		}
+
+		if (!m_pVBs[(int)FormatIndex])
+		{
+			SYS_LOG_ERR_F("Vertex buffer for format {} is not initialized.", (uint32_t)VertexFormat);
+			return false;
+		}
+
+		const uint32_t Stride = GetVertexSizeFromFormat(VertexFormat);
+		if (Stride == 0)
+			return false;
+
+		const size_t DstOffset = static_cast<size_t>(StartVertex) * Stride;
+
+		if (!m_pVBs[(int)FormatIndex]->UpdateBufferRegion(pData, DataSize, DstOffset))
+		{
+			SYS_LOG_ERR_F("Failed to update vertex buffer region for format {}.", (uint32_t)VertexFormat);
+			return false;
+		}
+
+		return true;
+	}
+
+	bool PrimitiveBuffer::UpdateIndexDataAtIndex(const void* pData, size_t DataSize, uint32_t StartIndex)
+	{
+		if (!DataSize || !pData)
+			return false;
+
+		if (!m_pIB)
+		{
+			SYS_LOG_ERR("Index buffer is not initialized.");
+			return false;
+		}
+
+		const size_t DstOffset = static_cast<size_t>(StartIndex) * INL_GetIndexStride();
+
+		if (!m_pIB->UpdateBufferRegion(pData, DataSize, DstOffset))
+		{
+			SYS_LOG_ERR("Failed to update index buffer region.");
+			return false;
+		}
+
+		return true;
 	}
 
 	void PrimitiveBuffer::Cleanup()

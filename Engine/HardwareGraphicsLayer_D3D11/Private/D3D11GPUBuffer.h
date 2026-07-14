@@ -17,6 +17,7 @@ namespace mark
 		void* GetNativePointer() const noexcept;
 
 		bool UpdateBuffer(const void* pData, size_t DataSize, size_t* pWrittenOffset);
+		bool UpdateBufferRegion(const void* pData, size_t DataSize, size_t DstOffset);
 
 		inline ID3D11Buffer* INL_GetD3D11Buffer() const noexcept { return m_pD3D11Buffer; }
 		inline const D3D11_BUFFER_DESC& INL_GetBufferDesc() const noexcept { return m_BufferDesc; }

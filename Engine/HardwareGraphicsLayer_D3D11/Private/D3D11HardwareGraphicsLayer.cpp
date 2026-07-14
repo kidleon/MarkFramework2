@@ -4,6 +4,7 @@
 #include "D3D11GPUBuffer.h"
 #include "D3D11GPUBufferPool.h"
 #include "D3D11ShaderProgram.h"
+#include "D3D11ShaderProgramCache.h"
 
 
 namespace mark
@@ -47,11 +48,22 @@ namespace mark
 			}
 		}
 
+		if (!m_pShaderProgramCache)
+		{
+			m_pShaderProgramCache = CORE_NEW(D3D11ShaderProgramCache);
+		}
+
 		return true;
 	}
 
 	void D3D11HardwareGraphicsLayer::Shutdown()
 	{
+		if (m_pShaderProgramCache)
+		{
+			CORE_DELETE(D3D11ShaderProgramCache, m_pShaderProgramCache);
+			m_pShaderProgramCache = nullptr;
+		}
+
 		if (m_pRenderDevice)
 		{
 			CORE_DELETE(D3D11RenderDevice, m_pRenderDevice);
@@ -82,19 +94,31 @@ namespace mark
 
 	IShaderProgram* D3D11HardwareGraphicsLayer::CreateShaderProgram(const ShaderProgramCreateDesc& desc)
 	{
+		D3D11ShaderProgram* pShaderProgram = m_pShaderProgramCache->Query(desc.ShaderType, desc.szShaderName);
+		if (pShaderProgram)
+			return static_cast<IShaderProgram*>(pShaderProgram);
+
 		if (!desc.pShaderBytecode || 0 == desc.BytecodeSize)
 		{
 			SYS_LOG_ERR("D3D11RenderSystem::CreateShaderProgram - Invalid shader bytecode.");
 			return nullptr;
 		}
 
-		name_hash NameHash(desc.szShaderName);
+		pShaderProgram = m_pRenderDevice->CompileShaderProgram(desc);
+		if (!pShaderProgram)
+			return nullptr;
 
-		D3D11ShaderProgram* pShaderProgram = m_pRenderDevice->CompileShaderProgram(desc);
+		m_pShaderProgramCache->Register(pShaderProgram);
+
+		return static_cast<IShaderProgram*>(pShaderProgram);
+	}
+
+	IShaderProgram* D3D11HardwareGraphicsLayer::QueryShaderProgram(SHADER_TYPE ShaderType, const char* szShaderName)
+	{
+		D3D11ShaderProgram* pShaderProgram = m_pShaderProgramCache->Query(ShaderType, szShaderName);
 		if (!pShaderProgram)
 			return nullptr;
 
 		return static_cast<IShaderProgram*>(pShaderProgram);
 	}
-
 }

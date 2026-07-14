@@ -146,4 +146,64 @@ namespace mark
 		SYS_LOG_ERR_F("Buffer update failed: unsupported D3D11_USAGE = {}", (int)m_BufferDesc.Usage);
 		return false;
 	}
+
+	bool D3D11GPUBuffer::UpdateBufferRegion(const void* pData, size_t DataSize, size_t DstOffset)
+	{
+		if (!m_pD3D11Buffer || !m_pDeviceContext || !pData || 0 == DataSize)
+			return false;
+
+		if (DstOffset + DataSize > static_cast<size_t>(m_BufferDesc.ByteWidth))
+		{
+			SYS_LOG_ERR_F("Buffer region update failed: range [{}, {}) exceeds buffer size {}",
+				DstOffset, DstOffset + DataSize, m_BufferDesc.ByteWidth);
+			return false;
+		}
+
+		ID3D11DeviceContext* pDeviceContext = m_pDeviceContext;
+
+		if (m_BufferDesc.Usage == D3D11_USAGE_DEFAULT)
+		{
+			// DEFAULT 버퍼는 D3D11_BOX로 목적지 바이트 구간을 지정해 부분 갱신한다.
+			// 버퍼는 1D 리소스이므로 top/bottom, front/back은 0/1 고정.
+			D3D11_BOX DstBox = {};
+			DstBox.left   = static_cast<UINT>(DstOffset);
+			DstBox.right  = static_cast<UINT>(DstOffset + DataSize);
+			DstBox.top    = 0;
+			DstBox.bottom = 1;
+			DstBox.front  = 0;
+			DstBox.back   = 1;
+
+			pDeviceContext->UpdateSubresource(m_pD3D11Buffer, 0, &DstBox, pData, 0, 0);
+			return true;
+		}
+		else if (m_BufferDesc.Usage == D3D11_USAGE_DYNAMIC)
+		{
+			// DYNAMIC 버퍼는 지정 오프셋에 덮어쓰기 위해 WRITE_NO_OVERWRITE로 매핑한다.
+			// (구간 공유 특성상 이미 기록된 다른 영역을 보존해야 하므로 DISCARD를 쓰지 않는다.)
+			D3D11_MAPPED_SUBRESOURCE MappedResource = {};
+			HRESULT hr = pDeviceContext->Map(
+				m_pD3D11Buffer,
+				0,
+				D3D11_MAP_WRITE_NO_OVERWRITE,
+				0,
+				&MappedResource
+			);
+
+			if (FAILED(hr))
+			{
+				SYS_LOG_ERR_F("Map failed: HRESULT = 0x{:08X}", static_cast<uint32_t>(hr));
+				return false;
+			}
+
+			uint8_t* pDst = static_cast<uint8_t*>(MappedResource.pData) + DstOffset;
+			memcpy(pDst, pData, DataSize);
+
+			pDeviceContext->Unmap(m_pD3D11Buffer, 0);
+			return true;
+		}
+
+		// IMMUTABLE / STAGING 등 — 부분 갱신 불가.
+		SYS_LOG_ERR_F("Buffer region update failed: unsupported D3D11_USAGE = {}", (int)m_BufferDesc.Usage);
+		return false;
+	}
 }

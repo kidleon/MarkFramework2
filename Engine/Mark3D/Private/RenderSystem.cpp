@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "RenderSystem.h"
-#include "ShaderProgramCache.h"
 #include "SurfaceMaterial.h"
 
 
@@ -43,8 +42,6 @@ namespace mark
 		}
 #endif // #if defined(__TARGET_OS_WINDOWS)
 
-		m_pShaderProgramCache = CORE_NEW(ShaderProgramCache);
-
 		if (!m_SurfaceMaterialPool.Initialize())
 		{
 			SYS_LOG_ERR("Failed to initialize SurfaceMaterial memory block pool.");
@@ -57,9 +54,6 @@ namespace mark
 	void RenderSystem::Shutdown()
 	{
 		m_SurfaceMaterialPool.Shutdown();
-
-		CORE_DELETE(ShaderProgramCache, m_pShaderProgramCache);
-		m_pShaderProgramCache = nullptr;
 
 		CHECK_RELEASE(m_pHardwareGraphicsLayer);
 
@@ -77,32 +71,17 @@ namespace mark
 
 	IShaderProgram* RenderSystem::CreateShaderProgram(const ShaderProgramCreateDesc& CreateDesc)
 	{
-		NameHash ShaderNameHash(CreateDesc.szShaderName);
-		if (0 == ShaderNameHash.get_hash())
-		{
-			SYS_LOG_ERR("Shader name cannot be empty.");
+		IShaderProgram* pShaderProgram = m_pHardwareGraphicsLayer->CreateShaderProgram(CreateDesc);
+
+		if (!pShaderProgram)
 			return nullptr;
-		}
-
-		IShaderProgram* pShaderProgram = m_pShaderProgramCache->Query(
-			CreateDesc.ShaderType,
-			ShaderNameHash
-		);
-
-		if (pShaderProgram)
-			return pShaderProgram; // 이미 캐시에 존재하는 셰이더 프로그램 반환
-
-		pShaderProgram = m_pHardwareGraphicsLayer->CreateShaderProgram(CreateDesc);
-
-		if (pShaderProgram)
-			m_pShaderProgramCache->Register(pShaderProgram);
 
 		return pShaderProgram;
 	}
 
 	IShaderProgram* RenderSystem::GetShaderProgram(SHADER_TYPE ShaderType, const char* szShaderName)
 	{
-		return m_pShaderProgramCache->Query(ShaderType, szShaderName);
+		return m_pHardwareGraphicsLayer->QueryShaderProgram(ShaderType, szShaderName);
 	}
 
 	ISurfaceMaterial* RenderSystem::CreateSurfaceMaterial()

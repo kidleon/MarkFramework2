@@ -1,10 +1,11 @@
 #include "pch.h"
-#include "ShaderProgramCache.h"
+#include "D3D11ShaderProgramCache.h"
+#include "D3D11ShaderProgram.h"
 
 
 namespace mark
 {
-	ShaderProgramCache::ShaderProgramCache()
+	D3D11ShaderProgramCache::D3D11ShaderProgramCache()
 	{
 		for (int i = 0; i < (int)SHADER_TYPE::EMAX; ++i)
 		{
@@ -13,7 +14,7 @@ namespace mark
 		}
 	}
 
-	ShaderProgramCache::~ShaderProgramCache() noexcept
+	D3D11ShaderProgramCache::~D3D11ShaderProgramCache() noexcept
 	{
 		for (int i = 0; i < (int)SHADER_TYPE::EMAX; ++i)
 		{
@@ -33,7 +34,7 @@ namespace mark
 		}
 	}
 
-	bool ShaderProgramCache::Register(IShaderProgram* pShaderProgram)
+	bool D3D11ShaderProgramCache::Register(D3D11ShaderProgram* pShaderProgram)
 	{
 		if (!pShaderProgram) return false;
 
@@ -53,13 +54,13 @@ namespace mark
 			SYS_LOG_F("Shader program with name hash {} already exists in cache for shader type {}.", ShaderNameHash.get_hash(), (int)ShaderType);
 			return false; // 이미 존재하는 셰이더 프로그램이 있음
 		}
-		
-		SPGroup.ShaderProgramMap.insert(sys_unordered_map<NameHash, IShaderProgram*>::value_type(ShaderNameHash, pShaderProgram));
+
+		SPGroup.ShaderProgramMap.insert(sys_unordered_map<NameHash, D3D11ShaderProgram*>::value_type(ShaderNameHash, pShaderProgram));
 
 		return true;
 	}
 
-	IShaderProgram* ShaderProgramCache::Query(
+	D3D11ShaderProgram* D3D11ShaderProgramCache::Query(
 		SHADER_TYPE ShaderType,
 		const char* szShaderName
 	)
@@ -68,14 +69,14 @@ namespace mark
 		return Query(ShaderType, ShaderNameHash);
 	}
 
-	IShaderProgram* ShaderProgramCache::Query(
+	D3D11ShaderProgram* D3D11ShaderProgramCache::Query(
 		SHADER_TYPE ShaderType,
 		NameHash ShaderNameHash
 	)
 	{
 		ShaderProgramGroup& SPGroup = m_SPGroups[(int)ShaderType];
 
-		IShaderProgram* pShaderProgram = nullptr;
+		D3D11ShaderProgram* pShaderProgram = nullptr;
 
 		{
 			AUTO_SPIN_LOCK Guard(&(SPGroup.SpinLock));

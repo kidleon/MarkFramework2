@@ -416,7 +416,14 @@ namespace mark
 		[[nodiscard]] virtual void* GetNativePointer() const noexcept = 0;
 
 		virtual bool UpdateBuffer(const void* pData, size_t DataSize, size_t* pWrittenOffset = nullptr) = 0;
-		
+
+		/**
+		 * @brief 버퍼의 지정한 목적지 바이트 오프셋에서 시작하는 영역만 부분 갱신합니다.
+		 *        DEFAULT usage 버퍼(정적 정점/인덱스 버퍼)의 구간 공유 시 사용합니다.
+		 * @param DstOffset 갱신을 시작할 버퍼 내 바이트 오프셋.
+		 */
+		virtual bool UpdateBufferRegion(const void* pData, size_t DataSize, size_t DstOffset) = 0;
+
 	};
 
 	//---------------------------------------------------------
@@ -596,6 +603,17 @@ namespace mark
 		 *         unknown_ptr<IShaderProgram>::attach()로 takeover 하세요. 실패 시 nullptr.
 		 */
 		[[nodiscard]] virtual IShaderProgram* CreateShaderProgram(const ShaderProgramCreateDesc& desc) = 0;
+
+		/**
+		 * @brief 캐시에서 셰이더 프로그램을 조회합니다.
+		 * @param ShaderType 셰이더 타입
+		 * @param szShaderName 셰이더 이름
+		 * @return AddRef된 상태의 IShaderProgram 포인터. 호출자가 Release()를 책임져야 합니다. 없으면 nullptr.
+		 */
+		[[nodiscard]] virtual IShaderProgram* QueryShaderProgram(
+			SHADER_TYPE ShaderType,
+			const char* szShaderName
+		) = 0;
 	};
 
 	//---------------------------------------------------------
