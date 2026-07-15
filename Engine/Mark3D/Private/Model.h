@@ -37,6 +37,17 @@ namespace mark
 			uint32_t IndexSize
 		) override;
 
+		// SEPARATE 레이아웃 전용: 메쉬가 소유하는 독립 PrimitiveBuffer 를 지정해 메쉬를 생성한다.
+		// 공유 버퍼(m_pPrimitiveBuffer)가 아닌 pMeshBuffer 내 오프셋 0 을 기준으로 데이터가 배치된다.
+		int32_t CreateMeshWithBuffer(
+			PrimitiveBuffer* pMeshBuffer,
+			NameHash MeshName,
+			PRIMITIVE_TYPE PrimitiveType,
+			uint32_t VertexFormats,
+			uint32_t VertexSize,
+			uint32_t IndexSize
+		);
+
 		virtual int32_t CreateSubMesh(
 			int32_t MeshIndex,
 			uint32_t VertexSize,
@@ -179,6 +190,8 @@ namespace mark
 			BOOL Visible;
 
 			mtl::fixed_vector<SUB_MESH, MAX_SUB_MESH> SubMeshes;
+
+			PrimitiveBuffer* pPrimitiveBuffer;
 		};
 
 		[[nodiscard]] MESH* GetMesh(int32_t MeshIndex) noexcept;

@@ -3,12 +3,11 @@
 #include "core.h"
 #include "AssetManager.h"
 #include "FileAssetProvider.h"
-#include "GPUGeometry.h"
-#include "GPUGeometryFactory.h"
 #include "RenderSystem.h"
 #include "PrimitiveBuffer.h"
 #include "World.h"
 #include "Model.h"
+#include "ModelFactory.h"
 
 
 namespace mark
@@ -129,18 +128,6 @@ namespace mark
 			m_pAssetManager->AddRef();
 
 		return true;
-	}
-
-	IGPUGeometry* Engine::CreateGPUGeometry(const GPUGeometryCreateDesc& CreateDesc)
-	{
-		GPUGeometry* pGeometry = CORE_NEW(GPUGeometry);
-		if (!GPUGeometryFactory::CreateGeometry(m_pRenderSystem, CreateDesc, pGeometry))
-		{
-			pGeometry->Release();
-			return nullptr;
-		}
-
-		return pGeometry;
 	}
 
 	ISurfaceMaterial* Engine::CreateSurfaceMaterial()

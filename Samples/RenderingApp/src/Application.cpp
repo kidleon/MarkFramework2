@@ -70,12 +70,14 @@ BOOL Application::OnInit(HWND hWnd, int width, int height)
 	}
 
 	{
+		/*
 		GPUGeometryCreateDesc GeoCreateDesc = {};
 		GeoCreateDesc.pModelAsset = pModelAsset;
 		GeoCreateDesc.BufferLayout = GPU_BUFFER_LAYOUT::MERGED;
 		GeoCreateDesc.CreateFlags = (uint32_t)GPUGEOMETRY_CREATE_FLAGS::HAS_MODEL_ASSET;
 		IGPUGeometry* pGPUGeometry = m_pMark3D->CreateGPUGeometry(GeoCreateDesc);
 		pGPUGeometry->Release();
+		*/
 	}
 
 	pModelAsset->Release();

@@ -21,7 +21,6 @@ namespace mark
 		virtual bool GetRenderSystemInterface(IRenderSystem** ppOut);
 		virtual bool GetAssetManagerInterface(IAssetManager** ppOut);
 
-		virtual IGPUGeometry* CreateGPUGeometry(const GPUGeometryCreateDesc& CreateDesc);
 		virtual ISurfaceMaterial* CreateSurfaceMaterial();
 
 		virtual IModel* CreateModel(const ModelCreateDesc& CreateDesc);

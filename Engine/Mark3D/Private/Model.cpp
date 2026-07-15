@@ -2,7 +2,6 @@
 #include "Model.h"
 #include "PrimitiveBuffer.h"
 #include "RenderSystem.h"
-#include "GPUGeometry.h"
 
 
 namespace mark
@@ -21,6 +20,16 @@ namespace mark
 		}
 		m_lstMaterials.clear();
 
+		// SEPARATE 레이아웃: 각 메쉬가 소유한 독립 PrimitiveBuffer 를 해제한다.
+		for (MESH& Mesh : m_lstMeshes)
+		{
+			if (Mesh.pPrimitiveBuffer && Mesh.pPrimitiveBuffer != m_pPrimitiveBuffer)
+				CORE_DELETE(PrimitiveBuffer, Mesh.pPrimitiveBuffer);
+			Mesh.pPrimitiveBuffer = nullptr;
+		}
+		m_lstMeshes.clear();
+
+		// MERGED 레이아웃: 모든 메쉬가 공유한 병합 PrimitiveBuffer 를 해제한다.
 		CORE_DELETE(PrimitiveBuffer, m_pPrimitiveBuffer);
 	}
 
@@ -151,9 +160,79 @@ namespace mark
 		Mesh.IndexCount = 0;
 		Mesh.MaterialSlot = -1;
 		Mesh.Visible = TRUE;
+		// MERGED 레이아웃: 공유 병합 버퍼를 참조한다.
+		Mesh.pPrimitiveBuffer = m_pPrimitiveBuffer;
 
 		m_ReservedVertexCursor += VertexSize;
 		m_ReservedIndexCursor += IndexSize;
+
+		const int32_t MeshIndex = static_cast<int32_t>(m_lstMeshes.size());
+		m_lstMeshes.push_back(Mesh);
+
+		return MeshIndex;
+	}
+
+	int32_t Model::CreateMeshWithBuffer(
+		PrimitiveBuffer* pMeshBuffer,
+		NameHash MeshName,
+		PRIMITIVE_TYPE PrimitiveType,
+		uint32_t VertexFormats,
+		uint32_t VertexSize,
+		uint32_t IndexSize
+	)
+	{
+		if (!pMeshBuffer)
+		{
+			SYS_LOG_ERR("Model::CreateMeshWithBuffer - mesh buffer is null.");
+			return -1;
+		}
+
+		if (m_lstMeshes.size() >= MAX_MESH)
+		{
+			SYS_LOG_ERR("Model::CreateMeshWithBuffer - reached MAX_MESH limit.");
+			return -1;
+		}
+
+		if (VertexFormats == 0 || VertexSize == 0)
+		{
+			SYS_LOG_ERR("Model::CreateMeshWithBuffer - invalid vertex format or vertex count.");
+			return -1;
+		}
+
+		// 이 메쉬가 요구하는 포맷은 소유 PrimitiveBuffer 가 실제로 보유한 포맷의 부분집합이어야 함.
+		if ((VertexFormats & pMeshBuffer->INL_GetVertexFormat()) != VertexFormats)
+		{
+			SYS_LOG_ERR("Model::CreateMeshWithBuffer - vertex formats are not provided by the mesh buffer.");
+			return -1;
+		}
+
+		// 소유 버퍼 용량 검증 (SEPARATE 는 오프셋 0 기준이므로 예약 크기가 곧 버퍼 크기).
+		if (VertexSize > pMeshBuffer->INL_GetVertexCount())
+		{
+			SYS_LOG_ERR("Model::CreateMeshWithBuffer - not enough vertex capacity in mesh buffer.");
+			return -1;
+		}
+
+		if (IndexSize > pMeshBuffer->INL_GetIndexCount())
+		{
+			SYS_LOG_ERR("Model::CreateMeshWithBuffer - not enough index capacity in mesh buffer.");
+			return -1;
+		}
+
+		MESH Mesh = {};
+		Mesh.Name = MeshName;
+		Mesh.PrimitiveType = PrimitiveType;
+		Mesh.VertexFormats = VertexFormats;
+		// SEPARATE 레이아웃: 소유 버퍼 내 오프셋 0 을 기준으로 데이터가 배치된다.
+		Mesh.ReservedVertexStart = 0;
+		Mesh.ReservedIndexStart = 0;
+		Mesh.ReservedVertexCount = VertexSize;
+		Mesh.ReservedIndexCount = IndexSize;
+		Mesh.VertexCount = 0;
+		Mesh.IndexCount = 0;
+		Mesh.MaterialSlot = -1;
+		Mesh.Visible = TRUE;
+		Mesh.pPrimitiveBuffer = pMeshBuffer;
 
 		const int32_t MeshIndex = static_cast<int32_t>(m_lstMeshes.size());
 		m_lstMeshes.push_back(Mesh);
@@ -239,11 +318,11 @@ namespace mark
 		size_t DataSize
 	)
 	{
-		if (!m_pPrimitiveBuffer || !pData || DataSize == 0)
+		if (!pData || DataSize == 0)
 			return;
 
 		MESH* pMesh = GetMesh(MeshIndex);
-		if (!pMesh)
+		if (!pMesh || !pMesh->pPrimitiveBuffer)
 			return;
 
 		if ((pMesh->VertexFormats & static_cast<uint32_t>(VertexFormat)) == 0)
@@ -263,8 +342,8 @@ namespace mark
 			return;
 		}
 
-		// 예약된 시작 정점 오프셋에 부분 업데이트.
-		if (!m_pPrimitiveBuffer->UpdateVertexDataAtVertex(VertexFormat, pData, DataSize, pMesh->ReservedVertexStart))
+		// 예약된 시작 정점 오프셋에 부분 업데이트 (MERGED=공유버퍼 오프셋, SEPARATE=소유버퍼 오프셋 0).
+		if (!pMesh->pPrimitiveBuffer->UpdateVertexDataAtVertex(VertexFormat, pData, DataSize, pMesh->ReservedVertexStart))
 			return;
 
 		pMesh->VertexCount = static_cast<uint32_t>(DataSize) / Stride;
@@ -286,14 +365,14 @@ namespace mark
 		size_t DataSize
 	)
 	{
-		if (!m_pPrimitiveBuffer || !pData || DataSize == 0)
+		if (!pData || DataSize == 0)
 			return;
 
 		MESH* pMesh = GetMesh(MeshIndex);
-		if (!pMesh)
+		if (!pMesh || !pMesh->pPrimitiveBuffer)
 			return;
 
-		const uint32_t Stride = m_pPrimitiveBuffer->INL_GetIndexStride();
+		const uint32_t Stride = pMesh->pPrimitiveBuffer->INL_GetIndexStride();
 		if (Stride == 0)
 			return;
 
@@ -305,7 +384,7 @@ namespace mark
 		}
 
 		// 예약된 시작 인덱스 오프셋에 부분 업데이트.
-		if (!m_pPrimitiveBuffer->UpdateIndexDataAtIndex(pData, DataSize, pMesh->ReservedIndexStart))
+		if (!pMesh->pPrimitiveBuffer->UpdateIndexDataAtIndex(pData, DataSize, pMesh->ReservedIndexStart))
 			return;
 
 		pMesh->IndexCount = static_cast<uint32_t>(DataSize) / Stride;
@@ -327,17 +406,17 @@ namespace mark
 		size_t DataSize
 	)
 	{
-		if (!m_pPrimitiveBuffer || !pData || DataSize == 0)
+		if (!pData || DataSize == 0)
 			return;
 
 		MESH* pMesh = GetMesh(MeshIndex);
-		if (!pMesh)
+		if (!pMesh || !pMesh->pPrimitiveBuffer)
 			return;
 
 		if (SubMeshIndex < 0 || static_cast<uint32_t>(SubMeshIndex) >= pMesh->SubMeshes.size())
 			return;
 
-		const uint32_t Stride = m_pPrimitiveBuffer->INL_GetIndexStride();
+		const uint32_t Stride = pMesh->pPrimitiveBuffer->INL_GetIndexStride();
 		if (Stride == 0)
 			return;
 
@@ -351,7 +430,7 @@ namespace mark
 		}
 
 		// 서브메쉬의 절대 시작 인덱스 오프셋에 부분 업데이트.
-		if (!m_pPrimitiveBuffer->UpdateIndexDataAtIndex(pData, DataSize, SubMesh.StartIndex))
+		if (!pMesh->pPrimitiveBuffer->UpdateIndexDataAtIndex(pData, DataSize, SubMesh.StartIndex))
 			return;
 
 		SubMesh.IndexCount = static_cast<uint32_t>(DataSize) / Stride;

@@ -5,39 +5,22 @@
 
 namespace mark
 {
-	enum class GPU_BUFFER_LAYOUT : uint32_t
+	enum class MODEL_LAYOUT : uint32_t
 	{
-		MERGED,
-		SEPARATE,
+		MERGED, // 모든 메쉬가 단일 PrimitiveBuffer를 공유하는 병합(MERGED) 레이아웃
+		SEPARATE, // 각 메쉬가 독립적인 PrimitiveBuffer를 가지는 분리(SEPARATE) 레이아웃
 	};
 
 
 	struct IModelAsset;
 
-	enum class GPUGEOMETRY_CREATE_FLAGS : uint32_t
-	{
-		ASYNC_LOAD = 0x1,
-		GENERATE_TANGENT = 0x2,
-		HAS_MODEL_ASSET = 0x4,
-	};
-
-	struct GPUGeometryCreateDesc
-	{
-		unknown_ptr<IModelAsset> pModelAsset;
-		GPU_BUFFER_LAYOUT BufferLayout = GPU_BUFFER_LAYOUT::MERGED;
-		uint32_t VertexFormats = 0;
-		uint32_t CreateFlags = 0;
-	};
 
 	struct IResource : public Unknown
 	{
 		[[nodiscard]] virtual bool IsLoaded() const noexcept = 0;
 	};
 
-	struct IGPUGeometry : public IResource
-	{
-	};
-
+	
 	struct ISceneNode;
 	struct ISurfaceMaterial;
 

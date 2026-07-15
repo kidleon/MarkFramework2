@@ -50,13 +50,6 @@ namespace mark
 		virtual bool GetAssetManagerInterface(IAssetManager** ppOut) = 0;
 
 		/**
-		 * @brief GPU 지오메트리를 생성합니다.
-		 * @return [Owning] 반환된 포인터는 AddRef된 상태입니다. 호출자가 Release()를 책임지거나
-		 *         unknown_ptr<IGPUGeometry>::attach()로 takeover 하세요. 실패 시 nullptr.
-		 */
-		[[nodiscard]] virtual IGPUGeometry* CreateGPUGeometry(const GPUGeometryCreateDesc& CreateDesc) = 0;
-
-		/**
 		 * @brief 표면 재질을 생성합니다.
 		 * @return SurfaceMaterial 인터페이스 포인터입니다. 반환된 포인터는 AddRef된 상태입니다.
 		 * 호출자가 Release()를 책임지거나 unknown_ptrd을 이용 하세요. 실패 시 nullptr.
