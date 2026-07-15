@@ -64,6 +64,14 @@ namespace mark
 		[[nodiscard]] virtual IModel* CreateModel(const ModelCreateDesc& CreateDesc) = 0;
 
 		/**
+		 * @brief 모델 에셋을 로드하고 모델 인스턴스를 생성합니다.
+		 * @param szModelPath 모델 에셋 파일 경로입니다. (예: "Assets/Models/MyModel.mdl")
+		 * @param Layout 모델 레이아웃을 지정합니다. (예: MODEL_LAYOUT::SEPARATE_BUFFER)
+		 * @return [Owning] 반환된 포인터는 AddRef된 상태입니다. 호출자가 Release()해줘야 메모리에서 해제 됩니다. 실패 시 nullptr.
+		 */
+		[[nodiscard]] virtual IModel* LoadModel(const char* szModelPath, MODEL_LAYOUT Layout) = 0;
+
+		/**
 		 * @brief 새로운 월드를 생성합니다. 월드는 씬과 씬 노드, 씬 오브젝트를 관리하는 최상위 컨테이너입니다.
 		 * @param Name 생성할 월드의 이름입니다. 월드 이름은 고유해야 합니다. 이미 존재하는 이름을 사용하면 nullptr이 반환됩니다.
 		 * @return [Owning] 반환된 포인터는 AddRef된 상태입니다. 호출자가 Release()를 책임지거나

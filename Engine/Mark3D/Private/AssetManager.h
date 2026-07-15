@@ -3,6 +3,8 @@
 
 namespace mark
 {
+	class ModelAsset;
+
 	class AssetManager final : public IAssetManager
 	{
 	public:
@@ -12,6 +14,8 @@ namespace mark
 		virtual void Release();
 
 		virtual IAsset* LoadAsset(ASSET_TYPE AssetType, const char* szAssetPath);
+
+		ModelAsset* LoadModelAsset(const char* szAssetPath);
 
 	private:
 		virtual ~AssetManager() noexcept;

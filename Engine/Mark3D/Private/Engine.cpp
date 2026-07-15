@@ -155,6 +155,20 @@ namespace mark
 		return static_cast<IModel*>(CORE_NEW(Model)(pPrimitiveBuffer));
 	}
 
+	IModel* Engine::LoadModel(const char* szModelPath, MODEL_LAYOUT Layout)
+	{
+		if (!szModelPath || !szModelPath[0])
+			return nullptr;
+
+		ModelAsset* pModelAsset = m_pAssetManager->LoadModelAsset(szModelPath);
+		if (!pModelAsset)
+			return nullptr;
+
+		Model* pModel = ModelFactory::CreateModel(m_pRenderSystem, pModelAsset, Layout);
+		
+		return static_cast<IModel*>(pModel);
+	}
+
 	IWorld* Engine::CreateWorld(const char* Name)
 	{
 		if (!Name || !Name[0])

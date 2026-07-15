@@ -31,13 +31,28 @@ namespace mark
 
 	IAsset* AssetManager::LoadAsset(ASSET_TYPE AssetType, const char* szAssetPath)
 	{
+		switch (AssetType)
+		{
+			case ASSET_TYPE::MODEL:
+				return LoadModelAsset(szAssetPath);
+			default:
+				SYS_LOG_ERR_F("Unsupported asset type: {}", static_cast<uint32_t>(AssetType));
+				return nullptr;
+		}
+	}
+
+	ModelAsset* AssetManager::LoadModelAsset(const char* szAssetPath)
+	{
+		if (!szAssetPath || !szAssetPath[0])
+			return nullptr;
+
 		if (!m_pProvider) [[unlikely]]
 		{
 			SYS_LOG_ERR("Asset provider is not set. Cannot load asset.");
 			return nullptr;
 		}
 
-		AssetBlob* pBlob = static_cast<AssetBlob*>(m_pProvider->LoadAsset(AssetType, szAssetPath));
+		AssetBlob* pBlob = static_cast<AssetBlob*>(m_pProvider->LoadAsset(ASSET_TYPE::MODEL, szAssetPath));
 		if (!pBlob)
 			return nullptr;
 

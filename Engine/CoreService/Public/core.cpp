@@ -37,10 +37,10 @@ namespace mark
 	}
 
 
-	void initialaize_core_service(size_t temp_buffer_size)
+	void initialize_core_service(size_t temp_buffer_size)
 	{
 		log::init(
-			static_cast<uint32_t>(log::level::info),
+			static_cast<uint32_t>(log::level::max_lv),
 			static_cast<uint32_t>(log::target::console) | static_cast<uint32_t>(log::target::file),
 			false
 		);

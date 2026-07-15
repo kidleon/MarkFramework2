@@ -21,7 +21,7 @@ namespace mark
 
 		if (!s_CoreServiceInitialized)
 		{
-			initialaize_core_service(
+			initialize_core_memory(
 				1024 * 1024 * 32 // 32MB 임시 버퍼
 			);
 			s_CoreServiceInitialized = true;
